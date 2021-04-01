@@ -5,13 +5,13 @@ WORKDIR /usr/src/app
 COPY package*.json bootstrap.sh ./
 
 RUN apk upgrade --update-cache --available && \
-	apk add openssl && \
+	apk add openssl bash && \
 	rm -rf /var/cache/apk/*
 
-RUN npm run bootstrap && npm ci
+RUN bash ./bootstrap.sh && npm ci
 
 COPY . .
 
 RUN npm run build
 
-CMD [ "bootstrap.sh", "node", "./dist/index.js" ]
+CMD [ "node", "./dist/server.js" ]
