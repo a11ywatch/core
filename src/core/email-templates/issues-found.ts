@@ -25,7 +25,7 @@ const issuesFoundTemplate: IssuesFound = (
       if (i === 10) {
         return true
       }
-      listData = `${listData}<tr><td style="font-size: 1.1em;">${item?.type}</td><td style="font-size: 1.1em;">${item?.context}</td><td style="font-size: 1.1em;">${item?.message}</td></tr>`
+      listData = `${listData}<tr><td>${item?.type}</td><td>${item?.context}</td><td>${item?.message}</td></tr>`
       return false
     })
   }
@@ -33,13 +33,37 @@ const issuesFoundTemplate: IssuesFound = (
   const page = data?.pageUrl
 
   return `
- <div style="width: 100%;">
+    <style>
+    #a11yIssues {
+      font-family: system-ui, Arial, Helvetica, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #a11yIssues td, #a11yIssues th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    #a11yIssues tr:nth-child(even){background-color: #f2f2f2;}
+
+    #a11yIssues tr:hover {background-color: #ddd;}
+
+    #a11yIssues th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #444c56;
+      color: white;
+    }
+    </style>
     <h1>${data?.issues?.length} issues found for ${page}</h1>
-    <table><tr><th>Type</th><th>Message</th><th>Context</th></tr>${listData}</table>
+    <div style="overflow-x:auto;">
+    <table id="a11yIssues"><tr><th>Type</th><th>Message</th><th>Context</th></tr>${listData}</table>
+    </div>
     <a href="https://www.a11ywatch.com/dashboard" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none; margin-bottom: 10px;">View Details</a>
     <a href="https://api.a11ywatch.com/api/get-website?q=${page}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #ccc; text-align: center; text-decoration: none;">Download Report</a>
     <p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>
-  </div>
 `.trim()
 }
 
