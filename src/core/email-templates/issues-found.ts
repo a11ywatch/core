@@ -25,41 +25,31 @@ const issuesFoundTemplate: IssuesFound = (
       if (i === 10) {
         return true
       }
-      listData = `${listData}<tr><td>${item?.type}</td><td>${item?.context}</td><td>${item?.message}</td></tr>`
+      listData = `${listData}<tr><td style="border: 1px solid #ddd; padding: 8px;">${item?.type}</td><td style="border: 1px solid #ddd; padding: 8px;">${item?.context}</td><td>${item?.message}</td></tr>`
       return false
     })
   }
 
   const page = data?.pageUrl
+  const thStyles = `style="border: 1px solid #ddd; padding: 8px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`
 
   return `
-    <style>
-    #a11yIssues {
-      font-family: system-ui, Arial, Helvetica, sans-serif;
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    #a11yIssues td, #a11yIssues th {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-
-    #a11yIssues tr:nth-child(even){background-color: #f2f2f2;}
-
-    #a11yIssues tr:hover {background-color: #ddd;}
-
-    #a11yIssues th {
-      padding-top: 12px;
-      padding-bottom: 12px;
-      text-align: left;
-      background-color: #444c56;
-      color: white;
-    }
-    </style>
+    <head>
+      <style>
+        tr:nth-child(even){background-color: #f2f2f2;}
+        tr:hover {background-color: #ddd;}
+      </style>
+    </head>
     <h1>${data?.issues?.length} issues found for ${page}</h1>
     <div style="overflow-x:auto;">
-    <table id="a11yIssues"><tr><th>Type</th><th>Message</th><th>Context</th></tr>${listData}</table>
+    <table class="a11y-view" style="font-family: system-ui, Arial, Helvetica, sans-serif; border-collapse: collapse; width: 100%;">
+      <tr>
+        <th ${thStyles}>Type</th>
+        <th ${thStyles}>Message</th>
+        <th ${thStyles}>Context</th>
+      </tr>
+      ${listData}
+    </table>
     </div>
     <a href="https://www.a11ywatch.com/dashboard" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none; margin-bottom: 10px;">View Details</a>
     <a href="https://api.a11ywatch.com/api/get-website?q=${page}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #ccc; text-align: center; text-decoration: none;">Download Report</a>
