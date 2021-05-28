@@ -19,19 +19,20 @@ const issuesFoundTemplate: IssuesFound = (
   data = { issues: [], pageUrl: "" }
 ) => {
   let listData = ""
+  const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`
 
   if (data.issues?.length) {
     data.issues.some((item: Issue, i: number) => {
       if (i === 10) {
         return true
       }
-      listData = `${listData}<tr><td style="border: 1px solid #ddd; padding: 8px;">${item?.type}</td><td style="border: 1px solid #ddd; padding: 8px;">${item?.context}</td><td>${item?.message}</td></tr>`
+      listData = `${listData}<tr><td ${tdStyles}>${item?.type}</td><td ${tdStyles}>${item?.context}</td><td ${tdStyles}>${item?.message}</td></tr>`
       return false
     })
   }
 
   const page = data?.pageUrl
-  const thStyles = `style="border: 1px solid #ddd; padding: 8px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`
+  const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`
 
   return `
     <head>
