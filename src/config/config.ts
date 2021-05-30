@@ -53,7 +53,7 @@ export const config = {
   DB_URL: process.env.MONGO_URL || process.env.DB_URL,
   DB_NAME: process.env.DB_NAME || "a11ywatch",
   CLIENT_URL: replaceDockerNetwork(process.env.CLIENT_URL),
-  CRAWL_URL: replaceDockerNetwork(process.env.CRAWL_URL),
+  WATCHER_CLIENT_URL: replaceDockerNetwork(process.env.WATCHER_CLIENT_URL),
   SCRIPTS_CDN_URL,
   GRAPHQL_PORT: Number(
     process.env.NODE_ENV === "test"

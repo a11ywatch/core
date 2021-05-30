@@ -6,14 +6,14 @@
 import { log } from "@a11ywatch/log";
 import { config, TEST_ENV } from "./config";
 
-const { CLIENT_URL, CRAWL_URL, ROOT_URL, DEV } = config;
+const { CLIENT_URL, WATCHER_CLIENT_URL, ROOT_URL, DEV } = config;
 
 const apiUrls = String(CLIENT_URL).split(",");
 
 export const whitelist = [
   ...apiUrls,
   ...apiUrls.map((url) => url.replace("http", "https")),
-  CRAWL_URL,
+  WATCHER_CLIENT_URL,
 ].filter((url) => url);
 
 if (DEV || TEST_ENV) {
