@@ -16,17 +16,18 @@ import { getPageItem } from "./utils";
 
 export async function websiteWatch(): Promise<void> {
   const stats = v8.getHeapStatistics();
-  try {
-    if (
-      stats.total_heap_size * 0.4 <
-      stats.total_heap_size - stats.used_heap_size
-    ) {
-      log("Server memory near peak, failed to run all website crawl", {
-        type: "error",
-      });
-      return Promise.resolve(undefined);
-    }
 
+  if (
+    stats.total_heap_size * 0.4 <
+    stats.total_heap_size - stats.used_heap_size
+  ) {
+    log("Server memory near peak, failed to run all website crawl", {
+      type: "error",
+    });
+    return Promise.resolve(undefined);
+  }
+
+  try {
     await fetch(`${process.env.MAV_CLIENT_URL}/api/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -62,6 +63,8 @@ export async function websiteWatch(): Promise<void> {
           });
         }
       }
+
+      console.debug([websiteIterator, allWebPages.length])
 
       if (websiteIterator === allWebPages.length - 1) {
         await emailMessager.sendFollowupEmail({
