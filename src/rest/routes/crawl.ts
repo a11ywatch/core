@@ -71,7 +71,6 @@ const crawlWebsite = async (req, res) => {
 const scanWebsite = async (req, res) => {
   const url = req.query?.websiteUrl || req.body?.websiteUrl;
   const userId = req.query?.userId || req.body?.userId;
-  console.log(url)
 
   try {
     const data = await scan({

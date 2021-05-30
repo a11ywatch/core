@@ -6,7 +6,7 @@
   "main": "./dist/server.js",
   "scripts": {
     "bootstrap": "bash ./bootstrap.sh",
-    "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register  src/server.ts",
+    "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "jest --forceExit --maxWorkers 4",
     "lint": "eslint .",
     "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist",
