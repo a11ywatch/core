@@ -8,7 +8,11 @@ import { log, setConfig as setLogConfig } from "@a11ywatch/log";
 import { initDbConnection } from "@app/database";
 import { websiteWatch } from "./watch-pages";
 
-setLogConfig({ container: "api" });
+try {
+  setLogConfig({ container: "api" });
+} catch(e) {
+  console.error(e)
+}
 
 process.on("message", async () => {
   try {
