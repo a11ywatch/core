@@ -43,7 +43,11 @@ import {
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import rateLimit from "express-rate-limit";
 
-setLogConfig({ container: "api" });
+try {
+  setLogConfig({ container: "api" });
+} catch (e) {
+ console.error(e)
+}
 
 const { GRAPHQL_PORT } = config;
 
