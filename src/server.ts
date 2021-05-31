@@ -6,10 +6,11 @@
 
 import type { Server as HttpServer } from "http";
 import type { AddressInfo } from "net";
-import express from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 import cors from "cors";
 import bodyParser from "body-parser";
+import createIframe from "node-iframe";
 
 import { CronJob } from "cron";
 import { corsOptions, config, logServerInit } from "./config";
@@ -56,6 +57,10 @@ const limiter = rateLimit({
   max: 100,
 });
 
+interface AppResponse extends Response {
+  createIframe: (params: { url: string, baseHref: boolean }) => string
+}
+
 function initServer(): HttpServer {
   initDbConnection();
   const server = new Server();
@@ -65,10 +70,20 @@ function initServer(): HttpServer {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json({ type: "application/*+json", limit: "300mb" }));
   app.use(limiter);
+  app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(WEBSITE_CHECK, cors());
 
   app.get(ROOT, root);
+  app.get("/iframe", (req: Request, res: AppResponse) => {
+    res.createIframe({
+      url: decodeURI(req.query.url + "").replace(
+        "http",
+        req.protocol === "https" ? "https" : "http"
+      ),
+      baseHref: !!req.query.baseHref,
+    });
+  });
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
