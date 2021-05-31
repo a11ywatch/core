@@ -18,8 +18,8 @@ export const forkProcess = (
 
   forked.on("message", (message: any) => {
     if (message?.name && message?.key?.value) {
-      pubsub.publish(message?.name, {
-        [message?.key?.name]: message?.key?.value,
+      pubsub.publish(message.name, {
+        [message.key.name]: message.key.value,
       });
     }
     if (message === "close") {
