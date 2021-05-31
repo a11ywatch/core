@@ -26,6 +26,7 @@ export const corsOptions = {
 };
 
 export const BYPASS_AUTH = [
+  "IntrospectionQuery",
   "Register",
   "Login",
   "ForgotPassword",
@@ -34,7 +35,6 @@ export const BYPASS_AUTH = [
   "ScanWebsite",
   "CrawlWebsite",
   "Payments",
-  "IntrospectionQuery",
   "getWebsites",
   "getIssue",
   "getScript",
