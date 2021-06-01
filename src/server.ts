@@ -87,7 +87,7 @@ function initServer(): HttpServer {
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
-  app.post(WEBSITE_CRAWL, websiteCrawl);
+  app.post(WEBSITE_CRAWL, cors(), websiteCrawl);
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
     if (
       typeof process.env.BACKGROUND_CRAWL !== "undefined" &&
@@ -99,8 +99,8 @@ function initServer(): HttpServer {
       await websiteCrawl(req, res);
     }
   });
-  app.post(CRAWL_WEBSITE, crawlWebsite);
-  app.post(SCAN_WEBSITE_ASYNC, scanWebsite);
+  app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
+  app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
   app.post(IMAGE_CHECK, cors(), detectImage);
   app.post(
     "/admin/website-watch-scan",

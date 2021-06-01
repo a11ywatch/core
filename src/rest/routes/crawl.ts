@@ -69,19 +69,23 @@ const crawlWebsite = async (req, res) => {
 };
 
 const scanWebsite = async (req, res) => {
-  const url = req.query?.websiteUrl || req.body?.websiteUrl;
-  const userId = req.query?.userId || req.body?.userId;
+  const url = req.query?.websiteUrl ?? req.body?.websiteUrl;
+  const userId = req.query?.userId ?? req.body?.userId;
 
-  try {
-    const data = await scan({
-      url,
-      userId,
-    });
-
-    res.json(data);
-  } catch (e) {
-    log(e);
-    res.json({ message: "Error: Page not found", status: 404, success: false });
+  if(url) {
+    try {
+      const data = await scan({
+        url,
+        userId,
+      });
+  
+      res.json(data);
+    } catch (e) {
+      log(e);
+      res.json({ message: "Error: Page not found", status: 404, success: false });
+    }
+  } else {
+    res.json({ message: "Error: Url param not found. Add the websiteUrl param and try again", status: 400, success: false });
   }
 };
 
