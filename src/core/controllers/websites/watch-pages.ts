@@ -5,7 +5,6 @@
  **/
 
 import fetch from "node-fetch";
-import v8 from "v8";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { realUser } from "@app/core/utils";
 import { emailMessager } from "@app/core/messagers";
@@ -15,18 +14,6 @@ import { getWebsitesWithUsers } from "../websites";
 import { getPageItem } from "./utils";
 
 export async function websiteWatch(): Promise<void> {
-  const stats = v8.getHeapStatistics();
-
-  if (
-    stats.total_heap_size * 0.4 <
-    stats.total_heap_size - stats.used_heap_size
-  ) {
-    log("Server memory near peak, failed to run all website crawl", {
-      type: "error",
-    });
-    return Promise.resolve(undefined);
-  }
-
   try {
     await fetch(`${process.env.MAV_CLIENT_URL}/api/init`, {
       method: "POST",
