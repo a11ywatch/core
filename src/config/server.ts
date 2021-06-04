@@ -35,6 +35,7 @@ export const BYPASS_AUTH = [
   "ScanWebsite",
   "CrawlWebsite",
   "Payments",
+  "getScript",
   "getWebsites",
   "getIssue",
   "getScript",
