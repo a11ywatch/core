@@ -11,11 +11,13 @@ import http from "http";
 import cors from "cors";
 import bodyParser from "body-parser";
 import createIframe from "node-iframe";
-
+import { setConfig as setLogConfig } from "@a11ywatch/log";
+import rateLimit from "express-rate-limit";
 import { CronJob } from "cron";
 import { corsOptions, config, logServerInit } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
+import { verifyUser } from "./core/controllers/users/update";
 import {
   CRAWL_WEBSITE,
   CONFIRM_EMAIL,
@@ -41,13 +43,12 @@ import {
   getWebsite,
   getDailyWebsites,
 } from "./rest/routes";
-import { setConfig as setLogConfig } from "@a11ywatch/log";
-import rateLimit from "express-rate-limit";
+import { createUser } from "./core/controllers/users/set";
 
 try {
   setLogConfig({ container: "api" });
 } catch (e) {
- console.error(e)
+  console.error(e);
 }
 
 const { GRAPHQL_PORT } = config;
@@ -58,11 +59,10 @@ const limiter = rateLimit({
 });
 
 interface AppResponse extends Response {
-  createIframe: (params: { url: string, baseHref: boolean }) => string
+  createIframe: (params: { url: string; baseHref: boolean }) => string;
 }
 
 function initServer(): HttpServer {
-  initDbConnection();
   const server = new Server();
   const app = express();
 
@@ -111,6 +111,40 @@ function initServer(): HttpServer {
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
+  app.post("/api/register", cors(), async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const auth = await createUser({ email, password, googleId: undefined });
+      res.json(auth);
+    } catch (e) {
+      console.error(e);
+      res.json({
+        data: null,
+        message: e?.message,
+      });
+    }
+  });
+
+  app.post("/api/login", cors(), async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const auth = await verifyUser({ email, password, googleId: undefined });
+      res.json(auth);
+    } catch (e) {
+      console.error(e);
+      res.json({
+        data: null,
+        message: e?.message,
+      });
+    }
+  });
+
+  //An error handling middleware
+  app.use(function (err, req, res, next) {
+    res.status(500);
+    res.render("error", { error: err });
+  });
+
   server.applyMiddleware({ app, cors: false });
 
   const httpServer = http.createServer(app);
@@ -131,7 +165,12 @@ function initServer(): HttpServer {
   return listener;
 }
 
-const coreServer = initServer();
+const coreServer = (() => {
+  (async function startDb() {
+    await initDbConnection();
+  })();
+  return initServer();
+})();
 
 const killServer = async () => {
   try {

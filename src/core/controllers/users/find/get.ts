@@ -40,7 +40,6 @@ export const getUser = async (
     const user = await collection.findOne(
       userParams({ email, id, emailConfirmCode })
     );
-
     return chain ? [user, collection] : user;
   } catch (e) {
     console.error(e);

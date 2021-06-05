@@ -16,7 +16,12 @@ const verifyUser = async ({ password, email, googleId }) => {
     throw new Error(EMAIL_ERROR);
   }
 
-  const salthash = user && !googleId && saltHashPassword(password, user?.salt);
+  const salthash = password && saltHashPassword(password, user?.salt);
+  const passwordMatch = user?.password === salthash?.passwordHash;
+
+  if (passwordMatch === false && !googleId) {
+    throw new Error(EMAIL_ERROR);
+  }
 
   if (user?.password === salthash?.passwordHash || googleId) {
     let id = user?.id;
