@@ -69,7 +69,6 @@ export const config = {
   DOCKER_ENV: process.env.DOCKER_ENV,
   EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL,
   EMAIL_CLIENT_ID: process.env.EMAIL_CLIENT_ID,
-  IFRAME_URL: process.env.IFRAME_URL,
   EMAIL_CLIENT_KEY,
   PUBLIC_KEY,
   PRIVATE_KEY,
