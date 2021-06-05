@@ -67,7 +67,7 @@ export const UsersController: UserControllerType = (
         {
           $set: {
             jwt,
-            password: newPassword,
+            password: newSaltHash?.passwordHash,
             salt: newSaltHash.salt,
             stripeToken,
           },

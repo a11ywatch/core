@@ -125,6 +125,20 @@ function initServer(): HttpServer {
     }
   });
 
+  app.get("/api/whats-new", cors(), async (_, res) => {
+    // TODO: Pull contents only from DB
+    res.json({
+      data: {
+        href:
+          "https://chrome.google.com/webstore/detail/a11ywatch/opefmkkmhchekgcmgneakbjafeckbaag?hl=en&authuser=0",
+        label: "Chrome Store",
+        message: "Check out the new A11yWatch Chrome Extension. Get metrics for your current tab on demand.",
+      },
+      message:
+        process.env.WHATS_NEW ?? "New Announcement",
+    });
+  });
+
   app.post("/api/login", cors(), async (req, res) => {
     const { email, password, googleId } = req.body;
     try {
