@@ -18,6 +18,8 @@ import { corsOptions, config, logServerInit } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
+import { AnnouncementsController } from "./core/controllers/announcements";
+
 import {
   CRAWL_WEBSITE,
   CONFIRM_EMAIL,
@@ -126,17 +128,23 @@ function initServer(): HttpServer {
   });
 
   app.get("/api/whats-new", cors(), async (_, res) => {
-    // TODO: Pull contents only from DB
-    res.json({
-      data: {
-        href:
-          "https://chrome.google.com/webstore/detail/a11ywatch/opefmkkmhchekgcmgneakbjafeckbaag?hl=en&authuser=0",
-        label: "Chrome Store",
-        message: "Check out the new A11yWatch Chrome Extension. Get metrics for your current tab on demand.",
-      },
-      message:
-        process.env.WHATS_NEW ?? "New Announcement",
-    });
+    try {
+      const [announcements] = await AnnouncementsController().getAnnouncement(
+        { _id: null },
+        true
+      );
+
+      res.json({
+        data: announcements ?? null,
+        message: process.env.WHATS_NEW ?? "No new announcements",
+      });
+    } catch (e) {
+      console.error(e);
+      res.json({
+        data: null,
+        message: e?.message ?? "An Issue occured with annountments",
+      });
+    }
   });
 
   app.post("/api/login", cors(), async (req, res) => {
