@@ -38,7 +38,6 @@ export const BYPASS_AUTH = [
   "getScript",
   "getWebsites",
   "getIssue",
-  "getScript",
   "getUser",
 ];
 
