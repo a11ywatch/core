@@ -18,6 +18,7 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
   const googleAuthed = user && (user.googleId || googleId);
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
+
   const shouldValidatePassword = user?.password && !googleId;
 
   if (shouldValidatePassword && passwordMatch === false) {
@@ -26,9 +27,23 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     );
   }
 
-  if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
-    throw new Error("GoogleID is not tied to any user.");
+  if (!googleId && !password) {
+    throw new Error(
+      "Password of atleast 6 chars required to register."
+    );
   }
+
+  if(user) {
+    if (!googleId && !user?.password) {
+      throw new Error(
+        user.googleId ? "Password not found, try using your google login or reset the password." :  "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
+      );
+    }
+    if (googleId && user?.googleId && user?.googleId !== googleId) {
+      throw new Error("GoogleID is not tied to any user.");
+    }
+  }
+
 
   if (user && user?.salt || googleAuthed) {
     if (passwordMatch || googleId) {

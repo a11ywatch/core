@@ -10,10 +10,25 @@ import { getNextSequenceValue } from "../../counters";
 import { getUser } from "../find";
 
 const verifyUser = async ({ password, email, googleId }) => {
+  if (!email) {
+    throw new Error(EMAIL_ERROR);
+  }
+  if (email && !password && !googleId) {
+    throw new Error("A password is required to login.");
+  }
+
   const [user, collection] = await getUser({ email }, true);
 
   if (!user) {
     throw new Error(EMAIL_ERROR);
+  }
+
+  if (!googleId && !user?.password) {
+    throw new Error(
+      user.googleId
+        ? "Password not found, try using your google login or reset the password."
+        : "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
+    );
   }
 
   const salthash = password && saltHashPassword(password, user?.salt);
@@ -22,10 +37,8 @@ const verifyUser = async ({ password, email, googleId }) => {
 
   if (shouldValidatePassword && passwordMatch === false) {
     throw new Error(EMAIL_ERROR);
-  }
-  
-  if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
-    // TODO: RAISE AWARENESS MISUSE
+  } else if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
+    // TODO: RAISE AWARENESS MISUSE HOW CLIENT IS TRYING TO LOGIN?
     throw new Error("GoogleID is not tied to any user.");
   }
 
