@@ -25,6 +25,7 @@ export const user = async (_, { id, filter, password }, context) => {
       activeSubscription: user?.paymentSubscription?.status === "active",
       loggedIn: !!ctx.user,
       accountType: audience ?? "",
+      passwordRequired: !user?.password && !user.googleId
     };
   }
 

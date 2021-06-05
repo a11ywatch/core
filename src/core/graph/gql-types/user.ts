@@ -22,6 +22,7 @@ export const user = `
 		password: String
 		jwt: String
 		loggedIn: Boolean
+		passwordRequired: Boolean
 		alertEnabled: Boolean
 		lastAlertSent: Int
 		stripeToken: String
