@@ -17,17 +17,21 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
   const [user, collection] = await getUser({ email }, true);
   const googleAuthed = user && (user.googleId || googleId);
   const salthash = password && saltHashPassword(password, user?.salt);
-
   const passwordMatch = user?.password === salthash?.passwordHash;
+  const shouldValidatePassword = user?.password && !googleId;
 
-  if (user && passwordMatch === false && typeof googleId === "undefined") {
+  if (shouldValidatePassword && passwordMatch === false) {
     throw new Error(
       "Account already exist. Please check your email and try again."
     );
   }
 
+  if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
+    throw new Error("GoogleID is not tied to any user.");
+  }
+
   if (user && user?.salt || googleAuthed) {
-    if (user?.password === salthash?.passwordHash || googleId) {
+    if (passwordMatch || googleId) {
       let keyid = user?.id;
       let updateCollectionProps = {};
 

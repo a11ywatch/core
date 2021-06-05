@@ -32,13 +32,12 @@ const serverConfig = {
     const authentication = req?.headers?.authorization
     const user = getUser(authentication)
 
-    if (process.env.NODE_ENV !== "test") {
-      if (!user && !BYPASS_AUTH.includes(req?.body?.operationName)) {
-        if (DEV && !req?.body?.operationName) {
-          console.info("graphql schema generating")
-        } else {
-          throw new Error(AUTH_ERROR)
-        }
+    // TODO: MOVE outside context into whitelist wrapper
+    if (process.env.NODE_ENV !== "test" && !user && !BYPASS_AUTH.includes(req?.body?.operationName)) {
+      if (DEV && !req?.body?.operationName) {
+        console.info("graphql schema generating")
+      } else {
+        throw new Error(AUTH_ERROR)
       }
     }
 

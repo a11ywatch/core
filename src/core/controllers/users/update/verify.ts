@@ -18,39 +18,42 @@ const verifyUser = async ({ password, email, googleId }) => {
 
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
+  const shouldValidatePassword = user?.password && !googleId;
 
-  if (passwordMatch === false && !googleId) {
+  if (shouldValidatePassword && passwordMatch === false) {
     throw new Error(EMAIL_ERROR);
   }
-
-  if (user?.password === salthash?.passwordHash || googleId) {
-    let id = user?.id;
-    let updateCollectionProps = {};
-
-    if (user?.id === null) {
-      id = await getNextSequenceValue("Users");
-      updateCollectionProps = { id };
-    }
-    const jwt = signJwt({
-      email: email || user?.email,
-      role: user?.role,
-      keyid: id,
-    });
-
-    updateCollectionProps = { ...updateCollectionProps, jwt };
-
-    if (googleId) {
-      updateCollectionProps = { ...updateCollectionProps, googleId };
-    }
-
-    await collection.updateOne({ email }, { $set: updateCollectionProps });
-    return {
-      ...user,
-      jwt,
-    };
+  
+  if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
+    // TODO: RAISE AWARENESS MISUSE
+    throw new Error("GoogleID is not tied to any user.");
   }
 
-  throw new Error(EMAIL_ERROR);
+  let id = user?.id;
+  let updateCollectionProps = {};
+
+  if (user?.id === null) {
+    id = await getNextSequenceValue("Users");
+    updateCollectionProps = { id };
+  }
+
+  const jwt = signJwt({
+    email: email || user?.email,
+    role: user?.role,
+    keyid: id,
+  });
+
+  updateCollectionProps = { ...updateCollectionProps, jwt };
+
+  if (googleId) {
+    updateCollectionProps = { ...updateCollectionProps, googleId };
+  }
+
+  await collection.updateOne({ email }, { $set: updateCollectionProps });
+  return {
+    ...user,
+    jwt,
+  };
 };
 
 export { verifyUser };

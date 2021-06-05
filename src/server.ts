@@ -112,9 +112,9 @@ function initServer(): HttpServer {
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
   app.post("/api/register", cors(), async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, googleId } = req.body;
     try {
-      const auth = await createUser({ email, password, googleId: undefined });
+      const auth = await createUser({ email, password, googleId });
       res.json(auth);
     } catch (e) {
       console.error(e);
@@ -126,9 +126,9 @@ function initServer(): HttpServer {
   });
 
   app.post("/api/login", cors(), async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, googleId } = req.body;
     try {
-      const auth = await verifyUser({ email, password, googleId: undefined });
+      const auth = await verifyUser({ email, password, googleId });
       res.json(auth);
     } catch (e) {
       console.error(e);
