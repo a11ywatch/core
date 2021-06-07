@@ -78,13 +78,20 @@ function initServer(): HttpServer {
 
   app.get(ROOT, root);
   app.get("/iframe", (req: Request, res: AppResponse) => {
-    res.createIframe({
-      url: decodeURI(req.query.url + "").replace(
-        "http",
-        req.protocol === "https" ? "https" : "http"
-      ),
-      baseHref: !!req.query.baseHref,
-    });
+    const url = req.query.url + ""
+
+    if(url.includes('.pdf')) {
+      res.redirect(url)
+    } else {
+      res.createIframe({
+        url: decodeURI(url).replace(
+          "http",
+          req.protocol === "https" ? "https" : "http"
+        ),
+        baseHref: !!req.query.baseHref,
+      });
+    }
+
   });
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
