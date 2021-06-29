@@ -59,13 +59,19 @@ export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
               "Website timeout exceeded threshhold for free scan, website rendered to slow under 15000 ms",
           });
         }
-        let { issues, webPage, pageHasCdn } = extractPageData(dataSource);
+        let { script, issues, webPage, pageHasCdn } = extractPageData(
+          dataSource
+        );
 
+        // TODO: simply use dataSource?.webPage
         const updateWebsiteProps = {
+          ...dataSource?.webPage,
           ...website,
           ...webPage,
+          html: dataSource?.webPage?.html ?? "",
           cdnConnected: pageHasCdn,
           timestamp: new Date().getTime(),
+          script,
         };
 
         const slicedIssue = limitIssue(issues);
@@ -82,7 +88,6 @@ export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
               ...website,
               issue: slicedIssue,
               ...updateWebsiteProps,
-              script: null,
             },
           })
         );
