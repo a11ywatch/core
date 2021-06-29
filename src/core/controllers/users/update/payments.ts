@@ -14,12 +14,9 @@ const { STRIPE_KEY, STRIPE_PREMIUM_PLAN, STRIPE_BASIC_PLAN } = config;
 
 const stripe = require("stripe")(STRIPE_KEY);
 
-export const addPaymentSubscription = async ({
-  email,
-  userId,
-  stripeToken,
-}) => {
-  const [user, collection] = await getUser({ email }, true);
+export const addPaymentSubscription = async ({ keyid, stripeToken }) => {
+  const [user, collection] = await getUser({ id: keyid }, true);
+  const { email } = user;
 
   if (user && stripeToken) {
     const parsedToken = JSON.parse(stripeToken);
@@ -97,8 +94,8 @@ export const addPaymentSubscription = async ({
   return { code: 404, success: false, message: EMAIL_ERROR };
 };
 
-export const cancelSubscription = async ({ email }) => {
-  const [user, collection] = await getUser({ email }, true);
+export const cancelSubscription = async ({ keyid }) => {
+  const [user, collection] = await getUser({ id: keyid }, true);
 
   if (!user) {
     throw new Error(EMAIL_ERROR);
@@ -126,7 +123,7 @@ export const cancelSubscription = async ({ email }) => {
         user.role = 0;
 
         await collection.updateOne(
-          { email },
+          { email: user?.email },
           {
             $set: {
               jwt,
