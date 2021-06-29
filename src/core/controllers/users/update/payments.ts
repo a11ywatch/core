@@ -137,6 +137,7 @@ export const cancelSubscription = async ({ keyid }) => {
               jwt,
               role: 0,
               lastRole: user.role,
+              paymentSubscription: false,
             },
           }
         );
