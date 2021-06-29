@@ -17,7 +17,10 @@ import { CronJob } from "cron";
 import { corsOptions, config, logServerInit } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
-import { verifyUser } from "./core/controllers/users/update";
+import {
+  verifyUser,
+  addPaymentSubscription,
+} from "./core/controllers/users/update";
 import { AnnouncementsController } from "./core/controllers/announcements";
 
 import {
@@ -78,10 +81,10 @@ function initServer(): HttpServer {
 
   app.get(ROOT, root);
   app.get("/iframe", (req: Request, res: AppResponse) => {
-    const url = req.query.url + ""
+    const url = req.query.url + "";
 
-    if(url.includes('.pdf')) {
-      res.redirect(url)
+    if (url.includes(".pdf")) {
+      res.redirect(url);
     } else {
       res.createIframe({
         url: decodeURI(url).replace(
@@ -91,7 +94,6 @@ function initServer(): HttpServer {
         baseHref: !!req.query.baseHref,
       });
     }
-
   });
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
@@ -119,6 +121,21 @@ function initServer(): HttpServer {
 
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
+
+  app.post("/api/add-subscription", cors(), async (req, res) => {
+    const { id, stripeToken } = req.body;
+
+    try {
+      const payment = await addPaymentSubscription({ keyid: id, stripeToken });
+      res.json(payment);
+    } catch (e) {
+      console.error(e);
+      res.json({
+        data: null,
+        message: e?.message,
+      });
+    }
+  });
 
   app.post("/api/register", cors(), async (req, res) => {
     const { email, password, googleId } = req.body;

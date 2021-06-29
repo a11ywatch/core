@@ -80,6 +80,7 @@ export const mutation = `
 		): UpdateWebSiteMutationResponse
 
 		addPaymentSubscription (
+			email: String
 			stripeToken: String
 		): UpdateUserMutationResponse
 

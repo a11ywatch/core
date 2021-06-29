@@ -5,3 +5,4 @@
  **/
 
 export { UsersController } from "./users";
+export { addPaymentSubscription } from "./update";

@@ -14,9 +14,17 @@ const { STRIPE_KEY, STRIPE_PREMIUM_PLAN, STRIPE_BASIC_PLAN } = config;
 
 const stripe = require("stripe")(STRIPE_KEY);
 
-export const addPaymentSubscription = async ({ keyid, stripeToken }) => {
-  const [user, collection] = await getUser({ id: keyid }, true);
-  const { email } = user;
+export const addPaymentSubscription = async ({
+  keyid,
+  email: emailP,
+  stripeToken,
+}: {
+  keyid?: number;
+  email?: string;
+  stripeToken: string;
+}) => {
+  const [user, collection] = await getUser({ email: emailP, id: keyid }, true);
+  const email = user?.email ?? emailP;
 
   if (user && stripeToken) {
     const parsedToken = JSON.parse(stripeToken);
