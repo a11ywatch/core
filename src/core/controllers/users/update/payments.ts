@@ -67,9 +67,9 @@ export const addPaymentSubscription = async ({
       if (charge) {
         console.log("charge stripe account", charge);
         const role =
-          charge.plan.amount === 1000
+          charge.plan.amount === 999
             ? 1
-            : charge.plan.amount === 2000
+            : charge.plan.amount === 1999
             ? 2
             : user.role;
 
