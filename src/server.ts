@@ -122,20 +122,27 @@ function initServer(): HttpServer {
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
-  app.post("/api/add-subscription", cors(), async (req, res) => {
-    const { id, stripeToken } = req.body;
+  app.post(
+    "/api/add-subscription",
+    cors({ origin: process.env.ADMIN_ORIGIN }),
+    async (req, res) => {
+      const { id, stripeToken } = req.body;
 
-    try {
-      const payment = await addPaymentSubscription({ keyid: id, stripeToken });
-      res.json(payment);
-    } catch (e) {
-      console.error(e);
-      res.json({
-        data: null,
-        message: e?.message,
-      });
+      try {
+        const payment = await addPaymentSubscription({
+          keyid: id,
+          stripeToken,
+        });
+        res.json(payment);
+      } catch (e) {
+        console.error(e);
+        res.json({
+          data: null,
+          message: e?.message,
+        });
+      }
     }
-  });
+  );
 
   app.post("/api/register", cors(), async (req, res) => {
     const { email, password, googleId } = req.body;

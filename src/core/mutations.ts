@@ -41,7 +41,7 @@ export const Mutation = {
     });
   },
   addWebsite,
-  crawlWebsite: async (_, { userId, url }, context) => {
+  crawlWebsite: async (_, { url }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
     const canScan = await context.models.User.updateScanAttempt({

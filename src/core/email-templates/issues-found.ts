@@ -4,35 +4,35 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import type { Issue } from "@app/types"
+import type { Issue } from "@app/types";
 
 export interface Data {
-  issues: [Issue] | []
-  pageUrl: string
+  issues: [Issue] | [];
+  pageUrl: string;
 }
 
 export interface IssuesFound {
-  (data: Data): string
+  (data: Data): string;
 }
 
 const issuesFoundTemplate: IssuesFound = (
   data = { issues: [], pageUrl: "" }
 ) => {
-  let listData = ""
-  const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`
+  let listData = "";
+  const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`;
 
   if (data.issues?.length) {
     data.issues.some((item: Issue, i: number) => {
       if (i === 10) {
-        return true
+        return true;
       }
-      listData = `${listData}<tr><td ${tdStyles}>${item?.type}</td><td ${tdStyles}>${item?.context}</td><td ${tdStyles}>${item?.message}</td></tr>`
-      return false
-    })
+      listData = `${listData}<tr><td ${tdStyles}>${item?.type}</td><td ${tdStyles}>${item?.context}</td><td ${tdStyles}>${item?.message}</td></tr>`;
+      return false;
+    });
   }
 
-  const page = data?.pageUrl
-  const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`
+  const page = data?.pageUrl;
+  const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`;
 
   return `
     <head>
@@ -54,8 +54,9 @@ const issuesFoundTemplate: IssuesFound = (
     </div>
     <a href="https://www.a11ywatch.com/dashboard" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none; margin-bottom: 10px;">View Details</a>
     <a href="https://api.a11ywatch.com/api/get-website?q=${page}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #ccc; text-align: center; text-decoration: none;">Download Report</a>
+    <a href="https://www.a11ywatch.com/report?sq=${page}" style="font-weight: 800; font-size: 1.8em; display: block; background: #A5D6A7; padding: 8px; color: #000; text-align: center; text-decoration: none;">Share Report</a>
     <p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>
-`.trim()
-}
+`.trim();
+};
 
-export { issuesFoundTemplate }
+export { issuesFoundTemplate };
