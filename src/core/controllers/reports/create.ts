@@ -12,12 +12,13 @@ export const createReport = async (website: Website, issues: Issue) => {
     const [collection] = await connect("Reports");
     const issue = website?.issues?.length ? website.issues : issues?.issues;
 
+    const timestamp = website?.timestamp || new Date().getTime();
+
     const report = {
-      timestamp: website?.timestamp || new Date().getTime(),
+      timestamp,
       url: website?.url,
       website: {
         ...website,
-        timestamp: undefined,
         issue: website?.issue?.length ? website?.issue : issue?.sort(issueSort),
       },
     };
