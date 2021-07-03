@@ -12,6 +12,10 @@ export const forkProcess = (
 ) => {
   const forked = fork(`${__dirname}/${workerPath}`, [], {
     detached: true,
+    execArgv:
+      process.env.NODE_ENV === "production"
+        ? undefined
+        : ["-r", "ts-node/register"],
   });
   forked.send({ ...props });
   forked.unref();
