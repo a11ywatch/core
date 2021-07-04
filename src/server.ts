@@ -195,26 +195,35 @@ function initServer(): HttpServer {
 
   /*  ANALYTICS */
 
-  app.post("/api/log/page", cors(), async (req, res, next) => {
+  app.use(
+    ua.middleware(process.env.GOOGLE_ANALYTIC_ID, {
+      cid: process.env.GOOGLE_CLIENT_ID,
+      cookieName: "_ga",
+    })
+  );
+
+  app.post("/api/log/page", cors(), async (req: any, res, next) => {
     try {
-      const { page, ip } = req.body;
+      const { page, ip, userID } = req.body;
       const origin = req.protocol + "://" + req.get("host");
       res.header("Access-Control-Allow-Origin", origin);
       res.header(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept"
       );
-
-      const visitor = ua(
-        process.env.GOOGLE_ANALYTIC_ID,
-        process.env.GOOGLE_CLIENT_ID
-      );
+      const locationIP = ip ?? req.ip ?? req.connection.remoteAddress;
+      const id = userID ?? locationIP;
+      const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, id, {
+        cid: process.env.GOOGLE_CLIENT_ID,
+        uid: id,
+        strictCidFormat: false,
+      });
 
       if (req.headers["DNT"] !== "1") {
-        visitor.set("uip", ip ?? req.ip ?? req.connection.remoteAddress);
+        visitor.set("uip", locationIP);
       }
 
-      visitor.pageview(page ?? "/").send();
+      visitor.pageview(page ?? "/", origin).send();
 
       res.sendStatus(204);
     } catch (e) {
