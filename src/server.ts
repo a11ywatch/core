@@ -192,6 +192,12 @@ function initServer(): HttpServer {
     }
   });
 
+  app.get("/api/health", cors(), async (_, res) => {
+    res.json({
+      data: "ok",
+    });
+  });
+
   //An error handling middleware
   app.use(function (err, req, res, next) {
     res.status(500);
