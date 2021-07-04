@@ -22,6 +22,7 @@ import {
   addPaymentSubscription,
 } from "./core/controllers/users/update";
 import { AnnouncementsController } from "./core/controllers/announcements";
+import ua from "universal-analytics";
 
 import {
   CRAWL_WEBSITE,
@@ -73,12 +74,12 @@ function initServer(): HttpServer {
 
   app.use(cors(corsOptions));
   app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(bodyParser.json({ type: "application/*+json", limit: "300mb" }));
+  app.use(bodyParser.json({ limit: "300mb" }));
   app.use(limiter);
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(WEBSITE_CHECK, cors());
-
+  app.set("trust proxy", true);
   app.get(ROOT, root);
   app.get("/iframe", (req: Request, res: AppResponse) => {
     const url = req.query.url + "";
@@ -192,9 +193,40 @@ function initServer(): HttpServer {
     }
   });
 
-  app.get("/api/health", cors(), async (_, res) => {
+  /*  ANALYTICS */
+
+  app.post("/api/log/page", cors(), async (req, res, next) => {
+    try {
+      const { page, ip } = req.body;
+      const origin = req.protocol + "://" + req.get("host");
+      res.header("Access-Control-Allow-Origin", origin);
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+      );
+
+      const visitor = ua(
+        process.env.GOOGLE_ANALYTIC_ID,
+        process.env.GOOGLE_CLIENT_ID
+      );
+
+      if (req.headers["DNT"] !== "1") {
+        visitor.set("uip", ip ?? req.ip ?? req.connection.remoteAddress);
+      }
+
+      visitor.pageview(page ?? "/").send();
+
+      res.sendStatus(204);
+    } catch (e) {
+      console.error(e);
+      next();
+    }
+  });
+
+  // INTERNAL
+  app.get("/_internal_/healthcheck", cors(), async (_, res) => {
     res.json({
-      data: "ok",
+      status: "healthy",
     });
   });
 
