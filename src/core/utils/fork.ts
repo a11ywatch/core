@@ -5,29 +5,31 @@
  **/
 import { fork } from "child_process";
 import { pubsub } from "@app/core/graph/subscriptions";
+import { DEV } from "../../config";
 
 export const forkProcess = (
   props: any,
   workerPath: string = "watcher-crawl"
 ) => {
-  const forked = fork(`${__dirname}/${workerPath}`, [], {
-    detached: true,
-    execArgv:
-      process.env.NODE_ENV === "production"
-        ? undefined
-        : ["-r", "ts-node/register"],
-  });
-  forked.send({ ...props });
-  forked.unref();
+  try {
+    const forked = fork(`${__dirname}/${workerPath}`, [], {
+      detached: true,
+      execArgv: DEV ? ["-r", "ts-node/register"] : undefined,
+    });
+    forked.send({ ...props });
+    forked.unref();
 
-  forked.on("message", (message: any) => {
-    if (message?.name && message?.key?.value) {
-      pubsub.publish(message.name, {
-        [message.key.name]: message.key.value,
-      });
-    }
-    if (message === "close") {
-      forked.kill("SIGINT");
-    }
-  });
+    forked.on("message", (message: any) => {
+      if (message?.name && message?.key?.value) {
+        pubsub.publish(message.name, {
+          [message.key.name]: message.key.value,
+        });
+      }
+      if (message === "close") {
+        forked.kill("SIGINT");
+      }
+    });
+  } catch (e) {
+    console.error(e);
+  }
 };
