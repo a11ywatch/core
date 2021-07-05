@@ -193,14 +193,11 @@ function initServer(): HttpServer {
     }
   });
 
-  /*  ANALYTICS */
+  /* START OF CDN */
+  // TODO: CDN API ROUTES
+  /* EOD CDN ROUTES */
 
-  app.use(
-    ua.middleware(process.env.GOOGLE_ANALYTIC_ID, {
-      cid: process.env.GOOGLE_CLIENT_ID,
-      cookieName: "_ga",
-    })
-  );
+  /*  ANALYTICS */
 
   app.post("/api/log/page", cors(), async (req: any, res, next) => {
     try {
