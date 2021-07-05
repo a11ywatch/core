@@ -14,7 +14,7 @@ import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import rateLimit from "express-rate-limit";
 import { CronJob } from "cron";
-import { corsOptions, config, logServerInit } from "./config";
+import { corsOptions, config, logServerInit, whitelist } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
 import {
@@ -205,7 +205,19 @@ function initServer(): HttpServer {
   app.post("/api/log/page", cors(), async (req: any, res, next) => {
     try {
       const { page, ip, userID } = req.body;
-      const origin = req.protocol + "://" + req.get("host");
+      let origin = req.get("origin");
+
+      if (!config.DEV) {
+        if (!whitelist.includes(origin)) {
+          // silent
+          res.sendStatus(200);
+          return;
+        }
+        if (origin.includes("api.")) {
+          origin = origin.replace("api.", "");
+        }
+      }
+
       res.header("Access-Control-Allow-Origin", origin);
       res.header(
         "Access-Control-Allow-Headers",
