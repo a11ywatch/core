@@ -53,6 +53,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     await issuesCollection.deleteMany(deleteQuery);
     await collection.findOneAndDelete(deleteQuery);
 
+    // TODO: IF HISTORY EXCEEDS 20 DELETE
     if (!history) {
       historyCollection.insertOne({
         ...siteExist,
