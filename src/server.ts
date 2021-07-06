@@ -61,7 +61,7 @@ const { GRAPHQL_PORT } = config;
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 250,
+  max: 750,
 });
 
 interface AppResponse extends Response {

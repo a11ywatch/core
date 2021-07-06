@@ -42,10 +42,10 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
   if (typeof userId !== "undefined") {
     const deleteQuery = { domain: siteExist?.domain, userId };
 
-    const [
-      history,
-      historyCollection,
-    ] = await HistoryController().getHistoryItem(deleteQuery, true);
+    const [_, historyCollection] = await HistoryController().getHistoryItem(
+      deleteQuery,
+      true
+    );
 
     await scriptsCollection.deleteMany(deleteQuery);
     await analyticsCollection.deleteMany(deleteQuery);
@@ -53,13 +53,13 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     await issuesCollection.deleteMany(deleteQuery);
     await collection.findOneAndDelete(deleteQuery);
 
-    // TODO: IF HISTORY EXCEEDS 20 DELETE
-    if (!history) {
-      historyCollection.insertOne({
-        ...siteExist,
-        deletedDate: new Date(),
-      });
+    if ((await historyCollection.countDocuments({ userId })) >= 20) {
+      await historyCollection.deleteOne({ userId });
     }
+    await historyCollection.insertOne({
+      ...siteExist,
+      deletedDate: new Date(),
+    });
 
     return { website: siteExist, code: 200, success: true, message: SUCCESS };
   }
