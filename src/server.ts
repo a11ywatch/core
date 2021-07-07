@@ -88,10 +88,7 @@ function initServer(): HttpServer {
       res.redirect(url);
     } else {
       res.createIframe({
-        url: decodeURI(url).replace(
-          "http",
-          req.protocol === "https" ? "https" : "http"
-        ),
+        url: decodeURI(url).replace(/^http:\/\//i, "https://"),
         baseHref: !!req.query.baseHref,
       });
     }
