@@ -88,6 +88,10 @@ function initServer(): HttpServer {
       url = `http://${url}`;
     }
 
+    if (req.protocol === "https") {
+      url = url.replace("http:", "https:");
+    }
+
     if (url.includes(".pdf")) {
       res.redirect(url);
     } else {
