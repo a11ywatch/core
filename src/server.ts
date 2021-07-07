@@ -82,13 +82,17 @@ function initServer(): HttpServer {
   app.set("trust proxy", true);
   app.get(ROOT, root);
   app.get("/iframe", (req: Request, res: AppResponse) => {
-    const url = req.query.url + "";
+    let url = req.query.url + "";
+
+    if (!url.includes("http")) {
+      url = `http://${url}`;
+    }
 
     if (url.includes(".pdf")) {
       res.redirect(url);
     } else {
       res.createIframe({
-        url: decodeURI(url).replace(/^http:\/\//i, "https://"),
+        url,
         baseHref: !!req.query.baseHref,
       });
     }
