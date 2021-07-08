@@ -7,18 +7,22 @@ import { getUser } from "../find";
 
 export const unsubscribeEmails = async ({ id, email }) => {
   try {
+    // TODO: remove collection find
     const [user, collection] = await getUser({ id, email }, true);
-    console.log(`user ${user.id} unsubscribed`);
 
-    await collection.findOneAndUpdate(
-      { id },
-      {
-        $set: {
-          emailAlerts: false,
-          alertEnabled: false,
-        },
-      }
-    );
+    if (user) {
+      await collection.findOneAndUpdate(
+        { id },
+        {
+          $set: {
+            emailAlerts: false,
+            alertEnabled: false,
+          },
+        }
+      );
+    } else {
+      console.info("USER: not found");
+    }
   } catch (e) {
     console.error(e);
   }

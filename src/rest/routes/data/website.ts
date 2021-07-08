@@ -10,7 +10,6 @@ import { downloadToExcel } from "@app/core/utils";
 const getWebsite = async (req: Request, res: Response, next?: any) => {
   let data: any = {};
   const { q, timestamp, download } = req.query;
-  console.log(timestamp);
 
   try {
     const report = await getReport(q + "", timestamp + "");

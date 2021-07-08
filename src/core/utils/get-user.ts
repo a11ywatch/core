@@ -4,10 +4,10 @@ export const getUser = (bearerToken: string): any => {
   const token = bearerToken?.includes("Bearer ") && bearerToken.split(" ")[1];
 
   if (token) {
+    // todo: check verify passing of decode
     if (verifyJwt(token)) {
       return decodeJwt(token);
     }
-    console.log("TOKEN EXPIRED");
   }
 
   return false;

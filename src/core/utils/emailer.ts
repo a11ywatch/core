@@ -42,13 +42,14 @@ const mailOptions = {
   text: "Some issues where found on your website.",
 };
 
-const sendMailCallback = (er: any, info: any, cb?: () => any) => {
+const sendMailCallback = (er: any, _info: any, cb?: () => any) => {
   if (er) {
     console.error(er);
-  } else {
-    console.log("Email sent: " + info?.response);
   }
-  cb && cb();
+  // console.info("Email sent: " + _info?.response);
+  if (cb && typeof cb === "function") {
+    cb();
+  }
 };
 
 export { transporter, mailOptions, sendMailCallback };
