@@ -198,7 +198,7 @@ function initServer(): HttpServer {
   /*  ANALYTICS */
 
   app.post("/api/log/page", cors(), async (req: any, res, next) => {
-    const { page, ip, userID } = req.body;
+    const { page, ip, userID, screenResolution } = req.body;
     let origin = req.get("origin");
 
     if (origin.includes("api.")) {
@@ -232,6 +232,10 @@ function initServer(): HttpServer {
     }
 
     visitor.set("uip", locationIP);
+
+    if (screenResolution) {
+      visitor.set("sr", screenResolution);
+    }
 
     visitor.pageview(page ?? "/", origin).send();
 
