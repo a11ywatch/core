@@ -207,7 +207,7 @@ function initServer(): HttpServer {
 
     res.header("Access-Control-Allow-Origin", origin);
 
-    if (!whitelist.includes(origin) || config.DEV) {
+    if (!whitelist.includes(origin)) {
       // silent
       res.sendStatus(200);
       return;
