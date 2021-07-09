@@ -234,8 +234,10 @@ function initServer(): HttpServer {
     visitor.set("uip", locationIP);
 
     if (screenResolution) {
-      visitor.set("sr", screenResolution);
+      visitor.set("vp", Number(screenResolution));
     }
+
+    visitor.set("ua", req.headers["user-agent"]);
 
     visitor.pageview(page ?? "/", origin).send();
 
