@@ -1,5 +1,7 @@
 # a11ywatch-core
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/e4ef08ad87b2fb9a2680/maintainability)](https://codeclimate.com/github/A11yWatch/a11ywatch-core/maintainability)
+
 central api for a11ywatch
 
 ## Getting Started
