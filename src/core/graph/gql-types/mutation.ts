@@ -82,6 +82,7 @@ export const mutation = `
 		addPaymentSubscription (
 			email: String
 			stripeToken: String
+			yearly: Boolean
 		): UpdateUserMutationResponse
 
 		cancelSubscription (

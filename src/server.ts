@@ -125,12 +125,13 @@ function initServer(): HttpServer {
     "/api/add-subscription",
     cors({ origin: process.env.ADMIN_ORIGIN }),
     async (req, res) => {
-      const { id, stripeToken } = req.body;
+      const { id, stripeToken, yearly } = req.body;
 
       try {
         const payment = await addPaymentSubscription({
           keyid: id,
           stripeToken,
+          yearly,
         });
         res.json(payment);
       } catch (e) {

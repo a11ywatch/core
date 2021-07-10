@@ -6,13 +6,18 @@
 
 import { getPayLoad } from "../../utils/query-payload";
 
-export const addPaymentSubscription = async (_, { stripeToken }, context) => {
+export const addPaymentSubscription = async (
+  _,
+  { stripeToken, yearly },
+  context
+) => {
   const { userId: keyid, audience } = getPayLoad(context);
 
   return await context.models.User.addPaymentSubscription({
     keyid,
     audience,
     stripeToken,
+    yearly,
   });
 };
 export const cancelSubscription = async (_, { email }, context) => {

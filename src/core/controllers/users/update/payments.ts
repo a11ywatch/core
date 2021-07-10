@@ -10,7 +10,13 @@ import { EMAIL_ERROR, SUCCESS } from "../../../strings";
 import { signJwt } from "../../../utils";
 import { getUser } from "../find";
 
-const { STRIPE_KEY, STRIPE_PREMIUM_PLAN, STRIPE_BASIC_PLAN } = config;
+const {
+  STRIPE_KEY,
+  STRIPE_PREMIUM_PLAN,
+  STRIPE_PREMIUM_PLAN_YEARLY,
+  STRIPE_BASIC_PLAN,
+  STRIPE_BASIC_PLAN_YEARLY,
+} = config;
 
 const stripe = require("stripe")(STRIPE_KEY);
 
@@ -18,10 +24,12 @@ export const addPaymentSubscription = async ({
   keyid,
   email: emailP,
   stripeToken,
+  yearly,
 }: {
   keyid?: number;
   email?: string;
   stripeToken: string;
+  yearly?: boolean;
 }) => {
   const [user, collection] = await getUser({ email: emailP, id: keyid }, true);
   const email = user?.email ?? emailP;
@@ -49,28 +57,28 @@ export const addPaymentSubscription = async ({
         source: parsedToken.id,
       });
 
-      let plan = STRIPE_BASIC_PLAN;
+      let plan = yearly ? STRIPE_BASIC_PLAN_YEARLY : STRIPE_BASIC_PLAN;
 
       if (parsedToken.plan === 1) {
-        plan = STRIPE_PREMIUM_PLAN;
+        plan = yearly ? STRIPE_PREMIUM_PLAN_YEARLY : STRIPE_PREMIUM_PLAN;
       }
 
       const charge = await stripe.subscriptions.create({
         customer: stripeCustomer.customer,
         items: [
           {
-            plan: `plan_${plan}`,
+            plan,
           },
         ],
       });
 
       if (charge) {
-        const role =
-          charge.plan.amount === 999
-            ? 1
-            : charge.plan.amount === 1999
-            ? 2
-            : user.role;
+        // TODO: GET ROLE DETERMINATION ANOTHER WAY
+        const role = [999, 9999].includes(charge.plan.amount)
+          ? 1
+          : [1999, 19999].includes(charge.plan.amount)
+          ? 2
+          : user.role;
 
         const jwt = signJwt({ email, role, keyid: user.id });
         user.jwt = jwt;
