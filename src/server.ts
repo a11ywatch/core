@@ -275,7 +275,10 @@ function initServer(): HttpServer {
   });
 
   //An error handling middleware
-  app.use(function (err, _req, res, _next) {
+  app.use(function (err, _req, res, next) {
+    if (res.headersSent) {
+      return next(err);
+    }
     res.status(500);
     res.render("error", { error: err });
   });
