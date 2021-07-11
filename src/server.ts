@@ -16,10 +16,7 @@ import { CronJob } from "cron";
 import { corsOptions, config, logServerInit, whitelist } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
-import {
-  verifyUser,
-  addPaymentSubscription,
-} from "./core/controllers/users/update";
+import { verifyUser } from "./core/controllers/users/update";
 import { AnnouncementsController } from "./core/controllers/announcements";
 import ua from "universal-analytics";
 
