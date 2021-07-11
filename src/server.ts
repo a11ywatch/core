@@ -216,16 +216,19 @@ function initServer(): HttpServer {
 
   /*  ANALYTICS */
 
-  app.post("/api/log/page", cors(), async (req: any, res, next) => {
+  app.post("/api/log/page", cors(), async (req: any, res) => {
+    const { page, ip, userID, screenResolution } = req.body;
     try {
-      const { page, ip, userID, screenResolution } = req.body;
       let origin = req.get("origin");
 
       if (origin && origin.includes("api.")) {
         origin = origin.replace("api.", "");
       }
 
-      res.header("Access-Control-Allow-Origin", origin);
+      res.header(
+        "Access-Control-Allow-Origin",
+        origin ?? "https://a11ywatch.com"
+      );
 
       if (!whitelist.includes(origin)) {
         // silent
