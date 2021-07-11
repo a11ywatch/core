@@ -126,12 +126,6 @@ function initServer(): HttpServer {
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
   app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
   app.post(IMAGE_CHECK, cors(), detectImage);
-  app.post(
-    "/admin/website-watch-scan",
-    cors({ origin: process.env.ADMIN_ORIGIN }),
-    websiteWatch
-  );
-
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
@@ -211,7 +205,6 @@ function initServer(): HttpServer {
   /* EOD CDN ROUTES */
 
   /*  ANALYTICS */
-
   app.post("/api/log/page", cors(), async (req: any, res) => {
     const { page, ip, userID, screenResolution } = req.body;
     try {
@@ -266,6 +259,7 @@ function initServer(): HttpServer {
       res.sendStatus(200);
     }
   });
+  /*  END OF ANALYTICS */
 
   // INTERNAL
   app.get("/_internal_/healthcheck", cors(), async (_, res) => {
