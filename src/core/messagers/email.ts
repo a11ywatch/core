@@ -13,7 +13,6 @@ import { issuesFoundTemplate } from "../email-templates";
 
 export const emailMessager = {
   sendFollowupEmail: async ({
-    userId,
     email,
     emailConfirmed,
     subject = "",
