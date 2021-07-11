@@ -50,7 +50,7 @@ import { createUser } from "./core/controllers/users/set";
 try {
   setLogConfig({ container: "api" });
 } catch (e) {
-  console.error(e);
+  console.error(["logger enable error:", e]);
 }
 
 const { GRAPHQL_PORT } = config;
