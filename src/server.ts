@@ -183,7 +183,7 @@ function initServer(): HttpServer {
 
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), async (req: any, res) => {
-    const { page, ip, userID, screenResolution } = req.body;
+    const { page, ip, userID, screenResolution, documentReferrer } = req.body;
     try {
       let origin = req.get("origin");
 
@@ -224,6 +224,10 @@ function initServer(): HttpServer {
 
       if (screenResolution) {
         visitor.set("vp", Number(screenResolution));
+      }
+
+      if (documentReferrer) {
+        visitor.set("dr", documentReferrer);
       }
 
       visitor.set("ua", req.headers["user-agent"]);
