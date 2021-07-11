@@ -14,8 +14,6 @@ export const createReport = async (website: Website, issues: Issue) => {
       ? website.issues
       : issues?.issues ?? (issues as Issue[]);
 
-    console.log(issue?.sort(issueSort));
-
     const report = {
       timestamp: website?.timestamp || new Date().getTime(),
       url: website?.url,
