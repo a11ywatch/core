@@ -12,7 +12,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   const { q, timestamp, download } = req.query;
 
   try {
-    const report = await getReport(q + "", timestamp + "");
+    const report = await getReport(q + "", timestamp && Number(timestamp));
 
     if (report?.website) {
       data = report.website;

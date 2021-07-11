@@ -10,16 +10,18 @@ import type { Issue, Website } from "@app/types";
 export const createReport = async (website: Website, issues: Issue) => {
   try {
     const [collection] = await connect("Reports");
-    const issue = website?.issues?.length ? website.issues : issues?.issues;
+    const issue = website?.issues?.length
+      ? website.issues
+      : issues?.issues ?? (issues as Issue[]);
 
-    const timestamp = website?.timestamp || new Date().getTime();
+    console.log(issue?.sort(issueSort));
 
     const report = {
-      timestamp,
+      timestamp: website?.timestamp || new Date().getTime(),
       url: website?.url,
       website: {
         ...website,
-        issue: website?.issue?.length ? website?.issue : issue?.sort(issueSort),
+        issues: issue?.sort(issueSort),
       },
     };
 
