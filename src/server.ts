@@ -76,18 +76,32 @@ function initServer(): HttpServer {
   app.get(ROOT, root);
   app.get("/iframe", (req: Request, res: AppResponse) => {
     let url = req.query.url + "";
+    try {
+      if (url) {
+        if (!url.includes("http")) {
+          url = `http://${url}`;
+        }
 
-    if (!url.includes("http")) {
-      url = `http://${url}`;
-    }
+        if (req.protocol === "https") {
+          url = url.replace("http:", "https:");
+        }
 
-    if (req.protocol === "https") {
-      url = url.replace("http:", "https:");
-    }
-
-    if (url.includes(".pdf")) {
-      res.redirect(url);
-    } else {
+        if (url.includes(".pdf")) {
+          res.redirect(url);
+        } else {
+          res.createIframe({
+            url,
+            baseHref: !!req.query.baseHref,
+          });
+        }
+      } else {
+        res.createIframe({
+          url,
+          baseHref: !!req.query.baseHref,
+        });
+      }
+    } catch (e) {
+      console.error(e);
       res.createIframe({
         url,
         baseHref: !!req.query.baseHref,
@@ -99,14 +113,18 @@ function initServer(): HttpServer {
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
   app.post(WEBSITE_CRAWL, cors(), websiteCrawl);
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
-    if (
-      typeof process.env.BACKGROUND_CRAWL !== "undefined" &&
-      process.env.BACKGROUND_CRAWL === "enabled"
-    ) {
-      forkProcess({ req: { body: req.body, pubsub: true } }, "crawl-website");
-      res.json(true);
-    } else {
-      await websiteCrawl(req, res);
+    try {
+      if (
+        typeof process.env.BACKGROUND_CRAWL !== "undefined" &&
+        process.env.BACKGROUND_CRAWL === "enabled"
+      ) {
+        forkProcess({ req: { body: req.body, pubsub: true } }, "crawl-website");
+        res.json(true);
+      } else {
+        await websiteCrawl(req, res);
+      }
+    } catch (e) {
+      console.error(e);
     }
   });
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
@@ -199,50 +217,55 @@ function initServer(): HttpServer {
   /*  ANALYTICS */
 
   app.post("/api/log/page", cors(), async (req: any, res, next) => {
-    const { page, ip, userID, screenResolution } = req.body;
-    let origin = req.get("origin");
+    try {
+      const { page, ip, userID, screenResolution } = req.body;
+      let origin = req.get("origin");
 
-    if (origin.includes("api.")) {
-      origin = origin.replace("api.", "");
-    }
+      if (origin && origin.includes("api.")) {
+        origin = origin.replace("api.", "");
+      }
 
-    res.header("Access-Control-Allow-Origin", origin);
+      res.header("Access-Control-Allow-Origin", origin);
 
-    if (!whitelist.includes(origin)) {
-      // silent
+      if (!whitelist.includes(origin)) {
+        // silent
+        res.sendStatus(200);
+        return;
+      }
+
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+      );
+
+      const locationIP = ip ?? req.ip ?? req.connection.remoteAddress;
+      const id = userID ?? locationIP;
+
+      const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, id, {
+        cid: process.env.GOOGLE_CLIENT_ID,
+        uid: id,
+        strictCidFormat: false,
+      });
+
+      if (req.headers["DNT"] !== "1") {
+        // TODO: any data future collection
+      }
+
+      visitor.set("uip", locationIP);
+
+      if (screenResolution) {
+        visitor.set("vp", Number(screenResolution));
+      }
+
+      visitor.set("ua", req.headers["user-agent"]);
+
+      visitor.pageview(page ?? "/", origin).send();
+
+      res.sendStatus(204);
+    } catch (e) {
+      console.error(e);
       res.sendStatus(200);
-      return;
     }
-
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept"
-    );
-
-    const locationIP = ip ?? req.ip ?? req.connection.remoteAddress;
-    const id = userID ?? locationIP;
-
-    const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, id, {
-      cid: process.env.GOOGLE_CLIENT_ID,
-      uid: id,
-      strictCidFormat: false,
-    });
-
-    if (req.headers["DNT"] !== "1") {
-      // TODO: any data future collection
-    }
-
-    visitor.set("uip", locationIP);
-
-    if (screenResolution) {
-      visitor.set("vp", Number(screenResolution));
-    }
-
-    visitor.set("ua", req.headers["user-agent"]);
-
-    visitor.pageview(page ?? "/", origin).send();
-
-    res.sendStatus(204);
   });
 
   // INTERNAL
@@ -253,7 +276,7 @@ function initServer(): HttpServer {
   });
 
   //An error handling middleware
-  app.use(function (err, req, res, next) {
+  app.use(function (err, _req, res, _next) {
     res.status(500);
     res.render("error", { error: err });
   });
@@ -279,10 +302,15 @@ function initServer(): HttpServer {
 }
 
 const coreServer = (() => {
-  (async function startDb() {
-    await initDbConnection();
-  })();
-  return initServer();
+  try {
+    (async function startDb() {
+      await initDbConnection();
+    })();
+    return initServer();
+  } catch (e) {
+    console.error("SERVER FAILED TO START");
+    console.error(e);
+  }
 })();
 
 const killServer = async () => {
