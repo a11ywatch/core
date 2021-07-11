@@ -9,7 +9,6 @@ import type { AddressInfo } from "net";
 import express, { Request, Response } from "express";
 import http from "http";
 import cors from "cors";
-import bodyParser from "body-parser";
 import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
@@ -64,8 +63,8 @@ function initServer(): HttpServer {
   const app = express();
 
   app.use(cors(corsOptions));
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(bodyParser.json({ limit: "300mb" }));
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: "300mb" }));
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(WEBSITE_CHECK, cors());
