@@ -74,9 +74,9 @@ export const addPaymentSubscription = async ({
 
       if (charge) {
         // TODO: GET ROLE DETERMINATION ANOTHER WAY
-        const role = [999, 9999].includes(charge.plan.amount)
+        const role = [999, 9999, "999", "9999"].includes(charge.plan.amount)
           ? 1
-          : [1999, 19999].includes(charge.plan.amount)
+          : [1999, 19999, "1999", "19999"].includes(charge.plan.amount)
           ? 2
           : user.role;
 
