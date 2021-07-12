@@ -19,7 +19,11 @@ export const createReport = async (website: Website, issues: Issue) => {
       url: website?.url,
       website: {
         ...website,
-        issues: issue?.sort(issueSort),
+        issues: Array.isArray(issue)
+          ? typeof issue?.sort === "function"
+            ? issue?.sort(issueSort)
+            : issue
+          : issue,
       },
     };
 
