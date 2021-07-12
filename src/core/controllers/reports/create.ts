@@ -10,9 +10,13 @@ import type { Issue, Website } from "@app/types";
 export const createReport = async (website: Website, issues: Issue) => {
   try {
     const [collection] = await connect("Reports");
-    const issue = website?.issues?.length
+    let issue = website?.issues?.length
       ? website.issues
       : issues?.issues ?? (issues as Issue[]);
+
+    if (!Array.isArray(issues) && issues?.issues) {
+      issue = issues.issues;
+    }
 
     const report = {
       timestamp: website?.timestamp || new Date().getTime(),
