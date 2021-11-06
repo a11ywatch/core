@@ -7,23 +7,22 @@
 import { EMAIL_ERROR } from "../../strings";
 import { getPayLoad } from "../../utils/query-payload";
 
-// NOTE: Rename to updateUserPassword
-export const updateUser = async (
+export const filterEmailDates = async (
   _,
-  { email, password, newPassword, stripeToken },
+  { emailFilteredDates, ...props },
   context
 ) => {
-  const { subject } = getPayLoad(context);
-  const loginUser = await context.models.User.updateUser({
-    email: subject || email,
-    password,
-    newPassword,
-    stripeToken,
+  const { audience, userId } = getPayLoad(context, props);
+
+  const loginUser = await context.models.User.updateFilterEmailDates({
+    audience,
+    id: userId,
+    emailFilteredDates,
   });
 
   if (!loginUser) {
     throw new Error(EMAIL_ERROR);
   }
 
-  return loginUser;
+  return { emailFilteredDates, ...loginUser };
 };

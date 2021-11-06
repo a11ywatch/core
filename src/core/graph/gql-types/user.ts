@@ -29,6 +29,7 @@ export const user = `
 		role: Int
 		activeSubscription: Boolean
 		emailConfirmed: Boolean
+		emailFilteredDates: [Int]
 		websites: [Website]
 		profileVisible: Boolean
 		history: [History]

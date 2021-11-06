@@ -20,7 +20,6 @@ export const mutation = `
 			googleId: String
 		): User
 
-
 		updateUser (
 			password: String
 			newPassword: String
@@ -73,6 +72,10 @@ export const mutation = `
 			url: String!
 			customHeaders: [CreatePageHeaders]
 		): UpdateWebSiteMutationResponse
+
+		filterEmailDates (
+			emailFilteredDates: [Int]
+		): User
 
 		removeWebsite (
 			url: String

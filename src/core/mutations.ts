@@ -10,6 +10,7 @@ import {
   addWebsite,
   addPaymentSubscription,
   cancelSubscription,
+  filterEmailDates,
 } from "./graph/mutations";
 import { forkProcess } from "./utils";
 
@@ -159,4 +160,5 @@ export const Mutation = {
   },
   addPaymentSubscription,
   cancelSubscription,
+  filterEmailDates,
 };
