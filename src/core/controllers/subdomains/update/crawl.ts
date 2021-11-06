@@ -5,8 +5,6 @@
  **/
 
 import validUrl from "valid-url";
-import { isWeekend } from "date-fns";
-
 import { emailMessager } from "@app/core/messagers";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { log } from "@a11ywatch/log";
@@ -24,12 +22,10 @@ import { fetchPuppet, extractPageData, limitResponse } from "./utils";
 import { createReport } from "../../reports";
 import type { Website } from "@app/types";
 
-export const crawlWebsite = async ({
-  userId,
-  url: urlMap,
-  apiData = false,
-  parentSub = false,
-}) => {
+export const crawlWebsite = async (
+  { userId, url: urlMap, apiData = false, parentSub = false },
+  sendEmail?: boolean
+) => {
   if (
     !validUrl.isUri(urlMap) ||
     (process.env.NODE_ENV === "production" && urlMap?.includes("localhost:"))
@@ -117,8 +113,7 @@ export const crawlWebsite = async ({
             })
           : pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
 
-        // DISABLE EMAILS ON WEEKENDS
-        if (!isWeekend(new Date())) {
+        if (sendEmail) {
           await emailMessager.sendMail({
             userId,
             data: issues,

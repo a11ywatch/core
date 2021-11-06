@@ -44,17 +44,48 @@ export const UsersController: UserControllerType = (
   createUser,
   addPaymentSubscription,
   cancelSubscription,
+  updateFilterEmailDates: async ({ id, filterEmailDates }) => {
+    const [user, collection] = await getUser({ id }, true);
+
+    if (user) {
+      await collection.updateOne(
+        { id },
+        {
+          $set: {
+            filterEmailDates,
+          },
+        }
+      );
+
+      return {
+        user,
+        code: 200,
+        success: true,
+        message: SUCCESS,
+      };
+    }
+
+    throw new Error(GENERAL_ERROR);
+  },
+  // TODO: Should be renamed update user password
   updateUser: async ({ password, email, newPassword, stripeToken }) => {
     const [user, collection] = await getUser({ email }, true);
     const salthash = saltHashPassword(password, user?.salt);
     const authless = !user?.password && !user.googleId;
 
-    // TODO: SEPERATE PASSWORD RESETTING 
-    if (password && user?.password && user?.password !== salthash?.passwordHash) {
+    // TODO: SEPERATE PASSWORD RESETTING
+    if (
+      password &&
+      user?.password &&
+      user?.password !== salthash?.passwordHash
+    ) {
       throw new Error(PASSWORD_ERROR);
     }
 
-    if (newPassword && (user?.password === salthash?.passwordHash || authless)) {
+    if (
+      newPassword &&
+      (user?.password === salthash?.passwordHash || authless)
+    ) {
       const jwt = await signJwt({
         email,
         role: user.role,

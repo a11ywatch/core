@@ -11,7 +11,9 @@ import { emailMessager } from "@app/core/messagers";
 import { crawlWebsite } from "@app/core/controllers/subdomains/update";
 import { log } from "@a11ywatch/log";
 import { getWebsitesWithUsers } from "../websites";
+import { getUser } from "../users";
 import { getPageItem } from "./utils";
+import { getDay } from "date-fns";
 
 export async function websiteWatch(): Promise<void> {
   try {
@@ -34,11 +36,25 @@ export async function websiteWatch(): Promise<void> {
       if (!realUser(userId) || !domain) {
         log(`request did not run for - user id: ${userId} - domain: ${domain}`);
       } else {
+        const [user] = await getUser({ id: userId }, true);
+
+        if (
+          user &&
+          Array.isArray(user?.emailFilteredDates) &&
+          user?.emailFilteredDates.includes(getDay(new Date()))
+        ) {
+          console.info(`Email disabled today for user ${user.id}`);
+          return;
+        }
+
         if (role === 0) {
-          await crawlWebsite({
-            url,
-            userId,
-          });
+          await crawlWebsite(
+            {
+              url,
+              userId,
+            },
+            true
+          );
         } else {
           await fetch(`${process.env.WATCHER_CLIENT_URL}/crawl`, {
             method: "POST",
@@ -48,10 +64,11 @@ export async function websiteWatch(): Promise<void> {
             }),
             headers: { "Content-Type": "application/json" },
           });
+          // TODO: SEND EMAIL ONCE CRAWL FINISHED PREMIUM
         }
       }
 
-      console.debug([websiteIterator, allWebPages.length])
+      console.debug([websiteIterator, allWebPages.length]);
 
       if (websiteIterator === allWebPages.length - 1) {
         await emailMessager.sendFollowupEmail({
