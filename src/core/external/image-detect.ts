@@ -4,12 +4,12 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import fetch from "node-fetch";
+import fetcher from "node-fetch";
 
 export const imageDetect = async ({ img }: { img: string }): Promise<any> => {
   let dataSource;
   try {
-    const data = await fetch(`${process.env.MAV_CLIENT_URL}/api/parseImg`, {
+    const data = await fetcher(`${process.env.MAV_CLIENT_URL}/api/parseImg`, {
       method: "POST",
       body: JSON.stringify({
         img: String(img),

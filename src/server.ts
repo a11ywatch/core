@@ -6,7 +6,7 @@
 
 import type { Server as HttpServer } from "http";
 import type { AddressInfo } from "net";
-import express, { Request, Response } from "express";
+import express from "express";
 import http from "http";
 import cors from "cors";
 import createIframe from "node-iframe";
@@ -16,6 +16,7 @@ import { corsOptions, config, logServerInit, whitelist } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
+import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
 import ua from "universal-analytics";
 
@@ -52,11 +53,7 @@ try {
   console.error(["logger enable error:", e]);
 }
 
-const { GRAPHQL_PORT } = config;
-
-interface AppResponse extends Response {
-  createIframe: (params: { url: string; baseHref: boolean }) => string;
-}
+const { GRAPHQL_PORT, DEV } = config;
 
 function initServer(): HttpServer {
   const server = new Server();
@@ -70,40 +67,7 @@ function initServer(): HttpServer {
   app.options(WEBSITE_CHECK, cors());
   app.set("trust proxy", true);
   app.get(ROOT, root);
-  app.get("/iframe", (req: Request, res: AppResponse) => {
-    let url = req.query.url + "";
-    try {
-      if (url) {
-        if (!url.includes("http")) {
-          url = `http://${url}`;
-        }
-
-        if (req.protocol === "https") {
-          url = url.replace("http:", "https:");
-        }
-
-        if (url.includes(".pdf")) {
-          res.redirect(url);
-        } else {
-          res.createIframe({
-            url,
-            baseHref: !!req.query.baseHref,
-          });
-        }
-      } else {
-        res.createIframe({
-          url,
-          baseHref: !!req.query.baseHref,
-        });
-      }
-    } catch (e) {
-      console.error(e);
-      res.createIframe({
-        url,
-        baseHref: !!req.query.baseHref,
-      });
-    }
-  });
+  app.get("/iframe", createIframeEvent);
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
@@ -158,7 +122,7 @@ function initServer(): HttpServer {
       console.error(e);
       res.json({
         data: null,
-        message: e?.message ?? "An Issue occured with annountments",
+        message: e?.message ?? "An Issue occured with announcements",
       });
     }
   });
@@ -183,7 +147,14 @@ function initServer(): HttpServer {
 
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), async (req: any, res) => {
+    // DO NOT LOG IN DEV
+    if (DEV) {
+      res.sendStatus(200);
+      return;
+    }
+
     const { page, ip, userID, screenResolution, documentReferrer } = req.body;
+
     try {
       let origin = req.get("origin");
 
@@ -285,8 +256,7 @@ const coreServer = (() => {
     })();
     return initServer();
   } catch (e) {
-    console.error("SERVER FAILED TO START");
-    console.error(e);
+    console.error(["SERVER FAILED TO START", e]);
   }
 })();
 

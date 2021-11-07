@@ -17,6 +17,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
   if (typeof userId === "undefined") {
     throw new Error(WEBSITE_NOT_FOUND);
   }
+
   const [scriptsCollection] = await connect("Scripts");
   const [analyticsCollection] = await connect("Analytics");
   const [subdomainsCollection] = await connect("SubDomains");
@@ -39,33 +40,29 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     throw new Error(WEBSITE_NOT_FOUND);
   }
 
-  if (typeof userId !== "undefined") {
-    const deleteQuery = { domain: siteExist?.domain, userId };
+  const deleteQuery = { domain: siteExist?.domain, userId };
 
-    const [
-      history,
-      historyCollection,
-    ] = await HistoryController().getHistoryItem(deleteQuery, true);
+  const [history, historyCollection] = await HistoryController().getHistoryItem(
+    deleteQuery,
+    true
+  );
 
-    await scriptsCollection.deleteMany(deleteQuery);
-    await analyticsCollection.deleteMany(deleteQuery);
-    await subdomainsCollection.deleteMany(deleteQuery);
-    await issuesCollection.deleteMany(deleteQuery);
-    await collection.findOneAndDelete(deleteQuery);
+  await scriptsCollection.deleteMany(deleteQuery);
+  await analyticsCollection.deleteMany(deleteQuery);
+  await subdomainsCollection.deleteMany(deleteQuery);
+  await issuesCollection.deleteMany(deleteQuery);
+  await collection.findOneAndDelete(deleteQuery);
 
-    // PREVENT DUPLICATE ITEMS IN HISTORY
-    if (!history) {
-      if ((await historyCollection.countDocuments({ userId })) >= 20) {
-        await historyCollection.deleteOne({ userId });
-      }
-      await historyCollection.insertOne({
-        ...siteExist,
-        deletedDate: new Date(),
-      });
+  // PREVENT DUPLICATE ITEMS IN HISTORY
+  if (!history) {
+    if ((await historyCollection.countDocuments({ userId })) >= 20) {
+      await historyCollection.deleteOne({ userId });
     }
-
-    return { website: siteExist, code: 200, success: true, message: SUCCESS };
+    await historyCollection.insertOne({
+      ...siteExist,
+      deletedDate: new Date(),
+    });
   }
 
-  throw new Error(WEBSITE_NOT_FOUND);
+  return { website: siteExist, code: 200, success: true, message: SUCCESS };
 };
