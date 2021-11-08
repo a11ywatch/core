@@ -26,9 +26,12 @@ Below is only needed to run locally currently.
 
 ### User
 
-`free`: role = 0
-`basic`: role = 1
-`premium`: role = 2
+```
+free: role = 0
+basic: role = 1
+premium: role = 2
+entreprise: role = 3
+```
 
 ### Model Setup
 

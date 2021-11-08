@@ -13,7 +13,7 @@ import { log } from "@a11ywatch/log";
 import { getWebsitesWithUsers } from "../websites";
 import { getUser } from "../users";
 import { getPageItem } from "./utils";
-import { getDay } from "date-fns";
+import { getDay, subHours } from "date-fns";
 
 export async function websiteWatch(): Promise<void> {
   try {
@@ -38,14 +38,11 @@ export async function websiteWatch(): Promise<void> {
       } else {
         const [user] = await getUser({ id: userId }, true);
 
-        if (
+        // TODO: move should email determination upfront before heavy process the prior nightly jobs with 5 hour gap
+        const sendEmail =
           user &&
           Array.isArray(user?.emailFilteredDates) &&
-          user?.emailFilteredDates.includes(getDay(new Date()))
-        ) {
-          console.info(`Email disabled today for user ${user.id}`);
-          return;
-        }
+          !user?.emailFilteredDates.includes(getDay(subHours(new Date(), 5)));
 
         if (role === 0) {
           await crawlWebsite(
@@ -53,7 +50,7 @@ export async function websiteWatch(): Promise<void> {
               url,
               userId,
             },
-            true
+            sendEmail
           );
         } else {
           await fetch(`${process.env.WATCHER_CLIENT_URL}/crawl`, {
@@ -68,7 +65,7 @@ export async function websiteWatch(): Promise<void> {
         }
       }
 
-      console.debug([websiteIterator, allWebPages.length]);
+      console.debug(["Watch Counter", websiteIterator, allWebPages.length]);
 
       if (websiteIterator === allWebPages.length - 1) {
         await emailMessager.sendFollowupEmail({
