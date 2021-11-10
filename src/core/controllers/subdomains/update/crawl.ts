@@ -30,12 +30,12 @@ export const crawlWebsite = async (
     !validUrl.isUri(urlMap) ||
     (process.env.NODE_ENV === "production" && urlMap?.includes("localhost:"))
   ) {
-    return responseModel({ msgType: ApiResponse.NotFound });
+    return Promise.resolve(responseModel({ msgType: ApiResponse.NotFound }));
   }
   const { domain, pageUrl } = sourceBuild(urlMap, userId);
   const authenticated = typeof userId !== "undefined";
 
-  return await new Promise(async (resolve) => {
+  return await new Promise(async (resolve, reject) => {
     try {
       const [website, websiteCollection] = await getWebsite(
         {
@@ -111,7 +111,7 @@ export const crawlWebsite = async (
               name: ISSUE_ADDED,
               key: { name: "issueAdded", value: newIssue },
             })
-          : pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+          : await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
 
         if (sendEmail) {
           await emailMessager.sendMail({
@@ -193,7 +193,7 @@ export const crawlWebsite = async (
                 name: SUBDOMAIN_ADDED,
                 key: { name: "subDomainAdded", value: webPage },
               })
-            : pubsub.publish(SUBDOMAIN_ADDED, {
+            : await pubsub.publish(SUBDOMAIN_ADDED, {
                 subDomainAdded: webPage,
               });
         }
@@ -237,7 +237,7 @@ export const crawlWebsite = async (
       resolve(responseModel(responseData));
     } catch (e) {
       log(e);
-      return responseModel();
+      reject(responseModel());
     }
   });
 };

@@ -24,7 +24,7 @@ export const validateEmail = async ({ code }) => {
         }
       );
 
-      pubsub.publish(EMAIL_VERIFIED, { emailVerified: true });
+      await pubsub.publish(EMAIL_VERIFIED, { emailVerified: true });
 
       return true;
     }

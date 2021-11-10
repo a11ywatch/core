@@ -14,14 +14,14 @@ export const forkProcess = (
   try {
     const forked = fork(`${__dirname}/${workerPath}`, [], {
       detached: true,
-      execArgv: DEV ? ["-r", "ts-node/register"] : undefined,
+      execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
     });
     forked.send({ ...props });
     forked.unref();
 
-    forked.on("message", (message: any) => {
+    forked.on("message", async (message: any) => {
       if (message?.name && message?.key?.value) {
-        pubsub.publish(message.name, {
+        await pubsub.publish(message.name, {
           [message.key.name]: message.key.value,
         });
       }

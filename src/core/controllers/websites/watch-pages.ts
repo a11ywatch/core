@@ -5,11 +5,8 @@
  **/
 
 import fetch from "node-fetch";
-import { initUrl } from "@a11ywatch/website-source-builder";
-import { realUser } from "@app/core/utils";
 import { emailMessager } from "@app/core/messagers";
 import { crawlWebsite } from "@app/core/controllers/subdomains/update";
-import { log } from "@a11ywatch/log";
 import { getWebsitesWithUsers } from "../websites";
 import { getUser } from "../users";
 import { getPageItem } from "./utils";
@@ -24,50 +21,29 @@ export async function websiteWatch(): Promise<void> {
 
     const allWebPages = await getWebsitesWithUsers();
 
-    for (
-      let websiteIterator = 0;
-      websiteIterator < allWebPages.length;
-      websiteIterator++
-    ) {
-      const { domain, userId, url, role } = getPageItem(
-        allWebPages[websiteIterator]
-      );
+    for await (const website of allWebPages) {
+      const { userId, url } = getPageItem(website);
+      const [user] = await getUser({ id: userId }, true);
 
-      if (!realUser(userId) || !domain) {
-        log(`request did not run for - user id: ${userId} - domain: ${domain}`);
-      } else {
-        const [user] = await getUser({ id: userId }, true);
+      const sendEmail =
+        user && Array.isArray(user?.emailFilteredDates)
+          ? !user.emailFilteredDates.includes(getDay(subHours(new Date(), 5)))
+          : true;
 
-        // TODO: move should email determination upfront before heavy process the prior nightly jobs with 5 hour gap
-        const sendEmail =
-          user &&
-          Array.isArray(user?.emailFilteredDates) &&
-          !user?.emailFilteredDates.includes(getDay(subHours(new Date(), 5)));
+      await crawlWebsite(
+        {
+          url,
+          userId,
+        },
+        sendEmail
+      ).catch((reason) => {
+        console.log(reason);
+      });
 
-        if (role === 0) {
-          await crawlWebsite(
-            {
-              url,
-              userId,
-            },
-            sendEmail
-          );
-        } else {
-          await fetch(`${process.env.WATCHER_CLIENT_URL}/crawl`, {
-            method: "POST",
-            body: JSON.stringify({
-              url: new String(initUrl(url, true)),
-              userId: new Number(userId),
-            }),
-            headers: { "Content-Type": "application/json" },
-          });
-          // TODO: SEND EMAIL ONCE CRAWL FINISHED PREMIUM
-        }
-      }
+      console.debug(["Watch", website, allWebPages.length]);
 
-      console.debug(["Watch Counter", websiteIterator, allWebPages.length]);
-
-      if (websiteIterator === allWebPages.length - 1) {
+      if (website.id === allWebPages[allWebPages.length - 1].id) {
+        console.log("CRAWLER JOB COMPLETE..");
         await emailMessager.sendFollowupEmail({
           emailConfirmed: true,
           email: process.env.EMAIL_MAIN_LEAD,
@@ -78,10 +54,9 @@ export async function websiteWatch(): Promise<void> {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-        log("WEBSITE WATCHER FINISHED ALL WEBSITES");
       }
     }
   } catch (e) {
-    log(e, { type: "error" });
+    console.log(e, { type: "error" });
   }
 }
