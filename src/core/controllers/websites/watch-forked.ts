@@ -4,18 +4,15 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { log, setConfig as setLogConfig } from "@a11ywatch/log";
 import { initDbConnection } from "@app/database";
 import { websiteWatch } from "./watch-pages";
-
-setLogConfig({ container: "api" });
 
 process.on("message", async () => {
   try {
     await initDbConnection();
     await websiteWatch();
   } catch (e) {
-    log(e, { type: "error" });
+    console.error(e);
   } finally {
     process.send("close");
   }

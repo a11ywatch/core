@@ -5,10 +5,16 @@
  **/
 
 import { fork } from "child_process";
+import { DEV } from "@app/config";
 
 export const websiteWatch = (_?: any, res?: any): any => {
   try {
-    const forked = fork(`${__dirname}/watch-forked`, [], { detached: true });
+    const forked = fork(`${__dirname}/watch-forked`, [], {
+      detached: true,
+      execArgv: DEV
+        ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
+        : undefined,
+    });
     forked.send({});
     forked.unref();
 

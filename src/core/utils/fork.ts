@@ -14,7 +14,9 @@ export const forkProcess = (
   try {
     const forked = fork(`${__dirname}/${workerPath}`, [], {
       detached: true,
-      execArgv: DEV ? ["-r", "tsconfig-paths/register"] : undefined,
+      execArgv: DEV
+        ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
+        : undefined,
     });
     forked.send({ ...props });
     forked.unref();

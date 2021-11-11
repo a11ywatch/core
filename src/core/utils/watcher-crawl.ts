@@ -8,7 +8,7 @@ const { initUrl } = require("@a11ywatch/website-source-builder");
 
 process.on("message", async ({ urlMap, userId }) => {
   const url = String(initUrl(urlMap, true));
-  console.info(`watcher crawling web page ${url}`)
+  console.info(`watcher crawling web page ${url}`);
 
   try {
     await fetch(`${process.env.WATCHER_CLIENT_URL}/crawl`, {
@@ -22,6 +22,8 @@ process.on("message", async ({ urlMap, userId }) => {
   } catch (e) {
     console.error(e);
   } finally {
-    process.send("close");
+    if (process.send) {
+      process.send("close");
+    }
   }
 });

@@ -4,8 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import fetch from "node-fetch";
-import { log } from "@a11ywatch/log";
+import fetcher from "node-fetch";
 
 export const fetchPuppet = async ({
   userId,
@@ -15,7 +14,7 @@ export const fetchPuppet = async ({
 }: any) => {
   let dataSource;
   try {
-    const data = await fetch(
+    const data = await fetcher(
       `${process.env.PUPPET_SERVICE}/api/getPageIssues`,
       {
         method: "POST",
@@ -33,7 +32,7 @@ export const fetchPuppet = async ({
       dataSource = await data?.json();
     }
   } catch (e) {
-    log(e);
+    console.error(e);
   }
 
   return dataSource;

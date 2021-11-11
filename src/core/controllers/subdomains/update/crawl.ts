@@ -7,7 +7,6 @@
 import validUrl from "valid-url";
 import { emailMessager } from "@app/core/messagers";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { log } from "@a11ywatch/log";
 import { pubsub } from "@app/core/graph/subscriptions";
 import { SUBDOMAIN_ADDED, ISSUE_ADDED, WEBSITE_ADDED } from "@app/core/static";
 import { ApiResponse, responseModel } from "@app/core/models";
@@ -106,7 +105,7 @@ export const crawlWebsite = async (
       });
 
       if (issues?.issues?.length) {
-        parentSub
+        parentSub && process.send
           ? process.send({
               name: ISSUE_ADDED,
               key: { name: "issueAdded", value: newIssue },
@@ -188,7 +187,7 @@ export const crawlWebsite = async (
         );
 
         if (!newSite) {
-          parentSub
+          parentSub && process.send
             ? process.send({
                 name: SUBDOMAIN_ADDED,
                 key: { name: "subDomainAdded", value: webPage },
@@ -202,7 +201,7 @@ export const crawlWebsite = async (
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
 
       if (authenticated) {
-        parentSub
+        parentSub && process.send
           ? process.send({
               name: WEBSITE_ADDED,
               key: { name: "websiteAdded", value: websiteAdded },
@@ -236,7 +235,7 @@ export const crawlWebsite = async (
 
       resolve(responseModel(responseData));
     } catch (e) {
-      log(e);
+      console.error(e);
       reject(responseModel());
     }
   });

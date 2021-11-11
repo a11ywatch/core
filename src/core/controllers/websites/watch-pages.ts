@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import fetch from "node-fetch";
+import fetcher from "node-fetch";
 import { emailMessager } from "@app/core/messagers";
 import { crawlWebsite } from "@app/core/controllers/subdomains/update";
 import { getWebsitesWithUsers } from "../websites";
@@ -12,14 +12,33 @@ import { getUser } from "../users";
 import { getPageItem } from "./utils";
 import { getDay, subHours } from "date-fns";
 
-export async function websiteWatch(): Promise<void> {
-  try {
-    await fetch(`${process.env.MAV_CLIENT_URL}/api/init`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
+const fetchOptions = {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+};
 
-    const allWebPages = await getWebsitesWithUsers();
+const cleanupWatcher = async (allWebPages: any[] = []) => {
+  await emailMessager.sendFollowupEmail({
+    emailConfirmed: true,
+    email: process.env.EMAIL_MAIN_LEAD,
+    subject: `CRAWLER FINISHED ENV:${process.env.NODE_ENV}`,
+    html: `<h1>All ${allWebPages.length} pages crawled </h1>`,
+  });
+  await fetcher(`${process.env.MAV_CLIENT_URL}/api/clear`, fetchOptions);
+};
+
+export async function websiteWatch(): Promise<void> {
+  let allWebPages = [];
+  let pageCounter = 0;
+
+  try {
+    allWebPages = await getWebsitesWithUsers();
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    await fetcher(`${process.env.MAV_CLIENT_URL}/api/init`, fetchOptions);
 
     for await (const website of allWebPages) {
       const { userId, url } = getPageItem(website);
@@ -36,27 +55,18 @@ export async function websiteWatch(): Promise<void> {
           userId,
         },
         sendEmail
-      ).catch((reason) => {
-        console.log(reason);
-      });
+      );
 
-      console.debug(["Watch", website, allWebPages.length]);
+      pageCounter++;
+      console.log(`Watcher page ${pageCounter}, of ${allWebPages.length}`);
 
-      if (website.id === allWebPages[allWebPages.length - 1].id) {
+      if (pageCounter === allWebPages.length) {
         console.log("CRAWLER JOB COMPLETE..");
-        await emailMessager.sendFollowupEmail({
-          emailConfirmed: true,
-          email: process.env.EMAIL_MAIN_LEAD,
-          subject: `CRAWLER FINISHED ENV:${process.env.NODE_ENV}`,
-          html: `<h1>All ${allWebPages.length} pages crawled </h1>`,
-        });
-        await fetch(`${process.env.MAV_CLIENT_URL}/api/clear`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
+        await cleanupWatcher(allWebPages);
       }
     }
   } catch (e) {
-    console.log(e, { type: "error" });
+    console.error(e);
+    await cleanupWatcher(allWebPages);
   }
 }

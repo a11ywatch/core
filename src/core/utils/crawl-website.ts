@@ -12,6 +12,8 @@ process.on("message", async (props) => {
   } catch (e) {
     console.error(e);
   } finally {
-    process.send("close");
+    if (process.send) {
+      process.send("close");
+    }
   }
 });
