@@ -3,41 +3,45 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  **/
-import { ApolloServer } from "apollo-server-express"
-import { config, BYPASS_AUTH } from "./config"
-import { getUser } from "./core/utils"
-import { schema } from "./core/schema"
-import { AUTH_ERROR } from "./core/strings"
-import { SubDomainController } from "./core/controllers/subdomains"
-import { ScriptsController } from "./core/controllers/scripts"
-import { HistoryController } from "./core/controllers/history"
-import { WebsitesController } from "./core/controllers/websites"
-import { UsersController } from "./core/controllers/users"
-import { IssuesController } from "./core/controllers/issues"
-import { FeaturesController } from "./core/controllers/features"
-import { AnalyticsController } from "./core/controllers/analytics"
+import { ApolloServer } from "apollo-server-express";
+import { config, BYPASS_AUTH } from "./config";
+import { getUser } from "./core/utils";
+import { schema } from "./core/schema";
+import { AUTH_ERROR } from "./core/strings";
+import { SubDomainController } from "./core/controllers/subdomains";
+import { ScriptsController } from "./core/controllers/scripts";
+import { HistoryController } from "./core/controllers/history";
+import { WebsitesController } from "./core/controllers/websites";
+import { UsersController } from "./core/controllers/users";
+import { IssuesController } from "./core/controllers/issues";
+import { FeaturesController } from "./core/controllers/features";
+import { AnalyticsController } from "./core/controllers/analytics";
 
-const { DEV, SUBSCRIPTION_TIMOUT } = config
+const { DEV, SUBSCRIPTION_TIMOUT } = config;
 
 const serverConfig = {
   tracing: DEV,
   schema,
   subscriptions: {
-    keepAlive: SUBSCRIPTION_TIMOUT || 10000
+    keepAlive: SUBSCRIPTION_TIMOUT || 10000,
   },
   context: ({ req, connection }) => {
     if (connection) {
-      return connection.context
+      return connection.context;
     }
-    const authentication = req?.headers?.authorization
-    const user = getUser(authentication)
+    const authentication = req?.headers?.authorization;
+    const user = getUser(authentication);
 
     // TODO: MOVE outside context into whitelist wrapper
-    if (process.env.NODE_ENV !== "test" && !user && !BYPASS_AUTH.includes(req?.body?.operationName)) {
+    if (
+      process.env.NODE_ENV !== "test" &&
+      !user &&
+      !BYPASS_AUTH.includes(req?.body?.operationName)
+    ) {
       if (DEV && !req?.body?.operationName) {
-        console.info("graphql schema generating")
+        console.info("graphql schema generating");
       } else {
-        throw new Error(AUTH_ERROR)
+        throw new Error(AUTH_ERROR);
       }
     }
 
@@ -51,12 +55,12 @@ const serverConfig = {
         SubDomain: SubDomainController({ user }),
         History: HistoryController({ user }),
         Analytics: AnalyticsController({ user }),
-        Scripts: ScriptsController({ user })
-      }
-    }
-  }
-}
+        Scripts: ScriptsController({ user }),
+      },
+    };
+  },
+};
 
-const Server = ApolloServer.bind(null, serverConfig)
+const Server = ApolloServer.bind(null, serverConfig);
 
-export { Server, serverConfig }
+export { Server, serverConfig };

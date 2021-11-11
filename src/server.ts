@@ -47,16 +47,14 @@ import {
 } from "./rest/routes";
 import { createUser } from "./core/controllers/users/set";
 
-try {
-  setLogConfig({ container: "api" });
-} catch (e) {
-  console.error(["logger enable error:", e]);
-}
+setLogConfig({
+  container: "api",
+  disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
+});
 
 const { GRAPHQL_PORT, DEV } = config;
 
 function initServer(): HttpServer {
-  const server = new Server();
   const app = express();
 
   app.use(cors(corsOptions));
@@ -107,6 +105,38 @@ function initServer(): HttpServer {
     }
   });
 
+  app.post("/api/login", cors(), async (req, res) => {
+    const { email, password, googleId } = req.body;
+    try {
+      const auth = await verifyUser({ email, password, googleId });
+      res.json(auth);
+    } catch (e) {
+      console.error(e);
+      res.json({
+        data: null,
+        message: e?.message,
+      });
+    }
+  });
+
+  app.post("/api/run-watcher", cors(), async (req, res) => {
+    const { password } = req.body;
+    try {
+      if (password === process.env.ADMIN_PASSWORD) {
+        await websiteWatch();
+      } else {
+        console.error("admin password required");
+      }
+      res.json(true);
+    } catch (e) {
+      console.error(e);
+      res.json({
+        data: null,
+        message: e?.message,
+      });
+    }
+  });
+
   app.get("/api/whats-new", cors(), async (_, res) => {
     try {
       const [announcements] = await AnnouncementsController().getAnnouncement(
@@ -123,20 +153,6 @@ function initServer(): HttpServer {
       res.json({
         data: null,
         message: e?.message ?? "An Issue occured with announcements",
-      });
-    }
-  });
-
-  app.post("/api/login", cors(), async (req, res) => {
-    const { email, password, googleId } = req.body;
-    try {
-      const auth = await verifyUser({ email, password, googleId });
-      res.json(auth);
-    } catch (e) {
-      console.error(e);
-      res.json({
-        data: null,
-        message: e?.message,
       });
     }
   });
@@ -228,6 +244,8 @@ function initServer(): HttpServer {
     res.status(500);
     res.render("error", { error: err });
   });
+
+  const server = new Server();
 
   server.applyMiddleware({ app, cors: false });
 
