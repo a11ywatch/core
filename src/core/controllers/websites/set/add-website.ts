@@ -18,6 +18,7 @@ import {
 import { WebsiteModel } from "@app/core/models/website";
 import { getHostName, initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
+import { getNextSequenceValue } from "../../counters";
 
 export const addWebsite = async ({
   userId,
@@ -29,10 +30,7 @@ export const addWebsite = async ({
     throw new Error(WEBSITE_URL_ERROR);
   }
   const url = initUrl(urlMap);
-  const [siteExist, collection, lastItemId] = await getWebsite(
-    { userId, url },
-    true
-  );
+  const [siteExist, collection] = await getWebsite({ userId, url }, true);
 
   if (siteExist) {
     throw new Error(WEBSITE_EXIST_ERROR);
@@ -44,9 +42,11 @@ export const addWebsite = async ({
     throw new Error(ADD_FREE_MAX_ERROR);
   }
 
+  const id = await getNextSequenceValue("Websites");
+
   const website = Object.assign({}, WebsiteModel, {
     userId,
-    id: lastItemId + 1,
+    id,
     url,
     domain: getHostName(url),
     pageHeaders: customHeaders,
