@@ -105,12 +105,15 @@ export const crawlWebsite = async (
       });
 
       if (issues?.issues?.length) {
-        parentSub && process.send
-          ? process.send({
-              name: ISSUE_ADDED,
-              key: { name: "issueAdded", value: newIssue },
-            })
-          : await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        if (parentSub && process.send) {
+          process.send({
+            name: ISSUE_ADDED,
+            key: { name: "issueAdded", value: newIssue },
+          });
+        } else {
+          console.info("ISSUE SENDING FOR " + pageUrl);
+          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        }
 
         if (sendEmail) {
           await emailMessager.sendMail({
@@ -171,12 +174,8 @@ export const crawlWebsite = async (
           script.scriptMeta = {
             skipContentEnabled: true,
           };
-          await collectionUpsert(script, [
-            scriptsCollection,
-            scripts,
-            "SCRIPTS",
-          ]);
         }
+        await collectionUpsert(script, [scriptsCollection, scripts, "SCRIPTS"]);
       }
 
       if (webPage) {
@@ -187,26 +186,30 @@ export const crawlWebsite = async (
         );
 
         if (!newSite) {
-          parentSub && process.send
-            ? process.send({
-                name: SUBDOMAIN_ADDED,
-                key: { name: "subDomainAdded", value: webPage },
-              })
-            : await pubsub.publish(SUBDOMAIN_ADDED, {
-                subDomainAdded: webPage,
-              });
+          if (parentSub && process.send) {
+            process.send({
+              name: SUBDOMAIN_ADDED,
+              key: { name: "subDomainAdded", value: webPage },
+            });
+          } else {
+            await pubsub.publish(SUBDOMAIN_ADDED, {
+              subDomainAdded: webPage,
+            });
+          }
         }
       }
 
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
 
       if (authenticated) {
-        parentSub && process.send
-          ? process.send({
-              name: WEBSITE_ADDED,
-              key: { name: "websiteAdded", value: websiteAdded },
-            })
-          : pubsub.publish(WEBSITE_ADDED, { websiteAdded });
+        if (parentSub && process.send) {
+          process.send({
+            name: WEBSITE_ADDED,
+            key: { name: "websiteAdded", value: websiteAdded },
+          });
+        } else {
+          await pubsub.publish(WEBSITE_ADDED, { websiteAdded });
+        }
       }
 
       const responseData = limitResponse({
