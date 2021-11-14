@@ -21,7 +21,7 @@ export const addIssue = async ({ userId, url, issue }: any) => {
       url,
     };
 
-    collection.insertOne(newIssue);
+    await collection.insertOne(newIssue);
   }
 
   return { code: 200, success: true, message: SUCCESS };

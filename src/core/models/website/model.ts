@@ -1,7 +1,7 @@
 // TODO: ADD TYPES
 const WebsiteModel = {
   userId: -1,
-  id: 0,
+  id: null,
   url: "",
   domain: "",
   adaScore: null,

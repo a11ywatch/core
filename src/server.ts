@@ -162,18 +162,26 @@ function initServer(): HttpServer {
   /* EOD CDN ROUTES */
 
   /*  ANALYTICS */
-  app.post("/api/log/page", cors(), async (req: any, res) => {
+  app.post("/api/log/page", cors(), async (req, res) => {
+    let origin = req.get("origin");
+
     // DO NOT LOG IN DEV
     if (DEV) {
-      res.sendStatus(200);
-      return;
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+      );
+      res.header(
+        "Access-Control-Allow-Origin",
+        origin ?? "https://a11ywatch.com"
+      );
+
+      return res.sendStatus(200);
     }
 
     const { page, ip, userID, screenResolution, documentReferrer } = req.body;
 
     try {
-      let origin = req.get("origin");
-
       if (origin && origin.includes("api.")) {
         origin = origin.replace("api.", "");
       }

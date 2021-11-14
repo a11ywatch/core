@@ -18,7 +18,6 @@ import {
 import { makeWebsite } from "@app/core/models/website";
 import { getHostName, initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
-import { getNextSequenceValue } from "../../counters";
 
 export const addWebsite = async ({
   userId,
@@ -42,14 +41,12 @@ export const addWebsite = async ({
     throw new Error(ADD_FREE_MAX_ERROR);
   }
 
-  const id = await getNextSequenceValue("Websites");
-
   const website = makeWebsite({
     userId,
-    id,
     url,
     domain: getHostName(url),
     pageHeaders: customHeaders,
+    id: collectionCount - 1, // TODO: remove id usage and map resolver to BISON OBJECT
   });
 
   await collection.insertOne(website);
