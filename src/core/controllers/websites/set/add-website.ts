@@ -46,7 +46,7 @@ export const addWebsite = async ({
     url,
     domain: getHostName(url),
     pageHeaders: customHeaders,
-    id: collectionCount - 1, // TODO: remove id usage and map resolver to BISON OBJECT
+    id: collectionCount ? Number(collectionCount) - 1 : 0, // TODO: remove id usage and map resolver to BISON OBJECT
   });
 
   await collection.insertOne(website);
