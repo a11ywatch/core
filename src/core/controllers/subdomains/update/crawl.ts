@@ -111,7 +111,6 @@ export const crawlWebsite = async (
             key: { name: "issueAdded", value: newIssue },
           });
         } else {
-          console.info("ISSUE SENDING FOR " + pageUrl);
           await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
         }
 

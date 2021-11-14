@@ -15,7 +15,7 @@ import {
   blockWebsiteAdd,
   stripUrlEndingSlash,
 } from "@app/core/utils";
-import { WebsiteModel } from "@app/core/models/website";
+import { makeWebsite } from "@app/core/models/website";
 import { getHostName, initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
 import { getNextSequenceValue } from "../../counters";
@@ -44,7 +44,7 @@ export const addWebsite = async ({
 
   const id = await getNextSequenceValue("Websites");
 
-  const website = Object.assign({}, WebsiteModel, {
+  const website = makeWebsite({
     userId,
     id,
     url,

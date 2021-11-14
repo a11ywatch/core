@@ -18,25 +18,32 @@ const WebsiteModel = {
     possibleIssuesFixedByCdn: 0,
     totalIssues: 0,
   },
-  issues: [],
-  lastScanDate: new Date().toUTCString(),
+  lastScanDate: "",
   pageHeaders: null,
   online: null,
 };
 
-interface Params {
+export interface Params {
   url: string;
   domain: string;
+  userId?: number;
+  id?: number;
+  [x: string]: any;
 }
 
 const makeWebsite = (
-  { url, domain }: Params = { url: "", domain: "" }
-): any => {
-  return Object.assign({}, WebsiteModel, {
-    url,
-    domain,
-    lastScanDate: new Date().toUTCString(),
-  });
+  { url, domain, ...extra }: Params = { url: "", domain: "" }
+): typeof WebsiteModel => {
+  return Object.assign(
+    {},
+    WebsiteModel,
+    {
+      url,
+      domain,
+      lastScanDate: new Date().toUTCString(),
+    },
+    extra
+  );
 };
 
 export { WebsiteModel, makeWebsite };
