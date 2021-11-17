@@ -5,5 +5,5 @@
  **/
 
 export { crawlWebsite } from "./crawl";
-export { generateWebsiteAverage } from "./domain";
+export { generateWebsiteAverage, generateWebsiteAverageIssues } from "./utils";
 export { scanWebsite } from "./scan";

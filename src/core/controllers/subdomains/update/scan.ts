@@ -46,17 +46,16 @@ export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
         pageHeaders: website?.pageHeaders,
         url: urlMap,
         userId,
-        authed: false,
       });
 
       if (dataSource) {
         if (!dataSource?.webPage) {
-          resolve({
+          return resolve({
             website: null,
             code: 300,
             success: false,
             message:
-              "Website timeout exceeded threshhold for free scan, website rendered to slow under 15000 ms",
+              "Website timeout exceeded threshhold for scan, website rendered to slow under 15000 ms",
           });
         }
         const { script, issues, webPage, pageHasCdn } = extractPageData(

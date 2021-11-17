@@ -16,8 +16,12 @@ import { ScriptsController } from "../../scripts";
 import { getWebsite } from "../../websites";
 import { AnalyticsController } from "../../analytics";
 import { getDomain } from "../find";
-import { generateWebsiteAverage } from "./domain";
-import { fetchPuppet, extractPageData, limitResponse } from "./utils";
+import {
+  fetchPuppet,
+  extractPageData,
+  limitResponse,
+  generateWebsiteAverageIssues,
+} from "./utils";
 import { createReport } from "../../reports";
 import type { Website } from "@app/types";
 
@@ -89,10 +93,12 @@ export const crawlWebsite = async (
         { pageUrl, userId, noRetries: true },
         true
       );
+
       const [
         analytics,
         analyticsCollection,
       ] = await AnalyticsController().getWebsite({ pageUrl, userId }, true);
+
       const [scripts, scriptsCollection] = await ScriptsController().getScript(
         { pageUrl, userId, noRetries: true },
         true
@@ -125,21 +131,18 @@ export const crawlWebsite = async (
 
       let updateWebsiteProps: Website;
 
-      if (website?.url === pageUrl) {
-        const avgScore = await generateWebsiteAverage(
-          {
-            domain,
-            userId,
-          },
-          [website, websiteCollection]
-        );
+      const [avgScore] = await generateWebsiteAverageIssues({
+        domain,
+        userId,
+      });
 
-        updateWebsiteProps = Object.assign({}, webPage, {
-          avgScore,
-          cdnConnected: pageHasCdn,
-          online: true,
-        });
-      }
+      // // TODO: MERGE ISSUES FROM ALL PAGES
+      // console.log(webPage.issuesInfo);
+      updateWebsiteProps = Object.assign({}, webPage, {
+        avgScore,
+        cdnConnected: pageHasCdn, // TODO: ONLY UPDATE CDN IF ROOT
+        online: true,
+      });
 
       await collectionUpsert(
         {

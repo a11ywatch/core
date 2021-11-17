@@ -6,12 +6,7 @@
 
 import fetcher from "node-fetch";
 
-export const fetchPuppet = async ({
-  userId,
-  url,
-  pageHeaders,
-  authed = true,
-}: any) => {
+export const fetchPuppet = async ({ userId, url, pageHeaders }: any) => {
   let dataSource;
   try {
     const data = await fetcher(
@@ -22,13 +17,12 @@ export const fetchPuppet = async ({
           pageHeaders: pageHeaders && Array(pageHeaders),
           url: String(encodeURIComponent(url)),
           userId: Number(userId),
-          authed: Boolean(authed),
         }),
         headers: { "Content-Type": "application/json" },
       }
     );
 
-    if (data.status === 200) {
+    if (data?.status === 200) {
       dataSource = await data?.json();
     }
   } catch (e) {
