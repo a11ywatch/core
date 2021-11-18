@@ -6,6 +6,7 @@
 import { UsersController } from "../controllers/users";
 import { IssuesController } from "../controllers/issues";
 import { SubDomainController } from "../controllers/subdomains";
+import { ScriptsController } from "../controllers/scripts";
 
 export const Website = {
   user: async ({ userId }) => {
@@ -19,10 +20,10 @@ export const Website = {
       filter,
     });
 
-    if (issues && ["error", "notice", "warning"].includes(filter)) {
-      issues = issues.filter((item) => {
-        if (item.issues) {
-          item.issues = item.issues.filter((issue) => issue.type === filter);
+    if (filter && issues && ["error", "notice", "warning"].includes(filter)) {
+      return issues.filter((item) => {
+        if (item?.issues) {
+          item.issues = item?.issues?.filter((issue) => issue?.type === filter);
         }
 
         return item?.issues?.length ? item : null;
@@ -31,7 +32,13 @@ export const Website = {
 
     return issues;
   },
-  subDomains: async ({ userId, url, domain }, { filter }) => {
+  script: async ({ userId, url, pageUrl }) => {
+    return await ScriptsController().getScript(
+      { userId: userId, pageUrl: url || pageUrl },
+      false
+    );
+  },
+  subDomains: async ({ userId, url, domain }) => {
     return await SubDomainController().getDomains({
       userId,
       url,
