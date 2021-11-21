@@ -9,7 +9,8 @@
     "test": "jest --forceExit --maxWorkers 4",
     "lint": "eslint .",
     "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist",
-    "start": "NODE_ENV=production node dist/server.js"
+    "start": "NODE_ENV=production node dist/server.js",
+    "generate": "graphql-codegen"
   },
   "engines": {
     "node": "v14.x"
