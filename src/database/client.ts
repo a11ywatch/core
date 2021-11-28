@@ -22,6 +22,7 @@ try {
   log(e);
 }
 
+// TODO: DB CONNECTION PER ROUTE
 const initDbConnection = async () => {
   try {
     if (process.send !== undefined) {

@@ -16,6 +16,10 @@ export const whitelist = [
   WATCHER_CLIENT_URL,
   "a11ywatch.com",
   "www.a11ywatch.com",
+  "https://a11ywatch.com",
+  "https://www.a11ywatch.com",
+  "http://a11ywatch.com",
+  "http://www.a11ywatch.com",
 ].filter((url) => url);
 
 if (DEV || TEST_ENV) {

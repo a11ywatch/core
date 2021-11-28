@@ -19,3 +19,4 @@ export { stripUrlEndingSlash } from "./strip-url-ending-slash";
 export { collectionUpsert } from "./collection-upsert";
 export { issueSort } from "./sorts";
 export { downloadToExcel } from "./download-to-excel";
+export { parseCookie } from "./parse-cookie";

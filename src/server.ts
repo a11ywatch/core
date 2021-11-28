@@ -60,7 +60,10 @@ setLogConfig({
 
 const { GRAPHQL_PORT, DEV } = config;
 
-function initServer(): HttpServer {
+async function initServer(): Promise<HttpServer> {
+  // TODO: REMOVE DB CONNECTION TOP LEVEL
+  await initDbConnection();
+
   const app = express();
 
   app.use(cors(corsOptions));
@@ -257,10 +260,11 @@ function initServer(): HttpServer {
   /* EOD CDN ROUTES */
 
   /*  ANALYTICS */
-  app.post("/api/log/page", cors(corsOptions), async (req, res) => {
-    let origin = req.get("origin");
+  app.post("/api/log/page", cors(), async (req, res) => {
+    let origin = req.get("origin") || req.headers.origin;
+    const nextJSMiddleware = req.headers["user-agent"] === "Next.js Middleware";
 
-    // DO NOT LOG IN DEV
+    // // DO NOT LOG IN DEV
     if (DEV) {
       res.header(
         "Access-Control-Allow-Headers",
@@ -279,6 +283,10 @@ function initServer(): HttpServer {
     try {
       if (origin && origin.includes("api.")) {
         origin = origin.replace("api.", "");
+      }
+
+      if (!origin && nextJSMiddleware) {
+        origin = "https://a11ywatch.com";
       }
 
       res.header(
@@ -317,8 +325,13 @@ function initServer(): HttpServer {
       }
       const dr = documentReferrer ?? req.headers.referer;
 
-      dr && visitor.set("dr", documentReferrer ?? req.headers.referer);
-      req.headers["user-agent"] && visitor.set("ua", req.headers["user-agent"]);
+      if (dr) {
+        visitor.set("dr", documentReferrer ?? req.headers.referer);
+      }
+
+      if (req.headers["user-agent"]) {
+        visitor.set("ua", req.headers["user-agent"]);
+      }
 
       visitor.pageview(page ?? "/", origin).send();
 
@@ -368,24 +381,23 @@ function initServer(): HttpServer {
   return listener;
 }
 
-const coreServer = (() => {
-  try {
-    (async function startDb() {
-      await initDbConnection();
-    })();
-    return initServer();
-  } catch (e) {
-    console.error(["SERVER FAILED TO START", e]);
-  }
-})();
+let coreServer: HttpServer;
 
 const killServer = async () => {
   try {
-    await Promise.all([closeDbConnection(), coreServer?.close()]);
+    await Promise.all([closeDbConnection(), coreServer.close()]);
   } catch (e) {
     console.error("failed to kill server", e);
   }
 };
 
-export { initServer, killServer };
+(async () => {
+  try {
+    coreServer = await initServer();
+  } catch (e) {
+    console.error(["SERVER FAILED TO START", e]);
+  }
+})();
+
+export { killServer, initServer };
 export default coreServer;
