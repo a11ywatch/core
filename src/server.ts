@@ -257,7 +257,7 @@ function initServer(): HttpServer {
   /* EOD CDN ROUTES */
 
   /*  ANALYTICS */
-  app.post("/api/log/page", cors(), async (req, res) => {
+  app.post("/api/log/page", cors(corsOptions), async (req, res) => {
     let origin = req.get("origin");
 
     // DO NOT LOG IN DEV
@@ -315,12 +315,10 @@ function initServer(): HttpServer {
       if (screenResolution) {
         visitor.set("vp", Number(screenResolution));
       }
+      const dr = documentReferrer ?? req.headers.referer;
 
-      if (documentReferrer) {
-        visitor.set("dr", documentReferrer);
-      }
-
-      visitor.set("ua", req.headers["user-agent"]);
+      dr && visitor.set("dr", documentReferrer ?? req.headers.referer);
+      req.headers["user-agent"] && visitor.set("ua", req.headers["user-agent"]);
 
       visitor.pageview(page ?? "/", origin).send();
 

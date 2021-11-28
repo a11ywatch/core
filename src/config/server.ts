@@ -14,6 +14,8 @@ export const whitelist = [
   ...apiUrls,
   ...apiUrls.map((url) => url.replace("http", "https")),
   WATCHER_CLIENT_URL,
+  "a11ywatch.com",
+  "www.a11ywatch.com",
 ].filter((url) => url);
 
 if (DEV || TEST_ENV) {
