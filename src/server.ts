@@ -306,11 +306,11 @@ async function initServer(): Promise<HttpServer> {
       );
 
       const locationIP = ip ?? req.ip ?? req.connection.remoteAddress;
-      const id = userID ?? locationIP;
+      const uid = userID ?? locationIP;
 
-      const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, id, {
+      const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, uid, {
         cid: process.env.GOOGLE_CLIENT_ID,
-        uid: id,
+        uid,
         strictCidFormat: false,
       });
 
@@ -323,10 +323,10 @@ async function initServer(): Promise<HttpServer> {
       if (screenResolution) {
         visitor.set("vp", Number(screenResolution));
       }
-      const dr = documentReferrer ?? req.headers.referer;
+      const dr = documentReferrer ?? req.headers["referer"];
 
       if (dr) {
-        visitor.set("dr", documentReferrer ?? req.headers.referer);
+        visitor.set("dr", dr);
       }
 
       if (req.headers["user-agent"]) {
