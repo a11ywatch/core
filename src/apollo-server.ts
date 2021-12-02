@@ -22,7 +22,7 @@ const { DEV } = config;
 const serverConfig: ApolloServerExpressConfig = {
   tracing: DEV,
   schema,
-  context: ({ req, connection }) => {
+  context: ({ req, res, connection }) => {
     if (connection) {
       return connection.context;
     }
@@ -46,6 +46,7 @@ const serverConfig: ApolloServerExpressConfig = {
 
     return {
       user,
+      res,
       models: {
         User: UsersController({ user }),
         Website: WebsitesController({ user }),

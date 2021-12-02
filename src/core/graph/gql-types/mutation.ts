@@ -20,6 +20,8 @@ export const mutation = `
 			googleId: String
 		): User
 
+		logout: Void
+
 		updateUser (
 			password: String
 			newPassword: String
@@ -94,6 +96,12 @@ export const mutation = `
 
 	}
   
+	type BasicMutationResponse implements MutationResponse {
+		code: String!
+		success: Boolean!
+		message: String!
+	}
+
 	type UpdateWebSiteMutationResponse implements MutationResponse {
 		code: String!
 		success: Boolean!

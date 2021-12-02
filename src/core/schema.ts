@@ -22,8 +22,10 @@ import {
   meta,
   input,
 } from "./graph/gql-types";
+import { typeDefs as scalarTypeDefs } from "graphql-scalars";
 
 const typeDefs = `
+${scalarTypeDefs}
 ${meta}
 ${payments}
 ${user}

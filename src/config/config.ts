@@ -7,6 +7,7 @@
 import { config as envConf } from "dotenv";
 import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
 import fs from "fs";
+import { CookieOptions } from "express";
 
 envConf();
 
@@ -76,4 +77,24 @@ export const config = {
   PRIVATE_KEY,
 };
 
-export { DEV, TEST_ENV, PRIVATE_KEY, SCRIPTS_CDN_URL, SCRIPTS_CDN, PUBLIC_KEY };
+const cookieConfigs: CookieOptions = DEV
+  ? {
+      maxAge: 900000,
+      httpOnly: true,
+    }
+  : {
+      maxAge: 900000,
+      sameSite: "none",
+      httpOnly: true,
+      secure: true,
+    };
+
+export {
+  cookieConfigs,
+  DEV,
+  TEST_ENV,
+  PRIVATE_KEY,
+  SCRIPTS_CDN_URL,
+  SCRIPTS_CDN,
+  PUBLIC_KEY,
+};

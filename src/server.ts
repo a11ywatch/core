@@ -12,7 +12,13 @@ import cors from "cors";
 import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
-import { corsOptions, config, logServerInit, whitelist } from "./config";
+import {
+  corsOptions,
+  config,
+  logServerInit,
+  whitelist,
+  cookieConfigs,
+} from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
@@ -20,6 +26,7 @@ import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
 import ua from "universal-analytics";
 import fetcher from "node-fetch";
+import cookieParser from "cookie-parser";
 
 import {
   CRAWL_WEBSITE,
@@ -66,6 +73,7 @@ async function initServer(): Promise<HttpServer> {
 
   const app = express();
 
+  app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
@@ -193,9 +201,12 @@ async function initServer(): Promise<HttpServer> {
     const { email, password, googleId } = req.body;
     try {
       const auth = await createUser({ email, password, googleId });
+
+      res.cookie("on", auth.email, cookieConfigs);
+      res.cookie("jwt", auth.jwt, cookieConfigs);
+
       res.json(auth);
     } catch (e) {
-      console.error(e);
       res.json({
         data: null,
         message: e?.message,
@@ -207,6 +218,10 @@ async function initServer(): Promise<HttpServer> {
     const { email, password, googleId } = req.body;
     try {
       const auth = await verifyUser({ email, password, googleId });
+
+      res.cookie("on", auth.email, cookieConfigs);
+      res.cookie("jwt", auth.jwt, cookieConfigs);
+
       res.json(auth);
     } catch (e) {
       console.error(e);
@@ -215,6 +230,12 @@ async function initServer(): Promise<HttpServer> {
         message: e?.message,
       });
     }
+  });
+
+  app.post("/api/logout", cors(), async (_req, res) => {
+    res.clearCookie("on");
+    res.clearCookie("jwt");
+    res.send(true);
   });
 
   app.post("/api/run-watcher", cors(), async (req, res) => {
@@ -361,7 +382,7 @@ async function initServer(): Promise<HttpServer> {
 
   const server = new Server();
 
-  server.applyMiddleware({ app, cors: false });
+  server.applyMiddleware({ app, cors: corsOptions });
 
   const httpServer = http.createServer(app);
 

@@ -13,6 +13,7 @@ import {
   filterEmailDates,
 } from "./graph/mutations";
 import { forkProcess } from "./utils";
+import { cookieConfigs } from "../config";
 
 const defaultPayload = {
   keyid: null,
@@ -21,6 +22,7 @@ const defaultPayload = {
 
 export const Mutation = {
   updateUser,
+  // TODO: DEPRECATE AUTHENTICATION VIA GQL
   login: async (_, { email, password, googleId }, context) => {
     const loginUser = await context.models.User.verifyUser({
       email,
@@ -32,14 +34,35 @@ export const Mutation = {
       throw new Error(EMAIL_ERROR);
     }
 
+    if (context.res) {
+      context.res.cookie("on", loginUser.email, cookieConfigs);
+      context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
+    }
+
     return loginUser;
   },
   register: async (_, { email, password, googleId }, context) => {
-    return await context.models.User.createUser({
+    const loginUser = await context.models.User.createUser({
       email,
       password,
       googleId,
     });
+
+    if (!loginUser) {
+      throw new Error(EMAIL_ERROR);
+    }
+
+    if (context.res) {
+      context.res.cookie("on", loginUser.email, cookieConfigs);
+      context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
+    }
+
+    return loginUser;
+  },
+  logout: async (_, _props, context) => {
+    context.res.clearCookie("on");
+    context.res.clearCookie("jwt");
+    return context.res.req.next();
   },
   addWebsite,
   crawlWebsite: async (_, { url }, context) => {

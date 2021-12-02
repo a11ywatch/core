@@ -35,6 +35,7 @@ export const BYPASS_AUTH = [
   "IntrospectionQuery",
   "Register",
   "Login",
+  "Logout",
   "ForgotPassword",
   "Testout",
   "ResetPassword",

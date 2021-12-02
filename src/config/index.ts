@@ -12,6 +12,7 @@ export {
   PUBLIC_KEY,
   SCRIPTS_CDN_URL,
   SCRIPTS_CDN,
+  cookieConfigs,
 } from "./config";
 export { features } from "./features";
 export {
