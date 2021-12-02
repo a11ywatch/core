@@ -1,15 +1,15 @@
-const { defaults } = require("jest-config")
-const tsPreset = require("ts-jest/jest-preset")
-const mongodbPreset = require("@shelf/jest-mongodb/jest-preset")
+import mongodbPreset from "@shelf/jest-mongodb/jest-preset";
 
 module.exports = {
-  ...tsPreset,
   ...mongodbPreset,
   moduleNameMapper: {
-    "^@app/(.*)$": "<rootDir>/src/$1"
+    "^@app/(.*)$": "<rootDir>/src/$1",
+  },
+  transform: {
+    "^.+\\.(t|j)sx?$": "@swc/jest",
   },
   setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
   verbose: true,
   coverageDirectory: "./coverage/",
-  collectCoverage: true
-}
+  collectCoverage: true,
+};
