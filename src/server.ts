@@ -12,19 +12,12 @@ import cors from "cors";
 import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
-import {
-  corsOptions,
-  config,
-  logServerInit,
-  whitelist,
-  cookieConfigs,
-} from "./config";
+import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
-import ua from "universal-analytics";
 import fetcher from "node-fetch";
 import cookieParser from "cookie-parser";
 
@@ -59,13 +52,14 @@ import {
   getDailyWebsites,
 } from "./rest/routes";
 import { createUser } from "./core/controllers/users/set";
+import { logPage } from "./core/controllers/analytics/ga";
 
 setLogConfig({
   container: "api",
   disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
 });
 
-const { GRAPHQL_PORT, DEV } = config;
+const { GRAPHQL_PORT } = config;
 
 async function initServer(): Promise<HttpServer> {
   // TODO: REMOVE DB CONNECTION TOP LEVEL
@@ -277,91 +271,13 @@ async function initServer(): Promise<HttpServer> {
   });
 
   /* START OF CDN */
+
   // TODO: CDN API ROUTES
+
   /* EOD CDN ROUTES */
 
   /*  ANALYTICS */
-  app.post("/api/log/page", cors(), async (req, res) => {
-    let origin = req.get("origin") || req.headers.origin;
-    const nextJSMiddleware = req.headers["user-agent"] === "Next.js Middleware";
-
-    // // DO NOT LOG IN DEV
-    if (DEV) {
-      res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-      );
-      res.header(
-        "Access-Control-Allow-Origin",
-        origin ?? "https://a11ywatch.com"
-      );
-
-      return res.sendStatus(200);
-    }
-
-    const { page, ip, userID, screenResolution, documentReferrer } = req.body;
-
-    try {
-      if (origin && origin.includes("api.")) {
-        origin = origin.replace("api.", "");
-      }
-
-      if (!origin && nextJSMiddleware) {
-        origin = "https://a11ywatch.com";
-      }
-
-      res.header(
-        "Access-Control-Allow-Origin",
-        origin ?? "https://a11ywatch.com"
-      );
-
-      if (!whitelist.includes(origin)) {
-        // silent
-        res.sendStatus(200);
-        return;
-      }
-
-      res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-      );
-
-      const locationIP = ip ?? req.ip ?? req.connection.remoteAddress;
-      const uid = userID ?? locationIP;
-
-      const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, uid, {
-        cid: process.env.GOOGLE_CLIENT_ID,
-        uid,
-        strictCidFormat: false,
-      });
-
-      if (req.headers["DNT"] !== "1") {
-        // TODO: any data future collection
-      }
-
-      visitor.set("uip", locationIP);
-
-      if (screenResolution) {
-        visitor.set("vp", Number(screenResolution));
-      }
-      const dr = documentReferrer ?? req.headers["referer"];
-
-      if (dr) {
-        visitor.set("dr", dr);
-      }
-
-      if (req.headers["user-agent"]) {
-        visitor.set("ua", req.headers["user-agent"]);
-      }
-
-      visitor.pageview(page ?? "/", origin).send();
-
-      res.sendStatus(204);
-    } catch (e) {
-      console.error(e);
-      res.sendStatus(200);
-    }
-  });
+  app.post("/api/log/page", cors(), logPage);
   /*  END OF ANALYTICS */
 
   // INTERNAL

@@ -75,6 +75,7 @@ export const config = {
   EMAIL_CLIENT_KEY,
   PUBLIC_KEY,
   PRIVATE_KEY,
+  DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
 };
 
 const cookieConfigs: CookieOptions = DEV

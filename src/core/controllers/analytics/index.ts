@@ -6,8 +6,10 @@
 
 import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
+import { logPage } from "./ga";
 
 export const AnalyticsController = ({ user } = { user: null }) => ({
+  logPage,
   getWebsite: async (
     { pageUrl, userId }: { pageUrl?: string; userId?: number },
     chain: boolean
