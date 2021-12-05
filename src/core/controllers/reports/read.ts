@@ -8,12 +8,15 @@ import { connect } from "@app/database";
 export const getReport = async (url: string, timestamp?: string | number) => {
   try {
     const [collection] = await connect("Reports");
+
     const findBy =
       typeof timestamp !== "undefined" ? { url, timestamp } : { url };
     const report = await collection.findOne(findBy);
 
     if (!report) {
-      return await collection.findOne({ url });
+      return await collection.findOne({
+        url,
+      });
     }
 
     return report;
