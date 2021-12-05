@@ -72,9 +72,9 @@ async function initServer(): Promise<HttpServer> {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
   app.use(createIframe);
+  app.set("trust proxy", true);
   app.options(CONFIRM_EMAIL, cors());
   app.options(WEBSITE_CHECK, cors());
-  app.set("trust proxy", true);
   app.get(ROOT, root);
   app.get("/iframe", createIframeEvent);
   app.get("/api/get-website", cors(), getWebsite);

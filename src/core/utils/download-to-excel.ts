@@ -7,32 +7,32 @@ import type { Request, Response } from "express";
 import type { Issue } from "@app/types";
 
 const downloadToExcel = (
-  req: Request,
+  _req: Request,
   res: Response,
-  next: any,
+  _next: any,
   data: Issue | any
 ) => {
   const excel = require("exceljs");
-  let workbook = new excel.Workbook();
+  const workbook = new excel.Workbook();
   const pageName = data?.url ?? "Website";
-  let worksheet = workbook.addWorksheet(`${data?.domain} Accessibility Audit`, {
-    headerFooter: {
-      firstHeader: `Accessibility score - ${data?.website?.adaScore}`,
-      firstFooter: `Test ran ${data?.website?.lastScanDate}`,
-    },
-  });
+  const worksheet = workbook.addWorksheet(
+    `${data?.domain} Accessibility Audit`,
+    {
+      headerFooter: {
+        firstHeader: `Accessibility score - ${data?.website?.adaScore}`,
+        firstFooter: `Test ran ${data?.website?.lastScanDate}`,
+      },
+    }
+  );
 
   worksheet.columns = [
-    { header: "Code", key: "code", width: 14 },
-    { header: "Type", key: "type", width: 5 },
-    { header: "Message", key: "message", width: 30 },
-    { header: "Context", key: "context", width: 40 },
-    { header: "Selector", key: "selector", width: 30 },
-    { header: "Audit", key: "checked", width: 5, outlineLevel: 1 },
-  ].map((items) => ({
-    ...items,
-    checked: 0,
-  }));
+    { header: "Code", key: "code", width: 14, checked: 0 },
+    { header: "Type", key: "type", width: 5, checked: 0 },
+    { header: "Message", key: "message", width: 30, checked: 0 },
+    { header: "Context", key: "context", width: 40, checked: 0 },
+    { header: "Selector", key: "selector", width: 30, checked: 0 },
+    { header: "Audit", key: "checked", width: 5, outlineLevel: 1, checked: 0 },
+  ];
 
   worksheet.addRows(
     (data?.issue?.length ? data?.issue : data?.issues).map((items) => ({

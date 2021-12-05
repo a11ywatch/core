@@ -27,7 +27,6 @@
     "dotenv": "8.2.0",
     "exceljs": "^4.2.1",
     "express": "4.17.1",
-    "generic-pool": "3.7.1",
     "get-page-speed": "^1.0.1",
     "graphql": "14.6.0",
     "graphql-scalars": "^1.13.6",

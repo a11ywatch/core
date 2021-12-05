@@ -6,10 +6,11 @@
 import type { Request, Response } from "express";
 import { getReport } from "@app/core/controllers/reports";
 import { downloadToExcel } from "@app/core/utils";
+import { Website } from "@app/types";
 
 const getWebsite = async (req: Request, res: Response, next?: any) => {
-  let data: any = {};
   const { q, timestamp, download } = req.query;
+  let data: Website = {};
 
   try {
     const report = await getReport(q + "", timestamp && Number(timestamp));
@@ -20,6 +21,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   } catch (e) {
     console.error(e);
   }
+
   if (download) {
     downloadToExcel(req, res, next, data);
   } else {

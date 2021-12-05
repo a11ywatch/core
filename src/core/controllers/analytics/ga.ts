@@ -25,7 +25,7 @@ const getOrigin = (origin: string, nextJSMiddleware?: boolean) => {
 export const logPage = async (req: Request, res: Response) => {
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, User-Agent, Referer, DNT"
+    "Origin, X-Requested-With, Content-Type, Cookies, Accept, User-Agent, Referer, DNT"
   );
   const agent = req.headers["user-agent"];
 
@@ -41,15 +41,27 @@ export const logPage = async (req: Request, res: Response) => {
     return res.sendStatus(200);
   }
 
-  const { page, ip, userID, screenResolution, documentReferrer } = req.body;
+  const rawCookie = req.headers["cookies"];
+  const cookies = rawCookie && JSON.parse(rawCookie as string);
+
+  const {
+    page,
+    ip,
+    userID,
+    _ga,
+    screenResolution,
+    documentReferrer,
+  } = req.body;
 
   try {
     const uip = ip ?? req.ip ?? req.connection.remoteAddress;
     const uid = userID ?? uip;
     const dr = documentReferrer ?? req.headers["referer"];
+    const cid =
+      _ga || (cookies && cookies["_ga"]) || process.env.GOOGLE_CLIENT_ID;
 
     const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, uid, {
-      cid: process.env.GOOGLE_CLIENT_ID,
+      cid,
       uid,
       strictCidFormat: false,
     });
