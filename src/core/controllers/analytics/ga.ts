@@ -28,15 +28,14 @@ export const logPage = async (req: Request, res: Response) => {
     "Origin, X-Requested-With, Content-Type, Cookies, Accept, User-Agent, Referer, DNT"
   );
   const agent = req.headers["user-agent"];
+  const middleware = agent === "Next.js Middleware";
 
   const origin = getOrigin(
     req.get("origin") || req.headers.origin,
     agent === "Next.js Middleware"
   );
 
-  res.header("Access-Control-Allow-Origin", origin);
-
-  // IGNORE OPTIONS
+  // // IGNORE OPTIONS
   if (DEV || !whitelist.includes(origin)) {
     return res.sendStatus(200);
   }
@@ -51,10 +50,11 @@ export const logPage = async (req: Request, res: Response) => {
     _ga,
     screenResolution,
     documentReferrer,
+    geo,
   } = req.body;
 
   try {
-    const uip = ip ?? req.ip ?? req.connection.remoteAddress;
+    const uip = ip || req.ip || req.connection.remoteAddress;
     const uid = userID ?? uip;
     const dr = documentReferrer ?? req.headers["referer"];
     const cid =
@@ -70,12 +70,22 @@ export const logPage = async (req: Request, res: Response) => {
       // TODO: any data future collection
     }
 
-    // meta start
-    uip && visitor.set("uip", uip);
+    if (ip) {
+      visitor.set("uip", ip);
+    } else if (geo) {
+      const { country } = geo;
+
+      if (country) {
+        visitor.set("geoid", country);
+      }
+    }
+
     screenResolution && visitor.set("vp", Number(screenResolution));
     dr && visitor.set("dr", dr);
-    agent && visitor.set("ua", agent);
-    // meta end
+
+    if (!middleware && agent) {
+      visitor.set("ua", encodeURIComponent(agent));
+    }
 
     visitor.pageview(page ?? "/", origin).send();
 
