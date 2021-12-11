@@ -13,7 +13,7 @@ import { fetchPuppet, extractPageData, limitIssue } from "./utils";
 import { createReport } from "../../reports";
 
 export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
-  const userId = Number(!userIdMap && userIdMap !== 0 ? -1 : userIdMap);
+  const userId = !userIdMap && userIdMap !== 0 ? -1 : userIdMap;
 
   if (!validUrl.isUri(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });

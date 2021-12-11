@@ -173,7 +173,7 @@ export const Mutation = {
     const { keyid, audience } = context.user?.payload || defaultPayload;
 
     return await context.models.Scripts.updateScript({
-      userId: Number(keyid),
+      userId: keyid,
       audience,
       scriptMeta,
       pageUrl: url,

@@ -21,7 +21,7 @@ export const unsubscribeEmails = async ({ id, email }) => {
         }
       );
     } else {
-      console.info("USER: not found");
+      console.info(`USER: not found: ID:${id} - Email:${email}`);
     }
   } catch (e) {
     console.error(e);

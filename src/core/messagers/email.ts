@@ -78,7 +78,7 @@ export const emailMessager = {
                 data
               )}<br />${footer.marketing({
                 userId,
-                domain: data?.domain || data?.pageUrl,
+                email: findUser?.email,
               })}`,
             }),
             sendMailCallback

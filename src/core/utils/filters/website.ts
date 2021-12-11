@@ -21,7 +21,7 @@ export function websiteSearchParams({
 
   if (typeof userId !== "undefined") {
     searchProps = {
-      userId: Number(userId),
+      userId,
     };
   }
 

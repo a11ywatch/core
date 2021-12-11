@@ -25,12 +25,13 @@ const confirmEmail = async (req, res) => {
 const unSubEmails = async (req, res) => {
   try {
     const email = req?.query?.email + "";
-    const id = Number(req?.query?.id);
+    const id = req?.query?.id;
 
     await UsersController().unsubscribeEmails({
       id,
       email,
     });
+
     res.json({
       sucess: "unsubscribed from email alerts",
     });

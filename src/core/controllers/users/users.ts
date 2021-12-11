@@ -191,7 +191,7 @@ export const UsersController: UserControllerType = (
             to: user.email,
             subject: `${domain} is Offline.`,
             html: `<h1>${domain} is currently offline.</h1><br /><p>Please check your server logs to see what happened if issues are difficult to figure out.</p><br />${footer.marketing(
-              { userId: id, domain }
+              { userId: id, email: user?.email }
             )}`,
           },
           sendMailCallback

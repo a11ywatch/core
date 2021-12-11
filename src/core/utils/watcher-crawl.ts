@@ -15,7 +15,7 @@ process.on("message", async ({ urlMap, userId }) => {
       method: "POST",
       body: JSON.stringify({
         url,
-        id: Number(userId),
+        id: userId,
       }),
       headers: { "Content-Type": "application/json" },
     });

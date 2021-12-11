@@ -15,7 +15,7 @@ export function userParams({
 }) {
   let searchProps = {};
 
-  if (email) {
+  if (typeof email !== "undefined") {
     searchProps = { email };
   }
 
@@ -23,7 +23,7 @@ export function userParams({
     searchProps = { ...searchProps, id };
   }
 
-  if (emailConfirmCode) {
+  if (typeof emailConfirmCode !== "undefined") {
     searchProps = { ...searchProps, emailConfirmCode };
   }
 

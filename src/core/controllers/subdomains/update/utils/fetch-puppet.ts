@@ -16,7 +16,7 @@ export const fetchPuppet = async ({ userId, url, pageHeaders }: any) => {
         body: JSON.stringify({
           pageHeaders: pageHeaders && Array(pageHeaders),
           url: String(encodeURIComponent(url)),
-          userId: Number(userId),
+          userId,
         }),
         headers: { "Content-Type": "application/json" },
       }

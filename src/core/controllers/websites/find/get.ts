@@ -64,10 +64,7 @@ export const getWebsitesWithUsers = async (userLimit = 10000) => {
 export const getWebsites = async ({ userId }, chain?: boolean) => {
   try {
     const [collection] = await connect("Websites");
-    const websites = await collection
-      .find({ userId: Number(userId) })
-      .limit(20)
-      .toArray();
+    const websites = await collection.find({ userId }).limit(20).toArray();
 
     return chain ? [websites, collection] : websites;
   } catch (e) {

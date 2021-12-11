@@ -79,7 +79,7 @@ export const ScriptsController = ({ user } = { user: null }) => ({
             editScript: !!editScript,
             newScript: newScript,
             url: String(encodeURIComponent(pageUrl)),
-            userId: Number(userId),
+            userId,
           }),
           headers: { "Content-Type": "application/json" },
         }
