@@ -40,9 +40,6 @@ export const logPage = async (req: Request, res: Response) => {
     return res.sendStatus(200);
   }
 
-  // const rawCookie = req.headers["cookies"];
-  // const cookies = rawCookie && JSON.parse(rawCookie as string);
-
   const {
     page,
     ip,
@@ -64,10 +61,6 @@ export const logPage = async (req: Request, res: Response) => {
     if (req.headers["DNT"] !== "1") {
       // TODO: any data future collection
     }
-
-    // if (userID) {
-    //   visitor.set("uid", userID);
-    // }
 
     if (ip) {
       visitor.set("uip", ip);
