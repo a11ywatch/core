@@ -37,6 +37,7 @@ export const getUser = async (
 ) => {
   try {
     const [collection] = await connect("Users");
+
     const user = await collection.findOne(
       userParams({ email, id, emailConfirmCode })
     );
