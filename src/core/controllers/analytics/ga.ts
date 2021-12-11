@@ -53,6 +53,8 @@ export const logPage = async (req: Request, res: Response) => {
     geo,
   } = req.body;
 
+  console.log(req.body);
+
   try {
     const uip = ip || req.ip || req.connection.remoteAddress;
     const uid = userID ?? uip;
@@ -80,8 +82,13 @@ export const logPage = async (req: Request, res: Response) => {
       }
     }
 
-    screenResolution && visitor.set("vp", Number(screenResolution));
-    dr && visitor.set("dr", dr);
+    if (screenResolution) {
+      visitor.set("vp", Number(screenResolution));
+    }
+
+    if (dr) {
+      visitor.set("dr", dr);
+    }
 
     if (!middleware && agent) {
       visitor.set("ua", encodeURIComponent(agent));
