@@ -40,37 +40,34 @@ export const logPage = async (req: Request, res: Response) => {
     return res.sendStatus(200);
   }
 
-  const rawCookie = req.headers["cookies"];
-  const cookies = rawCookie && JSON.parse(rawCookie as string);
+  // const rawCookie = req.headers["cookies"];
+  // const cookies = rawCookie && JSON.parse(rawCookie as string);
 
   const {
     page,
     ip,
     userID,
-    _ga,
     screenResolution,
     documentReferrer,
     geo,
   } = req.body;
 
-  console.log(req.body);
+  const dr = documentReferrer ?? req.headers["referer"];
 
   try {
-    const uip = ip || req.ip || req.connection.remoteAddress;
-    const uid = userID ?? uip;
-    const dr = documentReferrer ?? req.headers["referer"];
-    const cid =
-      _ga || (cookies && cookies["_ga"]) || process.env.GOOGLE_CLIENT_ID;
-
-    const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, uid, {
-      cid,
-      uid,
+    const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, {
+      cid: userID || agent,
+      uid: userID,
       strictCidFormat: false,
     });
 
     if (req.headers["DNT"] !== "1") {
       // TODO: any data future collection
     }
+
+    // if (userID) {
+    //   visitor.set("uid", userID);
+    // }
 
     if (ip) {
       visitor.set("uip", ip);
@@ -87,7 +84,7 @@ export const logPage = async (req: Request, res: Response) => {
     }
 
     if (dr) {
-      visitor.set("dr", dr);
+      visitor.set("dr", encodeURIComponent(dr));
     }
 
     if (!middleware && agent) {
