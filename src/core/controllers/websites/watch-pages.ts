@@ -4,21 +4,23 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
-import { emailMessager } from "@app/core/messagers";
 import { crawlWebsite } from "@app/core/controllers/subdomains/update";
 import { getWebsitesWithUsers } from "../websites";
 import { getUser } from "../users";
 import { getPageItem } from "./utils";
 import { getDay, subHours } from "date-fns";
+import { Website } from "@app/types";
 
-export async function websiteWatch(): Promise<void> {
-  let allWebPages = [];
+export async function websiteWatch(pages: Website[]): Promise<void> {
+  let allWebPages = pages ?? [];
   let pageCounter = 0;
 
-  try {
-    allWebPages = await getWebsitesWithUsers();
-  } catch (e) {
-    console.error(e);
+  if (!pages) {
+    try {
+      allWebPages = await getWebsitesWithUsers();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   for await (const website of allWebPages) {
@@ -42,6 +44,7 @@ export async function websiteWatch(): Promise<void> {
         sendEmail
       ).catch((e) => console.error(e));
     } else {
+      // TODO: purge everything from user associations
       console.warn(`user not found for ${userId}, please purge all data.`);
     }
 
@@ -50,14 +53,6 @@ export async function websiteWatch(): Promise<void> {
 
     if (pageCounter === allWebPages.length) {
       console.info("CRAWLER JOB COMPLETE..");
-      await emailMessager
-        .sendFollowupEmail({
-          emailConfirmed: true,
-          email: process.env.EMAIL_MAIN_LEAD,
-          subject: `CRAWLER FINISHED ENV:${process.env.NODE_ENV}`,
-          html: `<h1>All ${allWebPages.length} pages crawled </h1>`,
-        })
-        .catch((e) => console.error(e));
     }
   }
 }
