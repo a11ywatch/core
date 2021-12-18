@@ -120,7 +120,11 @@ export const crawlWebsite = async (
           await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
         }
 
-        if (sendEmail) {
+        const errorIssues = issues?.issues?.filter(
+          (iss) => iss?.type === "error"
+        );
+
+        if (sendEmail && errorIssues?.length) {
           await emailMessager.sendMail({
             userId,
             data: issues,

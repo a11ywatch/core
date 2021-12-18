@@ -47,7 +47,7 @@ export const getWebsitesCrawler = async (
   }
 };
 
-export const getWebsitesWithUsers = async (userLimit = 10000) => {
+export const getWebsitesWithUsers = async (userLimit = 100000) => {
   try {
     const [collection] = await connect("Websites");
     return await collection

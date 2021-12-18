@@ -191,6 +191,7 @@ async function initServer(): Promise<HttpServer> {
     }
   });
 
+  // AUTH ROUTES
   app.post("/api/register", cors(), async (req, res) => {
     const { email, password, googleId } = req.body;
     try {
@@ -207,7 +208,6 @@ async function initServer(): Promise<HttpServer> {
       });
     }
   });
-
   app.post("/api/login", cors(), async (req, res) => {
     const { email, password, googleId } = req.body;
     try {
@@ -225,13 +225,13 @@ async function initServer(): Promise<HttpServer> {
       });
     }
   });
-
   app.post("/api/logout", cors(), async (_req, res) => {
     res.clearCookie("on");
     res.clearCookie("jwt");
     res.send(true);
   });
 
+  // ADMIN ROUTES
   app.post("/api/run-watcher", cors(), async (req, res) => {
     const { password } = req.body;
     try {
@@ -269,12 +269,6 @@ async function initServer(): Promise<HttpServer> {
       });
     }
   });
-
-  /* START OF CDN */
-
-  // TODO: CDN API ROUTES
-
-  /* EOD CDN ROUTES */
 
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
