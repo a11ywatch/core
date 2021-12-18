@@ -42,6 +42,7 @@ __snapshots__
 .env.production
 
 dist
+ecs.config
 
 private.key
 public.key
