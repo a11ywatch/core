@@ -8,13 +8,13 @@ import { MongoClient } from "mongodb";
 import { config } from "@app/config";
 import { log } from "@a11ywatch/log";
 
-let client;
-
-const createClient = (): any =>
+const createClient = (): MongoClient =>
   new MongoClient(config.DB_URL, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
   });
+
+let client: MongoClient;
 
 try {
   client = createClient();
@@ -22,30 +22,27 @@ try {
   log(e);
 }
 
-// TODO: DB CONNECTION PER ROUTE
+let connection;
+
 const initDbConnection = async () => {
   try {
     if (process.send !== undefined) {
       client = createClient();
     }
-    await client?.connect();
+    connection = await client?.connect();
   } catch (e) {
     log(e);
   }
 };
 
-const connect = async (collectionType = "Websites", delay = 1000) => {
+const connect = async (collectionType = "Websites") => {
   let collection = [];
 
   try {
-    const db = await client?.db(config.DB_NAME);
+    const db = await connection?.db(config.DB_NAME);
     collection = await db?.collection(collectionType);
   } catch (e) {
     log(e);
-    setTimeout(async () => {
-      await initDbConnection();
-      await connect(collectionType, delay + 1000);
-    }, delay);
   }
 
   return [collection, client];
