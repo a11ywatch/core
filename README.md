@@ -2,7 +2,7 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/e4ef08ad87b2fb9a2680/maintainability)](https://codeclimate.com/github/A11yWatch/a11ywatch-core/maintainability)
 
-central api for a11ywatch
+HTTP API for a11ywatch
 
 ## Getting Started
 
@@ -26,16 +26,14 @@ Below is only needed to run locally currently.
 
 ### User
 
-```
-free: role = 0
-basic: role = 1
-premium: role = 2
-entreprise: role = 3
-```
+roles
 
-### Model Setup
-
-1. In the model folder the methods have the first param as direct props descendant and the second is the params from the query.
+```
+free = 0
+basic = 1
+premium = 2
+entreprise = 3
+```
 
 ### Emailing
 
