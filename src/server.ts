@@ -15,6 +15,7 @@ import { CronJob } from "cron";
 import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
 import { forkProcess } from "./core/utils";
 import { websiteWatch } from "./core/controllers/websites";
+import { AnalyticsController } from "./core/controllers/analytics";
 import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
@@ -53,6 +54,7 @@ import {
 } from "./rest/routes";
 import { createUser } from "./core/controllers/users/set";
 import { logPage } from "./core/controllers/analytics/ga";
+import { rawStatusBadge } from "./core/assets";
 
 setLogConfig({
   container: "api",
@@ -274,9 +276,28 @@ async function initServer(): Promise<HttpServer> {
   app.post("/api/log/page", cors(), logPage);
   /*  END OF ANALYTICS */
 
+  // TODO: SAVE IMAGE IF USAGE OF FEATURE BECOMES PROMINENT IN WATCHER STEP
+  app.get("/status/:domain", cors(), async (req, res) => {
+    res.setHeader("Content-Type", "image/svg+xml");
+    const domain = req.params.domain.replace(".svg", "");
+    const website = await AnalyticsController().getWebsite({ domain }, false);
+    const score = website?.adaScore;
+    let statusColor = "#000";
+
+    if (score < 70) {
+      statusColor = "#f85149";
+    } else if (score >= 70 && score < 90) {
+      statusColor = "#a4a61d";
+    } else if (score >= 90) {
+      statusColor = "#3fb950";
+    }
+
+    res.send(rawStatusBadge({ statusColor, score }));
+  });
+
   // INTERNAL
   app.get("/_internal_/healthcheck", cors(), async (_, res) => {
-    res.json({
+    res.send({
       status: "healthy",
     });
   });

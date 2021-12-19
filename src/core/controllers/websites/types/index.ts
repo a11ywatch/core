@@ -5,7 +5,7 @@
  **/
 
 export interface Params {
-  userId: number;
+  userId?: number;
   url?: string;
   domain?: string;
 }

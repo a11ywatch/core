@@ -11,11 +11,15 @@ import { logPage } from "./ga";
 export const AnalyticsController = ({ user } = { user: null }) => ({
   logPage,
   getWebsite: async (
-    { pageUrl, userId }: { pageUrl?: string; userId?: number },
+    {
+      pageUrl,
+      userId,
+      domain,
+    }: { pageUrl?: string; userId?: number; domain?: string },
     chain: boolean
   ) => {
     const [collection] = await connect("Analytics");
-    const searchProps = websiteSearchParams({ pageUrl, userId });
+    const searchProps = websiteSearchParams({ pageUrl, userId, domain });
     const analytics = await collection.findOne(searchProps);
 
     return chain ? [analytics, collection] : analytics;
@@ -23,11 +27,9 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
   getAnalytics: async ({
     userId,
     pageUrl,
-    url,
   }: {
     userId?: number;
     pageUrl?: string;
-    url?: string;
   }) => {
     const [collection] = await connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId });
