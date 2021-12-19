@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 export { updateApiUsage } from "./api-data";
-export { updateScanAttempt } from "./scan-attempt";
+export { updateScanAttempt, getScanEnabled } from "./scan-attempt";
 export { toggleAlert } from "./alerts";
 export { verifyUser } from "./verify";
 export { forgotPassword } from "./forgot-password";
@@ -13,4 +13,4 @@ export { unsubscribeEmails } from "./unsubscribe-emails";
 export { resetPassword } from "./reset-password";
 export { validateEmail } from "./validate-email";
 export { cancelSubscription, addPaymentSubscription } from "./payments";
-export {toggleProfile} from './toggle-profile'
+export { toggleProfile } from "./toggle-profile";

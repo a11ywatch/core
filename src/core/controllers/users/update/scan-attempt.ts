@@ -40,3 +40,18 @@ export const updateScanAttempt = async ({ userId }) => {
   }
   return false;
 };
+
+export const getScanEnabled = async ({ userId }) => {
+  const user = await getUser({ id: userId });
+  const scanAttempts = user?.scanInfo?.scanAttempts ?? 0;
+
+  if (
+    !user ||
+    (scanAttempts >= 3 && user?.role === 0) ||
+    (scanAttempts > 10 && user?.role === 1)
+  ) {
+    return false;
+  }
+
+  return true;
+};

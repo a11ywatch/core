@@ -141,10 +141,9 @@ export const crawlWebsite = async (
       });
 
       // // TODO: MERGE ISSUES FROM ALL PAGES
-      // console.log(webPage.issuesInfo);
       updateWebsiteProps = Object.assign({}, webPage, {
         avgScore,
-        cdnConnected: pageHasCdn, // TODO: ONLY UPDATE CDN IF ROOT
+        cdnConnected: pageHasCdn, // TODO: ONLY UPDATE CDN IF BASE PATH
         online: true,
       });
 

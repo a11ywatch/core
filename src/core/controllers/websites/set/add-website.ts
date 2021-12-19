@@ -24,6 +24,7 @@ export const addWebsite = async ({
   url: urlMap,
   customHeaders,
   audience,
+  canScan,
 }) => {
   if (!validUrl.isUri(urlMap)) {
     throw new Error(WEBSITE_URL_ERROR);
@@ -51,12 +52,16 @@ export const addWebsite = async ({
 
   await collection.insertOne(website);
 
-  forkProcess({ urlMap: stripUrlEndingSlash(url), userId });
+  if (canScan) {
+    forkProcess({ urlMap: stripUrlEndingSlash(url), userId });
+  }
 
   return {
     website,
     code: 200,
-    success: true,
-    message: SUCCESS,
+    success: !!canScan,
+    message: canScan
+      ? SUCCESS
+      : "Scan limit reached for the day. Upgrade your account or wait until your limit resets tomorrow.",
   };
 };
