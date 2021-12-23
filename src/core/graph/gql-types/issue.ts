@@ -6,6 +6,7 @@
 
 export const issue = ` 
 	type Issue {
+		documentTitle: String
 		code: String
 		type: String
 		typeCode: Int
@@ -13,7 +14,7 @@ export const issue = `
 		context: String
 		selector: String
 		runner: String
-		issue: String
+		issue: Issue
 		issues(filter: String): [Issue]
 		url: String
 		domain: String

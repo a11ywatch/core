@@ -49,7 +49,7 @@ export const getIssues = async ({
       userId,
     });
 
-    return await collection.find(searchProps).limit(100).toArray();
+    return await collection.find(searchProps).limit(1000).toArray();
   } catch (e) {
     console.error(e);
   }
