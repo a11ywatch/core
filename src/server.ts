@@ -86,15 +86,14 @@ async function initServer(): Promise<HttpServer> {
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
     try {
       if (
-        typeof process.env.BACKGROUND_CRAWL !== "undefined" &&
-        process.env.BACKGROUND_CRAWL === "enabled"
-      ) {
+        typeof process.env.BACKGROUND_CRAWL !== "undefined") {
         forkProcess({ req: { body: req.body, pubsub: true } }, "crawl-website");
         res.json(true);
       } else {
         await websiteCrawl(req, res);
       }
     } catch (e) {
+      res.json(false);
       console.error(e);
     }
   });
