@@ -23,7 +23,7 @@ export const crawlAllAuthedWebsites = async (
 
   while (allWebPages.length > 0) {
     pageChunk.push(
-      allWebPages.splice(0, Math.max(allWebPages.length / 10, 10))
+      allWebPages.splice(0, Math.max(allWebPages.length / 10, 50))
     );
   }
 
