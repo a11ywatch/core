@@ -8,7 +8,10 @@ import { fork } from "child_process";
 import { DEV } from "@app/config";
 import { getWebsitesWithUsers } from "../websites";
 
-export const websiteWatch = async (_?: any, res?: any): Promise<any> => {
+export const crawlAllAuthedWebsites = async (
+  _?: any,
+  res?: any
+): Promise<any> => {
   let allWebPages = [];
   let pageChunk = [];
 

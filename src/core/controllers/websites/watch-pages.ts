@@ -18,6 +18,7 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
   if (!pages) {
     try {
       allWebPages = await getWebsitesWithUsers();
+      console.info("Getting users with pages for watch job");
     } catch (e) {
       console.error(e);
     }

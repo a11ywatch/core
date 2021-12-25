@@ -14,7 +14,7 @@ import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
 import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
 import { forkProcess } from "./core/utils";
-import { websiteWatch } from "./core/controllers/websites";
+import { crawlAllAuthedWebsites } from "./core/controllers/websites";
 import { AnalyticsController } from "./core/controllers/analytics";
 import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
@@ -238,7 +238,7 @@ async function initServer(): Promise<HttpServer> {
     const { password } = req.body;
     try {
       if (password === process.env.ADMIN_PASSWORD) {
-        await websiteWatch();
+        await crawlAllAuthedWebsites();
       } else {
         console.error("admin password required");
       }
@@ -327,7 +327,7 @@ async function initServer(): Promise<HttpServer> {
   });
 
   if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("00 00 00 * * *", websiteWatch).start();
+    new CronJob("00 00 00 * * *", crawlAllAuthedWebsites).start();
   }
 
   return listener;

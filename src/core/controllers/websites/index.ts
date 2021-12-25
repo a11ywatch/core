@@ -11,6 +11,6 @@ export {
   getWebsite,
   getWebsites,
 } from "./find";
-export { websiteWatch } from "./watch";
+export { crawlAllAuthedWebsites } from "./watch";
 export { addWebsite } from "./set";
 export { removeWebsite } from "./remove";
