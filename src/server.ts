@@ -58,13 +58,7 @@ import { rawStatusBadge } from "./core/assets";
 
 const { GRAPHQL_PORT } = config;
 
-async function initServer(): Promise<HttpServer> {
-  setLogConfig({
-    container: "api",
-    disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
-  });
-  await initDbConnection();
-
+function initServer(): HttpServer {
   const app = express();
 
   app.use(cookieParser());
@@ -331,6 +325,24 @@ async function initServer(): Promise<HttpServer> {
 
 let coreServer: HttpServer;
 
+const startServer = (async () => {
+  setLogConfig({
+    container: "api",
+    disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
+  });
+
+  try {
+    await initDbConnection();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    coreServer = await initServer();
+  } catch (e) {
+    console.error(["SERVER FAILED TO START", e]);
+  }
+})();
+
 const killServer = async () => {
   try {
     await Promise.all([closeDbConnection(), coreServer.close()]);
@@ -339,13 +351,5 @@ const killServer = async () => {
   }
 };
 
-(async () => {
-  try {
-    coreServer = await initServer();
-  } catch (e) {
-    console.error(["SERVER FAILED TO START", e]);
-  }
-})();
-
-export { killServer, initServer };
+export { killServer, initServer, startServer };
 export default coreServer;
