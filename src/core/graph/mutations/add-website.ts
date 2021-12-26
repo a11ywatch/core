@@ -12,6 +12,7 @@ export const addWebsite = async (
   context
 ) => {
   const { audience, userId } = getPayLoad(context, props);
+
   const canScan = await context.models.User.updateScanAttempt({
     userId: userId,
   });

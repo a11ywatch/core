@@ -4,6 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
+import { cookieConfigs } from "../../../config";
 import { getPayLoad } from "../../utils/query-payload";
 
 export const addPaymentSubscription = async (
@@ -13,19 +14,45 @@ export const addPaymentSubscription = async (
 ) => {
   const { userId: keyid, audience } = getPayLoad(context);
 
-  return await context.models.User.addPaymentSubscription({
-    keyid,
-    audience,
-    stripeToken,
-    yearly,
-  });
+  let response;
+
+  try {
+    response = await context.models.User.addPaymentSubscription({
+      keyid,
+      audience,
+      stripeToken,
+      yearly,
+    });
+
+    if (response?.user) {
+      context.res.clearCookie("jwt");
+      context.res.cookie("jwt", response.user.jwt, cookieConfigs);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  return response;
 };
 export const cancelSubscription = async (_, { email }, context) => {
   const { userId: keyid, audience } = getPayLoad(context);
 
-  return await context.models.User.cancelSubscription({
-    keyid,
-    audience,
-    email,
-  });
+  let response;
+
+  try {
+    response = await context.models.User.cancelSubscription({
+      keyid,
+      audience,
+      email,
+    });
+
+    if (response?.user) {
+      context.res.clearCookie("jwt");
+      context.res.cookie("jwt", response.user.jwt, cookieConfigs);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  return response;
 };

@@ -81,10 +81,17 @@ export const addPaymentSubscription = async ({
           : user.role;
 
         const jwt = signJwt({ email, role, keyid: user.id });
+
         user.jwt = jwt;
+        user.role = role;
+        user.paymentSubscription = charge;
+
+        if (customer.id) {
+          user.stripeID = customer.id;
+        }
 
         await collection.updateOne(
-          { email },
+          { id: keyid },
           {
             $set: {
               stripeToken,
