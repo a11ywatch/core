@@ -8,3 +8,4 @@ README.md
 !private.key
 dist
 coverage
+.env
