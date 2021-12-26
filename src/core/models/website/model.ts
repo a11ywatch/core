@@ -1,7 +1,6 @@
 // TODO: ADD TYPES
 const WebsiteModel = {
   userId: -1,
-  id: null,
   url: "",
   domain: "",
   adaScore: null,
@@ -27,7 +26,6 @@ export interface Params {
   url: string;
   domain: string;
   userId?: number;
-  id?: number;
   [x: string]: any;
 }
 
