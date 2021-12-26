@@ -5,7 +5,7 @@
  **/
 import { ApolloServer, ApolloServerExpressConfig } from "apollo-server-express";
 import { config, BYPASS_AUTH } from "./config";
-import { getUser, parseCookie } from "./core/utils";
+import { getUser } from "./core/utils";
 import { schema } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
 import { SubDomainController } from "./core/controllers/subdomains";
@@ -26,9 +26,7 @@ const serverConfig: ApolloServerExpressConfig = {
     if (connection) {
       return connection.context;
     }
-    const authentication =
-      req?.headers?.authorization ??
-      (req?.headers?.cookie && parseCookie(req.headers.cookie)?.jwt);
+    const authentication = req?.cookies?.jwt || req?.headers?.authorization;
 
     const user = getUser(authentication);
 

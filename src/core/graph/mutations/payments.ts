@@ -25,7 +25,6 @@ export const addPaymentSubscription = async (
     });
 
     if (response?.user) {
-      context.res.clearCookie("jwt");
       context.res.cookie("jwt", response.user.jwt, cookieConfigs);
     }
   } catch (e) {

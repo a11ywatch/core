@@ -78,17 +78,12 @@ export const config = {
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
 };
 
-const cookieConfigs: CookieOptions = DEV
-  ? {
-      maxAge: 900000,
-      httpOnly: true,
-    }
-  : {
-      maxAge: 900000,
-      sameSite: "none",
-      httpOnly: true,
-      secure: true,
-    };
+const cookieConfigs: CookieOptions = {
+  maxAge: 900000,
+  sameSite: "none",
+  httpOnly: true,
+  secure: true,
+};
 
 export {
   cookieConfigs,
