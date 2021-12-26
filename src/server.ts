@@ -56,15 +56,13 @@ import { createUser } from "./core/controllers/users/set";
 import { logPage } from "./core/controllers/analytics/ga";
 import { rawStatusBadge } from "./core/assets";
 
-setLogConfig({
-  container: "api",
-  disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
-});
-
 const { GRAPHQL_PORT } = config;
 
 async function initServer(): Promise<HttpServer> {
-  // TODO: REMOVE DB CONNECTION TOP LEVEL
+  setLogConfig({
+    container: "api",
+    disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
+  });
   await initDbConnection();
 
   const app = express();
@@ -85,8 +83,7 @@ async function initServer(): Promise<HttpServer> {
   app.post(WEBSITE_CRAWL, cors(), websiteCrawl);
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
     try {
-      if (
-        typeof process.env.BACKGROUND_CRAWL !== "undefined") {
+      if (typeof process.env.BACKGROUND_CRAWL !== "undefined") {
         forkProcess({ req: { body: req.body, pubsub: true } }, "crawl-website");
         res.json(true);
       } else {

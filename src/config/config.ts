@@ -79,7 +79,7 @@ export const config = {
 };
 
 const cookieConfigs: CookieOptions = {
-  maxAge: 900000,
+  maxAge: 228960000,
   sameSite: "none",
   httpOnly: true,
   secure: true,
