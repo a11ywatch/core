@@ -11,8 +11,9 @@ import { pubsub } from "./pubsub";
 export const subDomainAdded = {
   subscribe: withFilter(
     () => pubsub.asyncIterator(SUBDOMAIN_ADDED),
-    (payload: any, variables: any) => {
-      return payload.subDomainAdded.userId === variables?.userId;
+    (payload: any, variables: any, context: any) => {
+      const id = payload.subDomainAdded.userId;
+      return id === context?.userId || id === variables?.userId;
     }
   ),
 };

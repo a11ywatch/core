@@ -5,7 +5,7 @@
  **/
 import { ApolloServer, ApolloServerExpressConfig } from "apollo-server-express";
 import { config, BYPASS_AUTH } from "./config";
-import { getUser } from "./core/utils";
+import { getUser, parseCookie } from "./core/utils";
 import { schema } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
 import { SubDomainController } from "./core/controllers/subdomains";
@@ -22,6 +22,18 @@ const { DEV } = config;
 const serverConfig: ApolloServerExpressConfig = {
   tracing: DEV,
   schema,
+  subscriptions: {
+    onConnect: (_cnxnParams, webSocket, _cnxnContext) => {
+      // @ts-ignore
+      const cookie = webSocket?.upgradeReq?.headers?.cookie;
+      const parsedCookie = parseCookie(cookie);
+      const user = getUser(parsedCookie?.jwt || "");
+
+      return {
+        userId: user?.payload?.keyid,
+      };
+    },
+  },
   context: ({ req, res, connection }) => {
     if (connection) {
       return connection.context;
