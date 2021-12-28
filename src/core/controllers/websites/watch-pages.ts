@@ -33,7 +33,7 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
 
     if (user) {
       const sendEmail =
-        user && Array.isArray(user?.emailFilteredDates)
+        user && user.alertEnabled && Array.isArray(user?.emailFilteredDates)
           ? !user.emailFilteredDates.includes(getDay(subHours(new Date(), 5)))
           : true;
 

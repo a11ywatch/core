@@ -7,13 +7,16 @@
 import { fork } from "child_process";
 import { DEV } from "@app/config";
 import { getWebsitesWithUsers } from "../websites";
+import { cpus } from "os";
+import type { Response, Request } from "express";
 
 export const crawlAllAuthedWebsites = async (
-  _?: any,
-  res?: any
+  _?: Request,
+  res?: Response
 ): Promise<any> => {
   let allWebPages = [];
   let pageChunk = [];
+  const numCPUs = cpus().length;
 
   try {
     allWebPages = await getWebsitesWithUsers();
@@ -23,7 +26,10 @@ export const crawlAllAuthedWebsites = async (
 
   while (allWebPages.length > 0) {
     pageChunk.push(
-      allWebPages.splice(0, Math.max(allWebPages.length / 10, 50))
+      allWebPages.splice(
+        0,
+        Math.max(Math.round(allWebPages.length / numCPUs), numCPUs)
+      )
     );
   }
 
