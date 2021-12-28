@@ -20,7 +20,7 @@ export function userParams({
   }
 
   if (typeof id !== "undefined") {
-    searchProps = { ...searchProps, id };
+    searchProps = { ...searchProps, id: Number(id) };
   }
 
   if (typeof emailConfirmCode !== "undefined") {

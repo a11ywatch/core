@@ -15,13 +15,12 @@ export const unsubscribeEmails = async ({ id, email }) => {
         { id },
         {
           $set: {
-            emailAlerts: false,
             alertEnabled: false,
           },
         }
       );
     } else {
-      console.info(`USER: not found: ID:${id} - Email:${email}`);
+      console.info(`UNSUBSCRIBE FAILED - ID:${id}, Email:${email}`);
     }
   } catch (e) {
     console.error(e);

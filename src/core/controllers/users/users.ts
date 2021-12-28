@@ -128,7 +128,7 @@ export const UsersController: UserControllerType = (
     try {
       const [user, collection] = await getUser({ id }, true);
 
-      if (user?.emailAlerts === false || !domain) {
+      if (user?.alertEnabled === false || !domain) {
         return false;
       }
 
