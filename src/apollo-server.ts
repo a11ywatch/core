@@ -48,7 +48,7 @@ const serverConfig: ApolloServerExpressConfig = {
       !BYPASS_AUTH.includes(req?.body?.operationName)
     ) {
       if (DEV && !req?.body?.operationName) {
-        console.info("Generating Graphql Schema");
+        console.log("Generating Graphql Schema");
       } else {
         throw new Error(AUTH_ERROR);
       }

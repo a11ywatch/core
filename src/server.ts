@@ -85,7 +85,6 @@ function initServer(): HttpServer {
       }
     } catch (e) {
       res.json(false);
-      console.error(e);
     }
   });
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
@@ -229,16 +228,12 @@ function initServer(): HttpServer {
     try {
       if (password === process.env.ADMIN_PASSWORD) {
         await crawlAllAuthedWebsites();
+        res.send(true);
       } else {
-        console.error("admin password required");
+        res.send(false);
       }
-      res.json(true);
     } catch (e) {
       console.error(e);
-      res.json({
-        data: null,
-        message: e?.message,
-      });
     }
   });
 
@@ -255,10 +250,6 @@ function initServer(): HttpServer {
       });
     } catch (e) {
       console.error(e);
-      res.json({
-        data: null,
-        message: e?.message ?? "An Issue occured with announcements",
-      });
     }
   });
 

@@ -46,14 +46,14 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
       ).catch((e) => console.error(e));
     } else {
       // TODO: purge everything from user associations
-      console.warn(`user not found for ${userId}, please purge all data.`);
+      console.log(`user not found for ${userId}, please purge all data.`);
     }
 
     pageCounter++;
-    console.info(`Watcher page ${pageCounter}, of ${allWebPages.length}`);
+    console.log(`Watcher page ${pageCounter}, of ${allWebPages.length}`);
 
     if (pageCounter === allWebPages.length) {
-      console.info("CRAWLER JOB COMPLETE..");
+      console.log("CRAWLER JOB COMPLETE..");
     }
   }
 }

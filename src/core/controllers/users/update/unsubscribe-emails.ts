@@ -20,7 +20,7 @@ export const unsubscribeEmails = async ({ id, email }) => {
         }
       );
     } else {
-      console.info(`UNSUBSCRIBE FAILED - ID:${id}, Email:${email}`);
+      console.log(`UNSUBSCRIBE FAILED - ID:${id}, Email:${email}`);
     }
   } catch (e) {
     console.error(e);
