@@ -45,7 +45,7 @@ const issuesFoundTemplate: IssuesFound = (
       </style>
     </head>
     <h1>${data?.issues?.length} issues found for ${page}</h1>
-    <div>Login to see full report</div>
+    <div style="margin-bottom: 10px;">Login to see full report</div>
     <div style="overflow-x:auto;">
     <table class="a11y-view" style="font-family: system-ui, Arial, Helvetica, sans-serif; border-collapse: collapse; width: 100%;">
       <tr>

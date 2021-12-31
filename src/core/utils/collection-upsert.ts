@@ -6,9 +6,12 @@
 
 export const collectionUpsert = async (
   source: any,
-  [collection, shouldUpdate, type],
+  [collection, shouldUpdate],
   config?: any
 ) => {
+  if (typeof source === "undefined") {
+    return Promise.resolve();
+  }
   try {
     const userId = config?.searchProps?.userId || source?.userId;
     const queryParams = config?.searchProps
@@ -28,6 +31,5 @@ export const collectionUpsert = async (
     }
   } catch (e) {
     console.error(e);
-    return null;
   }
 };

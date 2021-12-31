@@ -143,36 +143,9 @@ export const crawlWebsite = async (
       // // TODO: MERGE ISSUES FROM ALL PAGES
       updateWebsiteProps = Object.assign({}, webPage, {
         avgScore,
-        cdnConnected: pageHasCdn, // TODO: ONLY UPDATE CDN IF BASE PATH
+        cdnConnected: pageHasCdn,
         online: true,
       });
-
-      await collectionUpsert(
-        {
-          pageUrl,
-          domain,
-          errorCount,
-          warningCount,
-          noticeCount,
-          userId,
-          adaScore,
-        },
-        [analyticsCollection, analytics, "ANALYTICS"]
-      );
-
-      await collectionUpsert(newIssue, [
-        issuesCollection,
-        issueExist,
-        "ISSUES",
-      ]);
-
-      if (updateWebsiteProps) {
-        await collectionUpsert(
-          updateWebsiteProps,
-          [websiteCollection, website, "WEBSITE"],
-          { searchProps: { url: pageUrl, userId } }
-        );
-      }
 
       if (script) {
         if (!scripts?.scriptMeta) {
@@ -180,27 +153,44 @@ export const crawlWebsite = async (
             skipContentEnabled: true,
           };
         }
-        await collectionUpsert(script, [scriptsCollection, scripts, "SCRIPTS"]);
       }
 
-      if (webPage) {
-        await collectionUpsert(
-          webPage,
-          [subDomainCollection, newSite, "SUBDOMAIN"],
-          { searchProps: { pageUrl, userId } }
-        );
+      await Promise.all([
+        collectionUpsert(
+          {
+            pageUrl,
+            domain,
+            errorCount,
+            warningCount,
+            noticeCount,
+            userId,
+            adaScore,
+          },
+          [analyticsCollection, analytics]
+        ),
+        collectionUpsert(newIssue, [issuesCollection, issueExist]),
+        collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
+          searchProps: { url: pageUrl, userId },
+        }),
+        collectionUpsert(script, [scriptsCollection, scripts]),
+        collectionUpsert(webPage, [subDomainCollection, newSite], {
+          searchProps: { pageUrl, userId },
+        }),
+      ]);
 
+      if (webPage) {
         if (!newSite) {
           if (parentSub && process.send) {
             process.send({
               name: SUBDOMAIN_ADDED,
               key: { name: "subDomainAdded", value: webPage },
             });
-          } else {
-            await pubsub.publish(SUBDOMAIN_ADDED, {
-              subDomainAdded: webPage,
-            });
           }
+          await pubsub
+            .publish(SUBDOMAIN_ADDED, {
+              subDomainAdded: webPage,
+            })
+            .catch((e) => console.error(e));
         }
       }
 
@@ -212,9 +202,10 @@ export const crawlWebsite = async (
             name: WEBSITE_ADDED,
             key: { name: "websiteAdded", value: websiteAdded },
           });
-        } else {
-          await pubsub.publish(WEBSITE_ADDED, { websiteAdded });
         }
+        await pubsub
+          .publish(WEBSITE_ADDED, { websiteAdded })
+          .catch((e) => console.error(e));
       }
 
       const responseData = limitResponse({
@@ -239,7 +230,10 @@ export const crawlWebsite = async (
 
       const reportData = responseData?.website ?? responseData?.data;
 
-      await createReport(reportData, reportData?.issues ?? issues);
+      // TODO: CREATE IN BACKGROUND
+      await createReport(reportData, reportData?.issues ?? issues).catch((e) =>
+        console.error(e)
+      );
 
       resolve(responseModel(responseData));
     } catch (e) {
