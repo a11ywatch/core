@@ -176,7 +176,9 @@ export const crawlWebsite = async (
         collectionUpsert(webPage, [subDomainCollection, newSite], {
           searchProps: { pageUrl, userId },
         }),
-      ]);
+      ]).catch((e) => {
+        console.error(e);
+      });
 
       if (webPage) {
         if (!newSite) {
@@ -235,10 +237,10 @@ export const crawlWebsite = async (
         console.error(e)
       );
 
-      resolve(responseModel(responseData));
+      return resolve(responseModel(responseData));
     } catch (e) {
       console.error(e);
-      reject(responseModel());
+      return resolve(responseModel());
     }
   });
 };
