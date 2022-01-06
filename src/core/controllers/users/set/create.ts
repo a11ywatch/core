@@ -28,15 +28,15 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
   }
 
   if (!googleId && !password) {
-    throw new Error(
-      "Password of atleast 6 chars required to register."
-    );
+    throw new Error("Password of atleast 6 chars required to register.");
   }
 
-  if(user) {
+  if (user) {
     if (!googleId && !user?.password) {
       throw new Error(
-        user.googleId ? "Password not found, try using your google login or reset the password." :  "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
+        user.googleId
+          ? "Password not found, try using your google login or reset the password."
+          : "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
       );
     }
     if (googleId && user?.googleId && user?.googleId !== googleId) {
@@ -44,8 +44,7 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     }
   }
 
-
-  if (user && user?.salt || googleAuthed) {
+  if ((user && user?.salt) || googleAuthed) {
     if (passwordMatch || googleId) {
       let keyid = user?.id;
       let updateCollectionProps = {};
@@ -61,7 +60,11 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
         keyid,
       });
 
-      updateCollectionProps = { ...updateCollectionProps, jwt };
+      updateCollectionProps = {
+        ...updateCollectionProps,
+        jwt,
+        lastLoginDate: new Date(),
+      };
 
       if (googleId) {
         updateCollectionProps = { ...updateCollectionProps, googleId };
@@ -91,6 +94,7 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
       emailConfirmed: false,
       googleId,
       profileVisible: false,
+      lastLoginDate: new Date(),
     };
 
     await collection.insertOne(userObject);

@@ -13,12 +13,14 @@ import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
 import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
-import { forkProcess } from "./core/utils";
+import { forkProcess, getUser } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
 import { AnalyticsController } from "./core/controllers/analytics";
 import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
+import { UsersController } from "./core/controllers/users";
+
 import fetcher from "node-fetch";
 import cookieParser from "cookie-parser";
 
@@ -216,6 +218,31 @@ function initServer(): HttpServer {
       });
     }
   });
+
+  app.post("/api/ping", cors(), async (req, res) => {
+    const token = req.cookies.jwt;
+    const parsedToken = getUser(token);
+    const id = parsedToken?.payload?.keyid;
+
+    if (typeof id !== "undefined") {
+      const [user, collection] = await UsersController().getUser({ id }, true);
+
+      if (user) {
+        await collection.updateOne(
+          { id },
+          {
+            $set: {
+              lastLoginDate: new Date(),
+            },
+          }
+        );
+      }
+      res.send(true);
+    } else {
+      res.send(true);
+    }
+  });
+
   app.post("/api/logout", cors(), async (_req, res) => {
     res.clearCookie("on");
     res.clearCookie("jwt");

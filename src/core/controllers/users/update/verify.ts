@@ -37,7 +37,11 @@ const verifyUser = async ({ password, email, googleId }) => {
 
   if (shouldValidatePassword && passwordMatch === false) {
     throw new Error(EMAIL_ERROR);
-  } else if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
+  } else if (
+    user?.googleId &&
+    !shouldValidatePassword &&
+    user.googleId !== googleId
+  ) {
     // TODO: RAISE AWARENESS MISUSE HOW CLIENT IS TRYING TO LOGIN?
     throw new Error("GoogleID is not tied to any user.");
   }
@@ -56,7 +60,11 @@ const verifyUser = async ({ password, email, googleId }) => {
     keyid: id,
   });
 
-  updateCollectionProps = { ...updateCollectionProps, jwt };
+  updateCollectionProps = {
+    ...updateCollectionProps,
+    jwt,
+    lastLoginDate: new Date(),
+  };
 
   if (googleId) {
     updateCollectionProps = { ...updateCollectionProps, googleId };
