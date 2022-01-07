@@ -80,9 +80,10 @@ export const config = {
 
 const cookieConfigs: CookieOptions = {
   maxAge: 228960000,
-  sameSite: "none",
+  sameSite: "lax",
   httpOnly: true,
   secure: true,
+  domain: config.DOMAIN.replace("https://", "."),
 };
 
 export {
