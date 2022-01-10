@@ -188,6 +188,7 @@ export const crawlWebsite = async (
               key: { name: "subDomainAdded", value: webPage },
             });
           }
+
           await pubsub
             .publish(SUBDOMAIN_ADDED, {
               subDomainAdded: webPage,
