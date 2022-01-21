@@ -34,7 +34,7 @@ export const Mutation = {
       throw new Error(EMAIL_ERROR);
     }
 
-    if (context.res) {
+    if (context.res.cookie) {
       context.res.cookie("on", loginUser.email, cookieConfigs);
       context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
     }
@@ -52,7 +52,7 @@ export const Mutation = {
       throw new Error(EMAIL_ERROR);
     }
 
-    if (context.res) {
+    if (context.res.cookie) {
       context.res.cookie("on", loginUser.email, cookieConfigs);
       context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
     }

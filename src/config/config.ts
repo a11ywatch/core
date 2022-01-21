@@ -78,12 +78,13 @@ export const config = {
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
 };
 
+// TODO: Look into better cookie settings for localhost setups
 const cookieConfigs: CookieOptions = {
   maxAge: 228960000,
-  sameSite: "lax",
+  sameSite: !DEV ? "lax" : false,
   httpOnly: true,
-  secure: true,
-  domain: config.DOMAIN.replace("https://", "."),
+  secure: !DEV,
+  domain: !DEV ? config.DOMAIN.replace("https://", ".") : undefined,
 };
 
 export {
