@@ -34,7 +34,7 @@ export const Mutation = {
       throw new Error(EMAIL_ERROR);
     }
 
-    if (context.res.cookie) {
+    if (context?.res?.cookie) {
       context.res.cookie("on", loginUser.email, cookieConfigs);
       context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
     }
@@ -52,7 +52,7 @@ export const Mutation = {
       throw new Error(EMAIL_ERROR);
     }
 
-    if (context.res.cookie) {
+    if (context?.res?.cookie) {
       context.res.cookie("on", loginUser.email, cookieConfigs);
       context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
     }
@@ -60,8 +60,10 @@ export const Mutation = {
     return loginUser;
   },
   logout: async (_, _props, context) => {
-    context.res.clearCookie("on");
-    context.res.clearCookie("jwt");
+    if (context?.res?.cookie) {
+      context.res.clearCookie("on");
+      context.res.clearCookie("jwt");
+    }
     return context.res.req.next();
   },
   addWebsite,
