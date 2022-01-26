@@ -19,7 +19,7 @@ jobs:
             - ~/usr/local/lib/node_modules
           key: node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
       - codecov/upload:
-          file: "./api/coverage/clover.xml"
+          file: "./coverage/clover.xml"
 
 workflows:
   build_and_test:
