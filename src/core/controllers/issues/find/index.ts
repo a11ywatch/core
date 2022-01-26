@@ -14,10 +14,10 @@ export const getIssue = async (
 ) => {
   try {
     const [collection] = await connect("Issues");
-    const urlParam = url || pageUrl;
+    const queryUrl = (url || pageUrl) && decodeURIComponent(url || pageUrl);
 
     const searchProps = websiteSearchParams({
-      pageUrl: urlParam,
+      pageUrl: queryUrl,
       userId,
     });
 
@@ -25,7 +25,13 @@ export const getIssue = async (
 
     // get issues from general bucket
     if (!issue && !noRetries) {
-      issue = await collection.findOne({ pageUrl: urlParam });
+      issue = await collection.findOne({ pageUrl: queryUrl });
+    }
+
+    if (!issue && !noRetries) {
+      issue = await collection.findOne({
+        domain: getHostName(queryUrl),
+      });
     }
 
     return chain ? [issue, collection] : issue;
@@ -43,8 +49,11 @@ export const getIssues = async ({
 }: any) => {
   try {
     const [collection] = await connect("Issues");
+
+    const queryUrl = (pageUrl || url) && decodeURIComponent(pageUrl || url);
+
     const searchProps = websiteSearchParams({
-      domain: domain || getHostName(pageUrl || url),
+      domain: domain || getHostName(queryUrl),
       filter,
       userId,
     });
