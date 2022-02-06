@@ -20,7 +20,7 @@ export const mutation = `
 			googleId: String
 		): User
 
-		logout: Void
+		logout: BasicMutationResponse
 
 		updateUser (
 			password: String

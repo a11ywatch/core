@@ -64,7 +64,11 @@ export const Mutation = {
       context.res.clearCookie("on");
       context.res.clearCookie("jwt");
     }
-    return context.res.req.next();
+    return {
+      code: 200,
+      success: true,
+      message: "Logged out success",
+    };
   },
   addWebsite,
   crawlWebsite: async (_, { url }, context) => {
