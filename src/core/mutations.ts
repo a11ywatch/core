@@ -74,16 +74,25 @@ export const Mutation = {
   crawlWebsite: async (_, { url }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
-    const canScan = await context.models.User.updateScanAttempt({
-      userId: keyid,
-    });
+    if (!url) {
+      return {
+        website: null,
+        code: 404,
+        success: true,
+        message: CRAWLER_FINISHED,
+      };
+    }
 
-    if (url && canScan) {
+    if (
+      await context.models.User.updateScanAttempt({
+        userId: keyid,
+      })
+    ) {
       forkProcess({ urlMap: url, userId: keyid });
 
       return {
         website: null,
-        code: url ? 200 : 404,
+        code: 200,
         success: true,
         message: CRAWLER_FINISHED,
       };

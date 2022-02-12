@@ -280,6 +280,32 @@ function initServer(): HttpServer {
     }
   });
 
+  /* Queue
+     start of jobs and queues
+  */
+
+  app.post(`${WEBSITE_CRAWL}-start`, async (req, res) => {
+    // TODO: add website from inprogress scanning preventing re-jobs
+    res.json({ ok: true });
+  });
+
+  app.post(`${WEBSITE_CRAWL}-complete`, async (req, res) => {
+    // TODO: unqueue website from inprogress scanning
+    res.json({ ok: true });
+  });
+
+  app.post(`${WEBSITE_CRAWL}-background-start`, async (req, res) => {
+    // TODO: add website from inprogress scanning preventing re-jobs
+    res.json({ ok: true });
+  });
+
+  app.post(`${WEBSITE_CRAWL}-background-complete`, async (req, res) => {
+    // TODO: unqueue website from inprogress scanning
+    res.json({ ok: true });
+  });
+
+  /* End of Queue */
+
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
   /*  END OF ANALYTICS */

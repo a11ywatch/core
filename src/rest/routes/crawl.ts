@@ -22,17 +22,11 @@ const websiteCrawl = async (req, res) => {
       const { user_id, pages, domain } =
         typeof data === "string" ? JSON.parse(data) : data;
 
+      // TODO: if id and domain not found get from redis
+
       if (pages?.length === 0) {
-        if (domain) {
-          await crawl({
-            url: domain,
-            userId: user_id,
-            parentSub,
-          });
-        } else {
-          await UsersController().sendWebsiteOffline({ id: user_id, domain });
-          res && res.send(false);
-        }
+        await UsersController().sendWebsiteOffline({ id: user_id, domain });
+        res && res.send(false);
         return;
       }
 
@@ -72,20 +66,29 @@ const scanWebsite = async (req, res) => {
   const url = req.query?.websiteUrl ?? req.body?.websiteUrl;
   const userId = req.query?.userId ?? req.body?.userId;
 
-  if(url) {
+  if (url) {
     try {
       const data = await scan({
         url,
         userId,
       });
-  
+
       res.json(data);
     } catch (e) {
       log(e);
-      res.json({ message: "Error: Page not found", status: 404, success: false });
+      res.json({
+        message: "Error: Page not found",
+        status: 404,
+        success: false,
+      });
     }
   } else {
-    res.json({ message: "Error: Url param not found. Add the websiteUrl param and try again", status: 400, success: false });
+    res.json({
+      message:
+        "Error: Url param not found. Add the websiteUrl param and try again",
+      status: 400,
+      success: false,
+    });
   }
 };
 

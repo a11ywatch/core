@@ -22,13 +22,16 @@ export const forkProcess = (
     forked.unref();
 
     forked.on("message", async (message: any) => {
-      if (message?.name && message?.key?.value) {
-        await pubsub.publish(message.name, {
-          [message.key.name]: message.key.value,
-        });
-      }
-      if (message === "close") {
-        forked.kill("SIGINT");
+      if (message) {
+        if (message?.name && message?.key?.value) {
+          // dangerous interface (TODO: refactor)
+          await pubsub.publish(message.name, {
+            [message.key.name]: message.key.value,
+          });
+        }
+        if (message === "close") {
+          forked.kill("SIGINT");
+        }
       }
     });
   } catch (e) {

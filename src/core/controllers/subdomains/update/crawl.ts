@@ -36,9 +36,11 @@ export const crawlWebsite = async (
     return Promise.resolve(responseModel({ msgType: ApiResponse.NotFound }));
   }
   const { domain, pageUrl } = sourceBuild(urlMap, userId);
+
+  // TODO: check current queue to see if authed
   const authenticated = typeof userId !== "undefined";
 
-  return await new Promise(async (resolve, reject) => {
+  return await new Promise(async (resolve) => {
     try {
       const [website, websiteCollection] = await getWebsite(
         {
@@ -52,7 +54,6 @@ export const crawlWebsite = async (
         pageHeaders: website?.pageHeaders,
         url: urlMap,
         userId,
-        authed: authenticated,
       });
 
       if (!dataSource) {
@@ -199,17 +200,16 @@ export const crawlWebsite = async (
 
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
 
-      if (authenticated) {
-        if (parentSub && process.send) {
-          process.send({
-            name: WEBSITE_ADDED,
-            key: { name: "websiteAdded", value: websiteAdded },
-          });
-        }
-        await pubsub
-          .publish(WEBSITE_ADDED, { websiteAdded })
-          .catch((e) => console.error(e));
+      if (parentSub && process.send) {
+        process.send({
+          name: WEBSITE_ADDED,
+          key: { name: "websiteAdded", value: websiteAdded },
+        });
       }
+
+      await pubsub
+        .publish(WEBSITE_ADDED, { websiteAdded })
+        .catch((e) => console.error(e));
 
       const responseData = limitResponse({
         issues,
