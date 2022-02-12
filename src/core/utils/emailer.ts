@@ -33,10 +33,7 @@ if (EMAIL_CLIENT_KEY && EMAIL_CLIENT_ID && EMAIL_SERVICE_URL) {
 }
 
 const mailOptions = {
-  from: `"${String(EMAIL_SERVICE_URL).replace(
-    "www.",
-    ""
-  )} Support" <${EMAIL_SERVICE_URL}>`,
+  from: `A11yWatch <${EMAIL_SERVICE_URL}>`,
   to: "myfriend@yahoo.com",
   subject: "Issues found",
   text: "Some issues where found on your website.",
