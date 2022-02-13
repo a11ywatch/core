@@ -35,8 +35,15 @@ services:
       - LOGGER_ENABLED=${LOGGER_ENABLED:-true}
       - LOGGER_URL=${LOGGER_URL:-logger}
       - ADMIN_ORIGIN=${ADMIN_ORIGIN}
-      - BACKGROUND_CRAWL=${BACKGROUND_CRAWL:-false}
+      - BACKGROUND_CRAWL=${BACKGROUND_CRAWL:-true}
       - DOCKER_ENV=true
-
+      - REDIS_CLIENT=${REDIS_CLIENT:-redis://redis:6379}
+  redis:
+    container_name: redis
+    image: bitnami/redis:6.0
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - back-net
 networks:
   back-net:

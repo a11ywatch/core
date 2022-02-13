@@ -88,7 +88,7 @@ export const Mutation = {
         userId: keyid,
       })
     ) {
-      forkProcess({ urlMap: url, userId: keyid });
+      forkProcess({ urlMap: url, userId: keyid, scan: true });
 
       return {
         website: null,

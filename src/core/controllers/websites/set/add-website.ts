@@ -52,7 +52,7 @@ export const addWebsite = async ({
   await collection.insertOne(website);
 
   if (canScan) {
-    forkProcess({ urlMap: stripUrlEndingSlash(url), userId, scan: false });
+    forkProcess({ urlMap: stripUrlEndingSlash(url), userId, scan: true });
   }
 
   return {

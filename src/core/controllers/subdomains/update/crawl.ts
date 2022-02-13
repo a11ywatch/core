@@ -24,9 +24,10 @@ import {
 } from "./utils";
 import { createReport } from "../../reports";
 import type { Website } from "@app/types";
+import { redisClient } from "@app/database/memory-client";
 
 export const crawlWebsite = async (
-  { userId, url: urlMap, apiData = false, parentSub = false },
+  { userId: user_id, url: urlMap, apiData = false, parentSub = false },
   sendEmail?: boolean
 ) => {
   if (
@@ -35,13 +36,32 @@ export const crawlWebsite = async (
   ) {
     return Promise.resolve(responseModel({ msgType: ApiResponse.NotFound }));
   }
-  const { domain, pageUrl } = sourceBuild(urlMap, userId);
-
-  // TODO: check current queue to see if authed
-  const authenticated = typeof userId !== "undefined";
+  let userId = user_id;
+  let domainSource = sourceBuild(urlMap, userId);
+  let domain = domainSource?.domain;
+  let pageUrl = domainSource?.pageUrl;
+  let authenticated = typeof userId !== "undefined";
 
   return await new Promise(async (resolve) => {
     try {
+      if (typeof userId === "undefined" && redisClient) {
+        const memData = await redisClient
+          .get(domain)
+          .catch((e) => console.error(e));
+
+        if (memData) {
+          const memDataParsed = JSON.parse(memData);
+          const memKeys = Object.keys(memDataParsed);
+          const lastUser = memKeys[memKeys.length - 1];
+          userId = lastUser ? Number(lastUser) : undefined;
+          authenticated = !!userId;
+          domainSource = sourceBuild(urlMap, userId);
+          domain = domainSource?.domain;
+          pageUrl = domainSource?.pageUrl;
+        }
+      }
+
+      // CENTRAL WEBSITE COLLECTION
       const [website, websiteCollection] = await getWebsite(
         {
           domain,
@@ -82,6 +102,7 @@ export const crawlWebsite = async (
         adaScore,
       } = extractPageData(dataSource);
 
+      // CENTRAL PAGE COLLECTION
       const [newSite, subDomainCollection] = await getDomain(
         {
           userId,

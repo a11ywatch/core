@@ -40,7 +40,7 @@ import {
   GET_SCRIPT,
   GET_SCREENSHOT,
 } from "./core/routes";
-import { initDbConnection, closeDbConnection } from "./database";
+import { initDbConnection, closeDbConnection, redisClient } from "./database";
 import { Server } from "./apollo-server";
 import {
   confirmEmail,
@@ -57,6 +57,7 @@ import {
 import { createUser } from "./core/controllers/users/set";
 import { logPage } from "./core/controllers/analytics/ga";
 import { rawStatusBadge } from "./core/assets";
+import { URL } from "url";
 
 const { GRAPHQL_PORT } = config;
 
@@ -295,12 +296,50 @@ function initServer(): HttpServer {
   });
 
   app.post(`${WEBSITE_CRAWL}-background-start`, async (req, res) => {
-    // TODO: add website from inprogress scanning preventing re-jobs
+    const data = req.body?.data ?? {};
+    const { user_id: userId, domain } =
+      data && typeof data == "string"
+        ? JSON.parse(data)
+        : { domain: undefined, user_id: undefined };
+
+    if (domain && redisClient) {
+      try {
+        const urlSource = new URL(domain);
+        const hostname = urlSource.hostname;
+        const active = await redisClient.get(hostname);
+        const activeUsers = active ? JSON.parse(active) : {};
+
+        const newClient = { ...activeUsers, [userId]: 1 };
+        await redisClient.set(hostname, `${JSON.stringify(newClient)}`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     res.json({ ok: true });
   });
 
   app.post(`${WEBSITE_CRAWL}-background-complete`, async (req, res) => {
-    // TODO: unqueue website from inprogress scanning
+    const data = req.body?.data ?? {};
+    const { user_id: userId, domain } =
+      data && typeof data == "string"
+        ? JSON.parse(data)
+        : { domain: undefined, user_id: undefined };
+
+    if (domain && redisClient) {
+      try {
+        const urlSource = new URL(domain);
+        const hostname = urlSource.hostname;
+        const active = await redisClient.get(hostname);
+        const activeUsers = active ? JSON.parse(active) : {};
+        delete activeUsers[userId];
+
+        await redisClient.set(hostname, `${JSON.stringify(activeUsers)}`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     res.json({ ok: true });
   });
 
@@ -330,7 +369,7 @@ function initServer(): HttpServer {
   });
 
   // INTERNAL
-  app.get("/_internal_/healthcheck", cors(), async (_, res) => {
+  app.get("/_internal_/healthcheck", async (_, res) => {
     res.send({
       status: "healthy",
     });
@@ -380,8 +419,9 @@ const startServer = (async () => {
   } catch (e) {
     console.error(e);
   }
+
   try {
-    coreServer = await initServer();
+    coreServer = initServer();
   } catch (e) {
     console.error(["SERVER FAILED TO START", e]);
   }
