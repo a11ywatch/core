@@ -35,6 +35,7 @@ const websiteCrawl = async (req, res) => {
           url,
           userId: user_id,
           parentSub,
+          pageInsights: false,
         });
       }
 
@@ -54,6 +55,7 @@ const crawlWebsite = async (req, res) => {
     await crawl({
       url,
       userId,
+      pageInsights: false,
     });
   } catch (e) {
     console.error(e);

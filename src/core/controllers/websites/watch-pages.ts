@@ -41,6 +41,7 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
         {
           url,
           userId,
+          pageInsights: false,
         },
         sendEmail
       ).catch((e) => console.error(e));

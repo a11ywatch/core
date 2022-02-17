@@ -20,7 +20,6 @@ import { AnalyticsController } from "./core/controllers/analytics";
 const { DEV } = config;
 
 const serverConfig: ApolloServerExpressConfig = {
-  tracing: true,
   schema,
   subscriptions: {
     onConnect: (_cnxnParams, webSocket, _cnxnContext) => {

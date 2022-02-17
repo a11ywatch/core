@@ -79,7 +79,6 @@ export const getWebsites = async ({ userId }, chain?: boolean) => {
       .toArray();
 
     const websites = websitesCollection?.map((website) => {
-      console.log(website);
       if (typeof website?.pageInsights === "undefined") {
         website.pageInsights = false;
       }

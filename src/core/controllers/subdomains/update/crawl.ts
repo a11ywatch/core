@@ -32,7 +32,7 @@ export const crawlWebsite = async (
   {
     userId: user_id,
     url: urlMap,
-    pageInsights,
+    pageInsights = false,
     apiData = false,
     parentSub = false,
   },
@@ -84,7 +84,7 @@ export const crawlWebsite = async (
         true
       );
 
-      let insightsEnabled = pageInsights ?? (userData && website?.pageInsights);
+      let insightsEnabled = pageInsights || (userData && website?.pageInsights);
 
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
       if (insightsEnabled) {
