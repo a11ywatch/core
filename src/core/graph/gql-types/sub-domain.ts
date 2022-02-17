@@ -18,5 +18,7 @@ export const subdomain = `
 		htmlIncluded: Boolean
 		issues(filter: String): [Issue]
 		issuesInfo: IssueMeta
+		pageInsights: Boolean
+		insight: PageInsights
 	}
 `;

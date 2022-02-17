@@ -25,6 +25,7 @@ export const addWebsite = async ({
   customHeaders,
   audience,
   canScan,
+  pageInsights,
 }) => {
   if (!validUrl.isUri(urlMap)) {
     throw new Error(WEBSITE_URL_ERROR);
@@ -47,6 +48,7 @@ export const addWebsite = async ({
     url,
     domain: getHostName(url),
     pageHeaders: customHeaders,
+    pageInsights: !!pageInsights,
   });
 
   await collection.insertOne(website);

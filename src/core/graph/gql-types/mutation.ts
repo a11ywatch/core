@@ -39,6 +39,7 @@ export const mutation = `
 		updateWebsite (
 			url: String
 			customHeaders: [CreatePageHeaders]
+			pageInsights: Boolean
 		): UpdateWebSiteMutationResponse
 
 		updateScript (
@@ -73,6 +74,7 @@ export const mutation = `
 		addWebsite (
 			url: String!
 			customHeaders: [CreatePageHeaders]
+			pageInsights: Boolean
 		): UpdateWebSiteMutationResponse
 
 		filterEmailDates (

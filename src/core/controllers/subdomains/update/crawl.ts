@@ -25,14 +25,16 @@ import {
 import { createReport } from "../../reports";
 import type { Website } from "@app/types";
 import { redisClient } from "@app/database/memory-client";
+import { UsersController } from "../..";
+import { URL } from "url";
 
 export const crawlWebsite = async (
   {
     userId: user_id,
     url: urlMap,
+    pageInsights,
     apiData = false,
     parentSub = false,
-    pageInsights = false,
   },
   sendEmail?: boolean
 ) => {
@@ -67,6 +69,12 @@ export const crawlWebsite = async (
         }
       }
 
+      // TODO: ADD PREMIUM ONLY PAGEINSIGHTS
+      const userData = await UsersController().getUser(
+        { userId: userId },
+        false
+      );
+
       // CENTRAL WEBSITE COLLECTION
       const [website, websiteCollection] = await getWebsite(
         {
@@ -76,18 +84,27 @@ export const crawlWebsite = async (
         true
       );
 
+      let insightsEnabled = pageInsights ?? (userData && website?.pageInsights);
+
+      // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
+      if (insightsEnabled) {
+        if (userData?.role === 0 || !userData?.role) {
+          insightsEnabled = false;
+          const newSubUrl = new URL(website?.url);
+          const dataSourceUrl = new URL(pageUrl);
+          // ALLOW INSIGHTS ON ROOT DOMAIN
+          if (newSubUrl?.pathname === dataSourceUrl?.pathname) {
+            insightsEnabled = true;
+          }
+        }
+      }
+
       const dataSource = await fetchPuppet({
         pageHeaders: website?.pageHeaders,
         url: urlMap,
         userId,
-        pageInsights,
+        pageInsights: insightsEnabled,
       });
-
-      const insight = dataSource?.webPage?.insight;
-
-      if (insight) {
-        console.log(["Log insights", insight]);
-      }
 
       if (!dataSource) {
         return resolve(responseModel());

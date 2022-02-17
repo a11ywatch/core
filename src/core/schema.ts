@@ -8,6 +8,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import { resolvers } from "./resolvers";
 import {
   user,
+  pageInsights,
   feature,
   website,
   issue,
@@ -27,6 +28,7 @@ import { typeDefs as scalarTypeDefs } from "graphql-scalars";
 const typeDefs = `
 ${scalarTypeDefs}
 ${meta}
+${pageInsights}
 ${payments}
 ${user}
 ${feature}

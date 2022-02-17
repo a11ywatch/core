@@ -7,6 +7,6 @@
 // SEND RAW JSON OBJECT FOR NOW
 export const pageInsights = `
 	type PageInsights {
-        categories: String
+        json: String
 	}
 `;

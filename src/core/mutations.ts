@@ -132,13 +132,18 @@ export const Mutation = {
 
     return websiteRemoved;
   },
-  updateWebsite: async (_, { userId, url, customHeaders }, context) => {
+  updateWebsite: async (
+    _,
+    { userId, url, customHeaders, pageInsights },
+    context
+  ) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
     return await context.models.Website.updateWebsite({
       userId: userId || keyid,
       url,
       pageHeaders: customHeaders,
+      pageInsights,
     });
   },
   forgotPassword: async (_, { email }, context) => {

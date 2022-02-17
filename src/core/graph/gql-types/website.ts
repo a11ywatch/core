@@ -34,6 +34,8 @@ export const website = `
 		pageHeaders: [PageHeaders]
 		online: Boolean
 		timestamp: String
+		pageInsights: Boolean
+		insight: PageInsights
 	}
 
 `;
