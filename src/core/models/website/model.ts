@@ -1,4 +1,3 @@
-// TODO: ADD TYPES
 const WebsiteModel = {
   userId: -1,
   url: "",
@@ -7,6 +6,10 @@ const WebsiteModel = {
   cdnConnected: false,
   html: "",
   htmlIncluded: false,
+  pageInsights: false,
+  insight: {
+    json: "",
+  },
   pageLoadTime: {
     duration: 0,
     durationFormated: "",
@@ -22,15 +25,8 @@ const WebsiteModel = {
   online: null,
 };
 
-export interface Params {
-  url: string;
-  domain: string;
-  userId?: number;
-  [x: string]: any;
-}
-
 const makeWebsite = (
-  { url, domain, ...extra }: Params = { url: "", domain: "" }
+  { url, domain, ...extra }: any = { url: "", domain: "" }
 ): typeof WebsiteModel => {
   return Object.assign(
     {},

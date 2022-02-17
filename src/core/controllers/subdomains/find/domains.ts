@@ -18,7 +18,21 @@ export const getDomains = async (
       userId,
       domain: domain || (url && getHostName(url)),
     });
-    const websites = await collection.find(searchProps).limit(100).toArray();
+    const websitesCollection = await collection
+      .find(searchProps)
+      .limit(100)
+      .toArray();
+
+    // TODO: REPLACE FOR MIGRATION | interface resolver
+    const websites = websitesCollection?.map((website) => {
+      if (typeof website?.pageInsights === "undefined") {
+        website.pageInsights = false;
+      }
+      if (typeof website?.insight === "undefined") {
+        website.insight = null;
+      }
+      return website;
+    });
 
     return chain ? [websites, collection] : websites;
   } catch (e) {
@@ -34,6 +48,15 @@ export const getDomain = async (
     const [collection] = await connect("SubDomains");
     const searchProps = websiteSearchParams({ url, userId });
     const website = await collection.findOne(searchProps);
+
+    if (website) {
+      if (typeof website?.pageInsights === "undefined") {
+        website.pageInsights = false;
+      }
+      if (typeof website?.insight === "undefined") {
+        website.insight = null;
+      }
+    }
 
     return chain ? [website, collection] : website;
   } catch (e) {

@@ -27,8 +27,8 @@ import { typeDefs as scalarTypeDefs } from "graphql-scalars";
 
 const typeDefs = `
 ${scalarTypeDefs}
-${meta}
 ${pageInsights}
+${meta}
 ${payments}
 ${user}
 ${feature}

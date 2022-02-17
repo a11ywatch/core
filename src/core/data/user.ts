@@ -44,7 +44,7 @@ export const User = {
       pageUrl: url || pageUrl,
     });
   },
-  websites: async ({ id, filter, keyid }, extra) => {
+  websites: async ({ id, keyid }) => {
     const websites = await WebsitesController().getWebsites({
       userId: id || keyid,
     });
