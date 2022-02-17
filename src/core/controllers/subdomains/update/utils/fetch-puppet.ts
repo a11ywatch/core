@@ -6,7 +6,12 @@
 
 import fetcher from "node-fetch";
 
-export const fetchPuppet = async ({ userId, url, pageHeaders }: any) => {
+export const fetchPuppet = async ({
+  userId,
+  url,
+  pageHeaders,
+  pageInsights,
+}: any) => {
   let dataSource;
   try {
     const data = await fetcher(
@@ -17,6 +22,7 @@ export const fetchPuppet = async ({ userId, url, pageHeaders }: any) => {
           pageHeaders: pageHeaders && Array(pageHeaders),
           url: String(encodeURIComponent(url)),
           userId,
+          pageInsights,
         }),
         headers: { "Content-Type": "application/json" },
       }

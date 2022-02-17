@@ -14,7 +14,7 @@ export { analytic } from "./analytic";
 export { script } from "./script";
 export { payments } from "./payments";
 export { meta } from "./meta";
-
+export { pageInsights } from "./page-insights";
 // gql main types
 export { query } from "./query";
 export { mutation } from "./mutation";

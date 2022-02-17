@@ -27,7 +27,13 @@ import type { Website } from "@app/types";
 import { redisClient } from "@app/database/memory-client";
 
 export const crawlWebsite = async (
-  { userId: user_id, url: urlMap, apiData = false, parentSub = false },
+  {
+    userId: user_id,
+    url: urlMap,
+    apiData = false,
+    parentSub = false,
+    pageInsights = false,
+  },
   sendEmail?: boolean
 ) => {
   if (
@@ -74,7 +80,14 @@ export const crawlWebsite = async (
         pageHeaders: website?.pageHeaders,
         url: urlMap,
         userId,
+        pageInsights,
       });
+
+      const insight = dataSource?.webPage?.insight;
+
+      if (insight) {
+        console.log(["Log insights", insight]);
+      }
 
       if (!dataSource) {
         return resolve(responseModel());

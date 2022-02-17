@@ -107,16 +107,11 @@ export const Mutation = {
       url,
     });
   },
-  removeWebsite: async (
-    _,
-    { userId, url, deleteMany = false, password },
-    context
-  ) => {
+  removeWebsite: async (_, { url, deleteMany = false }, context) => {
     const { keyid, audience } = context.user?.payload || defaultPayload;
-    const useID =
-      typeof password !== "undefined" && password === process.env.ADMIN_PASS;
+
     const websiteRemoved = await context.models.Website.removeWebsite({
-      userId: useID ? userId : keyid,
+      userId: keyid,
       url,
       deleteMany,
       audience,
