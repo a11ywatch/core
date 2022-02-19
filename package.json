@@ -23,7 +23,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "2.8.0",
     "cron": "1.8.2",
-    "date-fns": "2.7.0",
+    "date-fns": "2.28.0",
     "dotenv": "8.2.0",
     "exceljs": "^4.2.1",
     "express": "4.17.1",
