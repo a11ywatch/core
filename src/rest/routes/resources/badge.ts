@@ -23,7 +23,7 @@ export const statusBadge = async (req: Request, res: Response) => {
   }
 
   const etagHash = createHash("sha256");
-  etagHash.update(score);
+  etagHash.update(score + "");
 
   res.setHeader("Content-Type", "image/svg+xml");
   res.setHeader("ETag", etagHash.digest("hex"));

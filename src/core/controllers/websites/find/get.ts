@@ -21,15 +21,6 @@ export const getWebsite = async (
     });
     const website = await collection.findOne(params);
 
-    if (website) {
-      if (typeof website?.pageInsights === "undefined") {
-        website.pageInsights = false;
-      }
-      if (typeof website?.insight === "undefined") {
-        website.insight = null;
-      }
-    }
-
     return chain ? [website, collection] : website;
   } catch (e) {
     console.error(e);
@@ -73,20 +64,7 @@ export const getWebsitesWithUsers = async (userLimit = 100000) => {
 export const getWebsites = async ({ userId }, chain?: boolean) => {
   try {
     const [collection] = await connect("Websites");
-    const websitesCollection = await collection
-      .find({ userId })
-      .limit(20)
-      .toArray();
-
-    const websites = websitesCollection?.map((website) => {
-      if (typeof website?.pageInsights === "undefined") {
-        website.pageInsights = false;
-      }
-      if (typeof website?.insight === "undefined") {
-        website.insight = null;
-      }
-      return website;
-    });
+    const websites = await collection.find({ userId }).limit(20).toArray();
 
     return chain ? [websites, collection] : websites;
   } catch (e) {
