@@ -20,7 +20,8 @@ export const whitelist = [
   "https://www.a11ywatch.com",
   "http://a11ywatch.com",
   "http://www.a11ywatch.com",
-].filter((url) => url);
+  "a11ywatch.vercel.app",
+].filter(Boolean);
 
 if (DEV || TEST_ENV) {
   whitelist.push("127.0.0.1", "0.0.0.0", "http://localhost:3000", "::1");
