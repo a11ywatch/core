@@ -1,9 +1,16 @@
+/*
+ * Copyright (c) A11yWatch, LLC. and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ **/
+
 import { UsersController } from "@app/core/controllers";
 import { getUser, usageExceededThreshold } from "@app/core/utils";
 import { imageDetect } from "@app/core/external";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
+import type { Request, Response } from "express";
 
-const detectImage = async (req, res) => {
+const detectImage = async (req: Request, res: Response) => {
   const img = req.body?.imageBase64;
 
   if (!img) {

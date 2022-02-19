@@ -15,12 +15,10 @@ import { CronJob } from "cron";
 import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
 import { forkProcess, getUser } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
-import { AnalyticsController } from "./core/controllers/analytics";
 import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
 import { UsersController } from "./core/controllers/users";
-
 import fetcher from "node-fetch";
 import cookieParser from "cookie-parser";
 
@@ -40,7 +38,7 @@ import {
   GET_SCRIPT,
   GET_SCREENSHOT,
 } from "./core/routes";
-import { initDbConnection, closeDbConnection, redisClient } from "./database";
+import { initDbConnection, closeDbConnection } from "./database";
 import { Server } from "./apollo-server";
 import {
   confirmEmail,
@@ -56,8 +54,11 @@ import {
 } from "./rest/routes";
 import { createUser } from "./core/controllers/users/set";
 import { logPage } from "./core/controllers/analytics/ga";
-import { rawStatusBadge } from "./core/assets";
-import { URL } from "url";
+import { statusBadge } from "./rest/routes/resources/badge";
+import {
+  startCrawlTracker,
+  completeCrawlTracker,
+} from "./rest/routes/services";
 
 const { GRAPHQL_PORT } = config;
 
@@ -281,92 +282,22 @@ function initServer(): HttpServer {
     }
   });
 
-  /* Queue
-     start of jobs and queues
-  */
-
-  app.post(`${WEBSITE_CRAWL}-start`, async (req, res) => {
-    // TODO: add website from inprogress scanning preventing re-jobs
-    res.json({ ok: true });
-  });
-
-  app.post(`${WEBSITE_CRAWL}-complete`, async (req, res) => {
-    // TODO: unqueue website from inprogress scanning
-    res.json({ ok: true });
-  });
-
-  app.post(`${WEBSITE_CRAWL}-background-start`, async (req, res) => {
-    const data = req.body?.data ?? {};
-    const { user_id: userId, domain } =
-      data && typeof data == "string"
-        ? JSON.parse(data)
-        : { domain: undefined, user_id: undefined };
-
-    if (domain && redisClient) {
-      try {
-        const urlSource = new URL(domain);
-        const hostname = urlSource.hostname;
-        const active = await redisClient.get(hostname);
-        const activeUsers = active ? JSON.parse(active) : {};
-
-        const newClient = { ...activeUsers, [userId]: 1 };
-        await redisClient.set(hostname, `${JSON.stringify(newClient)}`);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    res.json({ ok: true });
-  });
-
-  app.post(`${WEBSITE_CRAWL}-background-complete`, async (req, res) => {
-    const data = req.body?.data ?? {};
-    const { user_id: userId, domain } =
-      data && typeof data == "string"
-        ? JSON.parse(data)
-        : { domain: undefined, user_id: undefined };
-
-    if (domain && redisClient) {
-      try {
-        const urlSource = new URL(domain);
-        const hostname = urlSource.hostname;
-        const active = await redisClient.get(hostname);
-        const activeUsers = active ? JSON.parse(active) : {};
-        delete activeUsers[userId];
-
-        await redisClient.set(hostname, `${JSON.stringify(activeUsers)}`);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    res.json({ ok: true });
-  });
-
-  /* End of Queue */
+  /*
+   * Manage crawler service active crawling job
+   */
+  app.post(`${WEBSITE_CRAWL}-start`, startCrawlTracker);
+  app.post(`${WEBSITE_CRAWL}-complete`, completeCrawlTracker);
+  app.post(`${WEBSITE_CRAWL}-background-start`, startCrawlTracker);
+  app.post(`${WEBSITE_CRAWL}-background-complete`, completeCrawlTracker);
+  /*
+   * End of crawler service job handling
+   */
 
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
   /*  END OF ANALYTICS */
 
-  // TODO: SAVE IMAGE IF USAGE OF FEATURE BECOMES PROMINENT IN WATCHER STEP
-  app.get("/status/:domain", cors(), async (req, res) => {
-    res.setHeader("Content-Type", "image/svg+xml");
-    const domain = req.params.domain.replace(".svg", "");
-    const website = await AnalyticsController().getWebsite({ domain }, false);
-    const score = website?.adaScore;
-    let statusColor = "#000";
-
-    if (score < 70) {
-      statusColor = "#f85149";
-    } else if (score >= 70 && score < 90) {
-      statusColor = "#a4a61d";
-    } else if (score >= 90) {
-      statusColor = "#3fb950";
-    }
-
-    res.send(rawStatusBadge({ statusColor, score }));
-  });
+  app.get("/status/:domain", cors(), statusBadge);
 
   // INTERNAL
   app.get("/_internal_/healthcheck", async (_, res) => {
