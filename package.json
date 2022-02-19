@@ -33,7 +33,7 @@
     "graphql-tag": "^2.11.0",
     "graphql-tools": "0.8.0",
     "jsonwebtoken": "8.5.1",
-    "mongodb": "3.6.5",
+    "mongodb": "3.7.3",
     "node-fetch": "2.6.0",
     "node-iframe": "^1.5.10",
     "nodemailer": "6.7.2",
