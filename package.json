@@ -21,7 +21,7 @@
     "apollo-server": "2.25.3",
     "apollo-server-express": "2.25.3",
     "cookie-parser": "^1.4.6",
-    "cors": "2.8.0",
+    "cors": "2.8.5",
     "cron": "1.8.2",
     "date-fns": "2.28.0",
     "dotenv": "8.2.0",
