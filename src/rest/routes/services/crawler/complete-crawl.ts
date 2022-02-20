@@ -21,7 +21,7 @@ export const completeCrawlTracker = async (req: Request, res: Response) => {
       const hostname = urlSource.hostname;
       const active = await redisClient.get(hostname);
       const activeUsers = active ? JSON.parse(active) : {};
-      delete activeUsers[userId];
+      delete activeUsers[userId + ""];
 
       await redisClient.set(hostname, `${JSON.stringify(activeUsers)}`);
     } catch (e) {

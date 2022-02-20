@@ -91,7 +91,7 @@ export const addPaymentSubscription = async ({
         }
 
         await collection.updateOne(
-          { id: keyid },
+          { id: user.id },
           {
             $set: {
               stripeToken,
