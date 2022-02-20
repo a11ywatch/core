@@ -9,6 +9,7 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { ApiResponse, responseModel } from "@app/core/models";
 import { redisClient } from "@app/database/memory-client";
 import { crawlPage } from "./utils/crawl-page";
+import { createHash } from "crypto";
 
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const { userId: user_id, url: urlMap } = params ?? {};
@@ -29,12 +30,9 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
 
   if (typeof user_id === "undefined") {
     try {
-      const memData = await redisClient.get(domainSource?.domain);
-
-      if (memData) {
-        const memDataParsed = JSON.parse(memData);
-        usersPool = Object.keys(memDataParsed);
-      }
+      const hostHash = createHash("sha256");
+      hostHash.update(domainSource?.domain + "");
+      usersPool = (await redisClient.HKEYS(hostHash.digest("hex"))) || [];
     } catch (e) {
       console.error(e);
     }

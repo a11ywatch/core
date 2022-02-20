@@ -7,23 +7,21 @@
 import { redisClient } from "@app/database";
 import { URL } from "url";
 import type { Request, Response } from "express";
+import { getParams } from "./get-params";
+import { createHash } from "crypto";
 
 export const startCrawlTracker = async (req: Request, res: Response) => {
-  const data = req.body?.data ?? {};
-  const { user_id: userId, domain } =
-    data && typeof data == "string"
-      ? JSON.parse(data)
-      : { domain: undefined, user_id: undefined };
+  const { user_id: userId, domain } = getParams(req.body?.data ?? {});
 
   if (domain && redisClient) {
     try {
       const urlSource = new URL(domain);
       const hostname = urlSource.hostname;
-      const active = await redisClient.get(hostname);
-      const activeUsers = active ? JSON.parse(active) : {};
 
-      const newClient = { ...activeUsers, [userId]: 1 };
-      await redisClient.set(hostname, `${JSON.stringify(newClient)}`);
+      const hostHash = createHash("sha256");
+      hostHash.update(hostname + "");
+
+      await redisClient.hSet(hostHash.digest("hex"), userId + "", "1");
     } catch (e) {
       console.error(e);
     }
