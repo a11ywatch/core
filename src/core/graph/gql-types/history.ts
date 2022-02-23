@@ -19,5 +19,7 @@ export const history = `
 		cdnConnected: Boolean
 		pageLoadTime: PageLoadTimeMeta
 		issuesInfo: IssueMeta
+		pageInsights: Boolean
+		insight: PageInsights
 	}
 `;
