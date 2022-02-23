@@ -65,6 +65,7 @@ const { GRAPHQL_PORT } = config;
 function initServer(): HttpServer {
   const app = express();
 
+  app.disable("x-powered-by");
   app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
