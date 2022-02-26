@@ -23,6 +23,7 @@ const WebsiteModel = {
   lastScanDate: "",
   pageHeaders: null,
   online: null,
+  ua: "", // user agent to use when running
 };
 
 const makeWebsite = (

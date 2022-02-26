@@ -4,6 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  **/
 
+import { makeUser } from "@app/core/models";
 import { EMAIL_ERROR } from "../../../strings";
 import { saltHashPassword, signJwt } from "../../../utils";
 import { getNextSequenceValue } from "../../counters";
@@ -83,19 +84,15 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     }
   } else {
     const id = await getNextSequenceValue("Users");
-    const userObject = {
+    const userObject = makeUser({
       email,
       password: salthash?.passwordHash,
       salt: salthash?.salt,
       id,
       jwt: signJwt({ email, role, keyid: id }),
       role,
-      alertEnabled: true,
-      emailConfirmed: false,
       googleId,
-      profileVisible: false,
-      lastLoginDate: new Date(),
-    };
+    });
 
     await collection.insertOne(userObject);
     await confirmEmail({ keyid: id });
