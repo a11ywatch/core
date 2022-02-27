@@ -30,7 +30,7 @@
     "get-page-speed": "^1.0.1",
     "graphql": "14.6.0",
     "graphql-scalars": "^1.13.6",
-    "graphql-tag": "^2.11.0",
+    "graphql-tag": "^2.12.6",
     "graphql-tools": "8.2.0",
     "jsonwebtoken": "8.5.1",
     "mongodb": "3.7.3",
