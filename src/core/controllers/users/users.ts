@@ -1,9 +1,3 @@
-/*
- * Copyright (c) A11yWatch, LLC. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- **/
-
 import { isBefore } from "date-fns";
 import { footer } from "@app/html";
 import { GENERAL_ERROR, PASSWORD_ERROR, SUCCESS } from "../../strings";

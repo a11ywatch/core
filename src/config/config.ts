@@ -1,9 +1,3 @@
-/*
- * Copyright (c) A11yWatch, LLC. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- **/
-
 import { config as envConf } from "dotenv";
 import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
 import fs from "fs";

@@ -1,9 +1,3 @@
-/*
- * Copyright (c) A11yWatch, LLC. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- **/
-
 import { EMAIL_ERROR, CRAWLER_FINISHED } from "./strings";
 import {
   updateUser,
@@ -11,6 +5,7 @@ import {
   addPaymentSubscription,
   cancelSubscription,
   filterEmailDates,
+  login,
 } from "./graph/mutations";
 import { forkProcess } from "./utils";
 import { cookieConfigs } from "../config";
@@ -22,25 +17,7 @@ const defaultPayload = {
 
 export const Mutation = {
   updateUser,
-  // TODO: DEPRECATE AUTHENTICATION VIA GQL
-  login: async (_, { email, password, googleId }, context) => {
-    const loginUser = await context.models.User.verifyUser({
-      email,
-      password,
-      googleId,
-    });
-
-    if (!loginUser) {
-      throw new Error(EMAIL_ERROR);
-    }
-
-    if (context?.res?.cookie) {
-      context.res.cookie("on", loginUser.email, cookieConfigs);
-      context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
-    }
-
-    return loginUser;
-  },
+  login,
   register: async (_, { email, password, googleId }, context) => {
     const loginUser = await context.models.User.createUser({
       email,
@@ -125,9 +102,6 @@ export const Mutation = {
           id: 0,
         };
       }
-      // pubsub.publish(WEBSITE_REMOVED, {
-      //   websiteRemoved
-      // });
     }
 
     return websiteRemoved;
