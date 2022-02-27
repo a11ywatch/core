@@ -8,7 +8,7 @@ export const updateWebsite = async ({
   pageInsights,
 }) => {
   try {
-    const [website, collection] = await getWebsite({ userId, url }, true);
+    const [website, collection] = await getWebsite({ userId, url });
 
     if (!website) {
       throw new Error(WEBSITE_NOT_FOUND);
@@ -18,11 +18,11 @@ export const updateWebsite = async ({
       pageHeaders?.length === 1 && !pageHeaders[0].key ? null : pageHeaders;
 
     const pageParams = pageHeaders
-      ? { pageHeaders: pageHeaderSrc, pageInsights: website?.pageInsights }
+      ? { pageHeaders: pageHeaderSrc, pageInsights: !!website.pageInsights }
       : {};
 
     if (typeof pageInsights !== "undefined") {
-      pageParams.pageInsights = pageInsights;
+      pageParams.pageInsights = !!pageInsights;
     }
 
     await collection.updateOne({ url, userId }, { $set: pageParams });

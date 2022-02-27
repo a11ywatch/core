@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "jest --forceExit --maxWorkers 4",
     "lint": "eslint .",
-    "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist",
+    "build": "tsc && tsc-alias",
     "start": "NODE_ENV=production node dist/server.js",
     "generate": "graphql-codegen"
   },
@@ -29,7 +29,6 @@
     "express": "4.17.1",
     "get-page-speed": "^1.0.1",
     "graphql": "14.6.0",
-    "graphql-scalars": "^1.13.6",
     "graphql-tag": "^2.12.6",
     "graphql-tools": "8.2.0",
     "jsonwebtoken": "8.5.1",
@@ -65,8 +64,8 @@
     "supertest": "^6.1.1",
     "ts-node": "^10.4.0",
     "ts-node-dev": "^1.1.6",
+    "tsc-alias": "^1.6.3",
     "tsconfig-paths": "^3.9.0",
-    "tscpaths": "0.0.9",
     "typescript": "4.2.4",
     "typescript-eslint": "0.0.1-alpha.0"
   },

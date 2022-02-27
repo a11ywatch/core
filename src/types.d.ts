@@ -9,59 +9,6 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  Date: any;
-  Time: any;
-  DateTime: any;
-  Timestamp: any;
-  UtcOffset: any;
-  Duration: any;
-  ISO8601Duration: any;
-  LocalDate: any;
-  LocalTime: any;
-  LocalEndTime: any;
-  EmailAddress: any;
-  NegativeFloat: any;
-  NegativeInt: any;
-  NonEmptyString: any;
-  NonNegativeFloat: any;
-  NonNegativeInt: any;
-  NonPositiveFloat: any;
-  NonPositiveInt: any;
-  PhoneNumber: any;
-  PositiveFloat: any;
-  PositiveInt: any;
-  PostalCode: any;
-  UnsignedFloat: any;
-  UnsignedInt: any;
-  URL: any;
-  BigInt: any;
-  Long: any;
-  Byte: any;
-  UUID: any;
-  GUID: any;
-  Hexadecimal: any;
-  HexColorCode: any;
-  HSL: any;
-  HSLA: any;
-  IPv4: any;
-  IPv6: any;
-  ISBN: any;
-  JWT: any;
-  Latitude: any;
-  Longitude: any;
-  MAC: any;
-  Port: any;
-  RGB: any;
-  RGBA: any;
-  SafeInt: any;
-  USCurrency: any;
-  Currency: any;
-  JSON: any;
-  JSONObject: any;
-  IBAN: any;
-  ObjectID: any;
-  Void: any;
-  DID: any;
 };
 
 export type Analytic = {
@@ -90,18 +37,10 @@ export type BasicMutationResponse = MutationResponse & {
   message: Scalars['String'];
 };
 
-
-
 export type CreatePageHeaders = {
   key: Scalars['String'];
   value: Scalars['String'];
 };
-
-
-
-
-
-
 
 export type Feature = {
   __typename?: 'Feature';
@@ -111,9 +50,6 @@ export type Feature = {
   user?: Maybe<Array<Maybe<User>>>;
   accountType?: Maybe<Scalars['String']>;
 };
-
-
-
 
 export type History = {
   __typename?: 'History';
@@ -130,19 +66,14 @@ export type History = {
   cdnConnected?: Maybe<Scalars['Boolean']>;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issuesInfo?: Maybe<IssueMeta>;
+  pageInsights?: Maybe<Scalars['Boolean']>;
+  insight?: Maybe<PageInsights>;
 };
 
 
 export type HistoryIssuesArgs = {
   filter?: Maybe<Scalars['String']>;
 };
-
-
-
-
-
-
-
 
 export type Issue = {
   __typename?: 'Issue';
@@ -177,16 +108,6 @@ export type IssueMeta = {
   warningCount?: Maybe<Scalars['Int']>;
   limitedCount?: Maybe<Scalars['Int']>;
 };
-
-
-
-
-
-
-
-
-
-
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -319,14 +240,6 @@ export type MutationResponse = {
   message: Scalars['String'];
 };
 
-
-
-
-
-
-
-
-
 export type PageHeaders = {
   __typename?: 'PageHeaders';
   key?: Maybe<Scalars['String']>;
@@ -377,11 +290,6 @@ export type PaymentSubScription = {
   created?: Maybe<Scalars['String']>;
   collection_method?: Maybe<Scalars['String']>;
 };
-
-
-
-
-
 
 export type Query = {
   __typename?: 'Query';
@@ -443,9 +351,6 @@ export type QueryScriptArgs = {
 export type QueryIssueArgs = {
   url?: Maybe<Scalars['String']>;
 };
-
-
-
 
 export type ScanInformation = {
   __typename?: 'ScanInformation';
@@ -532,10 +437,6 @@ export type SubscriptionEmailVerifiedArgs = {
   userId?: Maybe<Scalars['Int']>;
 };
 
-
-
-
-
 export type UpdateScriptMutationResponse = MutationResponse & {
   __typename?: 'UpdateScriptMutationResponse';
   code: Scalars['String'];
@@ -561,8 +462,6 @@ export type UpdateWebSiteMutationResponse = MutationResponse & {
   message: Scalars['String'];
   website?: Maybe<Website>;
 };
-
-
 
 export type User = {
   __typename?: 'User';
@@ -605,9 +504,6 @@ export type UserScriptArgs = {
   filter?: Maybe<Scalars['String']>;
   url?: Maybe<Scalars['String']>;
 };
-
-
-
 
 export type Website = {
   __typename?: 'Website';

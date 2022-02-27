@@ -28,7 +28,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     return { code: 200, success: true, message: SUCCESS_DELETED_ALL };
   }
 
-  const [siteExist, collection] = await getWebsite({ userId, url }, true);
+  const [siteExist, collection] = await getWebsite({ userId, url });
 
   if (!siteExist) {
     throw new Error(WEBSITE_NOT_FOUND);

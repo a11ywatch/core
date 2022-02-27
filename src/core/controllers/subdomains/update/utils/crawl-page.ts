@@ -40,13 +40,10 @@ export const crawlPage = async (
     try {
       const userData = await UsersController().getUser({ id: userId }, false);
       // CENTRAL WEBSITE COLLECTION
-      const [website, websiteCollection] = await getWebsite(
-        {
-          domain,
-          userId,
-        },
-        true
-      );
+      const [website, websiteCollection] = await getWebsite({
+        domain,
+        userId,
+      });
       let insightsEnabled = pageInsights || (userData && website?.pageInsights);
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
       if (insightsEnabled) {

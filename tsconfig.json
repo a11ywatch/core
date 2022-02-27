@@ -18,7 +18,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "removeComments": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
       "@app/*": ["./src/*"]
     }

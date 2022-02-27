@@ -126,10 +126,10 @@ export const UsersController: UserControllerType = (
         return false;
       }
 
-      const [website, websiteCollection] = await getWebsite(
-        { userId: id, domain },
-        true
-      );
+      const [website, websiteCollection] = await getWebsite({
+        userId: id,
+        domain,
+      });
 
       if (website) {
         await websiteCollection.findOneAndUpdate(

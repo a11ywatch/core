@@ -26,7 +26,7 @@ export const addWebsite = async ({
     throw new Error(WEBSITE_URL_ERROR);
   }
   const url = initUrl(urlMap);
-  const [siteExist, collection] = await getWebsite({ userId, url }, true);
+  const [siteExist, collection] = await getWebsite({ userId, url });
 
   if (siteExist) {
     throw new Error(WEBSITE_EXIST_ERROR);

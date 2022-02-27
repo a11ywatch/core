@@ -1,11 +1,12 @@
 import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
-import type { Params } from "../website.types";
+import type { Website } from "@app/types";
 
-export const getWebsite = async (
-  { userId, url, domain }: Params,
-  chain?: boolean
-) => {
+export const getWebsite = async ({
+  userId,
+  url,
+  domain,
+}: Website): Promise<[Website, any]> => {
   try {
     const [collection] = await connect("Websites");
     const params = websiteSearchParams({
@@ -15,7 +16,7 @@ export const getWebsite = async (
     });
     const website = await collection.findOne(params);
 
-    return chain ? [website, collection] : website;
+    return [website, collection];
   } catch (e) {
     console.error(e);
   }
@@ -24,7 +25,7 @@ export const getWebsite = async (
 export const getWebsitesCrawler = async (
   { userId, domain }: { userId?: any; domain?: string },
   chain?: boolean
-) => {
+): Promise<Website[] | [Website[], any]> => {
   try {
     const [collection] = await connect("Websites");
     const websites = await collection
@@ -41,7 +42,9 @@ export const getWebsitesCrawler = async (
   }
 };
 
-export const getWebsitesWithUsers = async (userLimit = 100000) => {
+export const getWebsitesWithUsers = async (
+  userLimit = 100000
+): Promise<Website[]> => {
   try {
     const [collection] = await connect("Websites");
     return await collection

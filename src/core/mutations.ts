@@ -1,4 +1,4 @@
-import { EMAIL_ERROR, CRAWLER_FINISHED } from "./strings";
+import { CRAWLER_FINISHED } from "./strings";
 import {
   updateUser,
   addWebsite,
@@ -6,9 +6,10 @@ import {
   cancelSubscription,
   filterEmailDates,
   login,
+  register,
+  logout,
 } from "./graph/mutations";
 import { forkProcess } from "./utils";
-import { cookieConfigs } from "../config";
 
 const defaultPayload = {
   keyid: null,
@@ -18,35 +19,8 @@ const defaultPayload = {
 export const Mutation = {
   updateUser,
   login,
-  register: async (_, { email, password, googleId }, context) => {
-    const loginUser = await context.models.User.createUser({
-      email,
-      password,
-      googleId,
-    });
-
-    if (!loginUser) {
-      throw new Error(EMAIL_ERROR);
-    }
-
-    if (context?.res?.cookie) {
-      context.res.cookie("on", loginUser.email, cookieConfigs);
-      context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
-    }
-
-    return loginUser;
-  },
-  logout: async (_, _props, context) => {
-    if (context?.res?.cookie) {
-      context.res.clearCookie("on");
-      context.res.clearCookie("jwt");
-    }
-    return {
-      code: 200,
-      success: true,
-      message: "Logged out success",
-    };
-  },
+  register,
+  logout,
   addWebsite,
   crawlWebsite: async (_, { url }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;

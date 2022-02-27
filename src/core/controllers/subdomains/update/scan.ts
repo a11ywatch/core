@@ -22,13 +22,10 @@ export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
     throw new Error("Cannot use localhost, please use a valid web url.");
   }
 
-  let [website] = await getWebsite(
-    {
-      domain,
-      userId,
-    },
-    true
-  );
+  let [website] = await getWebsite({
+    domain,
+    userId,
+  });
 
   if (!website) {
     website = makeWebsite({ url, domain });
