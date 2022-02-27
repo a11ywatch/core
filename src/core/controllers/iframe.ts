@@ -1,5 +1,5 @@
 import { Request } from "express";
-import type { AppResponse } from "../../server-types";
+import type { AppResponse } from "@app/server-types";
 
 const createIframe = (req: Request, res: AppResponse) => {
   try {
