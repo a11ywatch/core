@@ -5,7 +5,9 @@ import { ScriptsController } from "../controllers/scripts";
 
 export const Website = {
   user: async ({ userId }) => {
-    return await UsersController().getUser({ id: userId }, false);
+    const [user] = await UsersController().getUser({ id: userId });
+
+    return user;
   },
   issues: async ({ userId, url, pageUrl }, { filter }) => {
     let issues = await IssuesController().getIssues({

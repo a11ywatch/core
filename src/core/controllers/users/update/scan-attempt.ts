@@ -2,7 +2,7 @@ import { getUser } from "../find";
 import { isSameDay } from "date-fns";
 
 export const updateScanAttempt = async ({ userId }) => {
-  const [user, collection] = await getUser({ id: userId }, true);
+  const [user, collection] = await getUser({ id: userId });
 
   if (user) {
     const lastScanDate = new Date();
@@ -15,7 +15,8 @@ export const updateScanAttempt = async ({ userId }) => {
         };
 
     scanInfo.scanAttempts =
-      scanInfo?.lastScanDate && !isSameDay(scanInfo?.lastScanDate, new Date())
+      scanInfo?.lastScanDate &&
+      !isSameDay(scanInfo?.lastScanDate as Date, new Date())
         ? 1
         : scanInfo.scanAttempts + 1;
 
@@ -36,7 +37,7 @@ export const updateScanAttempt = async ({ userId }) => {
 };
 
 export const getScanEnabled = async ({ userId }) => {
-  const user = await getUser({ id: userId });
+  const [user] = await getUser({ id: userId });
   const scanAttempts = user?.scanInfo?.scanAttempts ?? 0;
 
   if (

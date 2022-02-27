@@ -5,7 +5,7 @@ import { getUser } from "../find";
 
 export const validateEmail = async ({ code }) => {
   if (code) {
-    const [user, collection] = await getUser({ emailConfirmCode: code }, true);
+    const [user, collection] = await getUser({ emailConfirmCode: code });
 
     if (user && isBefore(new Date(), new Date(user?.emailExpDate))) {
       await collection.findOneAndUpdate(

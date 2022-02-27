@@ -11,7 +11,7 @@ const verifyUser = async ({ password, email, googleId }) => {
     throw new Error("A password is required to login.");
   }
 
-  const [user, collection] = await getUser({ email }, true);
+  const [user, collection] = await getUser({ email });
 
   if (!user) {
     throw new Error(EMAIL_ERROR);

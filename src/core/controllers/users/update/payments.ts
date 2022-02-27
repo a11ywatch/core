@@ -25,7 +25,7 @@ export const addPaymentSubscription = async ({
   stripeToken: string;
   yearly?: boolean;
 }) => {
-  const [user, collection] = await getUser({ email: emailP, id: keyid }, true);
+  const [user, collection] = await getUser({ email: emailP, id: keyid });
   const email = user?.email ?? emailP;
 
   if (user && stripeToken) {
@@ -111,7 +111,7 @@ export const addPaymentSubscription = async ({
 };
 
 export const cancelSubscription = async ({ keyid }) => {
-  const [user, collection] = await getUser({ id: keyid }, true);
+  const [user, collection] = await getUser({ id: keyid });
 
   if (!user) {
     throw new Error(EMAIL_ERROR);

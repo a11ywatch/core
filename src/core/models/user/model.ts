@@ -10,6 +10,7 @@ const UserModel = {
   googleId: "",
   profileVisible: false,
   lastLoginDate: "",
+  passwordRequired: false,
   websiteLimit: 0, // limit of websites a user can have
 };
 

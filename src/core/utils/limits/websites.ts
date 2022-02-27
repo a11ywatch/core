@@ -2,7 +2,7 @@ export const blockWebsiteAdd = ({
   audience,
   collectionCount,
 }: any): boolean => {
-  if (audience === "admin" || audience === 3) {
+  if (audience === "admin") {
     return false;
   }
   return (

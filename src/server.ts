@@ -222,7 +222,7 @@ function initServer(): HttpServer {
     const id = parsedToken?.payload?.keyid;
 
     if (typeof id !== "undefined") {
-      const [user, collection] = await UsersController().getUser({ id }, true);
+      const [user, collection] = await UsersController().getUser({ id });
 
       if (user) {
         await collection.updateOne(

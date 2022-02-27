@@ -14,7 +14,7 @@ export const resetPassword = async ({ email, resetCode }) => {
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
-  const [user, collection] = await getUser({ email }, true);
+  const [user, collection] = await getUser({ email });
 
   if (user?.resetCode === resetCode) {
     try {

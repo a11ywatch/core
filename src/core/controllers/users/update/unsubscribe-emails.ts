@@ -3,7 +3,7 @@ import { getUser } from "../find";
 export const unsubscribeEmails = async ({ id, email }) => {
   try {
     // TODO: remove collection find
-    const [user, collection] = await getUser({ id, email }, true);
+    const [user, collection] = await getUser({ id, email });
 
     if (user) {
       await collection.findOneAndUpdate(

@@ -9,7 +9,7 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
-  const [user, collection] = await getUser({ email }, true);
+  const [user, collection] = await getUser({ email });
   const googleAuthed = user && (user.googleId || googleId);
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
@@ -89,7 +89,10 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     });
 
     await collection.insertOne(userObject);
-    await confirmEmail({ keyid: id });
+
+    setImmediate(async () => {
+      await confirmEmail({ keyid: id });
+    });
 
     return userObject;
   }

@@ -469,6 +469,7 @@ export type User = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
   jwt?: Maybe<Scalars['String']>;
+  salt?: Maybe<Scalars['String']>;
   loggedIn?: Maybe<Scalars['Boolean']>;
   passwordRequired?: Maybe<Scalars['Boolean']>;
   alertEnabled?: Maybe<Scalars['Boolean']>;
@@ -487,6 +488,12 @@ export type User = {
   script?: Maybe<Script>;
   paymentSubscription?: Maybe<PaymentSubScription>;
   apiUsage?: Maybe<ApiUsage>;
+  websiteLimit?: Maybe<Scalars['Int']>;
+  downAlerts?: Maybe<Array<Maybe<Website>>>;
+  googleId?: Maybe<Scalars['String']>;
+  emailExpDate?: Maybe<Scalars['String']>;
+  resetCode?: Maybe<Scalars['String']>;
+  stripeID?: Maybe<Scalars['String']>;
 };
 
 

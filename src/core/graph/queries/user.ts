@@ -9,7 +9,7 @@ export const user = async (_, { id, filter, password }, context) => {
   });
 
   if (typeof userId !== undefined && userId !== null) {
-    const user = await models.User.getUser({
+    const [user] = await models.User.getUser({
       id: userId,
     });
 

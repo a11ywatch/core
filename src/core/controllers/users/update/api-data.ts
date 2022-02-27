@@ -6,7 +6,7 @@ export const updateApiUsage = async (
   chain?: boolean
 ) => {
   try {
-    const [user, collection] = await getUser({ id }, true);
+    const [user, collection] = await getUser({ id });
     if (!user) {
       return chain ? [user, collection] : user;
     }
@@ -19,7 +19,9 @@ export const updateApiUsage = async (
 
     const lastScanDate = new Date();
 
-    if (!isSameDay(user?.apiUsage?.lastScanDate, lastScanDate)) {
+    const lastScan = user?.apiUsage?.lastScanDate || new Date();
+
+    if (!isSameDay(lastScan as Date, lastScanDate)) {
       resetData = true;
     }
 
@@ -33,7 +35,10 @@ export const updateApiUsage = async (
         }
       : { apiUsage: { usage: 1, lastScanDate } };
 
-    user.apiUsage = updateCollectionProps.apiUsage;
+    user.apiUsage = {
+      ...updateCollectionProps.apiUsage,
+      lastScanDate: lastScan as string,
+    };
 
     await collection.updateOne({ id }, { $set: updateCollectionProps });
 

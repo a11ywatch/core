@@ -20,7 +20,7 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
 
   for await (const website of allWebPages) {
     const { userId, url } = getPageItem(website);
-    const [user] = await getUser({ id: userId }, true).catch((e) => {
+    const [user] = await getUser({ id: userId }).catch((e) => {
       console.error(e);
       return [null];
     });

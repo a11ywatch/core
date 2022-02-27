@@ -22,7 +22,7 @@ interface HashType {
 
 export function saltHashPassword(
   userpassword: string,
-  saltIncluded?: boolean
+  saltIncluded?: string
 ): HashType {
   const salt = saltIncluded || genRandomString(16);
   return sha512(userpassword, salt);

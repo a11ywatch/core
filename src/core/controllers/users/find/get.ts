@@ -1,5 +1,6 @@
 import { userParams } from "@app/core/utils/controller-filter";
 import { connect } from "@app/database";
+import { User } from "@app/types";
 
 export const getUsers = async (chain?: boolean, count: number = 20) => {
   try {
@@ -25,18 +26,18 @@ type GetUserParams = {
   emailConfirmCode?: string;
 };
 
-export const getUser = async (
-  { email, id, emailConfirmCode }: GetUserParams,
-  chain?: boolean
-) => {
+function getUser(params: GetUserParams): Promise<[User, any]>;
+async function getUser({ email, id, emailConfirmCode }) {
   try {
     const [collection] = await connect("Users");
     const params = userParams({ email, id, emailConfirmCode });
-
     const user = await collection.findOne(params);
 
-    return chain ? [user, collection] : user;
+    return [user, collection];
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
-};
+}
+
+export { getUser };

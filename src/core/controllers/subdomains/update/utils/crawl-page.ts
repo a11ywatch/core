@@ -38,7 +38,7 @@ export const crawlPage = async (
 
   return await new Promise(async (resolve) => {
     try {
-      const userData = await UsersController().getUser({ id: userId }, false);
+      const [userData] = await UsersController().getUser({ id: userId });
       // CENTRAL WEBSITE COLLECTION
       const [website, websiteCollection] = await getWebsite({
         domain,
@@ -47,7 +47,7 @@ export const crawlPage = async (
       let insightsEnabled = pageInsights || (userData && website?.pageInsights);
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
       if (insightsEnabled) {
-        if (userData?.role === "0" || !userData?.role) {
+        if (String(userData?.role) === "0" || !userData?.role) {
           const newSubUrl = new URL(website?.url);
           const dataSourceUrl = new URL(pageUrl);
           // ONLY ALLOW INSIGHTS ON ROOT DOMAIN when FREE

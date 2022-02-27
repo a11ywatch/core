@@ -39,7 +39,7 @@ export const UsersController: UserControllerType = (
   addPaymentSubscription,
   cancelSubscription,
   updateFilterEmailDates: async ({ id, emailFilteredDates }) => {
-    const [user, collection] = await getUser({ id }, true);
+    const [user, collection] = await getUser({ id });
 
     if (user) {
       await collection.updateOne(
@@ -63,7 +63,7 @@ export const UsersController: UserControllerType = (
   },
   // TODO: Should be renamed update user password
   updateUser: async ({ password, email, newPassword, stripeToken }) => {
-    const [user, collection] = await getUser({ email }, true);
+    const [user, collection] = await getUser({ email });
     const salthash = saltHashPassword(password, user?.salt);
     const authless = !user?.password && !user.googleId;
 
@@ -120,7 +120,7 @@ export const UsersController: UserControllerType = (
   unsubscribeEmails,
   sendWebsiteOffline: async ({ id, domain }) => {
     try {
-      const [user, collection] = await getUser({ id }, true);
+      const [user, collection] = await getUser({ id });
 
       if (user?.alertEnabled === false || !domain) {
         return false;

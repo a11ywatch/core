@@ -12,7 +12,7 @@ export const confirmEmail = async ({ keyid: id }) => {
   if (typeof id === "undefined") {
     throw new Error(EMAIL_ERROR);
   }
-  const [user, collection] = await getUser({ id }, true);
+  const [user, collection] = await getUser({ id });
 
   if (user) {
     const emailConfirmCode = randomBytes(4).toString("hex");

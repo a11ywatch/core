@@ -13,6 +13,7 @@ import {
 import { makeWebsite } from "@app/core/models/website";
 import { getHostName, initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
+import { getUser } from "../../users";
 
 export const addWebsite = async ({
   userId,
@@ -33,8 +34,12 @@ export const addWebsite = async ({
   }
 
   const collectionCount = await collection.countDocuments({ userId });
+  const [user] = await getUser({ id: userId });
 
-  if (blockWebsiteAdd({ audience, collectionCount })) {
+  if (
+    (user?.websiteLimit && collectionCount === user?.websiteLimit) ||
+    blockWebsiteAdd({ audience, collectionCount })
+  ) {
     throw new Error(ADD_FREE_MAX_ERROR);
   }
 

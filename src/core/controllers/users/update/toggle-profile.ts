@@ -4,7 +4,7 @@ import { log } from "@a11ywatch/log";
 
 const toggleProfile = async ({ keyid: id, profileVisible }) => {
   try {
-    const [user, collection] = await getUser({ id }, true);
+    const [user, collection] = await getUser({ id });
 
     if (user) {
       await collection.updateOne({ id }, { $set: { profileVisible } });

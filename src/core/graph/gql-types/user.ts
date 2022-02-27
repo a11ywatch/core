@@ -15,6 +15,7 @@ export const user = `
 		email: String
 		password: String
 		jwt: String
+		salt: String
 		loggedIn: Boolean
 		passwordRequired: Boolean
 		alertEnabled: Boolean
@@ -33,5 +34,11 @@ export const user = `
 		script(filter: String, url: String): Script
 		paymentSubscription: PaymentSubScription
 		apiUsage: ApiUsage
+		websiteLimit: Int
+		downAlerts: [Website]
+		googleId: String
+		emailExpDate: String
+		resetCode: String
+		stripeID: String
 	}
 `;
