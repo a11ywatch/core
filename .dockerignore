@@ -9,3 +9,5 @@ README.md
 dist
 coverage
 .env
+jest-mongodb-config.ts
+jest.config.ts

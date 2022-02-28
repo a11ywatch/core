@@ -15,8 +15,8 @@ import {
 export const resolvers = {
   Query,
   Mutation,
-  Script,
   Subscription,
+  Script,
   User,
   Analytic,
   Website,

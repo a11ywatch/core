@@ -2,17 +2,19 @@ import {
   emailVerified,
   issueAdded,
   websiteAdded,
-  pubsub,
   subDomainAdded,
   websiteRemoved,
 } from "./graph/subscriptions";
 
-const Subscription = {
+export const Subscription = {
+  // @ts-ignore
   emailVerified,
+  // @ts-ignore
   issueAdded,
+  // @ts-ignore
   subDomainAdded,
+  // @ts-ignore
   websiteAdded,
+  // @ts-ignore
   websiteRemoved,
 };
-
-export { pubsub, Subscription };

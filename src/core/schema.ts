@@ -1,4 +1,4 @@
-import { makeExecutableSchema } from "graphql-tools";
+import { makeExecutableSchema } from "@graphql-tools/schema";
 import { resolvers } from "./resolvers";
 import {
   user,
@@ -19,26 +19,26 @@ import {
 } from "./graph/gql-types";
 
 const typeDefs = `
-${pageInsights}
-${meta}
-${payments}
-${user}
-${feature}
-${website}
-${subdomain}
-${issue}
-${script}
-${analytic}
-${history}
-${query}
-${input}
-${mutation}
-${subscription}
+  ${pageInsights}
+  ${meta}
+  ${payments}
+  ${user}
+  ${feature}
+  ${website}
+  ${subdomain}
+  ${issue}
+  ${script}
+  ${analytic}
+  ${history}
+  ${query}
+  ${input}
+  ${mutation}
+  ${subscription}
 `;
 
-const scheme: { typeDefs: string; resolvers: any } = {
+const scheme = {
   typeDefs,
   resolvers,
 };
 
-export const schema = makeExecutableSchema(scheme);
+export const schema = makeExecutableSchema(scheme as any);

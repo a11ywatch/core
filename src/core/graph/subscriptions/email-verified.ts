@@ -1,4 +1,4 @@
-import { withFilter } from "apollo-server";
+import { withFilter } from "graphql-subscriptions";
 import { EMAIL_VERIFIED } from "../../static";
 import { pubsub } from "./pubsub";
 

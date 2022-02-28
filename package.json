@@ -18,6 +18,7 @@
   "dependencies": {
     "@a11ywatch/log": "^0.3.5",
     "@a11ywatch/website-source-builder": "^0.0.11",
+    "@graphql-tools/schema": "^8.3.2",
     "apollo-server": "2.25.3",
     "apollo-server-express": "2.25.3",
     "cookie-parser": "^1.4.6",
@@ -29,7 +30,8 @@
     "express": "4.17.1",
     "get-page-speed": "^1.0.1",
     "graphql": "14.6.0",
-    "graphql-tag": "^2.11.0",
+    "graphql-subscriptions": "^2.0.0",
+    "graphql-tag": "2.11.0",
     "graphql-tools": "0.8.0",
     "jsonwebtoken": "8.5.1",
     "mongodb": "3.7.3",
@@ -38,7 +40,7 @@
     "nodemailer": "6.7.2",
     "redis": "^4.0.3",
     "stripe": "7.14.0",
-    "subscriptions-transport-ws": "0.3.1",
+    "subscriptions-transport-ws": "^0.3.1",
     "universal-analytics": "^0.4.23",
     "valid-url": "1.0.9"
   },
