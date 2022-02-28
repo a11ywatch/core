@@ -1,6 +1,6 @@
 import mongodbPreset from "@shelf/jest-mongodb/jest-preset";
 
-module.exports = {
+export = {
   ...mongodbPreset,
   moduleNameMapper: {
     "^@app/(.*)$": "<rootDir>/src/$1",
