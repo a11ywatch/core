@@ -22,10 +22,11 @@ RUN apk upgrade --update-cache --available && \
 	apk add openssl && \
 	rm -rf /var/cache/apk/*
 
-COPY package.json ./
+COPY package*.json ./
 RUN npm install --production
 
 COPY --from=0 /usr/src/app/private.key .
 COPY --from=0 /usr/src/app/public.key .
+COPY --from=0 /usr/src/app/dist .
 
-CMD [ "node", "./dist/server.js" ]
+CMD [ "node", "./server.js" ]
