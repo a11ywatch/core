@@ -1,18 +1,22 @@
 import { rawStatusBadge } from "@app/core/assets";
 import { AnalyticsController } from "@app/core/controllers";
+import { Analytic } from "@app/types";
 import { createHash } from "crypto";
 import type { Request, Response } from "express";
 
 export const statusBadge = async (req: Request, res: Response) => {
   const domain = req.params?.domain?.replace(".svg", "");
-  const page = await AnalyticsController().getWebsite({ domain }, false);
+  const page: Analytic = await AnalyticsController().getWebsite(
+    { domain },
+    false
+  );
 
   let statusColor = "#000";
 
   let score = 0;
 
   if (page) {
-    score = page?.score;
+    score = page?.adaScore;
     if (score && typeof score === "number") {
       if (score >= 90) {
         statusColor = "#3fb950";
