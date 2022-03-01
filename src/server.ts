@@ -311,11 +311,9 @@ function initServer(): HttpServer {
   });
 
   const server = new Server();
-
   server.applyMiddleware({ app, cors: corsOptions });
 
   const httpServer = http.createServer(app);
-
   server.installSubscriptionHandlers(httpServer);
 
   const listener = httpServer.listen(GRAPHQL_PORT);

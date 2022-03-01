@@ -65,6 +65,9 @@ const serverConfig: ApolloServerExpressConfig = {
   },
 };
 
-const Server = ApolloServer.bind(this, serverConfig);
+interface AppGqlServer {
+  new (apolloConfig?: ApolloServerExpressConfig): ApolloServer;
+}
+const Server: AppGqlServer = ApolloServer.bind(this, serverConfig);
 
 export { Server, serverConfig };
