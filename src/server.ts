@@ -1,12 +1,18 @@
 import type { Server as HttpServer } from "http";
 import type { AddressInfo } from "net";
 import express from "express";
-import http from "http";
 import cors from "cors";
 import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
-import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
+import {
+  corsOptions,
+  config,
+  logServerInit,
+  cookieConfigs,
+  PRIVATE_KEY,
+  PUBLIC_KEY,
+} from "./config";
 import { forkProcess, getUser } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
@@ -15,6 +21,7 @@ import { AnnouncementsController } from "./core/controllers/announcements";
 import { UsersController } from "./core/controllers/users";
 import fetcher from "node-fetch";
 import cookieParser from "cookie-parser";
+import { createServer } from "spdy";
 
 import {
   CRAWL_WEBSITE,
@@ -313,7 +320,11 @@ function initServer(): HttpServer {
   const server = new Server();
   server.applyMiddleware({ app, cors: corsOptions });
 
-  const httpServer = http.createServer(app);
+  const httpServer = createServer(
+    { key: PRIVATE_KEY, cert: PUBLIC_KEY, spdy: { plain: true } },
+    app
+  );
+
   server.installSubscriptionHandlers(httpServer);
 
   const listener = httpServer.listen(GRAPHQL_PORT);
