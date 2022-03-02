@@ -1,18 +1,19 @@
 import { redisClient } from "@app/database";
-import { URL } from "url";
 import type { Request, Response } from "express";
 import { getParams } from "./get-params";
 import { createHash } from "crypto";
+import { sourceBuild } from "@a11ywatch/website-source-builder";
 
 export const completeCrawlTracker = async (req: Request, res: Response) => {
   const { user_id: userId, domain } = getParams(req.body?.data ?? {});
 
   if (domain && redisClient) {
     try {
-      const urlSource = new URL(domain);
-      const hostname = urlSource.hostname;
+      const source = sourceBuild(domain);
+      const bareHost = source?.domain;
       const hostHash = createHash("sha256");
-      hostHash.update(hostname + "");
+
+      hostHash.update(bareHost);
 
       await redisClient.hDel(hostHash.digest("hex"), userId + "");
     } catch (e) {

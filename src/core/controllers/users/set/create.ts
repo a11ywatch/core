@@ -89,10 +89,7 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     });
 
     await collection.insertOne(userObject);
-
-    setImmediate(async () => {
-      await confirmEmail({ keyid: id });
-    });
+    await confirmEmail({ keyid: id });
 
     return userObject;
   }
