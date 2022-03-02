@@ -14,20 +14,29 @@ export const updateWebsite = async ({
       throw new Error(WEBSITE_NOT_FOUND);
     }
 
-    const pageHeaderSrc =
-      pageHeaders?.length === 1 && !pageHeaders[0].key ? null : pageHeaders;
+    const pageParams = {
+      pageHeaders: website.pageHeaders,
+      pageInsights: !!website.pageInsights,
+    };
 
-    const pageParams = pageHeaders
-      ? { pageHeaders: pageHeaderSrc, pageInsights: !!website.pageInsights }
-      : {};
+    if (typeof pageHeaders !== "undefined") {
+      const pageHeaderSrc =
+        pageHeaders?.length === 1 && !pageHeaders[0].key ? null : pageHeaders;
 
+      pageParams.pageHeaders = pageHeaderSrc;
+    }
     if (typeof pageInsights !== "undefined") {
       pageParams.pageInsights = !!pageInsights;
     }
 
     await collection.updateOne({ url, userId }, { $set: pageParams });
 
-    return { website, code: 200, success: true, message: SUCCESS };
+    return {
+      website: { ...website, ...pageParams },
+      code: 200,
+      success: true,
+      message: SUCCESS,
+    };
   } catch (e) {
     console.error(e);
   }
