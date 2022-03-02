@@ -36,6 +36,7 @@ export const addWebsite = async ({
   const collectionCount = await collection.countDocuments({ userId });
   const [user] = await getUser({ id: userId });
 
+  // TODO: FLAG TO BLOCK USER FROM WEBSITE ADDING
   if (
     (user?.websiteLimit && collectionCount === user?.websiteLimit) ||
     blockWebsiteAdd({ audience, collectionCount })

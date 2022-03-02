@@ -67,12 +67,18 @@ export const addPaymentSubscription = async ({
       });
 
       if (charge) {
-        // TODO: GET ROLE DETERMINATION ANOTHER WAY
-        const role = [999, 9999, "999", "9999"].includes(charge.plan.amount)
-          ? 1
-          : [1999, 19999, "1999", "19999"].includes(charge.plan.amount)
-          ? 2
-          : user.role;
+        const chargeAmount = String(charge.plan.amount);
+        let role = user.role;
+        let websiteLimit = user.websiteLimit;
+
+        // TODO: determine another way off price
+        if ("999" === chargeAmount || "9999" === chargeAmount) {
+          role = 1;
+          websiteLimit = 4;
+        } else if ("1999" === chargeAmount || "19999" === chargeAmount) {
+          role = 2;
+          websiteLimit = 10;
+        }
 
         const jwt = signJwt({ email, role, keyid: user.id });
 
@@ -93,6 +99,7 @@ export const addPaymentSubscription = async ({
               role,
               stripeID: customer.id,
               paymentSubscription: charge,
+              websiteLimit,
             },
           }
         );
