@@ -1,9 +1,9 @@
 import validUrl from "valid-url";
-import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { ApiResponse, responseModel } from "@app/core/models";
 import { redisClient } from "@app/database/memory-client";
 import { crawlPage } from "./utils/crawl-page";
 import { createHash } from "crypto";
+import { URL } from "url";
 
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const { userId: user_id, url: urlMap } = params ?? {};
@@ -15,23 +15,24 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
     return Promise.resolve(responseModel({ msgType: ApiResponse.NotFound }));
   }
 
-  let domainSource = sourceBuild(urlMap, user_id);
   let usersPool = [];
 
   if (user_id) {
     usersPool.push(user_id);
   }
 
-  if (typeof user_id === "undefined") {
+  if (user_id === undefined) {
     try {
+      const urlSource = new URL(urlMap);
+      const hostname = urlSource.hostname;
+
       const hostHash = createHash("sha256");
-      hostHash.update(domainSource?.domain + "");
-      usersPool = (await redisClient.HKEYS(hostHash.digest("hex"))) || [];
+      hostHash.update(hostname + "");
+      usersPool = await redisClient.HKEYS(hostHash.digest("hex"));
     } catch (e) {
       console.error(e);
     }
   }
-
   if (usersPool?.length) {
     for await (const id of usersPool) {
       await crawlPage({ ...params, userId: Number(id) }, sendEmail);
