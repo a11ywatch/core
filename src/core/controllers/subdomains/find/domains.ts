@@ -14,7 +14,7 @@ export const getDomains = async (
     });
     const websitesCollection = await collection
       .find(searchProps)
-      .limit(100)
+      .limit(10000)
       .toArray();
 
     // TODO: REPLACE FOR MIGRATION | interface resolver

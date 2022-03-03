@@ -14,3 +14,4 @@ export { collectionUpsert } from "./collection-upsert";
 export { issueSort } from "./sorts";
 export { downloadToExcel } from "./download-to-excel";
 export { parseCookie } from "./parse-cookie";
+export { getHostName } from "./get-host";

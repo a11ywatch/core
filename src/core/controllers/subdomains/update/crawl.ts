@@ -4,6 +4,7 @@ import { redisClient } from "@app/database/memory-client";
 import { crawlPage } from "./utils/crawl-page";
 import { createHash } from "crypto";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
+import { getHostName } from "@app/core/utils";
 
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const { userId: user_id, url: urlMap } = params ?? {};
@@ -23,8 +24,7 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
 
   if (user_id === undefined) {
     try {
-      const source = sourceBuild(urlMap);
-      const bareHost = source?.domain;
+      const bareHost = getHostName(urlMap);
       const hostHash = createHash("sha256");
       hostHash.update(bareHost);
       usersPool = await redisClient.HKEYS(hostHash.digest("hex"));
