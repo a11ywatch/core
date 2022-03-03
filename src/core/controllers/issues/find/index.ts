@@ -52,7 +52,8 @@ export const getIssues = async ({
       userId,
     });
 
-    return await collection.find(searchProps).limit(1000).toArray();
+    // TODO: PAGINATION
+    return await collection.find(searchProps).limit(2000).toArray();
   } catch (e) {
     console.error(e);
   }

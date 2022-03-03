@@ -3,7 +3,6 @@ import { ApiResponse, responseModel } from "@app/core/models";
 import { redisClient } from "@app/database/memory-client";
 import { crawlPage } from "./utils/crawl-page";
 import { createHash } from "crypto";
-import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { getHostName } from "@app/core/utils";
 
 export const crawlWebsite = async (params, sendEmail?: boolean) => {

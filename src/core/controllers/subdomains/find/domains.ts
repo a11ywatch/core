@@ -12,21 +12,7 @@ export const getDomains = async (
       userId,
       domain: domain || (url && getHostName(url)),
     });
-    const websitesCollection = await collection
-      .find(searchProps)
-      .limit(10000)
-      .toArray();
-
-    // TODO: REPLACE FOR MIGRATION | interface resolver
-    const websites = websitesCollection?.map((website) => {
-      if (typeof website?.pageInsights === "undefined") {
-        website.pageInsights = false;
-      }
-      if (typeof website?.insight === "undefined") {
-        website.insight = null;
-      }
-      return website;
-    });
+    const websites = await collection.find(searchProps).limit(10000).toArray();
 
     return chain ? [websites, collection] : websites;
   } catch (e) {
