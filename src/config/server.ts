@@ -1,5 +1,5 @@
 import { log } from "@a11ywatch/log";
-import { config, TEST_ENV } from "./config";
+import { config } from "./config";
 
 const { CLIENT_URL, WATCHER_CLIENT_URL, ROOT_URL, DEV } = config;
 
@@ -18,7 +18,8 @@ export const whitelist = [
   "a11ywatch.vercel.app",
 ].filter(Boolean);
 
-if (DEV || TEST_ENV) {
+// ALLOW LOCAL NETWORK
+if (["localhost", "127.0.0.1"].includes(CLIENT_URL)) {
   whitelist.push("127.0.0.1", "0.0.0.0", "http://localhost:3000", "::1");
 }
 

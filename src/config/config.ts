@@ -1,6 +1,6 @@
 import { config as envConf } from "dotenv";
-import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
 import fs from "fs";
+import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
 import { CookieOptions } from "express";
 
 envConf();
@@ -51,9 +51,7 @@ export const config = {
   WATCHER_CLIENT_URL: replaceDockerNetwork(process.env.WATCHER_CLIENT_URL),
   SCRIPTS_CDN_URL,
   GRAPHQL_PORT: Number(
-    process.env.NODE_ENV === "test"
-      ? 0
-      : process.env.PORT || process.env.GRAPHQL_PORT || 0
+    TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 0
   ),
   EMAIL_SERVICE_PASSWORD: process.env.EMAIL_SERVICE_PASSWORD,
   STRIPE_KEY: process.env.STRIPE_KEY,
@@ -72,14 +70,23 @@ export const config = {
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
 };
 
-// TODO: Look into better cookie settings for localhost setups
-const cookieConfigs: CookieOptions = {
+let cookieConfigs: CookieOptions = {
   maxAge: 228960000,
-  sameSite: !DEV ? "lax" : false,
+  sameSite: "lax",
   httpOnly: true,
-  secure: !DEV,
-  domain: !DEV ? config.DOMAIN.replace("https://", ".") : undefined,
+  secure: true,
+  domain: config.DOMAIN.replace("https://", "."),
 };
+
+if (DEV) {
+  cookieConfigs = {
+    maxAge: 228960000,
+    sameSite: false,
+    httpOnly: true,
+    secure: false,
+    domain: undefined,
+  };
+}
 
 export {
   cookieConfigs,
