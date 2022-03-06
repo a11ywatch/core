@@ -36,7 +36,6 @@ export const user = `
 		apiUsage: ApiUsage
 		websiteLimit: Int
 		downAlerts: [Website]
-		googleId: String
 		emailExpDate: String
 		resetCode: String
 		stripeID: String
