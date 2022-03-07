@@ -43,6 +43,10 @@ const SCRIPTS_CDN_URL = String(
 );
 const SCRIPTS_CDN = SCRIPTS_CDN_URL.replace("api", "");
 
+const GRAPHQL_PORT = Number(
+  TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 0
+);
+
 export const config = {
   DEV,
   DB_URL: process.env.MONGO_URL || process.env.DB_URL,
@@ -50,24 +54,21 @@ export const config = {
   CLIENT_URL: replaceDockerNetwork(process.env.CLIENT_URL),
   WATCHER_CLIENT_URL: replaceDockerNetwork(process.env.WATCHER_CLIENT_URL),
   SCRIPTS_CDN_URL,
-  GRAPHQL_PORT: Number(
-    TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 0
-  ),
+  GRAPHQL_PORT,
   EMAIL_SERVICE_PASSWORD: process.env.EMAIL_SERVICE_PASSWORD,
+  ROOT_URL: process.env.ROOT_URL,
+  DOCKER_ENV: process.env.DOCKER_ENV,
+  DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
+  // EMAIL
+  EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL,
+  EMAIL_CLIENT_ID: process.env.EMAIL_CLIENT_ID,
+  EMAIL_CLIENT_KEY,
+  // STRIPE
   STRIPE_KEY: process.env.STRIPE_KEY,
-  SUBSCRIPTION_TIMOUT: process.env.SUBSCRIPTION_TIMOUT,
   STRIPE_BASIC_PLAN: process.env.STRIPE_BASIC_PLAN,
   STRIPE_PREMIUM_PLAN: process.env.STRIPE_PREMIUM_PLAN,
   STRIPE_BASIC_PLAN_YEARLY: process.env.STRIPE_BASIC_PLAN_YEARLY,
   STRIPE_PREMIUM_PLAN_YEARLY: process.env.STRIPE_PREMIUM_PLAN_YEARLY,
-  ROOT_URL: process.env.ROOT_URL,
-  DOCKER_ENV: process.env.DOCKER_ENV,
-  EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL,
-  EMAIL_CLIENT_ID: process.env.EMAIL_CLIENT_ID,
-  EMAIL_CLIENT_KEY,
-  PUBLIC_KEY,
-  PRIVATE_KEY,
-  DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
 };
 
 let cookieConfigs: CookieOptions = {
@@ -92,8 +93,8 @@ export {
   cookieConfigs,
   DEV,
   TEST_ENV,
-  PRIVATE_KEY,
   SCRIPTS_CDN_URL,
   SCRIPTS_CDN,
+  PRIVATE_KEY,
   PUBLIC_KEY,
 };

@@ -2,11 +2,19 @@ import type { Server as HttpServer } from "http";
 import type { AddressInfo } from "net";
 import express from "express";
 import http from "http";
+import https from "https";
 import cors from "cors";
 import createIframe from "node-iframe";
 import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
-import { corsOptions, config, logServerInit, cookieConfigs } from "./config";
+import {
+  corsOptions,
+  config,
+  logServerInit,
+  cookieConfigs,
+  PRIVATE_KEY,
+  PUBLIC_KEY,
+} from "./config";
 import { forkProcess, getUser } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
@@ -313,7 +321,19 @@ function initServer(): HttpServer {
   const server = new Server();
   server.applyMiddleware({ app, cors: corsOptions });
 
-  const httpServer = http.createServer(app);
+  let httpServer;
+
+  if (process.env.ENABLE_SSL === "true") {
+    httpServer = https.createServer(
+      {
+        key: PRIVATE_KEY,
+        cert: PUBLIC_KEY,
+      },
+      app
+    );
+  } else {
+    httpServer = http.createServer(app);
+  }
 
   server.installSubscriptionHandlers(httpServer);
 
