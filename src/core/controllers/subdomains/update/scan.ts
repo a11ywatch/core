@@ -5,12 +5,16 @@ import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
 import { getWebsite } from "../../websites";
 import { fetchPuppet, extractPageData, limitIssue } from "./utils";
 import { createReport } from "../../reports";
+import { ResponseModel } from "@app/core/models/response/types";
 
-export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
+export const scanWebsite = async ({
+  userId: userIdMap,
+  url: urlMap,
+}: any): Promise<ResponseModel> => {
   const userId = !userIdMap && userIdMap !== 0 ? -1 : userIdMap;
 
   if (!validUrl.isUri(urlMap)) {
-    return responseModel({ msgType: ApiResponse.NotFound });
+    return Promise.resolve(responseModel({ msgType: ApiResponse.NotFound }));
   }
 
   const { url, domain, pageUrl } = sourceBuild(urlMap, userId);
@@ -49,9 +53,8 @@ export const scanWebsite = async ({ userId: userIdMap, url: urlMap }: any) => {
               "Website timeout exceeded threshhold for scan, website rendered to slow under 15000 ms",
           });
         }
-        const { script, issues, webPage, pageHasCdn } = extractPageData(
-          dataSource
-        );
+        const { script, issues, webPage, pageHasCdn } =
+          extractPageData(dataSource);
 
         // TODO: simply use dataSource?.webPage
         const updateWebsiteProps = {

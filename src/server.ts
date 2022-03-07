@@ -23,6 +23,7 @@ import { AnnouncementsController } from "./core/controllers/announcements";
 import { UsersController } from "./core/controllers/users";
 import fetcher from "node-fetch";
 import cookieParser from "cookie-parser";
+import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
 
 import {
   CRAWL_WEBSITE,
@@ -96,6 +97,30 @@ function initServer(): HttpServer {
   });
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
   app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
+
+  // CLI OPTIONS
+  app.post("/api/scan-simple", cors(), async (req, res) => {
+    try {
+      const url = req.query?.websiteUrl ?? req.body?.websiteUrl;
+      const userId: number = req.query?.userId ?? req.body?.userId;
+
+      const data = await scan({
+        url: decodeURIComponent(url + ""),
+        userId,
+      });
+
+      // TODO: PASS PARAM INSTEAD TO REMOVE TRANSFER OF DATA
+      if (data?.website?.html) {
+        delete data.website.html;
+      }
+
+      res.json(data);
+    } catch (e) {
+      console.error(e);
+      res.json(false);
+    }
+  });
+
   app.post(IMAGE_CHECK, cors(), detectImage);
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);

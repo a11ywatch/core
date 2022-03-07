@@ -6,9 +6,10 @@ interface ResponseParamsModel {
 }
 
 interface ResponseModel {
-  message: number;
   code: number;
   success: boolean;
+  message?: string;
+  // TODO: USE DATA PROP STRICTLY
   [extra: string]: any;
 }
 
