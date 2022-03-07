@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { PRIVATE_KEY, PUBLIC_KEY } from "@app/config";
+import { PRIVATE_KEY, PUBLIC_KEY } from "@app/config/config";
 
 const issuer = "AUTH/RESOURCE";
 const expiresIn = "365 days";

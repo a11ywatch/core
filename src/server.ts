@@ -62,7 +62,7 @@ import {
   completeCrawlTracker,
 } from "./rest/routes/services";
 
-const { GRAPHQL_PORT } = config;
+const { GRAPHQL_PORT, SCRIPTS_CDN_URL } = config;
 
 function initServer(): HttpServer {
   const app = express();
@@ -104,9 +104,9 @@ function initServer(): HttpServer {
   app.get(GET_SCRIPT, async (req, res) => {
     try {
       const request = await fetcher(
-        `${String(process.env.SCRIPTS_CDN_URL).replace("api", "cdn")}/${
-          req.params.domain
-        }/${req.params.cdnPath}`,
+        `${SCRIPTS_CDN_URL.replace("api", "cdn")}/${req.params.domain}/${
+          req.params.cdnPath
+        }`,
         {
           method: "GET",
         }
@@ -121,7 +121,7 @@ function initServer(): HttpServer {
   app.get(GET_SCREENSHOT, async (req, res) => {
     try {
       const request = await fetcher(
-        `${String(process.env.SCRIPTS_CDN_URL).replace("api", "screenshots")}/${
+        `${SCRIPTS_CDN_URL.replace("api", "screenshots")}/${
           req.params.domain
         }/${req.params.cdnPath}`,
         {
@@ -139,9 +139,9 @@ function initServer(): HttpServer {
   app.get(DOWNLOAD_SCRIPT, async (req, res) => {
     try {
       const request = await fetcher(
-        `${String(process.env.SCRIPTS_CDN_URL).replace("api", "download")}/${
-          req.params.domain
-        }/${req.params.cdnPath}`,
+        `${SCRIPTS_CDN_URL.replace("api", "download")}/${req.params.domain}/${
+          req.params.cdnPath
+        }`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -156,14 +156,11 @@ function initServer(): HttpServer {
   });
   app.post(ADD_SCRIPT, async (req, res) => {
     try {
-      const request = await fetcher(
-        `${process.env.SCRIPTS_CDN_URL}/add-script`,
-        {
-          method: "POST",
-          body: req.body ? JSON.stringify(req.body) : null,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const request = await fetcher(`${SCRIPTS_CDN_URL}/add-script`, {
+        method: "POST",
+        body: req.body ? JSON.stringify(req.body) : null,
+        headers: { "Content-Type": "application/json" },
+      });
       const data = await request.text();
 
       return res.send(data);
@@ -173,14 +170,11 @@ function initServer(): HttpServer {
   });
   app.post(ADD_SCREENSHOT, async (req, res) => {
     try {
-      const request = await fetcher(
-        `${process.env.SCRIPTS_CDN_URL}/add-screenshot`,
-        {
-          method: "POST",
-          body: req.body ? JSON.stringify(req.body) : null,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const request = await fetcher(`${SCRIPTS_CDN_URL}/add-screenshot`, {
+        method: "POST",
+        body: req.body ? JSON.stringify(req.body) : null,
+        headers: { "Content-Type": "application/json" },
+      });
       const data = await request.text();
 
       return res.send(data);
