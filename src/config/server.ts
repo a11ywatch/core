@@ -5,7 +5,7 @@ const { CLIENT_URL, WATCHER_CLIENT_URL, ROOT_URL, DEV } = config;
 
 const apiUrls = String(CLIENT_URL).split(",");
 
-export const whitelist = [
+export const whitelist: string[] = [
   ...apiUrls,
   ...apiUrls.map((url) => url.replace("http", "https")),
   WATCHER_CLIENT_URL,
@@ -18,15 +18,17 @@ export const whitelist = [
   "a11ywatch.vercel.app",
 ].filter(Boolean);
 
-// ALLOW LOCAL NETWORK
-if (["localhost", "127.0.0.1"].includes(CLIENT_URL)) {
-  whitelist.push("127.0.0.1", "0.0.0.0", "http://localhost:3000", "::1");
-}
-
-export const corsOptions = {
+const corsOptions: { origin: string[] | boolean; credentials: boolean } = {
   origin: whitelist,
   credentials: true,
 };
+
+// ALLOW LOCAL NETWORK
+if (apiUrls.some((a) => a.includes("localhost"))) {
+  corsOptions.origin = true;
+}
+
+export { corsOptions };
 
 export const BYPASS_AUTH = [
   "IntrospectionQuery",
