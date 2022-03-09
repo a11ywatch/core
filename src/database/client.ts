@@ -1,6 +1,5 @@
 import { MongoClient } from "mongodb";
 import { config } from "@app/config";
-import { log } from "@a11ywatch/log";
 
 const createClient = (): MongoClient =>
   new MongoClient(config.DB_URL, {
@@ -13,7 +12,7 @@ let client: MongoClient;
 try {
   client = createClient();
 } catch (e) {
-  log(e);
+  console.log(e);
 }
 
 let connection;
@@ -25,7 +24,7 @@ const initDbConnection = async () => {
     }
     connection = await client?.connect();
   } catch (e) {
-    log(e);
+    console.log(e);
   }
 };
 
@@ -36,7 +35,7 @@ const connect = async (collectionType = "Websites") => {
     const db = await connection?.db(config.DB_NAME);
     collection = await db?.collection(collectionType);
   } catch (e) {
-    log(e);
+    console.log(e);
   }
 
   return [collection, client];
@@ -46,7 +45,7 @@ const closeDbConnection = async () => {
   try {
     await client?.close();
   } catch (e) {
-    log(e);
+    console.log(e);
   }
 };
 

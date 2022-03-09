@@ -1,4 +1,3 @@
-import { log } from "@a11ywatch/log";
 import { config } from "./config";
 
 const { CLIENT_URL, WATCHER_CLIENT_URL, ROOT_URL, DEV } = config;
@@ -52,7 +51,7 @@ export const cronTimer = DEV ? "0 1 * * *" : "0 16 * * *";
 const source = DEV ? "localhost" : ROOT_URL;
 
 export const logServerInit = (port, { graphqlPath, subscriptionsPath }) => {
-  log(
+  console.log(
     `Server ready at ${source}:${port}${graphqlPath}\nSubscriptions ready at ws://${source}:${port}${subscriptionsPath}`
   );
 };

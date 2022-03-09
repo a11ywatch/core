@@ -5,7 +5,6 @@ import http from "http";
 import https from "https";
 import cors from "cors";
 import createIframe from "node-iframe";
-import { setConfig as setLogConfig } from "@a11ywatch/log";
 import { CronJob } from "cron";
 import {
   corsOptions,
@@ -373,11 +372,6 @@ function initServer(): HttpServer {
 let coreServer: HttpServer;
 
 const startServer = (async () => {
-  setLogConfig({
-    container: "api",
-    disabled: process.env.LOGGER_ENABLED === "true" ? false : true,
-  });
-
   try {
     await initDbConnection();
   } catch (e) {

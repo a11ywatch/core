@@ -3,7 +3,7 @@ import {
   crawlWebsite as crawl,
   scanWebsite as scan,
 } from "@app/core/controllers/subdomains/update";
-import { log } from "@a11ywatch/log";
+
 import { getUser, usageExceededThreshold } from "@app/core/utils";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
 
@@ -36,7 +36,7 @@ const websiteCrawl = async (req, res) => {
       res && res.send(true);
     }
   } catch (e) {
-    log(e);
+    console.log(e);
     res && res.send(false);
   }
 };
@@ -71,7 +71,7 @@ const scanWebsite = async (req, res) => {
 
       res.json(data);
     } catch (e) {
-      log(e);
+      console.log(e);
       res.json({
         message: "Error: Page not found",
         status: 404,
@@ -140,7 +140,7 @@ const websiteCrawlAuthed = async (req, res) => {
       apiData: true,
     });
   } catch (e) {
-    log(e);
+    console.log(e);
   }
 
   res.json(data);

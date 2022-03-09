@@ -1,6 +1,5 @@
 import { getUser } from "../find";
 import { GENERAL_ERROR, SUCCESS } from "../../../strings";
-import { log } from "@a11ywatch/log";
 
 const toggleProfile = async ({ keyid: id, profileVisible }) => {
   try {
@@ -16,7 +15,7 @@ const toggleProfile = async ({ keyid: id, profileVisible }) => {
       };
     }
   } catch (e) {
-    log(e);
+    console.log(e);
     throw new Error(GENERAL_ERROR);
   }
 };

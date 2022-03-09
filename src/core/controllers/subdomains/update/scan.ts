@@ -1,6 +1,6 @@
 import validUrl from "valid-url";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { log } from "@a11ywatch/log";
+
 import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
 import { getWebsite } from "../../websites";
 import { fetchPuppet, extractPageData, limitIssue } from "./utils";
@@ -14,7 +14,7 @@ export const scanWebsite = async ({
   const userId = !userIdMap && userIdMap !== 0 ? -1 : userIdMap;
 
   if (!validUrl.isUri(urlMap)) {
-    return Promise.resolve(responseModel({ msgType: ApiResponse.NotFound }));
+    return responseModel({ msgType: ApiResponse.NotFound });
   }
 
   const { url, domain, pageUrl } = sourceBuild(urlMap, userId);
@@ -88,7 +88,7 @@ export const scanWebsite = async ({
         resolve(responseModel());
       }
     } catch (e) {
-      log(e);
+      console.log(e);
       reject(e);
     }
   });
