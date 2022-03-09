@@ -14,6 +14,8 @@ let PUBLIC_KEY =
 let PRIVATE_KEY =
   process.env.PRIVATE_KEY &&
   String(process.env.PRIVATE_KEY).replace(/\\n/gm, "\n");
+
+// email key
 let EMAIL_CLIENT_KEY =
   process.env.EMAIL_CLIENT_KEY &&
   String(process.env.EMAIL_CLIENT_KEY).replace(/\\n/gm, "\n");
@@ -52,7 +54,6 @@ export const config = {
   WATCHER_CLIENT_URL: replaceDockerNetwork(process.env.WATCHER_CLIENT_URL),
   SCRIPTS_CDN_URL,
   GRAPHQL_PORT,
-  EMAIL_SERVICE_PASSWORD: process.env.EMAIL_SERVICE_PASSWORD,
   ROOT_URL: process.env.ROOT_URL,
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
   // EMAIL
