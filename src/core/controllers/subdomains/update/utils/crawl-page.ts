@@ -102,10 +102,8 @@ export const crawlPage = async (
         true
       );
 
-      const [
-        analytics,
-        analyticsCollection,
-      ] = await AnalyticsController().getWebsite({ pageUrl, userId }, true);
+      const [analytics, analyticsCollection] =
+        await AnalyticsController().getWebsite({ pageUrl, userId }, true);
 
       const [scripts, scriptsCollection] = await ScriptsController().getScript(
         { pageUrl, userId, noRetries: true },
@@ -199,7 +197,10 @@ export const crawlPage = async (
 
           await pubsub
             .publish(SUBDOMAIN_ADDED, {
-              subDomainAdded: webPage,
+              subDomainAdded: {
+                ...webPage,
+                html: "",
+              },
             })
             .catch((e) => console.error(e));
         }

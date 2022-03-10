@@ -10,6 +10,7 @@ import {
   logout,
 } from "./graph/mutations";
 import { forkProcess } from "./utils";
+import { ApolloError } from "apollo-server-express";
 
 const defaultPayload = {
   keyid: null,
@@ -48,7 +49,7 @@ export const Mutation = {
         message: CRAWLER_FINISHED,
       };
     } else {
-      throw new Error(
+      throw new ApolloError(
         "You hit your scan limit for the day, please try again tomorrow"
       );
     }
@@ -68,14 +69,12 @@ export const Mutation = {
       audience,
     });
 
-    if (websiteRemoved) {
-      if (deleteMany) {
-        return {
-          ...websiteRemoved,
-          url: `Success ${websiteRemoved.count} items deleted`,
-          id: 0,
-        };
-      }
+    if (websiteRemoved && deleteMany) {
+      return {
+        ...websiteRemoved,
+        url: `Success ${websiteRemoved.count} items deleted`,
+        id: 0,
+      };
     }
 
     return websiteRemoved;

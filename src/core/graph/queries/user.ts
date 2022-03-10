@@ -1,7 +1,7 @@
 import { getPayLoad } from "../../utils/query-payload";
 import { ApolloError } from "apollo-server-errors";
 
-export const user = async (_, { id, filter, password }, context) => {
+export const user = async (_, { id, password }, context) => {
   const { models, ...ctx } = context;
   const { userId, audience } = getPayLoad(ctx, {
     id,
