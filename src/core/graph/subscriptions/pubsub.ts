@@ -1,8 +1,10 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
 import Redis from "ioredis";
 
+const redisHost = process.env.REDIS_HOST || "127.0.0.1";
+
 const options = {
-  host: "redis",
+  host: redisHost,
   port: 6379,
   retryStrategy: (times) => {
     return Math.min(times * 50, 2000);

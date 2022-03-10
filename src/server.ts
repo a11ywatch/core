@@ -120,6 +120,14 @@ function initServer(): HttpServer {
     }
   });
 
+  // GITHUB
+
+  app.post("/api/github-action/event", cors(), async (req, res) => {
+    const body = req.body;
+    console.log(body);
+    res.send(true);
+  });
+
   app.post(IMAGE_CHECK, cors(), detectImage);
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
