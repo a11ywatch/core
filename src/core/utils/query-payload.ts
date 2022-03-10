@@ -30,17 +30,11 @@ export const getPayLoad = (
     audience: null,
     subject: null,
   };
-  const password = overide?.password;
   const id = overide?.id;
 
   return {
     subject,
     audience,
-    userId:
-      typeof id !== "undefined" &&
-      typeof password !== "undefined" &&
-      password === process.env.ADMIN_PASS
-        ? id
-        : keyid,
+    userId: typeof id !== "undefined" ? id : keyid,
   };
 };
