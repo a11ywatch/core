@@ -78,6 +78,7 @@ function initServer(): HttpServer {
   app.options(WEBSITE_CHECK, cors());
   app.get(ROOT, root);
   app.get("/iframe", createIframeEvent);
+  app.get("/status/:domain", cors(), statusBadge);
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
@@ -118,14 +119,6 @@ function initServer(): HttpServer {
       console.error(e);
       res.json(false);
     }
-  });
-
-  // GITHUB
-
-  app.post("/api/github-action/event", cors(), async (req, res) => {
-    const body = req.body;
-    console.log(body);
-    res.send(true);
   });
 
   app.post(IMAGE_CHECK, cors(), detectImage);
@@ -318,15 +311,17 @@ function initServer(): HttpServer {
   app.post(`${WEBSITE_CRAWL}-complete`, completeCrawlTracker);
   app.post(`${WEBSITE_CRAWL}-background-start`, startCrawlTracker);
   app.post(`${WEBSITE_CRAWL}-background-complete`, completeCrawlTracker);
-  /*
-   * End of crawler service job handling
-   */
+
+  // GITHUB
+
+  app.post("/api/github-action/event", cors(), async (_req, res) => {
+    // const body = req.body;
+    // console.log(body);
+    res.send(true);
+  });
 
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
-  /*  END OF ANALYTICS */
-
-  app.get("/status/:domain", cors(), statusBadge);
 
   // INTERNAL
   app.get("/_internal_/healthcheck", async (_, res) => {

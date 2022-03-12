@@ -19,10 +19,11 @@ import { createReport } from "../../../reports";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
 import { URL } from "url";
+import { Issue } from "@app/schema";
 
 export const crawlPage = async (
   {
-    userId: user_id,
+    userId,
     url: urlMap,
     pageInsights = false,
     apiData = false,
@@ -30,13 +31,12 @@ export const crawlPage = async (
   },
   sendEmail?: boolean
 ) => {
-  let userId = user_id;
   let domainSource = sourceBuild(urlMap, userId);
   let domain = domainSource?.domain;
   let pageUrl = domainSource?.pageUrl;
   let authenticated = typeof userId !== "undefined";
 
-  return await new Promise(async (resolve) => {
+  return new Promise(async (resolve) => {
     try {
       const [userData] = await UsersController().getUser({ id: userId });
       // CENTRAL WEBSITE COLLECTION
@@ -47,7 +47,7 @@ export const crawlPage = async (
       let insightsEnabled = pageInsights || (userData && website?.pageInsights);
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
       if (insightsEnabled) {
-        if (String(userData?.role) === "0" || !userData?.role) {
+        if (userData?.role === 0 || !userData?.role) {
           const newSubUrl = new URL(website?.url);
           const dataSourceUrl = new URL(pageUrl);
           // ONLY ALLOW INSIGHTS ON ROOT DOMAIN when FREE
@@ -116,7 +116,9 @@ export const crawlPage = async (
         pageUrl,
       });
 
-      if (issues?.issues?.length) {
+      const subIssues: Issue[] = issues?.issues;
+
+      if (subIssues?.length) {
         if (parentSub && process.send) {
           process.send({
             name: ISSUE_ADDED,
@@ -126,11 +128,9 @@ export const crawlPage = async (
           await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
         }
 
-        const errorIssues = issues?.issues?.filter(
-          (iss) => iss?.type === "error"
-        );
+        const issuesFound = subIssues?.some((iss) => iss.type === "error");
 
-        if (sendEmail && errorIssues?.length) {
+        if (sendEmail && issuesFound) {
           await emailMessager.sendMail({
             userId,
             data: issues,

@@ -11,7 +11,16 @@ const options = {
   },
 };
 
-export const pubsub = new RedisPubSub({
+let pubsub = new RedisPubSub({
   publisher: new Redis(options),
   subscriber: new Redis(options),
 });
+
+function createPubSub() {
+  pubsub = new RedisPubSub({
+    publisher: new Redis(options),
+    subscriber: new Redis(options),
+  });
+}
+
+export { pubsub, createPubSub };

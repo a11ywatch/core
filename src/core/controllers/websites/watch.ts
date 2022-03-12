@@ -4,13 +4,22 @@ import { getWebsitesWithUsers } from "../websites";
 import { cpus } from "os";
 import type { Response, Request } from "express";
 
+const baseCpus = Math.max(cpus().length, 1);
+const numCPUs = Math.max(Math.floor(baseCpus / 2), 1);
+
+const forkArgs = {
+  detached: true,
+  execArgv: DEV
+    ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
+    : undefined,
+};
+
 export const crawlAllAuthedWebsites = async (
   _?: Request,
   res?: Response
 ): Promise<any> => {
   let allWebPages = [];
   let pageChunk = [];
-  const numCPUs = cpus().length;
 
   try {
     allWebPages = await getWebsitesWithUsers();
@@ -29,12 +38,7 @@ export const crawlAllAuthedWebsites = async (
 
   try {
     pageChunk.forEach((chunk: any) => {
-      const forked = fork(`${__dirname}/watch-forked`, [], {
-        detached: true,
-        execArgv: DEV
-          ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
-          : undefined,
-      });
+      const forked = fork(`${__dirname}/watch-forked`, [], forkArgs);
       forked.send({ pages: chunk });
       forked.unref();
 
