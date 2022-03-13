@@ -23,7 +23,7 @@ const issuesFoundTemplate: IssuesFound = (
       if (i === 10) {
         return true;
       }
-      listData = `${listData}<tr><td ${tdStyles}>${item?.type}</td><td ${tdStyles}>${item?.context}</td><td ${tdStyles}>${item?.message}</td></tr>`;
+      listData = `${listData}<tr><td ${tdStyles}>${item?.type}</td><td ${tdStyles}><pre>${item?.context}</pre></td><td ${tdStyles}>${item?.message}</td></tr>`;
       return false;
     });
   }
