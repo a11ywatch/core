@@ -54,7 +54,6 @@ import { statusBadge } from "./rest/routes/resources/badge";
 import {
   startCrawlTracker,
   completeCrawlTracker,
-  cdnProxy,
 } from "./rest/routes/services";
 
 function initServer(): HttpServer {
@@ -67,7 +66,6 @@ function initServer(): HttpServer {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
   app.set("trust proxy", true);
-  app.use("/cdn", cors(), cdnProxy);
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(WEBSITE_CHECK, cors());
