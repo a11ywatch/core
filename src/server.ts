@@ -9,6 +9,7 @@ import { CronJob } from "cron";
 import {
   corsOptions,
   config,
+  cdnBase,
   logServerInit,
   cookieConfigs,
   PRIVATE_KEY,
@@ -22,6 +23,7 @@ import { AnnouncementsController } from "./core/controllers/announcements";
 import { UsersController } from "./core/controllers/users";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
+import fetcher from "node-fetch";
 
 import {
   CRAWL_WEBSITE,
@@ -117,6 +119,25 @@ function initServer(): HttpServer {
   app.post(IMAGE_CHECK, cors(), detectImage);
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
+
+  // CDN SERVER TODO: USE DOWNLOAD PATH INSTEAD
+  app.get("/scripts/:domain/:cdnPath", async (req, res) => {
+    try {
+      const request = await fetcher(
+        `${cdnBase}/${req.params.domain}/${req.params.cdnPath}`
+      );
+      const data = await request.text();
+
+      res.setHeader(
+        "Content-disposition",
+        "attachment; filename=" + `${req.params.cdnPath}`
+      );
+
+      return res.send(data);
+    } catch (error) {
+      console.error(error);
+    }
+  });
 
   // AUTH ROUTES
   app.post("/api/register", cors(), async (req, res) => {
