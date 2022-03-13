@@ -15,10 +15,3 @@ export const ROOT = "/";
 // USER
 export const UNSUBSCRIBE_EMAILS = "/api/unsubscribe-emails";
 export const CONFIRM_EMAIL = "/api/confirmEmail"; // usually used from email inbox anchor
-
-// CDN
-export const GET_SCRIPT = "/cdn/scripts/:domain/:cdnPath";
-export const GET_SCREENSHOT = "/cdn/screenshots/:domain/:cdnPath";
-export const DOWNLOAD_SCRIPT = "/cdn/download/:domain/:cdnPath";
-export const ADD_SCRIPT = "/cdn/add-script";
-export const ADD_SCREENSHOT = "/cdn/add-screenshot";

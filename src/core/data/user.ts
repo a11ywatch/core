@@ -32,7 +32,7 @@ export const User = {
     );
     return script;
   },
-  scripts: async ({ id, filter, keyid }, { url, pageUrl }) => {
+  scripts: async ({ id, keyid }, { url, pageUrl }) => {
     return await ScriptsController().getScripts({
       userId: id || keyid,
       pageUrl: url || pageUrl,

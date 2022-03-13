@@ -2,7 +2,6 @@ import {
   user,
   website,
   websites,
-  features,
   subDomains,
   history,
   scripts,
@@ -18,6 +17,5 @@ export const Query = {
   scripts,
   subDomains,
   history,
-  features,
   user,
 };

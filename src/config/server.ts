@@ -8,12 +8,6 @@ export const whitelist: string[] = [
   ...apiUrls,
   ...apiUrls.map((url) => url.replace("http", "https")),
   WATCHER_CLIENT_URL,
-  "a11ywatch.com",
-  "www.a11ywatch.com",
-  "https://a11ywatch.com",
-  "https://www.a11ywatch.com",
-  "http://a11ywatch.com",
-  "http://www.a11ywatch.com",
   "a11ywatch.vercel.app",
 ].filter(Boolean);
 

@@ -22,7 +22,6 @@ services:
       - EMAIL_CLIENT_ID=${EMAIL_CLIENT_ID}
       - EMAIL_CLIENT_KEY=${EMAIL_CLIENT_KEY}
       - STRIPE_KEY=${STRIPE_KEY}
-      - SCRIPTS_CDN_URL=${SCRIPTS_CDN_URL:-http://localhost:8090/api}
       - PUPPET_SERVICE=${PUPPET_SERVICE:-http://pagemind:8040}
       - ROOT_URL=${ROOT_URL:-http://localhost:8080}
       - STRIPE_BASIC_PLAN=${STRIPE_BASIC_PLAN}

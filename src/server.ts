@@ -20,7 +20,6 @@ import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { AnnouncementsController } from "./core/controllers/announcements";
 import { UsersController } from "./core/controllers/users";
-import fetcher from "node-fetch";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
 
@@ -34,11 +33,6 @@ import {
   WEBSITE_CHECK,
   UNSUBSCRIBE_EMAILS,
   GET_WEBSITES_DAILY,
-  ADD_SCRIPT,
-  ADD_SCREENSHOT,
-  DOWNLOAD_SCRIPT,
-  GET_SCRIPT,
-  GET_SCREENSHOT,
 } from "./core/routes";
 import { initDbConnection, closeDbConnection } from "./database";
 import { Server } from "./apollo-server";
@@ -60,20 +54,21 @@ import { statusBadge } from "./rest/routes/resources/badge";
 import {
   startCrawlTracker,
   completeCrawlTracker,
+  cdnProxy,
 } from "./rest/routes/services";
-
-const { GRAPHQL_PORT, SCRIPTS_CDN_URL } = config;
 
 function initServer(): HttpServer {
   const app = express();
+  const { GRAPHQL_PORT } = config;
 
   app.disable("x-powered-by");
   app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
-  app.use(createIframe);
   app.set("trust proxy", true);
+  app.use("/cdn", cors(), cdnProxy);
+  app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(WEBSITE_CHECK, cors());
   app.get(ROOT, root);
@@ -124,89 +119,6 @@ function initServer(): HttpServer {
   app.post(IMAGE_CHECK, cors(), detectImage);
   app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
-
-  // CDN SERVER TODO
-  app.get(GET_SCRIPT, async (req, res) => {
-    try {
-      const request = await fetcher(
-        `${SCRIPTS_CDN_URL.replace("api", "cdn")}/${req.params.domain}/${
-          req.params.cdnPath
-        }`,
-        {
-          method: "GET",
-        }
-      );
-      const data = await request.text();
-
-      return res.send(data);
-    } catch (error) {
-      console.error(error);
-    }
-  });
-  app.get(GET_SCREENSHOT, async (req, res) => {
-    try {
-      const request = await fetcher(
-        `${SCRIPTS_CDN_URL.replace("api", "screenshots")}/${
-          req.params.domain
-        }/${req.params.cdnPath}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      const data = await request.text();
-
-      return res.send(data);
-    } catch (error) {
-      console.error(error);
-    }
-  });
-  app.get(DOWNLOAD_SCRIPT, async (req, res) => {
-    try {
-      const request = await fetcher(
-        `${SCRIPTS_CDN_URL.replace("api", "download")}/${req.params.domain}/${
-          req.params.cdnPath
-        }`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      const data = await request.text();
-
-      return res.send(data);
-    } catch (error) {
-      console.error(error);
-    }
-  });
-  app.post(ADD_SCRIPT, async (req, res) => {
-    try {
-      const request = await fetcher(`${SCRIPTS_CDN_URL}/add-script`, {
-        method: "POST",
-        body: req.body ? JSON.stringify(req.body) : null,
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await request.text();
-
-      return res.send(data);
-    } catch (error) {
-      console.error(error);
-    }
-  });
-  app.post(ADD_SCREENSHOT, async (req, res) => {
-    try {
-      const request = await fetcher(`${SCRIPTS_CDN_URL}/add-screenshot`, {
-        method: "POST",
-        body: req.body ? JSON.stringify(req.body) : null,
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await request.text();
-
-      return res.send(data);
-    } catch (e) {
-      console.error(e);
-    }
-  });
 
   // AUTH ROUTES
   app.post("/api/register", cors(), async (req, res) => {

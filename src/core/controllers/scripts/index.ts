@@ -14,7 +14,6 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     {
       pageUrl,
       userId,
-      filter,
       noRetries,
     }: {
       pageUrl?: string;
@@ -41,7 +40,7 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     try {
       const [collection] = await connect("Scripts");
       const searchProps = websiteSearchParams({ pageUrl, userId });
-      const scripts = await collection.find(searchProps).limit(100).toArray();
+      const scripts = await collection.find(searchProps).limit(1000).toArray();
 
       return scripts;
     } catch (e) {

@@ -40,8 +40,6 @@ if (!EMAIL_CLIENT_KEY && PRIVATE_KEY) {
   EMAIL_CLIENT_KEY = PRIVATE_KEY;
 }
 
-const SCRIPTS_CDN_URL = String(process.env.SCRIPTS_CDN_URL);
-
 const GRAPHQL_PORT = Number(
   TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 0
 );
@@ -52,7 +50,6 @@ export const config = {
   DB_NAME: process.env.DB_NAME || "a11ywatch",
   CLIENT_URL: replaceDockerNetwork(process.env.CLIENT_URL),
   WATCHER_CLIENT_URL: replaceDockerNetwork(process.env.WATCHER_CLIENT_URL),
-  SCRIPTS_CDN_URL,
   GRAPHQL_PORT,
   ROOT_URL: process.env.ROOT_URL,
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
