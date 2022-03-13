@@ -1,18 +1,19 @@
-import { fork } from "child_process";
-import { DEV } from "@app/config";
-import { getWebsitesWithUsers } from "../websites";
 import { cpus } from "os";
+// import { fork } from "child_process";
+// import { DEV } from "@app/config/config";
+import { getWebsitesWithUsers } from "../websites";
 import type { Response, Request } from "express";
+import { websiteWatch } from "./watch-pages";
 
 const baseCpus = Math.max(cpus().length, 1);
 const numCPUs = Math.max(Math.floor(baseCpus / 2), 1);
 
-const forkArgs = {
-  detached: true,
-  execArgv: DEV
-    ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
-    : undefined,
-};
+// const forkArgs = {
+//   detached: true,
+//   execArgv: DEV
+//     ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
+//     : undefined,
+// };
 
 export const crawlAllAuthedWebsites = async (
   _?: Request,
@@ -37,16 +38,19 @@ export const crawlAllAuthedWebsites = async (
   }
 
   try {
-    pageChunk.forEach((chunk: any) => {
-      const forked = fork(`${__dirname}/watch-forked`, [], forkArgs);
-      forked.send({ pages: chunk });
-      forked.unref();
+    console.log(`chunks to process ${pageChunk.length}`);
 
-      forked.on("message", (message: string) => {
-        if (message === "close") {
-          forked.kill("SIGINT");
-        }
-      });
+    pageChunk.forEach(async (chunk: any) => {
+      await websiteWatch(chunk);
+      // const forked = fork(`${__dirname}/watch-forked`, [], forkArgs);
+      // forked.send({ pages: chunk });
+      // forked.unref();
+
+      // forked.on("message", (message: string) => {
+      //   if (message === "close") {
+      //     forked.kill("SIGINT");
+      //   }
+      // });
     });
   } catch (e) {
     console.error(e);
