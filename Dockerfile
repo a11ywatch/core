@@ -1,4 +1,4 @@
-FROM node:14.18.2-alpine AS builder
+FROM node:17-alpine3.14 AS builder
 
 WORKDIR /usr/src/app
 
@@ -14,7 +14,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:14.18.2-alpine AS installer
+FROM node:17-alpine3.14 AS installer
 
 WORKDIR /usr/src/app
 
@@ -25,7 +25,7 @@ RUN apk upgrade --update-cache --available && \
 COPY package*.json ./
 RUN npm install --production
 
-FROM node:14.18.2-alpine
+FROM node:17-alpine3.14
 
 WORKDIR /usr/src/app
 

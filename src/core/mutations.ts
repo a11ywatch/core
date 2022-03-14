@@ -10,7 +10,6 @@ import {
   logout,
 } from "./graph/mutations";
 import { forkProcess } from "./utils";
-import { ApolloError } from "apollo-server-express";
 
 const defaultPayload = {
   keyid: null,
@@ -49,7 +48,7 @@ export const Mutation = {
         message: CRAWLER_FINISHED,
       };
     } else {
-      throw new ApolloError(
+      throw new Error(
         "You hit your scan limit for the day, please try again tomorrow"
       );
     }

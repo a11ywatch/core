@@ -67,10 +67,10 @@ function initServer(): HttpServer {
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
+
   app.set("trust proxy", true);
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
-  app.options(WEBSITE_CHECK, cors());
   app.get(ROOT, root);
   app.get("/iframe", createIframeEvent);
   app.get("/status/:domain", cors(), statusBadge);
@@ -93,11 +93,11 @@ function initServer(): HttpServer {
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
   app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
 
-  // CLI OPTIONS
+  // CLI OPTIONS MOVE TO DIRECTORY
   app.post("/api/scan-simple", cors(), async (req, res) => {
     try {
-      const url = req.query?.websiteUrl ?? req.body?.websiteUrl;
-      const userId: number = req.query?.userId ?? req.body?.userId;
+      const url = req.body?.websiteUrl;
+      const userId: number = req.body?.userId;
 
       const data = await scan({
         url: decodeURIComponent(url + ""),
@@ -117,7 +117,7 @@ function initServer(): HttpServer {
   });
 
   app.post(IMAGE_CHECK, cors(), detectImage);
-  app.route(WEBSITE_CHECK).get(websiteCrawlAuthed).post(websiteCrawlAuthed);
+  app.route(WEBSITE_CHECK).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
   // CDN SERVER TODO: USE DOWNLOAD PATH INSTEAD
@@ -174,6 +174,12 @@ function initServer(): HttpServer {
     }
   });
 
+  app.post("/api/logout", cors(), async (_req, res) => {
+    res.clearCookie("on");
+    res.clearCookie("jwt");
+    res.send(true);
+  });
+
   app.post("/api/ping", cors(), async (req, res) => {
     const token = req.cookies.jwt;
     const parsedToken = getUser(token);
@@ -196,12 +202,6 @@ function initServer(): HttpServer {
     } else {
       res.send(true);
     }
-  });
-
-  app.post("/api/logout", cors(), async (_req, res) => {
-    res.clearCookie("on");
-    res.clearCookie("jwt");
-    res.send(true);
   });
 
   // ADMIN ROUTES

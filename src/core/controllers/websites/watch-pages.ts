@@ -2,13 +2,12 @@ import { getDay, subHours } from "date-fns";
 import { crawlWebsite } from "@app/core/controllers/subdomains/update";
 import { getWebsitesWithUsers } from "@app/core/controllers/websites";
 import { getUser } from "@app/core/controllers/users";
-import { getPageItem } from "./utils";
 import { Website } from "@app/types";
 
 export async function websiteWatch(pages: Website[]): Promise<void> {
   let allWebPages = pages ?? [];
 
-  if (!pages) {
+  if (!allWebPages.length) {
     try {
       allWebPages = await getWebsitesWithUsers();
     } catch (e) {
@@ -16,8 +15,11 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
     }
   }
 
+  console.log(`pages to scan ${allWebPages.length}`);
+
   for (const website of allWebPages) {
-    const { userId, url } = getPageItem(website);
+    const { userId, url } = website;
+
     const [user] = await getUser({ id: userId }).catch((e) => {
       console.error(e);
       return [null];
