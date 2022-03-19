@@ -1,6 +1,6 @@
 import { ApolloServer, ApolloServerExpressConfig } from "apollo-server-express";
 import { config, BYPASS_AUTH } from "./config";
-import { getUser, parseCookie } from "./core/utils";
+import { getUserFromToken, parseCookie } from "./core/utils";
 import { schema } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
 import { SubDomainController } from "./core/controllers/subdomains";
@@ -21,7 +21,7 @@ const serverConfig: ApolloServerExpressConfig = {
       // @ts-ignore
       const cookie = webSocket?.upgradeReq?.headers?.cookie;
       const parsedCookie = parseCookie(cookie);
-      const user = getUser(parsedCookie?.jwt || "");
+      const user = getUserFromToken(parsedCookie?.jwt || "");
 
       return {
         userId: user?.payload?.keyid,
@@ -33,8 +33,7 @@ const serverConfig: ApolloServerExpressConfig = {
       return connection.context;
     }
     const authentication = req?.cookies?.jwt || req?.headers?.authorization;
-
-    const user = getUser(authentication);
+    const user = getUserFromToken(authentication);
 
     if (
       process.env.NODE_ENV !== "test" &&

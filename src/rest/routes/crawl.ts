@@ -4,7 +4,7 @@ import {
   scanWebsite as scan,
 } from "@app/core/controllers/subdomains/update";
 
-import { getUser, usageExceededThreshold } from "@app/core/utils";
+import { getUserFromToken, usageExceededThreshold } from "@app/core/utils";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
 
 const websiteCrawl = async (req, res) => {
@@ -100,7 +100,7 @@ const websiteCrawlAuthed = async (req, res) => {
     return;
   }
 
-  const user = getUser(req.headers?.authorization);
+  const user = getUserFromToken(req.headers?.authorization);
 
   if (!user) {
     res.json({

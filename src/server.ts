@@ -11,15 +11,12 @@ import {
   config,
   cdnBase,
   logServerInit,
-  cookieConfigs,
   PRIVATE_KEY,
   PUBLIC_KEY,
 } from "./config";
-import { forkProcess, getUser } from "./core/utils";
+import { forkProcess } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
-import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
-import { UsersController } from "./core/controllers/users";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
 import fetcher from "node-fetch";
@@ -49,13 +46,13 @@ import {
   getWebsite,
   getDailyWebsites,
 } from "./rest/routes";
-import { createUser } from "./core/controllers/users/set";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
 
 import { setCrawlManagerRoutes } from "./rest/routes_groups/crawl-manager";
 import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
 import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
+import { setAuthRoutes } from "./rest/routes_groups/auth";
 
 function initServer(): HttpServer {
   const app = express();
@@ -139,68 +136,13 @@ function initServer(): HttpServer {
   });
 
   // AUTH ROUTES
-  app.post("/api/register", cors(), async (req, res) => {
-    const { email, password, googleId } = req.body;
-    try {
-      const auth = await createUser({ email, password, googleId });
-
-      res.cookie("on", auth.email, cookieConfigs);
-      res.cookie("jwt", auth.jwt, cookieConfigs);
-
-      res.json(auth);
-    } catch (e) {
-      res.json({
-        data: null,
-        message: e?.message,
-      });
-    }
-  });
-  app.post("/api/login", cors(), async (req, res) => {
-    const { email, password, googleId } = req.body;
-    try {
-      const auth = await verifyUser({ email, password, googleId });
-
-      res.cookie("on", auth.email, cookieConfigs);
-      res.cookie("jwt", auth.jwt, cookieConfigs);
-
-      res.json(auth);
-    } catch (e) {
-      console.error(e);
-      res.json({
-        data: null,
-        message: e?.message,
-      });
-    }
-  });
-
-  app.post("/api/logout", cors(), async (_req, res) => {
-    res.clearCookie("on");
-    res.clearCookie("jwt");
-    res.send(true);
-  });
-
-  app.post("/api/ping", cors(), async (req, res) => {
-    const parsedToken = getUser(req.cookies.jwt);
-    const id = parsedToken?.payload?.keyid;
-
-    if (typeof id !== "undefined") {
-      const [user, collection] = await UsersController().getUser({ id });
-
-      if (user) {
-        await collection.updateOne(
-          { id },
-          {
-            $set: {
-              lastLoginDate: new Date(),
-            },
-          }
-        );
-      }
-      res.send(true);
-    } else {
-      res.send(true);
-    }
-  });
+  setAuthRoutes(app);
+  // Announcements from the application (new features etc)
+  setAnnouncementsRoutes(app);
+  // Crawler service manager control
+  setCrawlManagerRoutes(app);
+  // GITHUB
+  setGithubActionRoutes(app);
   // ADMIN ROUTES
   app.post("/api/run-watcher", cors(), async (req, res) => {
     const { password } = req.body;
@@ -215,12 +157,6 @@ function initServer(): HttpServer {
       console.error(e);
     }
   });
-  // Announcements from the application (new features etc)
-  setAnnouncementsRoutes(app);
-  // Crawler service manager control
-  setCrawlManagerRoutes(app);
-  // GITHUB
-  setGithubActionRoutes(app);
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
   // INTERNAL

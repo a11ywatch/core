@@ -4,7 +4,7 @@ export { transporter, mailOptions, sendMailCallback } from "./emailer";
 export { websiteSearchParams } from "./controller-filter";
 export { arrayAverage } from "./calculations";
 export { realUser } from "./getters";
-export { getUser } from "./get-user";
+export { getUserFromToken } from "./get-user";
 export { usageExceededThreshold } from "./get-usage";
 export { getLastItemInCollection } from "./get-last-item-in-collection";
 export { forkProcess } from "./fork";
