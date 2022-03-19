@@ -3,7 +3,7 @@ import { connect } from "@app/database";
 import { logoSvg, footer } from "@app/html";
 
 import { transporter, mailOptions, realUser, sendMailCallback } from "../utils";
-import { issuesFoundTemplate } from "../email-templates";
+import { issuesFoundTemplate } from "../email_templates";
 
 export const emailMessager = {
   sendFollowupEmail: async ({

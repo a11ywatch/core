@@ -16,7 +16,7 @@ import {
   payments,
   meta,
   input,
-} from "./graph/gql-types";
+} from "./graph/gql_types";
 
 const typeDefs = `
   ${pageInsights}

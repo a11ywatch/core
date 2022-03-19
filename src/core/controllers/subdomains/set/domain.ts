@@ -2,7 +2,7 @@ import { WEBSITE_EXIST_ERROR, SUCCESS } from "@app/core/strings";
 import { getLastItemInCollection } from "@app/core/utils";
 import { getDomain } from "../find";
 
-export const addDomain = async ({ userId, url, audience }) => {
+export const addDomain = async ({ userId, url }) => {
   const [siteExist, collection] = await getDomain({ userId, url }, true);
 
   if (siteExist) {

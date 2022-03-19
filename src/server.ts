@@ -19,7 +19,6 @@ import { forkProcess, getUser } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
 import { verifyUser } from "./core/controllers/users/update";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
-import { AnnouncementsController } from "./core/controllers/announcements";
 import { UsersController } from "./core/controllers/users";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
@@ -53,10 +52,10 @@ import {
 import { createUser } from "./core/controllers/users/set";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
-import {
-  startCrawlTracker,
-  completeCrawlTracker,
-} from "./rest/routes/services";
+
+import { setCrawlManagerRoutes } from "./rest/routes_groups/crawl-manager";
+import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
+import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 
 function initServer(): HttpServer {
   const app = express();
@@ -181,8 +180,7 @@ function initServer(): HttpServer {
   });
 
   app.post("/api/ping", cors(), async (req, res) => {
-    const token = req.cookies.jwt;
-    const parsedToken = getUser(token);
+    const parsedToken = getUser(req.cookies.jwt);
     const id = parsedToken?.payload?.keyid;
 
     if (typeof id !== "undefined") {
@@ -203,7 +201,6 @@ function initServer(): HttpServer {
       res.send(true);
     }
   });
-
   // ADMIN ROUTES
   app.post("/api/run-watcher", cors(), async (req, res) => {
     const { password } = req.body;
@@ -218,49 +215,20 @@ function initServer(): HttpServer {
       console.error(e);
     }
   });
-
-  app.get("/api/whats-new", cors(), async (_, res) => {
-    try {
-      const [announcements] = await AnnouncementsController().getAnnouncement(
-        { _id: null },
-        true
-      );
-
-      res.json({
-        data: announcements ?? null,
-        message: process.env.WHATS_NEW ?? "No new announcements",
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  });
-
-  /*
-   * Manage crawler service active crawling job
-   */
-  app.post(`${WEBSITE_CRAWL}-start`, startCrawlTracker);
-  app.post(`${WEBSITE_CRAWL}-complete`, completeCrawlTracker);
-  app.post(`${WEBSITE_CRAWL}-background-start`, startCrawlTracker);
-  app.post(`${WEBSITE_CRAWL}-background-complete`, completeCrawlTracker);
-
+  // Announcements from the application (new features etc)
+  setAnnouncementsRoutes(app);
+  // Crawler service manager control
+  setCrawlManagerRoutes(app);
   // GITHUB
-
-  app.post("/api/github-action/event", cors(), async (_req, res) => {
-    // const body = req.body;
-    // console.log(body);
-    res.send(true);
-  });
-
+  setGithubActionRoutes(app);
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
-
   // INTERNAL
   app.get("/_internal_/healthcheck", async (_, res) => {
     res.send({
       status: "healthy",
     });
   });
-
   //An error handling middleware
   app.use(function (err, _req, res, next) {
     if (res.headersSent) {
@@ -274,7 +242,6 @@ function initServer(): HttpServer {
   server.applyMiddleware({ app, cors: corsOptions });
 
   let httpServer;
-
   if (process.env.ENABLE_SSL === "true") {
     httpServer = https.createServer(
       {
@@ -288,7 +255,6 @@ function initServer(): HttpServer {
   }
 
   server.installSubscriptionHandlers(httpServer);
-
   const listener = httpServer.listen(GRAPHQL_PORT);
 
   logServerInit((listener.address() as AddressInfo).port, {
@@ -311,7 +277,6 @@ const startServer = (async () => {
   } catch (e) {
     console.error(e);
   }
-
   try {
     coreServer = initServer();
   } catch (e) {

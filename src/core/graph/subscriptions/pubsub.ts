@@ -1,26 +1,24 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
 import Redis from "ioredis";
 
-const redisHost = process.env.REDIS_HOST || "127.0.0.1";
-
 const options = {
-  host: redisHost,
+  host: process.env.REDIS_HOST || "127.0.0.1",
   port: 6379,
-  retryStrategy: (times) => {
-    return Math.min(times * 50, 2000);
-  },
 };
 
-let pubsub = new RedisPubSub({
-  publisher: new Redis(options),
-  subscriber: new Redis(options),
-});
+let pubsub: RedisPubSub;
 
 function createPubSub() {
-  pubsub = new RedisPubSub({
-    publisher: new Redis(options),
-    subscriber: new Redis(options),
-  });
+  try {
+    pubsub = new RedisPubSub({
+      publisher: new Redis(options),
+      subscriber: new Redis(options),
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }
+
+createPubSub();
 
 export { pubsub, createPubSub };

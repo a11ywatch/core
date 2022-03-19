@@ -1,7 +1,11 @@
 import { URL } from "url";
 
 export const getHostName = (url: string) => {
-  const { hostname } = new URL(url);
+  try {
+    const { hostname } = new URL(url);
 
-  return hostname.replace(/^[^.]+\./g, "");
+    return hostname.replace(/^[^.]+\./g, "");
+  } catch (e) {
+    console.error(e);
+  }
 };
