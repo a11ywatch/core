@@ -36,7 +36,6 @@
     "node-fetch": "2.6.0",
     "node-iframe": "^1.5.10",
     "nodemailer": "6.7.2",
-    "redis": "^4.0.3",
     "stripe": "7.14.0",
     "universal-analytics": "^0.4.23",
     "valid-url": "1.0.9"

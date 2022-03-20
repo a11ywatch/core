@@ -14,7 +14,7 @@ export const completeCrawlTracker = async (req: Request, res: Response) => {
 
       hostHash.update(bareHost);
 
-      await redisClient.hDel(hostHash.digest("hex"), userId + "");
+      await redisClient.hdel(hostHash.digest("hex"), userId + "");
     } catch (e) {
       console.error(e);
     }

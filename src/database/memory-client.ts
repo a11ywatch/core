@@ -1,19 +1,15 @@
-import { createClient } from "redis";
-import type { RedisClientType } from "redis";
+import Redis from "ioredis";
 
-let redisClient: RedisClientType<any, any>;
+let redisClient: Redis.Redis;
+
+const options = {
+  host: process.env.REDIS_HOST || "127.0.0.1",
+  port: 6379,
+};
 
 const initRedisConnection = async () => {
   try {
-    redisClient = createClient({
-      url: process.env.REDIS_CLIENT ? process.env.REDIS_CLIENT : "",
-      socket: {
-        connectTimeout: 8000,
-        noDelay: false,
-      },
-    });
-    redisClient.on("error", (err) => console.error("Redis Client Error", err));
-    await redisClient.connect();
+    redisClient = new Redis(options);
   } catch (e) {
     console.log(e);
   }

@@ -23,7 +23,7 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
     const hostHash = createHash("sha256");
     hostHash.update(bareHost);
     try {
-      usersPool = await redisClient.HKEYS(hostHash.digest("hex"));
+      usersPool = await redisClient.hkeys(hostHash.digest("hex"));
     } catch (e) {
       console.error(e);
     }

@@ -13,7 +13,7 @@ export const startCrawlTracker = async (req: Request, res: Response) => {
       const hostHash = createHash("sha256");
       hostHash.update(bareHost);
 
-      await redisClient.hSet(hostHash.digest("hex"), userId + "", "1");
+      await redisClient.hset(hostHash.digest("hex"), userId + "", "1");
     } catch (e) {
       console.error(e);
     }
