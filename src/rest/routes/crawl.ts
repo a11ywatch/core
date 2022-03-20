@@ -6,38 +6,37 @@ import {
 
 import { getUserFromToken, usageExceededThreshold } from "@app/core/utils";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
+import type { Request, Response } from "express";
 
-const websiteCrawl = async (req, res) => {
-  try {
-    const { data } = req.body;
-    const parentSub = !!req?.pubsub;
+const websiteCrawl = (req: Request, res?: Response) => {
+  const { data } = req.body;
+  // @ts-ignore
+  const parentSub = !!req?.pubsub;
 
-    if (data) {
+  if (data) {
+    try {
       const { user_id, pages, domain } =
         typeof data === "string" ? JSON.parse(data) : data;
 
-      // TODO: if id and domain not found get from redis
+      setImmediate(async () => {
+        if (pages?.length === 0) {
+          await UsersController().sendWebsiteOffline({ id: user_id, domain });
+        }
 
-      if (pages?.length === 0) {
-        await UsersController().sendWebsiteOffline({ id: user_id, domain });
-        res && res.send(false);
-        return;
-      }
-
-      for await (const url of pages) {
-        await crawl({
-          url,
-          userId: user_id,
-          parentSub,
-          pageInsights: false,
-        });
-      }
-
-      res && res.send(true);
+        for (const url of pages) {
+          await crawl({
+            url,
+            userId: user_id,
+            parentSub,
+          });
+        }
+      });
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.log(e);
-    res && res.send(false);
+  }
+  if (res) {
+    res.send(false);
   }
 };
 

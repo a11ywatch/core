@@ -1,15 +1,18 @@
+const { createPubSub } = require("../graph/subscriptions");
 const { initDbConnection, initRedisConnection } = require("../../database");
 const { websiteCrawl } = require("../../rest/routes/crawl");
 
-process.on("message", async (props) => {
-  try {
-    await Promise.all([initDbConnection(), initRedisConnection()]);
-    await websiteCrawl(props?.req);
-  } catch (e) {
-    console.error(e);
-  } finally {
-    if (process.send) {
+process.on("message", (props) => {
+  Promise.all([
+    initDbConnection(),
+    initRedisConnection(),
+    createPubSub(),
+    websiteCrawl(props.req),
+  ])
+    .catch((error) => {
+      console.error(error);
+    })
+    .finally(() => {
       process.send("close");
-    }
-  }
+    });
 });

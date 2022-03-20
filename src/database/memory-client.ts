@@ -14,8 +14,6 @@ const initRedisConnection = async () => {
     });
     redisClient.on("error", (err) => console.error("Redis Client Error", err));
     await redisClient.connect();
-
-    return redisClient;
   } catch (e) {
     console.log(e);
   }

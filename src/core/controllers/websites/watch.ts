@@ -14,12 +14,14 @@ export const crawlAllAuthedWebsites = async (
     console.error(e);
   }
 
-  try {
-    console.log("crawling all web pages standby...");
-    setImmediate(async () => await websiteWatch(allWebPages));
-  } catch (e) {
-    console.error(e);
-  }
+  setImmediate(async () => {
+    try {
+      console.log("crawling all web pages standby...");
+      return await websiteWatch(allWebPages);
+    } catch (e) {
+      console.error(e);
+    }
+  });
 
   if (res && "send" in res) {
     res.send(true);

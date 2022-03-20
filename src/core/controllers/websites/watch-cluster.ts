@@ -1,19 +1,18 @@
 import { cpus } from "os";
-// import { fork } from "child_process";
-// import { DEV } from "@app/config/config";
+import { fork } from "child_process";
+import { DEV } from "@app/config/config";
 import { getWebsitesWithUsers } from "../websites";
 import type { Response, Request } from "express";
-import { websiteWatch } from "./watch-pages";
 
 const baseCpus = Math.max(cpus().length, 1);
 const numCPUs = Math.max(Math.floor(baseCpus / 2), 1);
 
-// const forkArgs = {
-//   detached: true,
-//   execArgv: DEV
-//     ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
-//     : undefined,
-// };
+const forkArgs = {
+  detached: true,
+  execArgv: DEV
+    ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
+    : undefined,
+};
 
 export const crawlAllAuthedWebsitesFork = async (
   _?: Request,
@@ -37,12 +36,18 @@ export const crawlAllAuthedWebsitesFork = async (
     );
   }
 
-  try {
+  pageChunk.forEach((chunk: any) => {
     console.log(`chunks to process ${pageChunk.length}`);
-    await websiteWatch(allWebPages);
-  } catch (e) {
-    console.error(e);
-  }
+    const forked = fork(`${__dirname}/watch-forked`, [], forkArgs);
+    forked.send({ pages: chunk });
+    forked.unref();
+
+    forked.on("message", (message: string) => {
+      if (message === "close") {
+        forked.kill("SIGINT");
+      }
+    });
+  });
 
   if (res && "send" in res) {
     res.send(true);
