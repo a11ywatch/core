@@ -2,8 +2,8 @@ import validUrl from "valid-url";
 import { createHash } from "crypto";
 import { ApiResponse, responseModel } from "@app/core/models";
 import { redisClient } from "@app/database/memory-client";
-import { crawlPage } from "./utils/crawl-page";
 import { getHostName } from "@app/core/utils";
+import { crawlPage } from "./utils/crawl-page";
 
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const { userId, url: urlMap } = params ?? {};

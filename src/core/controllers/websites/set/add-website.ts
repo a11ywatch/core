@@ -5,15 +5,12 @@ import {
   SUCCESS,
   WEBSITE_URL_ERROR,
 } from "@app/core/strings";
-import {
-  workerMessage,
-  blockWebsiteAdd,
-  stripUrlEndingSlash,
-} from "@app/core/utils";
+import { blockWebsiteAdd, stripUrlEndingSlash } from "@app/core/utils";
 import { makeWebsite } from "@app/core/models/website";
 import { getHostName, initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
+import { watcherCrawl } from "@app/core/utils/watcher_crawl";
 
 export const addWebsite = async ({
   userId,
@@ -55,7 +52,13 @@ export const addWebsite = async ({
   await collection.insertOne(website);
 
   if (canScan) {
-    workerMessage({ urlMap: stripUrlEndingSlash(url), userId, scan: true });
+    setImmediate(async () => {
+      await watcherCrawl({
+        urlMap: stripUrlEndingSlash(url),
+        userId,
+        scan: true,
+      });
+    });
   }
 
   return {

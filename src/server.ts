@@ -15,7 +15,7 @@ import {
   PUBLIC_KEY,
 } from "./config";
 import { workerMessage } from "./core/utils";
-import { crawlAllAuthedWebsites } from "./core/controllers/websites";
+import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
@@ -73,10 +73,10 @@ function initServer(): HttpServer {
   app.get("/api/get-website", cors(), getWebsite);
   app.get(GET_WEBSITES_DAILY, getDailyWebsites);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
-  app.post(WEBSITE_CRAWL, cors(), websiteCrawl);
+  app.post(WEBSITE_CRAWL, websiteCrawl);
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
     try {
-      workerMessage({ req: { body: req.body } }, "crawl-website");
+      await workerMessage({ req: { body: req.body } });
     } catch (e) {
       console.error(e);
     }
@@ -144,7 +144,7 @@ function initServer(): HttpServer {
     const { password } = req.body;
     try {
       if (password === process.env.ADMIN_PASSWORD) {
-        await crawlAllAuthedWebsites();
+        await crawlAllAuthedWebsitesCluster();
         res.send(true);
       } else {
         res.send(false);
@@ -195,7 +195,7 @@ function initServer(): HttpServer {
   });
 
   if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("00 00 00 * * *", crawlAllAuthedWebsites).start();
+    new CronJob("00 00 00 * * *", crawlAllAuthedWebsitesCluster).start();
   }
 
   return listener;

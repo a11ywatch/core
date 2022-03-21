@@ -9,7 +9,7 @@ import {
   register,
   logout,
 } from "./graph/mutations";
-import { workerMessage } from "./utils";
+import { watcherCrawl } from "./utils/watcher_crawl";
 
 const defaultPayload = {
   keyid: null,
@@ -39,8 +39,9 @@ export const Mutation = {
         userId: keyid,
       })
     ) {
-      workerMessage({ urlMap: url, userId: keyid, scan: true });
-
+      setImmediate(async () => {
+        await watcherCrawl({ urlMap: url, userId: keyid, scan: true });
+      });
       return {
         website: null,
         code: 200,

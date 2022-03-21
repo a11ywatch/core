@@ -1,7 +1,7 @@
-const fetch = require("node-fetch");
-const { initUrl } = require("@a11ywatch/website-source-builder");
+import fetch from "node-fetch";
+import { initUrl } from "@a11ywatch/website-source-builder";
 
-module.exports = async ({ urlMap, userId, scan = false }) => {
+export const watcherCrawl = async ({ urlMap, userId, scan = false }) => {
   const url = String(initUrl(urlMap, true));
   const targetUrl = scan ? "scan" : "crawl";
 
@@ -16,9 +16,5 @@ module.exports = async ({ urlMap, userId, scan = false }) => {
     });
   } catch (e) {
     console.error(e);
-  } finally {
-    if (process.send) {
-      process.send("close");
-    }
   }
 };

@@ -10,30 +10,21 @@ import type { Request, Response } from "express";
 
 const websiteCrawl = (req: Request, res?: Response) => {
   const { data } = req.body;
-  // @ts-ignore
-  const parentSub = !!req?.pubsub;
-
   if (data) {
-    try {
-      const { user_id, pages, domain } =
-        typeof data === "string" ? JSON.parse(data) : data;
-
-      setImmediate(async () => {
-        if (pages?.length === 0) {
-          await UsersController().sendWebsiteOffline({ id: user_id, domain });
-        }
-
+    setImmediate(async () => {
+      try {
+        const { user_id, pages } =
+          typeof data === "string" ? JSON.parse(data) : data;
         for (const url of pages) {
           await crawl({
             url,
             userId: user_id,
-            parentSub,
           });
         }
-      });
-    } catch (e) {
-      console.error(e);
-    }
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
   if (res) {
     res.send(false);
@@ -48,7 +39,6 @@ const crawlWebsite = async (req, res) => {
     await crawl({
       url,
       userId,
-      pageInsights: false,
     });
   } catch (e) {
     console.error(e);

@@ -13,7 +13,7 @@ const piscina = new Piscina({
 const baseCpus = Math.max(cpus().length, 1);
 const numCPUs = Math.max(Math.floor(baseCpus / 2), 1);
 
-export const crawlAllAuthedWebsitesFork = async (
+export const crawlAllAuthedWebsitesCluster = async (
   _?: Request,
   res?: Response
 ): Promise<any> => {
