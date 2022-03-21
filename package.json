@@ -36,6 +36,7 @@
     "node-fetch": "2.6.0",
     "node-iframe": "^1.5.10",
     "nodemailer": "6.7.2",
+    "piscina": "^3.2.0",
     "stripe": "7.14.0",
     "universal-analytics": "^0.4.23",
     "valid-url": "1.0.9"
@@ -47,9 +48,9 @@
     "@swc/core": "^1.2.117",
     "@swc/jest": "^0.2.11",
     "@types/express-rate-limit": "^5.1.1",
+    "@types/ioredis": "^4.28.8",
     "@types/jest": "^26.0.20",
     "@types/node": "^10.17.51",
-    "@types/ioredis": "^4.28.8",
     "@types/universal-analytics": "^0.4.5",
     "apollo-server-testing": "^2.21.1",
     "eslint": "3.8.1",

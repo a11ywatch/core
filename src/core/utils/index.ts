@@ -7,7 +7,7 @@ export { realUser } from "./getters";
 export { getUserFromToken } from "./get-user";
 export { usageExceededThreshold } from "./get-usage";
 export { getLastItemInCollection } from "./get-last-item-in-collection";
-export { forkProcess } from "./fork";
+export { workerMessage } from "./worker-message";
 export { blockWebsiteAdd } from "./limits";
 export { stripUrlEndingSlash } from "./strip-url-ending-slash";
 export { collectionUpsert } from "./collection-upsert";

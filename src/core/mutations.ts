@@ -9,7 +9,7 @@ import {
   register,
   logout,
 } from "./graph/mutations";
-import { forkProcess } from "./utils";
+import { workerMessage } from "./utils";
 
 const defaultPayload = {
   keyid: null,
@@ -39,7 +39,7 @@ export const Mutation = {
         userId: keyid,
       })
     ) {
-      forkProcess({ urlMap: url, userId: keyid, scan: true });
+      workerMessage({ urlMap: url, userId: keyid, scan: true });
 
       return {
         website: null,

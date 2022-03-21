@@ -14,7 +14,7 @@ import {
   PRIVATE_KEY,
   PUBLIC_KEY,
 } from "./config";
-import { forkProcess } from "./core/utils";
+import { workerMessage } from "./core/utils";
 import { crawlAllAuthedWebsites } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
@@ -76,15 +76,11 @@ function initServer(): HttpServer {
   app.post(WEBSITE_CRAWL, cors(), websiteCrawl);
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
     try {
-      if (typeof process.env.BACKGROUND_CRAWL !== "undefined") {
-        forkProcess({ req: { body: req.body, pubsub: true } }, "crawl-website");
-        res.json(true);
-      } else {
-        await websiteCrawl(req, res);
-      }
+      workerMessage({ req: { body: req.body } }, "crawl-website");
     } catch (e) {
-      res.json(false);
+      console.error(e);
     }
+    res.json(false);
   });
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
   app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);

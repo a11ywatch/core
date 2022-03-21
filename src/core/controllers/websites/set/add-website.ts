@@ -6,7 +6,7 @@ import {
   WEBSITE_URL_ERROR,
 } from "@app/core/strings";
 import {
-  forkProcess,
+  workerMessage,
   blockWebsiteAdd,
   stripUrlEndingSlash,
 } from "@app/core/utils";
@@ -55,7 +55,7 @@ export const addWebsite = async ({
   await collection.insertOne(website);
 
   if (canScan) {
-    forkProcess({ urlMap: stripUrlEndingSlash(url), userId, scan: true });
+    workerMessage({ urlMap: stripUrlEndingSlash(url), userId, scan: true });
   }
 
   return {
