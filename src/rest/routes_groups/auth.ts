@@ -41,10 +41,10 @@ export const setAuthRoutes = (app: Application) => {
     }
   });
 
-  app.post("/api/logout", cors(), async (_req, res) => {
+  app.post("/api/logout", cors(), (_req, res) => {
     res.clearCookie("on");
     res.clearCookie("jwt");
-    res.send(true);
+    res.end();
   });
 
   // A NEW INSTANCE OF THE APP BASIC PING (RUNS ONCE ON APP START)

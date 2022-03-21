@@ -1,5 +1,5 @@
 // gql mutation function
-export async function logout(_, __, context) {
+export function logout(_, __, context) {
   if (context?.res?.cookie) {
     context.res.clearCookie("on");
     context.res.clearCookie("jwt");
