@@ -1,6 +1,5 @@
 interface AppCookie {
   jwt?: string;
-  on?: string;
 }
 
 export function parseCookie(cookiesString?: string): AppCookie | null {

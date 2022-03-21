@@ -12,7 +12,6 @@ export const setAuthRoutes = (app: Application) => {
     try {
       const auth = await createUser({ email, password, googleId });
 
-      res.cookie("on", auth.email, cookieConfigs);
       res.cookie("jwt", auth.jwt, cookieConfigs);
 
       res.json(auth);
@@ -28,7 +27,6 @@ export const setAuthRoutes = (app: Application) => {
     try {
       const auth = await verifyUser({ email, password, googleId });
 
-      res.cookie("on", auth.email, cookieConfigs);
       res.cookie("jwt", auth.jwt, cookieConfigs);
 
       res.json(auth);
@@ -42,7 +40,7 @@ export const setAuthRoutes = (app: Application) => {
   });
 
   app.post("/api/logout", cors(), (_req, res) => {
-    res.clearCookie("on");
+    res.cookie("jwt", "", cookieConfigs);
     res.clearCookie("jwt");
     res.end();
   });

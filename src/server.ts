@@ -59,13 +59,13 @@ function initServer(): HttpServer {
   const { GRAPHQL_PORT } = config;
 
   app.disable("x-powered-by");
+  app.set("trust proxy", process.env.NODE_ENV !== "production");
   app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
-
-  app.set("trust proxy", true);
   app.use(createIframe);
+
   app.options(CONFIRM_EMAIL, cors());
   app.get(ROOT, root);
   app.get("/iframe", createIframeEvent);

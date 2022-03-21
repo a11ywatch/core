@@ -14,7 +14,6 @@ export async function login(_, { email, password, googleId }, context) {
   }
 
   if (context?.res?.cookie) {
-    context.res.cookie("on", loginUser.email, cookieConfigs);
     context.res.cookie("jwt", loginUser.jwt, cookieConfigs);
   }
 

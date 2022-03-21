@@ -75,9 +75,8 @@ let cookieConfigs: CookieOptions = {
 
 if (DEV) {
   cookieConfigs = {
-    maxAge: 228960000,
+    ...cookieConfigs,
     sameSite: false,
-    httpOnly: true,
     secure: false,
     domain: undefined,
   };

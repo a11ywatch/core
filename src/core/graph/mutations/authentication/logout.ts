@@ -1,7 +1,9 @@
+import { cookieConfigs } from "@app/config";
+
 // gql mutation function
 export function logout(_, __, context) {
   if (context?.res?.cookie) {
-    context.res.clearCookie("on");
+    context.res.cookie("jwt", "", cookieConfigs);
     context.res.clearCookie("jwt");
   }
   return {
