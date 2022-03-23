@@ -1,1 +1,1 @@
-export const logoSvg = `<img src="https://drive.google.com/uc?id=1ZzG7awkfsVM0odGnfr9QTrLDaGaVluoD" alt="A11yWatch logo">`;
+export const logoSvg = `<div style="display: flex; flex: 1; align-items: center"><img src="https://drive.google.com/uc?id=1ZzG7awkfsVM0odGnfr9QTrLDaGaVluoD" alt="A11yWatch logo" width="51" height="30"><strong style="margin-left: 12px; font-size: 1.3rem">A11yWatch</strong></div>`;
