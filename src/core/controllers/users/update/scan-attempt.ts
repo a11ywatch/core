@@ -7,18 +7,19 @@ export const updateScanAttempt = async ({ userId }) => {
   if (user) {
     const lastScanDate = new Date();
 
-    let scanInfo = user?.scanInfo
-      ? user?.scanInfo
-      : {
-          lastScanDate,
-          scanAttempts: 0,
-        };
+    const scanInfo = user?.scanInfo ?? {
+      lastScanDate,
+      scanAttempts: 0,
+    };
 
-    scanInfo.scanAttempts =
+    if (
       scanInfo?.lastScanDate &&
       !isSameDay(scanInfo?.lastScanDate as Date, new Date())
-        ? 1
-        : scanInfo.scanAttempts + 1;
+    ) {
+      scanInfo.scanAttempts = 1;
+    } else {
+      scanInfo.scanAttempts = scanInfo.scanAttempts + 1;
+    }
 
     if (
       (scanInfo?.scanAttempts >= 3 && user?.role === 0) ||
@@ -29,10 +30,16 @@ export const updateScanAttempt = async ({ userId }) => {
 
     scanInfo.lastScanDate = lastScanDate;
 
-    await collection.findOneAndUpdate({ id: user.id }, { $set: { scanInfo } });
+    setImmediate(async () => {
+      await collection.findOneAndUpdate(
+        { id: user.id },
+        { $set: { scanInfo } }
+      );
+    });
 
     return true;
   }
+
   return false;
 };
 

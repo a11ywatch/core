@@ -161,29 +161,31 @@ export const crawlPage = async (
         }
       }
 
-      await Promise.all([
-        collectionUpsert(
-          {
-            pageUrl,
-            domain,
-            errorCount,
-            warningCount,
-            noticeCount,
-            userId,
-            adaScore,
-          },
-          [analyticsCollection, analytics]
-        ),
-        collectionUpsert(newIssue, [issuesCollection, issueExist]),
-        collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
-          searchProps: { url: pageUrl, userId },
-        }),
-        collectionUpsert(script, [scriptsCollection, scripts]),
-        collectionUpsert(webPage, [subDomainCollection, newSite], {
-          searchProps: { pageUrl, userId },
-        }),
-      ]).catch((e) => {
-        console.error(e);
+      setImmediate(async () => {
+        await Promise.all([
+          collectionUpsert(
+            {
+              pageUrl,
+              domain,
+              errorCount,
+              warningCount,
+              noticeCount,
+              userId,
+              adaScore,
+            },
+            [analyticsCollection, analytics]
+          ),
+          collectionUpsert(newIssue, [issuesCollection, issueExist]),
+          collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
+            searchProps: { url: pageUrl, userId },
+          }),
+          collectionUpsert(script, [scriptsCollection, scripts]),
+          collectionUpsert(webPage, [subDomainCollection, newSite], {
+            searchProps: { pageUrl, userId },
+          }),
+        ]).catch((e) => {
+          console.error(e);
+        });
       });
 
       if (webPage) {

@@ -7,9 +7,16 @@ export const addWebsite = async (
 ) => {
   const { audience, userId } = getPayLoad(context, props);
 
+  // TODO: MOVE TO API ENTRY FOR GQL AND REST
   const canScan = await context.models.User.updateScanAttempt({
     userId: userId,
   });
+
+  if (!canScan) {
+    throw new Error(
+      "You hit your scan limit for the day, please try again tomorrow to add your website."
+    );
+  }
 
   return await context.models.Website.addWebsite({
     userId,
