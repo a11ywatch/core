@@ -15,7 +15,10 @@ import {
   PUBLIC_KEY,
 } from "./config";
 import { workerMessage } from "./core/utils";
-import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
+import {
+  crawlAllAuthedWebsites,
+  crawlAllAuthedWebsitesCluster,
+} from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
@@ -30,7 +33,6 @@ import {
   WEBSITE_CRAWL,
   WEBSITE_CHECK,
   UNSUBSCRIBE_EMAILS,
-  GET_WEBSITES_DAILY,
 } from "./core/routes";
 import { initDbConnection, closeDbConnection } from "./database";
 import { Server } from "./apollo-server";
@@ -44,7 +46,6 @@ import {
   websiteCrawl,
   websiteCrawlAuthed,
   getWebsite,
-  getDailyWebsites,
 } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
@@ -71,7 +72,6 @@ function initServer(): HttpServer {
   app.get("/iframe", createIframeEvent);
   app.get("/status/:domain", cors(), statusBadge);
   app.get("/api/get-website", cors(), getWebsite);
-  app.get(GET_WEBSITES_DAILY, getDailyWebsites);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
   app.post(WEBSITE_CRAWL, websiteCrawl);
   app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
@@ -195,7 +195,7 @@ function initServer(): HttpServer {
   });
 
   if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("00 00 00 * * *", crawlAllAuthedWebsitesCluster).start();
+    new CronJob("00 00 00 * * *", crawlAllAuthedWebsites).start();
   }
 
   return listener;

@@ -1,7 +1,7 @@
 import { emailMessager } from "@app/core/messagers";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { pubsub } from "@app/core/graph/subscriptions";
-import { SUBDOMAIN_ADDED, ISSUE_ADDED, WEBSITE_ADDED } from "@app/core/static";
+import { SUBDOMAIN_ADDED, ISSUE_ADDED } from "@app/core/static";
 import { responseModel } from "@app/core/models";
 import { collectionUpsert } from "@app/core/utils";
 import { IssuesController } from "@app/core/controllers/issues";
@@ -44,7 +44,8 @@ export const crawlPage = async (
         domain,
         userId,
       });
-      let insightsEnabled = pageInsights || (userData && website?.pageInsights);
+
+      let insightsEnabled = pageInsights || website?.pageInsights;
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
       if (insightsEnabled) {
         if (userData?.role === 0 || !userData?.role) {
@@ -79,7 +80,7 @@ export const crawlPage = async (
 
       let {
         script,
-        issues,
+        issues: pageIssues,
         webPage,
         pageHasCdn,
         errorCount,
@@ -110,30 +111,25 @@ export const crawlPage = async (
         true
       );
 
-      const newIssue = Object.assign({}, issues, {
+      const newIssue = Object.assign({}, pageIssues, {
         domain,
         userId,
         pageUrl,
       });
 
-      const subIssues: Issue[] = issues?.issues;
+      const subIssues: Issue[] = pageIssues?.issues;
 
-      if (subIssues?.length) {
-        if (parentSub && process.send) {
-          process.send({
-            name: ISSUE_ADDED,
-            key: { name: "issueAdded", value: newIssue },
-          });
-        } else {
-          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-        }
+      const pageConstainsIssues = subIssues?.length;
+
+      if (pageConstainsIssues) {
+        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
 
         const issuesFound = subIssues?.some((iss) => iss.type === "error");
 
         if (sendEmail && issuesFound) {
           await emailMessager.sendMail({
             userId,
-            data: issues,
+            data: pageIssues,
             confirmedOnly: true,
           });
         }
@@ -150,7 +146,6 @@ export const crawlPage = async (
       updateWebsiteProps = Object.assign({}, webPage, {
         avgScore,
         cdnConnected: pageHasCdn,
-        online: true,
       });
 
       if (script) {
@@ -175,7 +170,11 @@ export const crawlPage = async (
             },
             [analyticsCollection, analytics]
           ),
-          collectionUpsert(newIssue, [issuesCollection, issueExist]),
+          collectionUpsert(newIssue, [
+            issuesCollection,
+            issueExist,
+            pageConstainsIssues,
+          ]),
           collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
             searchProps: { url: pageUrl, userId },
           }),
@@ -190,13 +189,6 @@ export const crawlPage = async (
 
       if (webPage) {
         if (!newSite) {
-          if (parentSub && process.send) {
-            process.send({
-              name: SUBDOMAIN_ADDED,
-              key: { name: "subDomainAdded", value: webPage },
-            });
-          }
-
           await pubsub
             .publish(SUBDOMAIN_ADDED, {
               subDomainAdded: {
@@ -210,19 +202,13 @@ export const crawlPage = async (
 
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
 
-      if (parentSub && process.send) {
-        process.send({
-          name: WEBSITE_ADDED,
-          key: { name: "websiteAdded", value: websiteAdded },
-        });
-      }
-
-      await pubsub
-        .publish(WEBSITE_ADDED, { websiteAdded })
-        .catch((e) => console.error(e));
+      // TODO: REMOVE (SINCE ALL PAGES ARE SENT VIA ISSUES AND DOMAINS SUBS)
+      // await pubsub
+      //   .publish(WEBSITE_ADDED, { websiteAdded })
+      //   .catch((e) => console.error(e));
 
       const responseData = limitResponse({
-        issues,
+        issues: pageIssues,
         pageUrl,
         script,
         websiteAdded,
@@ -231,6 +217,7 @@ export const crawlPage = async (
 
       const timestamp = new Date().getTime();
 
+      // TODO: REMOVE UGLY LOGIC
       if (responseData?.data) {
         if (responseData?.data?.website) {
           responseData.data.website.timestamp = timestamp;
@@ -243,8 +230,8 @@ export const crawlPage = async (
 
       const reportData = responseData?.website ?? responseData?.data;
 
-      await createReport(reportData, reportData?.issues ?? issues).catch((e) =>
-        console.error(e)
+      await createReport(reportData, reportData?.issues ?? pageIssues).catch(
+        (e) => console.error(e)
       );
 
       return resolve(responseModel(responseData));

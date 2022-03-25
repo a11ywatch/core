@@ -1,6 +1,6 @@
 export const collectionUpsert = async (
   source: any,
-  [collection, shouldUpdate],
+  [collection, shouldUpdate, shouldDelete]: [any, any, any?],
   config?: any
 ) => {
   if (typeof source === "undefined") {
@@ -10,10 +10,16 @@ export const collectionUpsert = async (
     const userId = config?.searchProps?.userId || source?.userId;
     const queryParams = config?.searchProps
       ? config?.searchProps
-      : { userId, pageUrl: config?.searchProps?.pageUrl || source?.pageUrl };
+      : // default handle collections as pageURL. SHOULD REFACTOR single prop `url`
+        { userId, pageUrl: config?.searchProps?.pageUrl || source?.pageUrl };
 
     if (typeof queryParams?.pageUrl === "undefined" && !queryParams.url) {
       queryParams.url = source?.url;
+    }
+
+    // mainly if issues exist and theres none on the page (delete the collection)
+    if (shouldUpdate && shouldDelete) {
+      return await collection.deleteOne(queryParams);
     }
 
     if (!shouldUpdate) {
