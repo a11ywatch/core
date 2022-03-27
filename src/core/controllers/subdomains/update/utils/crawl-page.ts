@@ -1,6 +1,6 @@
 import { emailMessager } from "@app/core/messagers";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { pubsub } from "@app/core/graph/subscriptions";
+import { pubsub } from "@app/database/pubsub";
 import { SUBDOMAIN_ADDED, ISSUE_ADDED } from "@app/core/static";
 import { responseModel } from "@app/core/models";
 import { collectionUpsert } from "@app/core/utils";
@@ -22,13 +22,7 @@ import { URL } from "url";
 import { Issue } from "@app/schema";
 
 export const crawlPage = async (
-  {
-    userId,
-    url: urlMap,
-    pageInsights = false,
-    apiData = false,
-    parentSub = false,
-  },
+  { userId, url: urlMap, pageInsights = false, apiData = false },
   sendEmail?: boolean
 ) => {
   let domainSource = sourceBuild(urlMap, userId);
@@ -201,11 +195,6 @@ export const crawlPage = async (
       }
 
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
-
-      // TODO: REMOVE (SINCE ALL PAGES ARE SENT VIA ISSUES AND DOMAINS SUBS)
-      // await pubsub
-      //   .publish(WEBSITE_ADDED, { websiteAdded })
-      //   .catch((e) => console.error(e));
 
       const responseData = limitResponse({
         issues: pageIssues,

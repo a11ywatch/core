@@ -65,7 +65,7 @@ export const emailMessager = {
           await transporter.sendMail(
             Object.assign({}, mailOptions, {
               to: findUser.email,
-              subject: `${data.issues.length} issues found with ${
+              subject: `[Report] ${data.issues.length} issues found with ${
                 data?.pageUrl || data?.domain
               }.`,
               html: `${logoSvg}<br /><h1>${issuesFoundTemplate(

@@ -1,6 +1,6 @@
 import { withFilter } from "graphql-subscriptions";
 import { ISSUE_ADDED } from "../../static";
-import { pubsub } from "./pubsub";
+import { pubsub } from "@app/database/pubsub";
 
 export const issueAdded = {
   subscribe: withFilter(

@@ -7,20 +7,15 @@ import {
 import { getUserFromToken, usageExceededThreshold } from "@app/core/utils";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
 import type { Request, Response } from "express";
+import { pubsub, Channels } from "@app/database/pubsub";
 
 const websiteCrawl = (req: Request, res?: Response) => {
   const { data } = req.body;
   if (data) {
     setImmediate(async () => {
       try {
-        const { user_id, pages } =
-          typeof data === "string" ? JSON.parse(data) : data;
-        for (const url of pages) {
-          await crawl({
-            url,
-            userId: user_id,
-          });
-        }
+        const source = typeof data === "string" ? data : JSON.stringify(data);
+        await pubsub.publish(Channels.crawl_scan_queue, source);
       } catch (e) {
         console.error(e);
       }

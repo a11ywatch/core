@@ -14,7 +14,6 @@ import {
   PRIVATE_KEY,
   PUBLIC_KEY,
 } from "./config";
-import { workerMessage } from "./core/utils";
 import {
   crawlAllAuthedWebsites,
   crawlAllAuthedWebsitesCluster,
@@ -34,7 +33,12 @@ import {
   WEBSITE_CHECK,
   UNSUBSCRIBE_EMAILS,
 } from "./core/routes";
-import { initDbConnection, closeDbConnection } from "./database";
+import {
+  initDbConnection,
+  closeDbConnection,
+  setChannels,
+  createPubSub,
+} from "./database";
 import { Server } from "./apollo-server";
 import {
   confirmEmail,
@@ -54,6 +58,7 @@ import { setCrawlManagerRoutes } from "./rest/routes_groups/crawl-manager";
 import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
 import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 import { setAuthRoutes } from "./rest/routes_groups/auth";
+import { createSub } from "./database/pubsub";
 
 function initServer(): HttpServer {
   const app = express();
@@ -73,17 +78,10 @@ function initServer(): HttpServer {
   app.get("/status/:domain", cors(), statusBadge);
   app.get("/api/get-website", cors(), getWebsite);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
-  app.post(WEBSITE_CRAWL, websiteCrawl);
-  app.post(`${WEBSITE_CRAWL}-background`, async (req, res) => {
-    try {
-      await workerMessage({ req: { body: req.body } });
-    } catch (e) {
-      console.error(e);
-    }
-    res.json(false);
-  });
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
   app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
+  app.post(WEBSITE_CRAWL, websiteCrawl);
+  app.post(`${WEBSITE_CRAWL}-background`, websiteCrawl); // TODO: remove endpoint
 
   // CLI OPTIONS MOVE TO DIRECTORY
   app.post("/api/scan-simple", cors(), async (req, res) => {
@@ -206,6 +204,9 @@ let coreServer: HttpServer;
 const startServer = (async () => {
   try {
     await initDbConnection();
+    createPubSub();
+    createSub();
+    setChannels();
   } catch (e) {
     console.error(e);
   }

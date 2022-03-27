@@ -53,7 +53,11 @@ export const getIssues = async ({
     });
 
     // TODO: PAGINATION
-    return await collection.find(searchProps).limit(2000).toArray();
+    return await collection
+      .find(searchProps)
+      .sort({ pageUrl: 1 })
+      .limit(20000)
+      .toArray();
   } catch (e) {
     console.error(e);
   }

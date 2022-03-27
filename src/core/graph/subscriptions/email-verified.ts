@@ -1,6 +1,6 @@
 import { withFilter } from "graphql-subscriptions";
 import { EMAIL_VERIFIED } from "../../static";
-import { pubsub } from "./pubsub";
+import { pubsub } from "@app/database/pubsub";
 
 export const emailVerified = {
   subscribe: withFilter(

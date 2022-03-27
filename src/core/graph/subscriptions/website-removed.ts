@@ -1,6 +1,6 @@
 import { withFilter } from "graphql-subscriptions";
 import { WEBSITE_REMOVED } from "../../static";
-import { pubsub } from "./pubsub";
+import { pubsub } from "@app/database/pubsub";
 
 export const websiteRemoved = {
   subscribe: withFilter(

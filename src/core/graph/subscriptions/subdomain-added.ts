@@ -1,6 +1,6 @@
 import { withFilter } from "graphql-subscriptions";
 import { SUBDOMAIN_ADDED } from "../../static";
-import { pubsub } from "./pubsub";
+import { pubsub } from "@app/database/pubsub";
 
 export const subDomainAdded = {
   subscribe: withFilter(

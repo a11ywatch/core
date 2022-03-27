@@ -1,7 +1,7 @@
 import { redisClient } from "@app/database";
 import type { Request, Response } from "express";
 import { getParams } from "./get-params";
-import { createHash } from "crypto";
+import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils";
 
 export const completeCrawlTracker = async (req: Request, res: Response) => {
@@ -10,11 +10,9 @@ export const completeCrawlTracker = async (req: Request, res: Response) => {
   if (domain && redisClient) {
     try {
       const bareHost = getHostName(domain);
-      const hostHash = createHash("sha256");
+      const hostHash = hashString(bareHost);
 
-      hostHash.update(bareHost);
-
-      await redisClient.hdel(hostHash.digest("hex"), userId + "");
+      await redisClient.hdel(hostHash, userId + "");
     } catch (e) {
       console.error(e);
     }

@@ -12,7 +12,12 @@ export const getDomains = async (
       userId,
       domain: domain || (url && getHostName(url)),
     });
-    const websites = await collection.find(searchProps).limit(10000).toArray();
+    // TODO: ADD PAGINATION
+    const websites = await collection
+      .find(searchProps)
+      .sort({ url: 1 })
+      .limit(100000)
+      .toArray();
 
     return chain ? [websites, collection] : websites;
   } catch (e) {

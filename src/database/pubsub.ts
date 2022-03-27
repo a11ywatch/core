@@ -7,6 +7,7 @@ const options = {
 };
 
 let pubsub: RedisPubSub;
+let sub: Redis.Redis;
 
 function createPubSub() {
   try {
@@ -19,6 +20,16 @@ function createPubSub() {
   }
 }
 
-createPubSub();
+function createSub() {
+  try {
+    sub = new Redis(options);
+  } catch (e) {
+    console.error(e);
+  }
+}
 
-export { pubsub, createPubSub };
+enum Channels {
+  crawl_scan_queue = "crawl_scan_queue",
+}
+
+export { pubsub, sub, createPubSub, createSub, Channels };
