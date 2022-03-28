@@ -1,4 +1,3 @@
-// import { isSameDay } from "date-fns";
 import { getIssue } from "../find";
 
 export const updateIssues = async ({ userId, url, issuesCount, issues }) => {
@@ -10,7 +9,10 @@ export const updateIssues = async ({ userId, url, issuesCount, issues }) => {
     issues,
   };
 
-  await collection.updateOne({ url }, { $set: { issuesCount, issues } });
+  await collection.updateOne(
+    { url, userId },
+    { $set: { issuesCount, issues } }
+  );
 
   return issue;
 };

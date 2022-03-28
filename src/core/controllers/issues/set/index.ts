@@ -1,9 +1,8 @@
-// import { isSameDay } from "date-fns";
 import { getIssue } from "../find";
 import { SUCCESS } from "@app/core/strings";
 
 export const addIssue = async ({ userId, url, issue }: any) => {
-  const [issueExist, collection] = await getIssue({ userId, url, issue }, true);
+  const [issueExist, collection] = await getIssue({ userId, url }, true);
 
   if (!issueExist) {
     const id = await collection.countDocuments({ userId, url });

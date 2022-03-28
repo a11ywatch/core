@@ -13,7 +13,7 @@
     "generate": "graphql-codegen"
   },
   "dependencies": {
-    "@a11ywatch/website-source-builder": "^0.0.11",
+    "@a11ywatch/website-source-builder": "^0.0.15",
     "@graphql-tools/schema": "^8.3.2",
     "apollo-server": "2.25.3",
     "apollo-server-express": "2.25.3",

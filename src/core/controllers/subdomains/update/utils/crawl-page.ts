@@ -9,12 +9,7 @@ import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getDomain } from "../../find";
-import {
-  fetchPuppet,
-  extractPageData,
-  limitResponse,
-  generateWebsiteAverageIssues,
-} from ".";
+import { fetchPuppet, extractPageData, limitResponse } from "./";
 import { createReport } from "../../../reports";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
@@ -25,9 +20,12 @@ export const crawlPage = async (
   { userId, url: urlMap, pageInsights = false, apiData = false },
   sendEmail?: boolean
 ) => {
+  // todo: use get hostname
   let domainSource = sourceBuild(urlMap, userId);
+
   let domain = domainSource?.domain;
   let pageUrl = domainSource?.pageUrl;
+
   let authenticated = typeof userId !== "undefined";
 
   return new Promise(async (resolve) => {
@@ -61,7 +59,9 @@ export const crawlPage = async (
         return resolve(responseModel());
       }
 
+      // TODO: UPDATE WESITE ONLINE FLAG
       if (!dataSource?.webPage) {
+        // WEBSITE IS OFFLINE
         return resolve({
           website: null,
           code: 300,
@@ -112,15 +112,12 @@ export const crawlPage = async (
       });
 
       const subIssues: Issue[] = pageIssues?.issues;
-
       const pageConstainsIssues = subIssues?.length;
 
       if (pageConstainsIssues) {
         await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
 
-        const issuesFound = subIssues?.some((iss) => iss.type === "error");
-
-        if (sendEmail && issuesFound) {
+        if (sendEmail && subIssues.some((iss) => iss.type === "error")) {
           await emailMessager.sendMail({
             userId,
             data: pageIssues,
@@ -131,15 +128,10 @@ export const crawlPage = async (
 
       let updateWebsiteProps: Website;
 
-      const [avgScore] = await generateWebsiteAverageIssues({
-        domain,
-        userId,
-      });
-
       // // TODO: MERGE ISSUES FROM ALL PAGES
       updateWebsiteProps = Object.assign({}, webPage, {
-        avgScore,
         cdnConnected: pageHasCdn,
+        online: true,
       });
 
       if (script) {
@@ -186,7 +178,7 @@ export const crawlPage = async (
           await pubsub
             .publish(SUBDOMAIN_ADDED, {
               subDomainAdded: {
-                ...webPage,
+                ...updateWebsiteProps,
                 html: "",
               },
             })
@@ -217,11 +209,14 @@ export const crawlPage = async (
         responseData.website.timestamp = timestamp;
       }
 
-      const reportData = responseData?.website ?? responseData?.data;
+      // TODO: BATCH WITH OTHER IMMEDIATE
+      setImmediate(async () => {
+        const reportData = responseData?.website ?? responseData?.data;
 
-      await createReport(reportData, reportData?.issues ?? pageIssues).catch(
-        (e) => console.error(e)
-      );
+        await createReport(reportData, reportData?.issues ?? pageIssues).catch(
+          (e) => console.error(e)
+        );
+      });
 
       return resolve(responseModel(responseData));
     } catch (e) {

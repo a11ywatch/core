@@ -4,6 +4,7 @@ import {
   websiteAdded,
   subDomainAdded,
   websiteRemoved,
+  crawlComplete,
 } from "./graph/subscriptions";
 
 export const Subscription = {
@@ -12,4 +13,5 @@ export const Subscription = {
   subDomainAdded,
   websiteAdded,
   websiteRemoved,
+  crawlComplete,
 };

@@ -2,10 +2,15 @@ import { URL } from "url";
 
 export const getHostName = (url: string) => {
   try {
+    let q = url;
+    if (!/^(http|https)/.test(q)) {
+      q = `http://${q}`;
+    }
+
     const { hostname } = new URL(url);
 
-    return hostname.replace(/^[^.]+\./g, "");
+    return hostname;
   } catch (e) {
-    console.error(e);
+    console.error(`invalid url ${url} \n ${e}`);
   }
 };

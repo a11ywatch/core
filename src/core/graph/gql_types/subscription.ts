@@ -4,6 +4,7 @@ export const subscription = `
 		issueAdded(userId: Int): Issue
 		subDomainAdded(userId: Int): SubDomain
 		emailVerified(userId: Int): User
+		crawlComplete(userId: Int): Website
 		issueRemoved: Issue
 		subDomainRemoved: SubDomain
 		websiteRemoved: Website

@@ -1,13 +1,16 @@
-import validUrl from "valid-url";
 import {
   WEBSITE_EXIST_ERROR,
   ADD_FREE_MAX_ERROR,
   SUCCESS,
   WEBSITE_URL_ERROR,
 } from "@app/core/strings";
-import { blockWebsiteAdd, stripUrlEndingSlash } from "@app/core/utils";
+import {
+  getHostName,
+  blockWebsiteAdd,
+  stripUrlEndingSlash,
+} from "@app/core/utils";
 import { makeWebsite } from "@app/core/models/website";
-import { getHostName, initUrl } from "@a11ywatch/website-source-builder";
+import { initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
 import { watcherCrawl } from "@app/core/utils/watcher_crawl";
@@ -20,9 +23,12 @@ export const addWebsite = async ({
   canScan,
   pageInsights,
 }) => {
-  if (!validUrl.isUri(urlMap)) {
+  const domain = getHostName(urlMap);
+
+  if (!domain) {
     throw new Error(WEBSITE_URL_ERROR);
   }
+
   const url = initUrl(urlMap);
   const [siteExist, collection] = await getWebsite({ userId, url });
 
@@ -44,7 +50,7 @@ export const addWebsite = async ({
   const website = makeWebsite({
     userId,
     url,
-    domain: getHostName(url),
+    domain: domain,
     pageHeaders: customHeaders,
     pageInsights: !!pageInsights,
   });

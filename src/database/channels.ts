@@ -1,4 +1,4 @@
-import { sub, Channels } from "./pubsub";
+import { sub } from "./pubsub";
 import { crawlWebsite as crawl } from "@app/core/controllers/subdomains/update";
 import fastq from "fastq";
 import type { queueAsPromised } from "fastq";
@@ -6,10 +6,19 @@ import { ResponseModel } from "@app/core/models/response/types";
 import { getActiveUsersCrawling } from "@app/core/utils/query";
 import { cpus } from "os";
 
+import { Method, Channels } from "./config";
+import { setWebsiteScore } from "@app/core/utils/stats/score";
+
+interface Meta {
+  method?: Method;
+  extra: any;
+}
+
 type Task = {
   userId?: number;
   url?: string;
   usersPooling?: string[];
+  meta?: Meta;
 };
 
 const cpucors = cpus().length;
@@ -19,13 +28,30 @@ const q: queueAsPromised<Task> = fastq.promise(
   Math.max(Math.round(cpucors / 2), 2)
 );
 
-async function asyncWorker(arg: Task): Promise<ResponseModel> {
-  const { url: urlMap, userId, usersPooling } = arg;
+const isGenerateAverageMethod = (meta: Meta) => {
+  if (meta && typeof meta?.method !== "undefined") {
+    return meta.method === Method["crawl_complete"];
+  }
+  return false;
+};
+
+async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
+  const { url: urlMap, userId, usersPooling = [], meta } = arg;
   console.log(
-    `received crawling task ${urlMap}: users:${usersPooling.length} awaiting scan`
+    `received crawling task ${urlMap ?? "completed"}: users:${
+      usersPooling.length
+    } awaiting scan`
   );
 
   try {
+    if (isGenerateAverageMethod(meta)) {
+      const props = meta?.extra;
+
+      return await setWebsiteScore({
+        domain: props?.domain,
+        userId: Number(userId),
+      });
+    }
     // TODO: CLEANUP URL-URLMAP
     return await crawl({ userId, url: urlMap, usersPooling });
   } catch (e) {
@@ -37,7 +63,15 @@ async function asyncWorker(arg: Task): Promise<ResponseModel> {
 const crawlPageQueue = async (message) => {
   try {
     const data = JSON.parse(JSON.parse(message));
-    const { pages, user_id } = data;
+    const { pages = [], user_id, meta } = data;
+
+    if (isGenerateAverageMethod(meta)) {
+      await q.push({
+        userId: user_id,
+        meta,
+      });
+      return;
+    }
 
     for (const url of pages) {
       const usersPooling = await getActiveUsersCrawling({

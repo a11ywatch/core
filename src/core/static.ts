@@ -5,3 +5,4 @@ export const ISSUE_REMOVED = "issueRemoved";
 export const SUBDOMAIN_ADDED = "subDomainAdded";
 export const SUBDOMAIN_REMOVED = "subDomainRemoved";
 export const EMAIL_VERIFIED = "emailVerified";
+export const CRAWL_COMPLETE = "crawlComplete";

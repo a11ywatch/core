@@ -1,6 +1,5 @@
 import { connect } from "@app/database";
-import { websiteSearchParams } from "@app/core/utils";
-import { getHostName } from "@a11ywatch/website-source-builder";
+import { getHostName, websiteSearchParams } from "@app/core/utils";
 
 export const getIssue = async (
   { url, pageUrl, userId, noRetries }: any,

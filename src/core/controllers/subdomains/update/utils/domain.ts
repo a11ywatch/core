@@ -1,6 +1,5 @@
 import { arrayAverage } from "@app/core/utils";
 import { getDomains } from "../../find";
-// import { collectPageInfo } from "./page-info";
 
 export const generateWebsiteAverage = async ({
   domain,
@@ -14,16 +13,6 @@ export const generateWebsiteAverage = async ({
   allDomains?: any[];
 }) => {
   try {
-    // TODO: OVERALL SCORE COLLECTION
-    // if (webPage) {
-    //   [allWebSites, websiteCollection] = await getWebsitesCrawler(
-    //     {
-    //       domain,
-    //       userId,
-    //     },
-    //     true
-    //   );
-    // }
     const allDomains = allDomainsList?.length
       ? allDomainsList
       : await getDomains({
@@ -54,7 +43,6 @@ export const generateWebsiteAverageIssues = async ({ domain, userId }) => {
       userId,
       allDomains,
     });
-    // const collectivePageInfo = await collectPageInfo(allDomains);
 
     return [averageIssues];
   } catch (e) {

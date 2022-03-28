@@ -7,7 +7,8 @@ import {
 import { getUserFromToken, usageExceededThreshold } from "@app/core/utils";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
 import type { Request, Response } from "express";
-import { pubsub, Channels } from "@app/database/pubsub";
+import { pubsub } from "@app/database/pubsub";
+import { Channels } from "@app/database/config";
 
 const websiteCrawl = (req: Request, res?: Response) => {
   const { data } = req.body;

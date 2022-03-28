@@ -28,8 +28,4 @@ function createSub() {
   }
 }
 
-enum Channels {
-  crawl_scan_queue = "crawl_scan_queue",
-}
-
-export { pubsub, sub, createPubSub, createSub, Channels };
+export { pubsub, sub, createPubSub, createSub };
