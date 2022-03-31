@@ -86,7 +86,7 @@ function initServer(): HttpServer {
   // CLI OPTIONS MOVE TO DIRECTORY
   app.post("/api/scan-simple", cors(), async (req, res) => {
     try {
-      const url = req.body?.websiteUrl;
+      const url = req.body?.websiteUrl || req.body?.url;
       const userId: number = req.body?.userId;
 
       const data = await scan({

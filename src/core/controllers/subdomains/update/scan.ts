@@ -1,4 +1,3 @@
-import validUrl from "valid-url";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 
 import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
@@ -6,6 +5,7 @@ import { getWebsite } from "../../websites";
 import { fetchPuppet, extractPageData, limitIssue } from "./utils";
 import { createReport } from "../../reports";
 import { ResponseModel } from "@app/core/models/response/types";
+import { getHostName } from "@app/core/utils";
 
 export const scanWebsite = async ({
   userId: userIdMap,
@@ -13,7 +13,7 @@ export const scanWebsite = async ({
 }: any): Promise<ResponseModel> => {
   const userId = !userIdMap && userIdMap !== 0 ? -1 : userIdMap;
 
-  if (!validUrl.isUri(urlMap)) {
+  if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
 

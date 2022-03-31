@@ -30,7 +30,7 @@ FROM node:17-alpine3.14
 WORKDIR /usr/src/app
 
 RUN apk upgrade --update-cache --available && \
-	apk add openssl && \
+	apk add openssl curl && \
 	rm -rf /var/cache/apk/*
 
 COPY --from=builder /usr/src/app/private.key .
