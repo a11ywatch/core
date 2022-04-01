@@ -1,4 +1,4 @@
-import validUrl from "valid-url";
+import { getHostName } from "@app/core/utils";
 import { ApiResponse, responseModel } from "@app/core/models";
 import { crawlPage } from "./utils/crawl-page";
 import { getActiveUsersCrawling } from "@app/core/utils/query";
@@ -6,7 +6,7 @@ import { getActiveUsersCrawling } from "@app/core/utils/query";
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const { userId, url: urlMap, usersPooling } = params ?? {};
 
-  if (!validUrl.isUri(urlMap)) {
+  if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
 

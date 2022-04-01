@@ -28,8 +28,8 @@ const websiteCrawl = (req: Request, res?: Response) => {
 };
 
 const crawlWebsite = async (req, res) => {
-  const url = req.query?.websiteUrl;
-  const userId = req.query?.userId;
+  const url = req.query?.websiteUrl ?? req.body?.websiteUrl;
+  const userId = req.query?.userId ?? req.body?.userId;
 
   try {
     await crawl({
