@@ -193,7 +193,7 @@ function initServer(): HttpServer {
   });
 
   if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("00 00 00 * * *", crawlAllAuthedWebsites).start();
+    new CronJob("00 20 * * *", crawlAllAuthedWebsites).start();
   }
 
   return listener;
