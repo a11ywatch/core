@@ -1,4 +1,4 @@
-FROM node:17-alpine3.14 AS builder
+FROM node:17.8-alpine3.14 AS builder
 
 WORKDIR /usr/src/app
 
@@ -14,7 +14,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:17-alpine3.14 AS installer
+FROM node:17.8-alpine3.14 AS installer
 
 WORKDIR /usr/src/app
 
@@ -25,12 +25,12 @@ RUN apk upgrade --update-cache --available && \
 COPY package*.json ./
 RUN npm install --production
 
-FROM node:17-alpine3.14
+FROM node:17.8-alpine3.14
 
 WORKDIR /usr/src/app
 
 RUN apk upgrade --update-cache --available && \
-	apk add openssl curl && \
+	apk add openssl curl&& \
 	rm -rf /var/cache/apk/*
 
 COPY --from=builder /usr/src/app/private.key .
