@@ -1,7 +1,7 @@
 import { getHostName } from "@app/core/utils";
 import { ApiResponse, responseModel } from "@app/core/models";
-import { crawlPage } from "./utils/crawl-page";
 import { getActiveUsersCrawling } from "@app/core/utils/query";
+import { crawlPage } from "./utils/crawl-page";
 
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const { userId, url: urlMap, usersPooling } = params ?? {};

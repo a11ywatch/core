@@ -332,7 +332,7 @@ export type QueryIssueArgs = {
 
 export type ScanInformation = {
   __typename?: "ScanInformation";
-  lastScanDate?: Maybe<Scalars["String"]>;
+  lastScanDate?: Maybe<Scalars["Date"]>;
   scanAttempts?: Maybe<Scalars["Int"]>;
 };
 

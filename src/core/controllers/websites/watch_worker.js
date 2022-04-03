@@ -1,12 +1,15 @@
-const { createPubSub } = require("@app/database/pubsub");
-const { initDbConnection } = require("@app/database/client");
-const { initRedisConnection } = require("@app/database/memory-client");
+const { createPubSub } = require("../../../database/pubsub");
+const { initDbConnection } = require("../../../database/client");
+const { initRedisConnection } = require("../../../database/memory-client");
 const { websiteWatch } = require("./watch-pages");
 
 process.on("message", async function ({ pages }) {
+  console.log(`worker script with ${pages.length} to process`);
+
   try {
     await initDbConnection();
     await initRedisConnection();
+    // TODO: REFACTOR PUBSUB HANDLING
     createPubSub();
   } catch (e) {
     console.error(e);
@@ -14,8 +17,9 @@ process.on("message", async function ({ pages }) {
 
   try {
     await websiteWatch(pages);
-    process.exit(0);
   } catch (e) {
     console.error(e);
+  } finally {
+    process.send("close");
   }
 });

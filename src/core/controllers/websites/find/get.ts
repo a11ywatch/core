@@ -42,8 +42,13 @@ export const getWebsitesCrawler = async (
   }
 };
 
+/*
+ * Get all the current users of the application
+ * @param [userLimit] a limit of users count: number
+ * [Promise]: Partial<Website[]>
+ */
 export const getWebsitesWithUsers = async (
-  userLimit = 100000
+  userLimit = 20
 ): Promise<Website[]> => {
   try {
     const [collection] = await connect("Websites");

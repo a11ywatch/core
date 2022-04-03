@@ -5,22 +5,21 @@ export const updateScanAttempt = async ({ userId }) => {
   const [user, collection] = await getUser({ id: userId });
 
   if (user) {
-    const lastScanDate = new Date();
-
     const scanInfo = user?.scanInfo ?? {
-      lastScanDate,
+      lastScanDate: undefined as Date,
       scanAttempts: 0,
     };
 
     if (
       scanInfo?.lastScanDate &&
-      !isSameDay(scanInfo?.lastScanDate as Date, new Date())
+      !isSameDay(scanInfo.lastScanDate, new Date())
     ) {
       scanInfo.scanAttempts = 1;
     } else {
       scanInfo.scanAttempts = scanInfo.scanAttempts + 1;
     }
 
+    // return and prevent updating db after scan limits exceeded
     if (
       (scanInfo?.scanAttempts >= 3 && user?.role === 0) ||
       (scanInfo?.scanAttempts > 10 && user?.role === 1)
@@ -28,14 +27,8 @@ export const updateScanAttempt = async ({ userId }) => {
       return false;
     }
 
-    scanInfo.lastScanDate = lastScanDate;
-
-    setImmediate(async () => {
-      await collection.findOneAndUpdate(
-        { id: user.id },
-        { $set: { scanInfo } }
-      );
-    });
+    scanInfo.lastScanDate = new Date();
+    await collection.findOneAndUpdate({ id: user.id }, { $set: { scanInfo } });
 
     return true;
   }

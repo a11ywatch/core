@@ -26,6 +26,7 @@ export const createReport = async (website: Website, issues: Issue) => {
       },
     };
 
+    // TODO: FIND OR INSERT REPORT
     await collection.insertOne({
       ...report,
       website: { ...report.website, html: "" },

@@ -14,10 +14,7 @@ import {
   PRIVATE_KEY,
   PUBLIC_KEY,
 } from "./config";
-import {
-  crawlAllAuthedWebsites,
-  crawlAllAuthedWebsitesCluster,
-} from "./core/controllers/websites";
+import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
@@ -195,7 +192,7 @@ function initServer(): HttpServer {
   });
 
   if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("00 20 * * *", crawlAllAuthedWebsites).start();
+    new CronJob("* 23 * * *", crawlAllAuthedWebsitesCluster).start();
   }
 
   return listener;

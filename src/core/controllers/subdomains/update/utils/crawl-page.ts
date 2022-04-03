@@ -20,13 +20,11 @@ export const crawlPage = async (
   { userId, url: urlMap, pageInsights = false, apiData = false },
   sendEmail?: boolean
 ) => {
+  const authenticated = typeof userId !== "undefined";
   // todo: use get hostname
   let domainSource = sourceBuild(urlMap, userId);
-
   let domain = domainSource?.domain;
   let pageUrl = domainSource?.pageUrl;
-
-  let authenticated = typeof userId !== "undefined";
 
   return new Promise(async (resolve) => {
     try {
@@ -37,15 +35,20 @@ export const crawlPage = async (
         userId,
       });
 
-      let insightsEnabled = pageInsights || website?.pageInsights;
+      let insightsEnabled = false;
+      const freeAccount = !userData?.role;
+
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
-      if (insightsEnabled) {
-        if (userData?.role === 0 || !userData?.role) {
-          const newSubUrl = new URL(website?.url);
-          const dataSourceUrl = new URL(pageUrl);
+      if (freeAccount) {
+        try {
+          const urlSource = new URL(pageUrl);
           // ONLY ALLOW INSIGHTS ON ROOT DOMAIN when FREE
-          insightsEnabled = newSubUrl?.pathname === dataSourceUrl?.pathname;
+          insightsEnabled = urlSource?.pathname === "/";
+        } catch (e) {
+          console.error(e);
         }
+      } else {
+        insightsEnabled = pageInsights || website?.pageInsights;
       }
 
       const dataSource = await fetchPuppet({
@@ -142,35 +145,33 @@ export const crawlPage = async (
         }
       }
 
-      setImmediate(async () => {
-        await Promise.all([
-          collectionUpsert(
-            {
-              pageUrl,
-              domain,
-              errorCount,
-              warningCount,
-              noticeCount,
-              userId,
-              adaScore,
-            },
-            [analyticsCollection, analytics]
-          ),
-          collectionUpsert(newIssue, [
-            issuesCollection,
-            issueExist,
-            pageConstainsIssues,
-          ]),
-          collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
-            searchProps: { url: pageUrl, userId },
-          }),
-          collectionUpsert(script, [scriptsCollection, scripts]),
-          collectionUpsert(webPage, [subDomainCollection, newSite], {
-            searchProps: { pageUrl, userId },
-          }),
-        ]).catch((e) => {
-          console.error(e);
-        });
+      await Promise.all([
+        collectionUpsert(
+          {
+            pageUrl,
+            domain,
+            errorCount,
+            warningCount,
+            noticeCount,
+            userId,
+            adaScore,
+          },
+          [analyticsCollection, analytics]
+        ),
+        collectionUpsert(newIssue, [
+          issuesCollection,
+          issueExist,
+          pageConstainsIssues,
+        ]),
+        collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
+          searchProps: { url: pageUrl, userId },
+        }),
+        collectionUpsert(script, [scriptsCollection, scripts]),
+        collectionUpsert(webPage, [subDomainCollection, newSite], {
+          searchProps: { pageUrl, userId },
+        }),
+      ]).catch((e) => {
+        console.error(e);
       });
 
       if (webPage) {
@@ -209,14 +210,12 @@ export const crawlPage = async (
         responseData.website.timestamp = timestamp;
       }
 
-      // TODO: BATCH WITH OTHER IMMEDIATE
-      setImmediate(async () => {
-        const reportData = responseData?.website ?? responseData?.data;
+      // TODO: BATCH queue
+      const reportData = responseData?.website ?? responseData?.data;
 
-        await createReport(reportData, reportData?.issues ?? pageIssues).catch(
-          (e) => console.error(e)
-        );
-      });
+      await createReport(reportData, reportData?.issues ?? pageIssues).catch(
+        (e) => console.error(e)
+      );
 
       return resolve(responseModel(responseData));
     } catch (e) {

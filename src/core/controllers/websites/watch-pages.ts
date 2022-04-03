@@ -1,14 +1,14 @@
 import { getDay, subHours } from "date-fns";
 import { crawlWebsite } from "@app/core/controllers/subdomains/update";
 import { getUser } from "@app/core/controllers/users";
-import { Website } from "@app/types";
 
-export async function websiteWatch(pages: Website[]): Promise<void> {
-  let allWebPages = pages ?? [];
+type Page = {
+  userId?: number;
+  url: string;
+};
 
-  console.log(`pages to scan ${allWebPages.length}`);
-
-  for (const website of allWebPages) {
+export async function websiteWatch(pages: Page[] = []): Promise<void> {
+  for (const website of pages) {
     const { userId, url } = website;
 
     const [user] = await getUser({ id: userId }).catch((e) => {
@@ -20,6 +20,7 @@ export async function websiteWatch(pages: Website[]): Promise<void> {
       const emailAvailable =
         user && user.alertEnabled && Array.isArray(user.emailFilteredDates);
 
+      // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
       const sendEmail = emailAvailable
         ? !user.emailFilteredDates.includes(getDay(subHours(new Date(), 12)))
         : true;

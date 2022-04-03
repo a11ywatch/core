@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { config } from "@app/config/config";
+import { config } from "../config/config";
 
 const createClient = (): MongoClient =>
   new MongoClient(config.DB_URL, {
