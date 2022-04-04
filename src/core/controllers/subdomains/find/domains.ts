@@ -15,7 +15,7 @@ export const getDomains = async (
     const websites = await collection
       .find(searchProps)
       .sort({ url: 1 })
-      .limit(100000)
+      .limit(0)
       .toArray();
 
     return chain ? [websites, collection] : websites;

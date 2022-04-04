@@ -10,12 +10,11 @@ import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getDomain } from "../../find";
 import { fetchPuppet, extractPageData, limitResponse } from "./";
-import { createReport } from "../../../reports";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
 import { Issue } from "@app/schema";
 
-type CrawlConfig = {
+export type CrawlConfig = {
   userId: number; // user id
   url: string;
   pageInsights: boolean; // use page insights to get info
@@ -213,13 +212,6 @@ export const crawlPage = async (
       } else if (responseData.website) {
         responseData.website.timestamp = timestamp;
       }
-
-      // TODO: BATCH queue
-      const reportData = responseData?.website ?? responseData?.data;
-
-      await createReport(reportData, reportData?.issues ?? pageIssues).catch(
-        (e) => console.error(e)
-      );
 
       return resolve(responseModel(responseData));
     } catch (e) {

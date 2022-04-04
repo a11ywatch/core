@@ -11,7 +11,6 @@ export function setWebsiteScore(props: {
 
 // set website score and send complete subcription
 export async function setWebsiteScore({ domain, userId }) {
-  let updateWebsiteProps = {};
   try {
     const [website, websiteCollection] = await getWebsite({
       domain,
@@ -20,9 +19,9 @@ export async function setWebsiteScore({ domain, userId }) {
 
     const adaScore = await generateWebsiteAverage({ domain, userId });
 
-    updateWebsiteProps = Object.assign({}, website, {
+    const updateWebsiteProps = {
       adaScore,
-    });
+    };
 
     await collectionUpsert(updateWebsiteProps, [websiteCollection, !!website]);
 

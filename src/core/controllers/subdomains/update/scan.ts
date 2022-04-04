@@ -1,9 +1,7 @@
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 
 import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
-import { getWebsite } from "../../websites";
 import { fetchPuppet, extractPageData, limitIssue } from "./utils";
-import { createReport } from "../../reports";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getHostName } from "@app/core/utils";
 
@@ -26,14 +24,7 @@ export const scanWebsite = async ({
     throw new Error("Cannot use localhost, please use a valid web url.");
   }
 
-  let [website] = await getWebsite({
-    domain,
-    userId,
-  });
-
-  if (!website) {
-    website = makeWebsite({ url: pageUrl, domain });
-  }
+  const website = makeWebsite({ url: pageUrl, domain });
 
   return await new Promise(async (resolve, reject) => {
     try {
@@ -53,16 +44,13 @@ export const scanWebsite = async ({
               "Website timeout exceeded threshhold for scan, website rendered to slow under 15000 ms",
           });
         }
-        const { script, issues, webPage, pageHasCdn } =
-          extractPageData(dataSource);
+        const { script, issues, webPage } = extractPageData(dataSource);
 
         // TODO: simply use dataSource?.webPage
         const updateWebsiteProps = {
-          ...dataSource?.webPage,
           ...website,
           ...webPage,
           html: dataSource?.webPage?.html ?? "",
-          cdnConnected: pageHasCdn,
           timestamp: new Date().getTime(),
           script,
         };
@@ -73,12 +61,9 @@ export const scanWebsite = async ({
           updateWebsiteProps.issuesInfo.limitedCount = slicedIssue.length;
         }
 
-        await createReport(updateWebsiteProps, slicedIssue ?? issues);
-
         resolve(
           responseModel({
             website: {
-              ...website,
               issue: slicedIssue,
               ...updateWebsiteProps,
             },

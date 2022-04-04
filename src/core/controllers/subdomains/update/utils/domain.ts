@@ -13,6 +13,7 @@ export const generateWebsiteAverage = async ({
   allDomains?: any[];
 }) => {
   try {
+    // TODO: USE ANALYTICS COLLECTION
     const allDomains = allDomainsList?.length
       ? allDomainsList
       : await getDomains({

@@ -1,31 +1,42 @@
+import { getHostName } from "@a11ywatch/website-source-builder";
 import { connect } from "@app/database";
 
-const httpPattern = /^((http|https):\/\/)/;
-
-export const getReport = async (url: string, timestamp?: string | number) => {
+export const getReport = async (
+  pageUrl: string,
+  timestamp?: string | number
+) => {
   try {
-    const [collection] = await connect("Reports");
+    // TODO: GET authed user
+    const [domainCollection] = await connect("SubDomains");
 
-    let findBy;
+    const [collection] = await connect("Issues");
 
-    // find by domain if http not found
-    if (!httpPattern.test(url)) {
-      findBy = {
-        "website.domain": url,
-      };
-    } else {
-      findBy = typeof timestamp !== "undefined" ? { url, timestamp } : { url };
+    const domain = getHostName(pageUrl);
+
+    const findBy = {
+      domain,
+    };
+
+    const websiteFindBy = timestamp
+      ? {
+          ...findBy,
+          lastScanDate: undefined,
+        }
+      : findBy;
+
+    // TODO: ADD USER_ID AND TIMESTAMP
+    const website = await domainCollection.findOne(websiteFindBy);
+    const websiteIssues = await collection.findOne(findBy);
+
+    if (website && websiteIssues) {
+      if (websiteIssues.issues) {
+        website.issues = websiteIssues.issues ?? [];
+      }
     }
 
-    const report = await collection.findOne(findBy);
-
-    if (!report) {
-      return await collection.findOne({
-        url,
-      });
-    }
-
-    return report;
+    return {
+      website,
+    };
   } catch (e) {
     console.error(e);
   }

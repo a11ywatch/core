@@ -4,7 +4,6 @@ import fastq from "fastq";
 import type { queueAsPromised } from "fastq";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getActiveUsersCrawling } from "@app/core/utils/query";
-import { cpus } from "os";
 
 import { Method, Channels } from "./config";
 import { setWebsiteScore } from "@app/core/utils/stats/score";
@@ -21,12 +20,7 @@ type Task = {
   meta?: Meta;
 };
 
-const cpucors = cpus().length;
-
-const q: queueAsPromised<Task> = fastq.promise(
-  asyncWorker,
-  Math.max(Math.round(cpucors / 2), 2)
-);
+const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 2);
 
 const isGenerateAverageMethod = (meta: Meta) => {
   if (meta && typeof meta?.method !== "undefined") {
@@ -37,11 +31,6 @@ const isGenerateAverageMethod = (meta: Meta) => {
 
 async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
   const { url: urlMap, userId, usersPooling = [], meta } = arg;
-  console.log(
-    `received crawling task ${urlMap ?? "completed"}: users:${
-      usersPooling.length
-    } awaiting scan`
-  );
 
   try {
     if (isGenerateAverageMethod(meta)) {
