@@ -13,40 +13,45 @@ import { fetchPuppet, extractPageData, limitResponse } from "./";
 import { createReport } from "../../../reports";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
-import { URL } from "url";
 import { Issue } from "@app/schema";
 
+type CrawlConfig = {
+  userId: number; // user id
+  url: string;
+  pageInsights: boolean; // use page insights to get info
+  apiData: boolean;
+  sendSub?: boolean; // use pub sub
+};
+
 export const crawlPage = async (
-  { userId, url: urlMap, pageInsights = false, apiData = false },
+  crawlConfig: CrawlConfig,
   sendEmail?: boolean
 ) => {
+  const {
+    userId,
+    url: urlMap,
+    pageInsights = false,
+    apiData = false,
+    sendSub = true,
+  } = crawlConfig ?? {};
   const authenticated = typeof userId !== "undefined";
-  // todo: use get hostname
-  let domainSource = sourceBuild(urlMap, userId);
-  let domain = domainSource?.domain;
-  let pageUrl = domainSource?.pageUrl;
 
   return new Promise(async (resolve) => {
     try {
+      const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
       const [userData] = await UsersController().getUser({ id: userId });
-      // CENTRAL WEBSITE COLLECTION
+      // WEBSITE COLLECTION
       const [website, websiteCollection] = await getWebsite({
         domain,
         userId,
       });
+      const freeAccount = !userData?.role;
 
       let insightsEnabled = false;
-      const freeAccount = !userData?.role;
 
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
       if (freeAccount) {
-        try {
-          const urlSource = new URL(pageUrl);
-          // ONLY ALLOW INSIGHTS ON ROOT DOMAIN when FREE
-          insightsEnabled = urlSource?.pathname === "/";
-        } catch (e) {
-          console.error(e);
-        }
+        insightsEnabled = pathname === "/";
       } else {
         insightsEnabled = pageInsights || website?.pageInsights;
       }
@@ -65,28 +70,29 @@ export const crawlPage = async (
       // TODO: UPDATE WESITE ONLINE FLAG
       if (!dataSource?.webPage) {
         // WEBSITE IS OFFLINE
-        return resolve({
-          website: null,
-          code: 300,
-          success: false,
-          message: `Website timeout exceeded threshhold ${
-            authenticated ? "" : "for free scan"
-          }, website rendered to slow or does not exist, please check your url and try again`,
-        });
+        return resolve(
+          responseModel({
+            website: null,
+            code: 300,
+            success: false,
+            message: `Website timeout exceeded threshhold ${
+              authenticated ? "" : "for free scan"
+            }, website rendered to slow or does not exist, please check your url and try again`,
+          })
+        );
       }
 
       let {
         script,
         issues: pageIssues,
         webPage,
-        pageHasCdn,
         errorCount,
         noticeCount,
         warningCount,
         adaScore,
       } = extractPageData(dataSource);
 
-      // CENTRAL PAGE COLLECTION
+      // PAGE COLLECTION
       const [newSite, subDomainCollection] = await getDomain(
         {
           userId,
@@ -118,7 +124,9 @@ export const crawlPage = async (
       const pageConstainsIssues = subIssues?.length;
 
       if (pageConstainsIssues) {
-        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        if (sendSub) {
+          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        }
 
         if (sendEmail && subIssues.some((iss) => iss.type === "error")) {
           await emailMessager.sendMail({
@@ -129,13 +137,22 @@ export const crawlPage = async (
         }
       }
 
-      let updateWebsiteProps: Website;
-
       // // TODO: MERGE ISSUES FROM ALL PAGES
-      updateWebsiteProps = Object.assign({}, webPage, {
-        cdnConnected: pageHasCdn,
+      const updateWebsiteProps: Website = Object.assign({}, webPage, {
         online: true,
       });
+
+      // new domain found
+      if (webPage && !newSite) {
+        if (sendSub) {
+          await pubsub.publish(SUBDOMAIN_ADDED, {
+            subDomainAdded: {
+              ...updateWebsiteProps,
+              html: "",
+            },
+          });
+        }
+      }
 
       if (script) {
         if (!scripts?.scriptMeta) {
@@ -173,19 +190,6 @@ export const crawlPage = async (
       ]).catch((e) => {
         console.error(e);
       });
-
-      if (webPage) {
-        if (!newSite) {
-          await pubsub
-            .publish(SUBDOMAIN_ADDED, {
-              subDomainAdded: {
-                ...updateWebsiteProps,
-                html: "",
-              },
-            })
-            .catch((e) => console.error(e));
-        }
-      }
 
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
 

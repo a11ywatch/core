@@ -17,7 +17,7 @@ export const scanWebsite = async ({
     return responseModel({ msgType: ApiResponse.NotFound });
   }
 
-  const { url, domain, pageUrl } = sourceBuild(urlMap, userId);
+  const { pageUrl, domain } = sourceBuild(urlMap, userId);
 
   if (
     process.env.NODE_ENV === "production" &&
@@ -32,14 +32,14 @@ export const scanWebsite = async ({
   });
 
   if (!website) {
-    website = makeWebsite({ url, domain });
+    website = makeWebsite({ url: pageUrl, domain });
   }
 
   return await new Promise(async (resolve, reject) => {
     try {
       const dataSource = await fetchPuppet({
         pageHeaders: website?.pageHeaders,
-        url: urlMap,
+        url: pageUrl,
         userId,
       });
 
@@ -88,7 +88,7 @@ export const scanWebsite = async ({
         resolve(responseModel());
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       reject(e);
     }
   });

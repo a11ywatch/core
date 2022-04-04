@@ -7,6 +7,7 @@ type Page = {
   url: string;
 };
 
+// run a set of websites and get issues
 export async function websiteWatch(pages: Page[] = []): Promise<void> {
   for (const website of pages) {
     const { userId, url } = website;
@@ -31,6 +32,7 @@ export async function websiteWatch(pages: Page[] = []): Promise<void> {
             url,
             userId,
             pageInsights: false,
+            sendSub: false,
           },
           sendEmail
         );
