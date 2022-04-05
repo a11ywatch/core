@@ -13,8 +13,6 @@ export const website = `
 		adaScore: Float
 		screenshot: String
 		screenshotStill: String
-		html: String
-		htmlIncluded: Boolean
 		cdnConnected: Boolean
 		pageLoadTime: PageLoadTimeMeta
 		issues(filter: String): [Issue]

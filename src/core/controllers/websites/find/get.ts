@@ -53,7 +53,7 @@ export const getWebsitesWithUsers = async (
   try {
     const [collection] = await connect("Websites");
     return await collection
-      .find({ userId: { $gt: -1 } })
+      .find({ userId: { $gte: 0, $ne: -1 } })
       .project({ url: 1, userId: 1 })
       .limit(userLimit)
       .toArray();

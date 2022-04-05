@@ -8,8 +8,6 @@ export const subdomain = `
 		adaScore: Float
 		cdnConnected: Boolean
 		pageLoadTime: PageLoadTimeMeta
-		html: String
-		htmlIncluded: Boolean
 		issues(filter: String): [Issue]
 		issuesInfo: IssueMeta
 		pageInsights: Boolean

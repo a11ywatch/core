@@ -24,7 +24,7 @@ export const emailMessager = {
           sendMailCallback
         );
       } catch (e) {
-        console.log(e, { type: "error" });
+        console.error(e);
       }
     }
   },
@@ -78,7 +78,7 @@ export const emailMessager = {
             sendMailCallback
           );
         } catch (e) {
-          console.log(e, { type: "error" });
+          console.error(e);
         }
       }
     }

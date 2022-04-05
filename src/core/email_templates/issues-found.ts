@@ -31,6 +31,8 @@ const issuesFoundTemplate: IssuesFound = (
   const page = data?.pageUrl;
   const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`;
 
+  const target = encodeURIComponent(page);
+
   return `
     <head>
       <style>
@@ -51,10 +53,8 @@ const issuesFoundTemplate: IssuesFound = (
     </table>
     </div>
     <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none;">View Full Details</a>
-    <a href="https://a11ywatch.com/reports/${encodeURIComponent(
-      page
-    )}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
-    <a href="https://api.a11ywatch.com/api/get-website?q=${page}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #000; text-align: center; text-decoration: none;">Download Report</a>
+    <a href="https://a11ywatch.com/reports/${target}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
+    <a href="https://api.a11ywatch.com/api/get-website?q=${target}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #000; text-align: center; text-decoration: none;">Download Report</a>
     <p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>
 `.trim();
 };

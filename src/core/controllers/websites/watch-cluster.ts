@@ -1,7 +1,21 @@
-import { cpus } from "os";
 import { DEV } from "@app/config";
+import { Website } from "@app/schema";
 import { fork } from "child_process";
+import { cpus } from "os";
 import { getWebsitesWithUsers } from "../websites";
+
+// TODO: replace with one iteration or db query batching
+const chunk = (target: Website[], max: number) => {
+  const newArray = [];
+  for (let c = 0; c < max; c++) {
+    newArray.push([]);
+  }
+  for (let i = 0; i < target.length; i++) {
+    const slot = i % max;
+    newArray[slot].push(target[i]);
+  }
+  return newArray;
+};
 
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   let allWebPages = [];
@@ -15,17 +29,11 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   }
 
   console.log(`total websites to scan ${allWebPages.length}`);
-  const numCPUs = Math.max(Math.floor(cpus().length), 1);
-  const numProcesses = Math.floor(allWebPages.length / numCPUs);
-  console.log(`processes capable by pages ${numProcesses}`);
 
-  while (allWebPages.length > 0) {
-    pageChunk.push(allWebPages.splice(0, numProcesses));
-  }
+  pageChunk = chunk(allWebPages, cpus().length || 2);
 
   console.log(`chunks to process ${pageChunk.length}`);
 
-  // TODO: REMOVE LEFTOVER CHUNKS like 11 into group
   pageChunk.forEach((chunk: any) => {
     console.log(`chunk size ${chunk.length}`);
     const forked = fork(`${__dirname}/watch_worker`, [], {

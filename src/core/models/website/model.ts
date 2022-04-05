@@ -4,8 +4,6 @@ const WebsiteModel = {
   domain: "",
   adaScore: null,
   cdnConnected: false,
-  html: "",
-  htmlIncluded: false,
   pageInsights: false,
   insight: {
     json: "",

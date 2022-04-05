@@ -67,8 +67,6 @@ export type History = {
   userId?: Maybe<Scalars["Int"]>;
   domain?: Maybe<Scalars["String"]>;
   adaScore?: Maybe<Scalars["Float"]>;
-  html?: Maybe<Scalars["String"]>;
-  htmlIncluded?: Maybe<Scalars["Boolean"]>;
   cdnConnected?: Maybe<Scalars["Boolean"]>;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issuesInfo?: Maybe<IssueMeta>;
@@ -371,8 +369,6 @@ export type SubDomain = {
   adaScore?: Maybe<Scalars["Float"]>;
   cdnConnected?: Maybe<Scalars["Boolean"]>;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
-  html?: Maybe<Scalars["String"]>;
-  htmlIncluded?: Maybe<Scalars["Boolean"]>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   issuesInfo?: Maybe<IssueMeta>;
   pageInsights?: Maybe<Scalars["Boolean"]>;
@@ -491,8 +487,6 @@ export type Website = {
   adaScore?: Maybe<Scalars["Float"]>;
   screenshot?: Maybe<Scalars["String"]>;
   screenshotStill?: Maybe<Scalars["String"]>;
-  html?: Maybe<Scalars["String"]>;
-  htmlIncluded?: Maybe<Scalars["Boolean"]>;
   cdnConnected?: Maybe<Scalars["Boolean"]>;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;

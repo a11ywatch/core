@@ -8,8 +8,6 @@ export const history = `
 		userId: Int
 		domain: String
 		adaScore: Float
-		html: String
-		htmlIncluded: Boolean
 		cdnConnected: Boolean
 		pageLoadTime: PageLoadTimeMeta
 		issuesInfo: IssueMeta

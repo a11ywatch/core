@@ -8,6 +8,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   let data: Website = {};
 
   try {
+    // TODO: REDIS TEMP STORAGE OF SCANS FREE
     const report = await getReport(q + "", timestamp && Number(timestamp));
 
     if (report?.website) {
@@ -18,7 +19,11 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   }
 
   if (download) {
-    downloadToExcel(req, res, next, data);
+    try {
+      await downloadToExcel(req, res, next, data);
+    } catch (e) {
+      console.error(e);
+    }
   } else {
     res.json(data);
   }

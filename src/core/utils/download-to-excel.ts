@@ -1,25 +1,22 @@
 import type { Request, Response } from "express";
 import type { Issue } from "@app/types";
+import excel from "exceljs";
 
-const downloadToExcel = (
+const downloadToExcel = async (
   _req: Request,
   res: Response,
   _next: any,
   data: Issue | any
 ) => {
   try {
-    const excel = require("exceljs");
     const workbook = new excel.Workbook();
     const pageName = data?.url ?? "Website";
-    const worksheet = workbook.addWorksheet(
-      `${data?.domain} Accessibility Audit`,
-      {
-        headerFooter: {
-          firstHeader: `Accessibility score - ${data?.website?.adaScore}`,
-          firstFooter: `Test ran ${data?.website?.lastScanDate}`,
-        },
-      }
-    );
+    const worksheet = workbook.addWorksheet(`${data?.domain} WCAG Audit`, {
+      headerFooter: {
+        firstHeader: `Accessibility score - ${data?.website?.adaScore}`,
+        firstFooter: `Test ran ${data?.website?.lastScanDate}`,
+      },
+    });
 
     worksheet.columns = [
       { header: "Code", key: "code", width: 14, checked: 0 },
@@ -34,14 +31,18 @@ const downloadToExcel = (
         outlineLevel: 1,
         checked: 0,
       },
-    ];
+    ] as any;
 
-    worksheet.addRows(
-      (data?.issue?.length ? data?.issue : data?.issues).map((items) => ({
-        ...items,
-        style: { font: { name: "Helvetica" } },
-      }))
-    );
+    const rowIssues = data?.issue?.length ? data?.issue : data?.issues;
+
+    const rows = (rowIssues ?? []).map((items) => ({
+      ...items,
+      style: { font: { name: "Helvetica" } },
+    }));
+
+    if (rows.length) {
+      worksheet.addRows(rows);
+    }
 
     res.setHeader(
       "Content-Type",
@@ -52,9 +53,9 @@ const downloadToExcel = (
       "attachment; filename=" + `${pageName}-audit.xlsx`
     );
 
-    return workbook.xlsx.write(res).then(function () {
-      res.status(200).end();
-    });
+    await workbook.xlsx.write(res);
+
+    res.status(200).end();
   } catch (e) {
     console.error(e);
   }
