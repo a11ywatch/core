@@ -1,4 +1,4 @@
-export const root = (req, res) => {
+export const root = (_req, res) => {
   res.json({
     server_status: "online",
   });

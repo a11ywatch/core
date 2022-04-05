@@ -56,6 +56,7 @@ import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
 import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 import { setAuthRoutes } from "./rest/routes_groups/auth";
 import { createSub } from "./database/pubsub";
+import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 
 function initServer(): HttpServer {
   const app = express();
@@ -67,20 +68,29 @@ function initServer(): HttpServer {
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
-  app.use(createIframe);
 
+  // rate limits
+  app.use("/iframe", limiter);
+  app.use("/api/get-website", limiter);
+  app.use("/api/register", limiter); // TODO: REMOVE on next chrome store update
+  app.use("/api/scan-simple", scanLimiter);
+  app.use("/api/scanWebsiteAsync", scanLimiter); // TODO: REMOVE on next chrome store update
+  app.use("/api/crawlWebsiteAsync", scanLimiter); // TODO: REMOVE on next chrome store update
+  app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
+  app.use("/api/website-crawl", scanLimiter); // TODO: REMOVE on next chrome store update
+
+  app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
+
   app.get(ROOT, root);
-  app.get("/iframe", createIframeEvent);
+
+  app.get("/iframe", cors(), createIframeEvent);
   app.get("/status/:domain", cors(), statusBadge);
   app.get("/api/get-website", cors(), getWebsite);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
 
   app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
-
   app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
-  app.post(WEBSITE_CRAWL, websiteCrawl);
-  app.post(`${WEBSITE_CRAWL}-background`, websiteCrawl); // TODO: remove endpoint
 
   // CLI OPTIONS MOVE TO DIRECTORY
   app.post("/api/scan-simple", cors(), async (req, res) => {
@@ -105,7 +115,13 @@ function initServer(): HttpServer {
     }
   });
 
+  // private routes for watcher [TODO: ADD HEADER AUTH OR MOVE TO PRIVATE SERVICE]
+  app.post(WEBSITE_CRAWL, websiteCrawl);
+  app.post(`${WEBSITE_CRAWL}-background`, websiteCrawl); // TODO: remove endpoint
+
+  // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
+
   app.route(WEBSITE_CHECK).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
@@ -206,6 +222,7 @@ const startServer = (async () => {
     createPubSub();
     createSub();
     setChannels();
+    connectLimiters();
   } catch (e) {
     console.error(e);
   }

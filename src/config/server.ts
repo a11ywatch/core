@@ -21,8 +21,6 @@ if (apiUrls.some((a) => a.includes("localhost"))) {
   corsOptions.origin = true;
 }
 
-export { corsOptions };
-
 export const BYPASS_AUTH = [
   "IntrospectionQuery",
   "Register",
@@ -49,3 +47,5 @@ export const logServerInit = (port, { graphqlPath, subscriptionsPath }) => {
     `Server ready at ${source}:${port}${graphqlPath}\nSubscriptions ready at ws://${source}:${port}${subscriptionsPath}`
   );
 };
+
+export { corsOptions };

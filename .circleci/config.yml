@@ -4,7 +4,7 @@ orbs:
 jobs:
   api:
     docker:
-      - image: circleci/node:12.0.0
+      - image: cimg/node:17.8.0
     steps:
       - checkout
       - restore_cache:
