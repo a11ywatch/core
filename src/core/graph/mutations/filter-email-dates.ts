@@ -3,7 +3,7 @@ import { getPayLoad } from "../../utils/query-payload";
 
 export const filterEmailDates = async (
   _,
-  { emailFilteredDates, ...props },
+  { emailFilteredDates, morning, ...props },
   context
 ) => {
   const { audience, userId } = getPayLoad(context, props);
@@ -12,6 +12,7 @@ export const filterEmailDates = async (
     audience,
     id: userId,
     emailFilteredDates,
+    morning,
   });
 
   if (!loginUser) {

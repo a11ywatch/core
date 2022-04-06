@@ -1,6 +1,7 @@
 import { DEV } from "@app/config";
 import { Website } from "@app/schema";
 import { fork } from "child_process";
+import { getHours } from "date-fns";
 import { cpus } from "os";
 import { getWebsitesWithUsers } from "../websites";
 
@@ -20,10 +21,13 @@ const chunk = (target: Website[], max: number) => {
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   let allWebPages = [];
   let pageChunk = [];
+  const morning = getHours(new Date()) === 11;
+  console.log(morning ? `morning cron` : "night cron");
+  const userFilter = morning ? { emailMorningOnly: { eq: true } } : {};
 
   try {
     // TODO: move generate website to queue
-    allWebPages = await getWebsitesWithUsers(0);
+    allWebPages = await getWebsitesWithUsers(0, userFilter);
   } catch (e) {
     console.error(e);
   }

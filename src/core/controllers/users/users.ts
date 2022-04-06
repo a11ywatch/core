@@ -38,7 +38,11 @@ export const UsersController: UserControllerType = (
   createUser,
   addPaymentSubscription,
   cancelSubscription,
-  updateFilterEmailDates: async ({ id, emailFilteredDates }) => {
+  updateFilterEmailDates: async ({
+    id,
+    emailFilteredDates,
+    morning = false,
+  }) => {
     const [user, collection] = await getUser({ id });
 
     if (user) {
@@ -47,6 +51,7 @@ export const UsersController: UserControllerType = (
         {
           $set: {
             emailFilteredDates,
+            emailMorningOnly: morning,
           },
         }
       );

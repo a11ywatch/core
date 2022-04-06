@@ -73,7 +73,7 @@ function initServer(): HttpServer {
   // rate limits
   app.use("/iframe", limiter);
   app.use("/api/get-website", limiter);
-  app.use("/api/register", limiter); // TODO: REMOVE on next chrome store update
+  app.use("/api/register", limiter);
   app.use("/api/scan-simple", scanLimiter);
   app.use("/api/scanWebsiteAsync", scanLimiter); // TODO: REMOVE on next chrome store update
   app.use("/api/crawlWebsiteAsync", scanLimiter); // TODO: REMOVE on next chrome store update
@@ -209,7 +209,7 @@ function initServer(): HttpServer {
   });
 
   if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("0 23 * * *", crawlAllAuthedWebsitesCluster).start();
+    new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
   }
 
   return listener;

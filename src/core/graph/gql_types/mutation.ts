@@ -73,6 +73,7 @@ export const mutation = `
 
 		filterEmailDates (
 			emailFilteredDates: [Int]
+			morning: Boolean
 		): User
 
 		removeWebsite (
