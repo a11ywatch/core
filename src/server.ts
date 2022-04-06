@@ -21,13 +21,10 @@ import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
 import fetcher from "node-fetch";
 
 import {
-  CRAWL_WEBSITE,
   CONFIRM_EMAIL,
   IMAGE_CHECK,
-  SCAN_WEBSITE_ASYNC,
   ROOT,
   WEBSITE_CRAWL,
-  WEBSITE_CHECK,
   UNSUBSCRIBE_EMAILS,
 } from "./core/routes";
 import {
@@ -40,13 +37,10 @@ import {
 import { Server } from "./apollo-server";
 import {
   confirmEmail,
-  crawlWebsite,
   detectImage,
   root,
   unSubEmails,
-  scanWebsite,
   websiteCrawl,
-  websiteCrawlAuthed,
   getWebsite,
 } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
@@ -59,6 +53,12 @@ import { setAuthRoutes } from "./rest/routes_groups/auth";
 import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 
+// only internal servers can use endpoints
+const internalOnlyMiddleware = (req, res, next) => {
+  // console.log([req.connection.localAddress, req.connection.remoteAddress]);
+  next();
+};
+
 function initServer(): HttpServer {
   const app = express();
   const { GRAPHQL_PORT } = config;
@@ -70,15 +70,15 @@ function initServer(): HttpServer {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
 
+  app.use(WEBSITE_CRAWL, internalOnlyMiddleware);
+  app.use(`${WEBSITE_CRAWL}-*`, internalOnlyMiddleware); // todo: strict routes
+
   // rate limits
   app.use("/iframe", limiter);
   app.use("/api/get-website", limiter);
   app.use("/api/register", limiter);
   app.use("/api/scan-simple", scanLimiter);
-  app.use("/api/scanWebsiteAsync", scanLimiter); // TODO: REMOVE on next chrome store update
-  app.use("/api/crawlWebsiteAsync", scanLimiter); // TODO: REMOVE on next chrome store update
   app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
-  app.use("/api/website-crawl", scanLimiter); // TODO: REMOVE on next chrome store update
 
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
@@ -89,9 +89,6 @@ function initServer(): HttpServer {
   app.get("/status/:domain", cors(), statusBadge);
   app.get("/api/get-website", cors(), getWebsite);
   app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
-
-  app.post(CRAWL_WEBSITE, cors(), crawlWebsite);
-  app.post(SCAN_WEBSITE_ASYNC, cors(), scanWebsite);
 
   // CLI OPTIONS MOVE TO DIRECTORY
   app.post("/api/scan-simple", cors(), async (req, res) => {
@@ -123,7 +120,6 @@ function initServer(): HttpServer {
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
 
-  app.route(WEBSITE_CHECK).post(websiteCrawlAuthed);
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
   // CDN SERVER TODO: USE DOWNLOAD PATH INSTEAD
