@@ -53,31 +53,24 @@ import { setAuthRoutes } from "./rest/routes_groups/auth";
 import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 
-const internalPwd = process.env.INTERNAL_PWD || "INTERNAL_PWD";
+const { GRAPHQL_PORT, CRAWL_SERVER_PORT } = config;
 
-// only internal servers can use endpoints
-const internalOnlyMiddleware = (req, res, next) => {
-  // TODO: MOVE TO PRIVATE MICRO-SERVICE
-  if (req.headers["authentication"] === internalPwd) {
-    next();
-  } else {
-    res.json({ error: "Access denied" });
-  }
-};
-
-function initServer(): HttpServer {
+function initServer(): HttpServer[] {
   const app = express();
-  const { GRAPHQL_PORT } = config;
+  const crawlerApp = express();
 
   app.disable("x-powered-by");
+  crawlerApp.disable("x-powered-by");
+
   app.set("trust proxy", process.env.NODE_ENV !== "production");
   app.use(cookieParser());
   app.use(cors(corsOptions));
+
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
-
-  app.use(WEBSITE_CRAWL, internalOnlyMiddleware);
-  app.use(`${WEBSITE_CRAWL}-*`, internalOnlyMiddleware); // todo: strict routes
+  // private api between crawl service
+  crawlerApp.use(express.urlencoded({ extended: true }));
+  crawlerApp.use(express.json({ limit: "50mb" }));
 
   // rate limits
   app.use("/iframe", limiter);
@@ -85,8 +78,8 @@ function initServer(): HttpServer {
   app.use("/api/register", limiter);
   app.use("/api/scan-simple", scanLimiter);
   app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
-
   app.use(createIframe);
+
   app.options(CONFIRM_EMAIL, cors());
 
   app.get(ROOT, root);
@@ -119,10 +112,6 @@ function initServer(): HttpServer {
     }
   });
 
-  // private routes for watcher [TODO: ADD HEADER AUTH OR MOVE TO PRIVATE SERVICE]
-  app.post(WEBSITE_CRAWL, websiteCrawl);
-  app.post(`${WEBSITE_CRAWL}-background`, websiteCrawl); // TODO: remove endpoint
-
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
 
@@ -151,8 +140,12 @@ function initServer(): HttpServer {
   setAuthRoutes(app);
   // Announcements from the application (new features etc)
   setAnnouncementsRoutes(app);
+
   // Crawler service manager control
-  setCrawlManagerRoutes(app);
+  crawlerApp.post(WEBSITE_CRAWL, websiteCrawl);
+  crawlerApp.post(`${WEBSITE_CRAWL}-background`, websiteCrawl); // TODO: remove endpoint
+  setCrawlManagerRoutes(crawlerApp);
+
   // GITHUB
   setGithubActionRoutes(app);
   // ADMIN ROUTES
@@ -190,6 +183,8 @@ function initServer(): HttpServer {
   server.applyMiddleware({ app, cors: corsOptions });
 
   let httpServer;
+  let crawlServer;
+
   if (process.env.ENABLE_SSL === "true") {
     httpServer = https.createServer(
       {
@@ -202,8 +197,13 @@ function initServer(): HttpServer {
     httpServer = http.createServer(app);
   }
 
+  crawlServer = http.createServer(crawlerApp);
   server.installSubscriptionHandlers(httpServer);
+
   const listener = httpServer.listen(GRAPHQL_PORT);
+  // TODO: BIND WITH listener for close calls
+  const crawlListener = crawlServer.listen(CRAWL_SERVER_PORT);
+  console.log(`crawl server listening at ${crawlListener.address().port}`);
 
   logServerInit((listener.address() as AddressInfo).port, {
     subscriptionsPath: server.subscriptionsPath,
@@ -214,10 +214,11 @@ function initServer(): HttpServer {
     new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
   }
 
-  return listener;
+  return [listener, crawlListener];
 }
 
 let coreServer: HttpServer;
+let crawlServer: HttpServer;
 
 const startServer = (async () => {
   try {
@@ -231,7 +232,7 @@ const startServer = (async () => {
     console.error(e);
   }
   try {
-    coreServer = initServer();
+    [coreServer, crawlServer] = initServer();
   } catch (e) {
     console.error(["SERVER FAILED TO START", e]);
   }
@@ -239,7 +240,11 @@ const startServer = (async () => {
 
 const killServer = async () => {
   try {
-    await Promise.all([closeDbConnection(), coreServer.close()]);
+    await Promise.all([
+      closeDbConnection(),
+      coreServer.close(),
+      crawlServer.close(),
+    ]);
   } catch (e) {
     console.error("failed to kill server", e);
   }
