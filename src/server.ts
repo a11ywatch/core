@@ -35,6 +35,7 @@ import {
   closeDbConnection,
   setChannels,
   createPubSub,
+  initRedisConnection,
 } from "./database";
 import { Server } from "./apollo-server";
 import {
@@ -219,10 +220,11 @@ let coreServer: HttpServer;
 const startServer = (async () => {
   try {
     await initDbConnection();
-    createPubSub();
-    createSub();
-    setChannels();
-    connectLimiters();
+    createPubSub(); //gql sub
+    createSub(); // pub sub
+    setChannels(); // queues
+    initRedisConnection(); // redis client
+    connectLimiters(); // rate limiters
   } catch (e) {
     console.error(e);
   }

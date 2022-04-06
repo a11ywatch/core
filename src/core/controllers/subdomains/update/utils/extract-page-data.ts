@@ -6,12 +6,10 @@ export const extractPageData = (
   let noticeCount;
   let adaScore;
   let issuesInfo;
-  let pageHasCdn;
   let { script, issues, webPage } = dataSource;
 
   if (webPage) {
     issuesInfo = webPage.issuesInfo;
-    pageHasCdn = webPage.cdnConnected;
     if (issuesInfo) {
       errorCount = issuesInfo.errorCount;
       warningCount = issuesInfo.warningCount;
@@ -30,7 +28,6 @@ export const extractPageData = (
     warningCount,
     noticeCount,
     adaScore,
-    pageHasCdn,
     script,
     issues,
     webPage,

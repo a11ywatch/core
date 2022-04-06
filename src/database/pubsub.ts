@@ -20,6 +20,7 @@ function createPubSub() {
   }
 }
 
+// used as primary redis sub
 function createSub() {
   try {
     sub = new Redis(options);

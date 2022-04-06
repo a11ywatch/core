@@ -15,6 +15,4 @@ const initRedisConnection = async () => {
   }
 };
 
-initRedisConnection();
-
 export { redisClient, initRedisConnection };

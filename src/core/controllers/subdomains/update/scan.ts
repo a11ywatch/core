@@ -4,6 +4,7 @@ import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
 import { fetchPuppet, extractPageData, limitIssue } from "./utils";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getHostName } from "@app/core/utils";
+import { redisClient } from "@app/database/memory-client";
 
 export const scanWebsite = async ({
   userId: userIdMap,
@@ -50,7 +51,6 @@ export const scanWebsite = async ({
         const updateWebsiteProps = {
           ...website,
           ...webPage,
-          html: dataSource?.webPage?.html ?? "",
           timestamp: new Date().getTime(),
           script,
         };
@@ -61,12 +61,28 @@ export const scanWebsite = async ({
           updateWebsiteProps.issuesInfo.limitedCount = slicedIssue.length;
         }
 
+        const websiteTarget = {
+          issue: slicedIssue,
+          ...updateWebsiteProps,
+        };
+
+        try {
+          await redisClient.set(
+            websiteTarget.url,
+            JSON.stringify({
+              ...updateWebsiteProps,
+              issue: JSON.stringify(slicedIssue),
+              script: undefined, // remove scripts from storage
+            })
+          );
+          await redisClient.expire(websiteTarget.url, 60 * 5); // expire in 5 mins
+        } catch (e) {
+          console.error(e);
+        }
+
         resolve(
           responseModel({
-            website: {
-              issue: slicedIssue,
-              ...updateWebsiteProps,
-            },
+            website: websiteTarget,
           })
         );
       } else {

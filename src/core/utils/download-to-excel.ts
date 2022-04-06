@@ -11,10 +11,12 @@ const downloadToExcel = async (
   try {
     const workbook = new excel.Workbook();
     const pageName = data?.url ?? "Website";
+    const source = data?.website ? data?.website : data;
+
     const worksheet = workbook.addWorksheet(`${data?.domain} WCAG Audit`, {
       headerFooter: {
-        firstHeader: `Accessibility score - ${data?.website?.adaScore}`,
-        firstFooter: `Test ran ${data?.website?.lastScanDate}`,
+        firstHeader: `Accessibility score - ${source.adaScore}`,
+        firstFooter: `Test ran ${source?.lastScanDate}`,
       },
     });
 
@@ -33,7 +35,7 @@ const downloadToExcel = async (
       },
     ] as any;
 
-    const rowIssues = data?.issue?.length ? data?.issue : data?.issues;
+    const rowIssues = source?.issue?.length ? source?.issue : source?.issues;
 
     const rows = (rowIssues ?? []).map((items) => ({
       ...items,
