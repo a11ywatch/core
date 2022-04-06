@@ -53,10 +53,16 @@ import { setAuthRoutes } from "./rest/routes_groups/auth";
 import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 
+const internalPwd = process.env.INTERNAL_PWD || "INTERNAL_PWD";
+
 // only internal servers can use endpoints
 const internalOnlyMiddleware = (req, res, next) => {
-  // console.log([req.connection.localAddress, req.connection.remoteAddress]);
-  next();
+  // TODO: MOVE TO PRIVATE MICRO-SERVICE
+  if (req.headers["authentication"] === internalPwd) {
+    next();
+  } else {
+    res.json({ error: "Access denied" });
+  }
 };
 
 function initServer(): HttpServer {
