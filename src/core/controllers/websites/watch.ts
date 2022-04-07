@@ -11,7 +11,7 @@ export const crawlAllAuthedWebsites = async (): Promise<void> => {
 
   try {
     // [TODO: move to queue] generate users
-    allWebPages = await getWebsitesWithUsers(0);
+    [allWebPages] = await getWebsitesWithUsers(0);
   } catch (e) {
     console.error(e);
   }

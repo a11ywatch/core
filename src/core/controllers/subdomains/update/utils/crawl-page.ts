@@ -179,9 +179,12 @@ export const crawlPage = async (
           issueExist,
           pageConstainsIssues,
         ]),
-        collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
-          searchProps: { url: pageUrl, userId },
-        }),
+        // TODO: move data setting till after scan
+        pathname === "/"
+          ? collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
+              searchProps: { url: pageUrl, userId },
+            })
+          : Promise.resolve(),
         collectionUpsert(script, [scriptsCollection, scripts]),
         collectionUpsert(webPage, [subDomainCollection, newSite], {
           searchProps: { pageUrl, userId },

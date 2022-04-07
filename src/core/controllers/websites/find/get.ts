@@ -50,17 +50,20 @@ export const getWebsitesCrawler = async (
 export const getWebsitesWithUsers = async (
   userLimit = 20,
   filter = {}
-): Promise<Website[]> => {
+): Promise<[Website[], any]> => {
   try {
     const [collection] = await connect("Websites");
-    return await collection
-      .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
-      .project({ url: 1, userId: 1 })
-      .limit(userLimit)
-      .toArray();
+    return [
+      await collection
+        .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
+        .project({ url: 1, userId: 1 })
+        .limit(userLimit)
+        .toArray(),
+      collection,
+    ];
   } catch (e) {
     console.error(e);
-    return [];
+    return [null, null];
   }
 };
 

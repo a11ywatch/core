@@ -18,6 +18,29 @@ const chunk = (target: Website[], max: number) => {
   return newArray;
 };
 
+export const cleanUpInvalidWebsite = async () => {
+  let allWebPages = [];
+  let collection;
+
+  try {
+    // TODO: move generate website to queue
+    [allWebPages, collection] = await getWebsitesWithUsers(0);
+  } catch (e) {
+    console.error(e);
+  }
+
+  const colMap = {};
+  allWebPages.forEach(async (item) => {
+    // remove duplicates
+    if (colMap[item.url]) {
+      await collection.findOneAndDelete({ url: item.url });
+      delete colMap[item.url];
+    } else {
+      colMap[item.url] = true;
+    }
+  });
+};
+
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   let allWebPages = [];
   let pageChunk = [];
@@ -27,7 +50,7 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
 
   try {
     // TODO: move generate website to queue
-    allWebPages = await getWebsitesWithUsers(0, userFilter);
+    [allWebPages] = await getWebsitesWithUsers(0, userFilter);
   } catch (e) {
     console.error(e);
   }

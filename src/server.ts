@@ -14,7 +14,10 @@ import {
   PRIVATE_KEY,
   PUBLIC_KEY,
 } from "./config";
-import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
+import {
+  cleanUpInvalidWebsite,
+  crawlAllAuthedWebsitesCluster,
+} from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
@@ -231,10 +234,18 @@ const startServer = (async () => {
   } catch (e) {
     console.error(e);
   }
+
   try {
     [coreServer, crawlServer] = initServer();
   } catch (e) {
     console.error(["SERVER FAILED TO START", e]);
+  }
+
+  // TODO: CLEANUP ALL URLS THAT ARE IN DB THAT INCLUDE paths for website
+  try {
+    await cleanUpInvalidWebsite();
+  } catch (e) {
+    console.error(e);
   }
 })();
 
