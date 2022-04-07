@@ -1,5 +1,4 @@
-import { closeDbConnection, initDbConnection } from "@app/database";
-import { killServer } from "@app/server";
+import { initDbConnection, closeDbConnection } from "@app/database";
 
 beforeAll(async () => {
   await initDbConnection();
@@ -7,5 +6,4 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await closeDbConnection();
-  await killServer();
 });
