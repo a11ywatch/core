@@ -11,6 +11,7 @@ import { UsersController } from "./core/controllers/users";
 import { IssuesController } from "./core/controllers/issues";
 import { FeaturesController } from "./core/controllers/features";
 import { AnalyticsController } from "./core/controllers/analytics";
+import { ApolloServerPluginUsageReportingDisabled } from "apollo-server-core";
 
 const { DEV } = config;
 
@@ -62,6 +63,7 @@ const serverConfig: ApolloServerExpressConfig = {
       },
     };
   },
+  plugins: [ApolloServerPluginUsageReportingDisabled()],
 };
 
 interface AppGqlServer {

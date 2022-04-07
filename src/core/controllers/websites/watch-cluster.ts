@@ -8,12 +8,15 @@ import { getWebsitesWithUsers } from "../websites";
 // TODO: replace with one iteration or db query batching
 const chunk = (target: Website[], max: number) => {
   const newArray = [];
-  for (let c = 0; c < max; c++) {
-    newArray.push([]);
-  }
-  for (let i = 0; i < target.length; i++) {
-    const slot = i % max;
-    newArray[slot].push(target[i]);
+  // if array exist split into chunks long
+  if (target.length) {
+    for (let c = 0; c < max; c++) {
+      newArray.push([]);
+    }
+    for (let i = 0; i < target.length; i++) {
+      const slot = i % max;
+      newArray[slot].push(target[i]);
+    }
   }
   return newArray;
 };
@@ -24,7 +27,7 @@ export const cleanUpInvalidWebsite = async () => {
   let collection;
 
   try {
-    // TODO: move generate website to queue
+    // TODO: recursive paginate 20 batch
     [allWebPages, collection] = await getWebsitesWithUsers(0);
   } catch (e) {
     console.error(e);
@@ -57,7 +60,7 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
 
   console.log(`total websites to scan ${allWebPages.length}`);
 
-  pageChunk = chunk(allWebPages, cpus().length || 2);
+  pageChunk = chunk(allWebPages, cpus().length);
 
   console.log(`chunks to process ${pageChunk.length}`);
 
