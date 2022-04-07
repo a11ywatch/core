@@ -18,6 +18,7 @@ const chunk = (target: Website[], max: number) => {
   return newArray;
 };
 
+// internal method to cleanup invalid domain adds
 export const cleanUpInvalidWebsite = async () => {
   let allWebPages = [];
   let collection;
@@ -34,7 +35,6 @@ export const cleanUpInvalidWebsite = async () => {
     // remove duplicates
     if (colMap[item.url]) {
       await collection.findOneAndDelete({ url: item.url });
-      delete colMap[item.url];
     } else {
       colMap[item.url] = true;
     }
