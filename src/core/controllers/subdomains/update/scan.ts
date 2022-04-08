@@ -75,7 +75,7 @@ export const scanWebsite = async ({
               script: undefined, // remove scripts from storage
             })
           );
-          await redisClient.expire(websiteTarget.url, 60 * 5); // expire in 5 mins
+          await redisClient.expire(websiteTarget.url, 60 * 30); // expire in 5 mins
         } catch (e) {
           console.error(e);
         }

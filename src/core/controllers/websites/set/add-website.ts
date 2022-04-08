@@ -29,7 +29,7 @@ export const addWebsite = async ({
     throw new Error(WEBSITE_URL_ERROR);
   }
 
-  const url = initUrl(urlMap);
+  const url = stripUrlEndingSlash(initUrl(urlMap));
   const [siteExist, collection] = await getWebsite({ userId, url });
 
   if (siteExist) {
@@ -50,7 +50,7 @@ export const addWebsite = async ({
   const website = makeWebsite({
     userId,
     url,
-    domain: domain,
+    domain,
     pageHeaders: customHeaders,
     pageInsights: !!pageInsights,
   });
@@ -60,7 +60,7 @@ export const addWebsite = async ({
   if (canScan) {
     setImmediate(async () => {
       await watcherCrawl({
-        urlMap: stripUrlEndingSlash(url),
+        urlMap: url,
         userId,
         scan: true,
       });

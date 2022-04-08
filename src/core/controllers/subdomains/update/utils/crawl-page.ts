@@ -9,7 +9,7 @@ import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getDomain } from "../../find";
-import { fetchPuppet, extractPageData, limitResponse } from "./";
+import { fetchPuppet, extractPageData } from "./";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
 import { Issue } from "@app/schema";
@@ -145,15 +145,13 @@ export const crawlPage = async (
       if (webPage && !newSite) {
         if (sendSub) {
           await pubsub.publish(SUBDOMAIN_ADDED, {
-            subDomainAdded: {
-              ...updateWebsiteProps,
-              html: "",
-            },
+            subDomainAdded: updateWebsiteProps,
           });
         }
       }
 
       if (script) {
+        // TODO: look into auto meta reason
         if (!scripts?.scriptMeta) {
           script.scriptMeta = {
             skipContentEnabled: true,
@@ -161,59 +159,56 @@ export const crawlPage = async (
         }
       }
 
-      await Promise.all([
-        collectionUpsert(
+      // TODO: REMOVE UPDATING WEBSITE DATA FROM BASE
+      if (pathname === "/") {
+        await collectionUpsert(
+          updateWebsiteProps,
+          [websiteCollection, !!updateWebsiteProps],
           {
-            pageUrl,
-            domain,
-            errorCount,
-            warningCount,
-            noticeCount,
-            userId,
-            adaScore,
-          },
-          [analyticsCollection, analytics]
-        ),
-        collectionUpsert(newIssue, [
-          issuesCollection,
-          issueExist,
-          pageConstainsIssues,
-        ]),
-        // TODO: move data setting till after scan
-        pathname === "/"
-          ? collectionUpsert(updateWebsiteProps, [websiteCollection, website], {
-              searchProps: { url: pageUrl, userId },
-            })
-          : Promise.resolve(),
-        collectionUpsert(script, [scriptsCollection, scripts]),
-        collectionUpsert(webPage, [subDomainCollection, newSite], {
-          searchProps: { pageUrl, userId },
-        }),
-      ]).catch((e) => {
-        console.error(e);
+            searchProps: { url: pageUrl, userId },
+          }
+        );
+      }
+
+      await collectionUpsert(
+        {
+          pageUrl,
+          domain,
+          errorCount,
+          warningCount,
+          noticeCount,
+          userId,
+          adaScore,
+        },
+        [analyticsCollection, analytics]
+      );
+
+      await collectionUpsert(newIssue, [
+        issuesCollection,
+        issueExist,
+        pageConstainsIssues,
+      ]);
+
+      await collectionUpsert(script, [scriptsCollection, scripts]);
+
+      await collectionUpsert(webPage, [subDomainCollection, newSite], {
+        searchProps: { pageUrl, userId },
       });
 
+      // prior website configs with new data returned
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
 
-      const responseData = limitResponse({
-        issues: pageIssues,
-        pageUrl,
-        script,
-        websiteAdded,
-        authenticated,
-      }) ?? { data: apiData ? dataSource : websiteAdded };
-
-      const timestamp = new Date().getTime();
+      // if flat api return source
+      const responseData = { data: apiData ? dataSource : websiteAdded };
 
       // TODO: REMOVE UGLY LOGIC
       if (responseData?.data) {
+        const timestamp = new Date().getTime();
         if (responseData?.data?.website) {
           responseData.data.website.timestamp = timestamp;
         } else {
           responseData.data.timestamp = timestamp;
         }
-      } else if (responseData.website) {
-        responseData.website.timestamp = timestamp;
       }
 
       return resolve(responseModel(responseData));
