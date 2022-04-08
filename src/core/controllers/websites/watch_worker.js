@@ -3,8 +3,6 @@ const { initRedisConnection } = require("../../../database/memory-client");
 const { websiteWatch } = require("./watch-pages");
 
 process.on("message", async function ({ pages }) {
-  console.log(`worker script with ${pages.length} to process`);
-
   try {
     await initDbConnection();
     await initRedisConnection();

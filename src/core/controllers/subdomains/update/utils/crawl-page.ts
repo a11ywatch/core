@@ -33,7 +33,6 @@ export const crawlPage = async (
     apiData = false,
     sendSub = true,
   } = crawlConfig ?? {};
-  const authenticated = typeof userId !== "undefined";
 
   return new Promise(async (resolve) => {
     try {
@@ -44,12 +43,10 @@ export const crawlPage = async (
         domain,
         userId,
       });
-      const freeAccount = !userData?.role;
-
       let insightsEnabled = false;
 
       // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
-      if (freeAccount) {
+      if (!userData?.role) {
         insightsEnabled = pathname === "/";
       } else {
         insightsEnabled = pageInsights || website?.pageInsights;
@@ -62,25 +59,14 @@ export const crawlPage = async (
         pageInsights: insightsEnabled,
       });
 
-      if (!dataSource) {
-        return resolve(responseModel());
-      }
-
-      // TODO: UPDATE WESITE ONLINE FLAG
-      if (!dataSource?.webPage) {
-        // WEBSITE IS OFFLINE
+      // TODO: SET PAGE OFFLINE DB
+      if (!dataSource || !dataSource?.webPage) {
         return resolve(
-          responseModel({
-            website: null,
-            code: 300,
-            success: false,
-            message: `Website timeout exceeded threshhold ${
-              authenticated ? "" : "for free scan"
-            }, website rendered to slow or does not exist, please check your url and try again`,
-          })
+          responseModel({ website: null, code: 300, success: false })
         );
       }
 
+      // TODO: MOVE TO QUEUE
       let {
         script,
         issues: pageIssues,

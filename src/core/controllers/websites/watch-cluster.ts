@@ -64,7 +64,7 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
 
   console.log(`chunks to process ${pageChunk.length}`);
 
-  pageChunk.forEach((chunk: any) => {
+  for await (const chunk of pageChunk) {
     console.log(`chunk size ${chunk.length}`);
     const forked = fork(`${__dirname}/watch_worker`, [], {
       detached: true,
@@ -79,5 +79,5 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
         forked.kill("SIGINT");
       }
     });
-  });
+  }
 };

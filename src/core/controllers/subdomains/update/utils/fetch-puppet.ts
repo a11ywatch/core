@@ -8,12 +8,14 @@ export const fetchPuppet = async ({
 }: any) => {
   let dataSource;
   try {
+    // MOVE TO gRPC CALL
     const data = await fetcher(
       `${process.env.PUPPET_SERVICE}/api/getPageIssues`,
       {
         method: "POST",
         body: JSON.stringify({
-          pageHeaders: pageHeaders && Array(pageHeaders),
+          pageHeaders:
+            pageHeaders && Array.isArray(pageHeaders) ? pageHeaders : undefined,
           url: String(encodeURIComponent(url)),
           userId,
           pageInsights,
