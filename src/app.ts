@@ -62,7 +62,7 @@ function initServer(): HttpServer[] {
   app.disable("x-powered-by");
   crawlerApp.disable("x-powered-by");
 
-  app.set("trust proxy", process.env.NODE_ENV !== "production");
+  app.set("trust proxy", process.env.NODE_ENV !== "production"); // replace with docker env
   app.use(cookieParser());
   app.use(cors(corsOptions));
 
@@ -81,15 +81,19 @@ function initServer(): HttpServer[] {
   app.use(createIframe);
 
   app.options(CONFIRM_EMAIL, cors());
+  app.options(UNSUBSCRIBE_EMAILS, cors());
 
   app.get(ROOT, root);
 
   app.get("/iframe", cors(), createIframeEvent);
   app.get("/status/:domain", cors(), statusBadge);
   app.get("/api/get-website", cors(), getWebsite);
-  app.get(UNSUBSCRIBE_EMAILS, cors(), unSubEmails);
+  app
+    .route(UNSUBSCRIBE_EMAILS)
+    .get(cors(), unSubEmails)
+    .post(cors(), unSubEmails);
 
-  // CLI OPTIONS MOVE TO DIRECTORY
+  // SCAN -> PAGEMIND
   app.post("/api/scan-simple", cors(), async (req, res) => {
     try {
       const url = req.body?.websiteUrl || req.body?.url;
@@ -100,15 +104,9 @@ function initServer(): HttpServer[] {
         userId,
       });
 
-      // TODO: PASS PARAM INSTEAD TO REMOVE TRANSFER OF DATA
-      if (data?.website?.html) {
-        delete data.website.html;
-      }
-
       res.json(data);
     } catch (e) {
       console.error(e);
-      res.json(false);
     }
   });
 
