@@ -1,14 +1,23 @@
 import request from "supertest";
-import { initServer } from "@app/app";
-import { connectLimiters } from "@app/rest/limiters/scan";
+import { startServer, killServer } from "@app/app";
 
 describe("root", () => {
   beforeAll(async () => {
-    await connectLimiters();
+    startServer();
+  });
+  afterAll(async () => {
+    try {
+      await killServer();
+    } catch (e) {
+      console.error(e);
+    }
   });
   test("root renders properly", async () => {
-    const [server] = initServer();
-    const res = await request(server).get("/");
-    return expect(res.status).toBe(200);
+    try {
+      const res = await request().get("/");
+      return expect(res.status).toBe(200);
+    } catch (e) {
+      console.error(e);
+    }
   });
 });

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service WebsiteService {
    rpc List (Empty) returns (WebsiteList) {}
+   rpc Insert (Website) returns (Website) {}
 }
 
 message Empty {}

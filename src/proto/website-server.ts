@@ -1,4 +1,5 @@
 import { Server, ServerCredentials } from "@grpc/grpc-js";
+import { GRPC_HOST } from "@app/config/rpc";
 import { getProto } from "./website";
 
 const pages = [
@@ -14,14 +15,15 @@ export const createServer = async () => {
     list: (_, callback) => {
       callback(null, { websites: pages });
     },
+    insert: (call, callback) => {
+      let page = call.request;
+      pages.push(page);
+      callback(null, page);
+    },
   });
 
-  server.bindAsync(
-    "127.0.0.1:50051",
-    ServerCredentials.createInsecure(),
-    () => {
-      console.log("Server running at http://127.0.0.1:50051");
-      server.start();
-    }
-  );
+  server.bindAsync(GRPC_HOST, ServerCredentials.createInsecure(), () => {
+    server.start();
+    console.log("Server running at http://127.0.0.1:50051");
+  });
 };

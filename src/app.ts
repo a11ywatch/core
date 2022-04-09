@@ -52,8 +52,8 @@ import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 import { setAuthRoutes } from "./rest/routes_groups/auth";
 import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
-import { createClient } from "./proto/website-client";
-import { createServer } from "./proto/website-server";
+// import { createClient } from "./proto/website-client";
+// import { createServer } from "./proto/website-server";
 
 const { GRAPHQL_PORT, CRAWL_SERVER_PORT } = config;
 
@@ -212,8 +212,10 @@ function initServer(): HttpServer[] {
     graphqlPath: server.graphqlPath,
   });
 
-  if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-    new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+  if (process.env.NODE_ENV !== "test") {
+    if (process.env.DYNO === "web.1" || !process.env.DYNO) {
+      new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+    }
   }
 
   return [listener, crawlListener];
@@ -240,10 +242,10 @@ const startServer = async () => {
     console.error(["SERVER FAILED TO START", e]);
   }
 
-  // create grpc website server
-  await createServer();
-  // create grpc website client
-  await createClient();
+  // // create grpc website server
+  // await createServer();
+  // // create grpc website client
+  // await createClient();
 };
 
 const killServer = async () => {
