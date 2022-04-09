@@ -4,7 +4,7 @@ import express from "express";
 import http from "http";
 import https from "https";
 import cors from "cors";
-import createIframe from "node-iframe";
+import createIframe, { configureAgent } from "node-iframe";
 import { CronJob } from "cron";
 import {
   corsOptions,
@@ -54,6 +54,8 @@ import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 
 const { GRAPHQL_PORT, CRAWL_SERVER_PORT } = config;
+
+configureAgent();
 
 function initServer(): HttpServer[] {
   const app = express();
