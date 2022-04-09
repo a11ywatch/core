@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service WebsiteService {
+   rpc List (Empty) returns (WebsiteList) {}
+}
+
+message Empty {}
+
+message Website {
+   string id = 1;
+   string title = 2;
+   string content = 3;
+}
+
+message WebsiteList {
+   repeated Website websites = 1;
+}
