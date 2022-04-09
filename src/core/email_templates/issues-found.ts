@@ -31,7 +31,7 @@ const issuesFoundTemplate: IssuesFound = (
   const page = data?.pageUrl;
   const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`;
 
-  const target = encodeURIComponent(page);
+  const target = encodeURI(page);
 
   return `
     <head>
@@ -40,7 +40,7 @@ const issuesFoundTemplate: IssuesFound = (
         tr:hover {background-color: #ddd;}
       </style>
     </head>
-    <h1>${data?.issues?.length} issues found for ${page}</h1>
+    <h1>${data?.issues?.length} issues found for ${target}</h1>
     <div style="margin-bottom: 10px;">Login to see full report</div>
     <div style="overflow-x:auto;">
     <table class="a11y-view" style="font-family: system-ui, Arial, Helvetica, sans-serif; border-collapse: collapse; width: 100%;">

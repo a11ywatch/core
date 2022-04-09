@@ -11,12 +11,9 @@ const createIframe = (req: Request, res: AppResponse) => {
 
     let url = decodeURIComponent(baseUrl);
 
-    if (!url.includes("http")) {
-      url = `http://${url}`;
-    }
-
-    if (req.protocol === "https") {
-      url = url.replace("http:", "https:");
+    if (/http|https/.test(url) === false) {
+      const tp = req.protocol === "https" ? "https" : "http";
+      url = `${tp}://${url}`;
     }
 
     if (url.includes(".pdf")) {

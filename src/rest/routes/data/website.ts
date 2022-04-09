@@ -8,6 +8,12 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   const { q, timestamp, download } = req.query;
   let data: Website;
 
+  if (!q) {
+    console.log(`query for website not found`);
+    res.send(false);
+    return;
+  }
+
   try {
     const memReport = await redisClient.get(decodeURIComponent(q + ""));
 
