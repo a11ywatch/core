@@ -1,8 +1,9 @@
 const { initDbConnection } = require("../../../database/client");
 const { initRedisConnection } = require("../../../database/memory-client");
 const { websiteWatch } = require("./watch-pages");
+const { workerData } = require("worker_threads");
 
-process.on("message", async function ({ pages }) {
+(async function startUp() {
   try {
     await initDbConnection();
     await initRedisConnection();
@@ -11,10 +12,10 @@ process.on("message", async function ({ pages }) {
   }
 
   try {
-    await websiteWatch(pages);
+    await websiteWatch(workerData);
   } catch (e) {
     console.error(e);
   }
 
-  process.send("close");
-});
+  process.exit();
+})();

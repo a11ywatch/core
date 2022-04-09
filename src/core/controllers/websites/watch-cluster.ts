@@ -1,9 +1,8 @@
-import { DEV } from "@app/config";
-import { Website } from "@app/schema";
-import { fork } from "child_process";
+import { Worker } from "worker_threads";
 import { getHours } from "date-fns";
 import { cpus } from "os";
 import { getWebsitesWithUsers } from "../websites";
+import type { Website } from "@app/schema";
 
 // TODO: replace with one iteration or db query batching
 const chunk = (target: Website[], max: number) => {
@@ -44,6 +43,11 @@ export const cleanUpInvalidWebsite = async () => {
   });
 };
 
+const forkWatch = (workerData) =>
+  new Worker(`${__dirname}/watch_worker`, {
+    workerData,
+  });
+
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   let allWebPages = [];
   let pageChunk = [];
@@ -64,20 +68,9 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
 
   console.log(`chunks to process ${pageChunk.length}`);
 
-  for await (const chunk of pageChunk) {
+  for (const chunk of pageChunk) {
     console.log(`chunk size ${chunk.length}`);
-    const forked = fork(`${__dirname}/watch_worker`, [], {
-      detached: true,
-      execArgv: DEV
-        ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
-        : undefined,
-    });
-    forked.send({ pages: chunk });
+    const forked = forkWatch(chunk);
     forked.unref();
-    forked.on("message", (message: string) => {
-      if (message === "close") {
-        forked.kill("SIGINT");
-      }
-    });
   }
 };
