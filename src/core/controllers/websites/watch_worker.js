@@ -1,21 +1,24 @@
 const { initDbConnection } = require("../../../database/client");
 const { initRedisConnection } = require("../../../database/memory-client");
 const { websiteWatch } = require("./watch-pages");
-const { workerData } = require("worker_threads");
+const { parentPort } = require("worker_threads");
 
-(async function startUp() {
+const initConnections = async () => {
   try {
     await initDbConnection();
     await initRedisConnection();
   } catch (e) {
     console.error(e);
   }
+};
 
-  try {
-    await websiteWatch(workerData);
-  } catch (e) {
-    console.error(e);
+parentPort.on("message", async (message) => {
+  const { websites, exit } = message;
+
+  await initConnections();
+  await websiteWatch(websites);
+
+  if (exit) {
+    process.exit();
   }
-
-  process.exit();
-})();
+});

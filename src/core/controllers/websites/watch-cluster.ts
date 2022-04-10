@@ -20,57 +20,28 @@ const chunk = (target: Website[], max: number) => {
   return newArray;
 };
 
-// [Internal] method to cleanup invalid domain adds
-export const cleanUpInvalidWebsite = async () => {
-  let allWebPages = [];
-  let collection;
-
-  try {
-    // TODO: recursive paginate 20 batch
-    [allWebPages, collection] = await getWebsitesWithUsers(0);
-  } catch (e) {
-    console.error(e);
-  }
-
-  const colMap = {};
-  allWebPages.forEach(async (item) => {
-    // remove duplicates
-    if (colMap[item.url]) {
-      await collection.findOneAndDelete({ url: item.url });
-    } else {
-      colMap[item.url] = true;
-    }
-  });
-};
-
-const forkWatch = (workerData) =>
-  new Worker(`${__dirname}/watch_worker`, {
-    workerData,
-  });
-
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   let allWebPages = [];
   let pageChunk = [];
   const morning = getHours(new Date()) === 11;
-  console.log(morning ? `morning cron` : "night cron");
   const userFilter = morning ? { emailMorningOnly: { eq: true } } : {};
 
   try {
-    // TODO: move generate website to queue
+    // TODO: move generate website in batch 20
     [allWebPages] = await getWebsitesWithUsers(0, userFilter);
   } catch (e) {
     console.error(e);
   }
 
-  console.log(`total websites to scan ${allWebPages.length}`);
-
   pageChunk = chunk(allWebPages, Math.max(2, cpus().length / 2));
+  allWebPages = []; // remove pages from memory
 
-  console.log(`chunks to process ${pageChunk.length}`);
+  const forked = new Worker(`${__dirname}/watch_worker`);
+  forked.unref();
 
+  let i = 0;
   for (const chunk of pageChunk) {
-    console.log(`chunk size ${chunk.length}`);
-    const forked = forkWatch(chunk);
-    forked.unref();
+    forked.postMessage({ websites: chunk, exit: i === pageChunk.length - 1 });
+    i++;
   }
 };
