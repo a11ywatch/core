@@ -9,7 +9,7 @@ import type {
 
 type GRPC = GrpcObject | ServiceClientConstructor | ProtobufTypeDefinition;
 
-interface Service {
+export interface Service {
   WebsiteService?: typeof Client & {
     service?: any;
   };

@@ -1,8 +1,12 @@
 import { credentials } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
-import { getProto } from "./website";
+import { Service, getProto } from "./website";
 
-let client;
+let client: Service["WebsiteService"]["service"];
+
+export const killClient = () => {
+  client?.close();
+};
 
 const createClient = async () => {
   const { WebsiteService } = await getProto();

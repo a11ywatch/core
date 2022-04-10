@@ -20,7 +20,7 @@ const chunk = (target: Website[], max: number) => {
   return newArray;
 };
 
-// internal method to cleanup invalid domain adds
+// [Internal] method to cleanup invalid domain adds
 export const cleanUpInvalidWebsite = async () => {
   let allWebPages = [];
   let collection;
@@ -64,7 +64,7 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
 
   console.log(`total websites to scan ${allWebPages.length}`);
 
-  pageChunk = chunk(allWebPages, cpus().length);
+  pageChunk = chunk(allWebPages, Math.max(2, cpus().length / 2));
 
   console.log(`chunks to process ${pageChunk.length}`);
 

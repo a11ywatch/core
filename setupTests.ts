@@ -1,9 +1,5 @@
-import { initDbConnection, closeDbConnection } from "@app/database";
-
-beforeAll(async () => {
-  await initDbConnection();
-});
-
-afterAll(async () => {
-  await closeDbConnection();
+jest.mock("ioredis", () => {
+  const rmock = require("ioredis-mock");
+  rmock.prototype.call = (args) => args;
+  return rmock;
 });

@@ -7,6 +7,7 @@ const options = {
   port: 6379,
 };
 
+// redis client
 const initRedisConnection = async () => {
   try {
     redisClient = new Redis(options);
@@ -15,4 +16,13 @@ const initRedisConnection = async () => {
   }
 };
 
-export { redisClient, initRedisConnection };
+// close redis client
+const closeRedisConnection = () => {
+  try {
+    redisClient?.disconnect();
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export { redisClient, initRedisConnection, closeRedisConnection };

@@ -7,9 +7,11 @@ const pages = [
   { id: "2", title: "Website 2", content: "Content 2" },
 ];
 
+let server: Server;
+
 export const createServer = async () => {
   const websiteProto = await getProto();
-  const server = new Server();
+  server = new Server();
 
   server.addService(websiteProto.WebsiteService.service, {
     list: (_, callback) => {
@@ -26,4 +28,10 @@ export const createServer = async () => {
     server.start();
     console.log("Server running at http://127.0.0.1:50051");
   });
+};
+
+export const killServer = async () => {
+  const websiteProto = await getProto();
+  server.removeService(websiteProto.WebsiteService.service);
+  server.forceShutdown();
 };

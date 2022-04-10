@@ -1,10 +1,21 @@
 import { createTestClient } from "apollo-server-testing";
 import { Server } from "@app/apollo-server";
 import gql from "graphql-tag";
+import { initDbConnection, closeDbConnection } from "@app/database";
+
+let server: Server;
 
 describe("user", () => {
-  it("create user successfully", async () => {
-    const server = new Server();
+  beforeAll(async () => {
+    await initDbConnection();
+  });
+  afterAll(async (done) => {
+    await server.stop();
+    await closeDbConnection();
+    done();
+  });
+  test("create user successfully", async (done) => {
+    server = new Server();
     const { mutate } = createTestClient(server);
 
     const mutation = gql`
@@ -22,6 +33,7 @@ describe("user", () => {
       variables: { email, password: "password" },
     });
 
-    return expect(res.data.register.email).toBe(email);
+    expect(res.data.register.email).toBe(email);
+    done();
   });
 });

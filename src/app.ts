@@ -33,6 +33,8 @@ import {
   setChannels,
   createPubSub,
   initRedisConnection,
+  closeSub,
+  closeRedisConnection,
 } from "./database";
 import { Server } from "./apollo-server";
 import {
@@ -224,23 +226,49 @@ function initServer(): HttpServer[] {
 let coreServer: HttpServer;
 let crawlServer: HttpServer;
 
-const startServer = async () => {
+const connectClients = async () => {
   try {
     await initDbConnection();
-    createPubSub(); //gql sub
-    createSub(); // pub sub
-    setChannels(); // queues
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     await initRedisConnection(); // redis client
-    connectLimiters(); // rate limiters
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    await createSub(); // pub sub
   } catch (e) {
     console.error(e);
   }
 
   try {
-    [coreServer, crawlServer] = initServer();
+    createPubSub(); //gql sub
+    setChannels(); // queues
+    connectLimiters(); // rate limiters
   } catch (e) {
-    console.error(["SERVER FAILED TO START", e]);
+    console.error(e);
   }
+};
+
+const startServer = async () => {
+  try {
+    await connectClients();
+  } catch (e) {
+    console.error(e);
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      [coreServer, crawlServer] = initServer();
+
+      resolve([coreServer, crawlServer]);
+    } catch (e) {
+      console.error(["SERVER FAILED TO START", e]);
+      reject(e);
+    }
+  });
 
   // // create grpc website server
   // await createServer();
@@ -251,9 +279,11 @@ const startServer = async () => {
 const killServer = async () => {
   try {
     await Promise.all([
-      closeDbConnection(),
       coreServer?.close(),
       crawlServer?.close(),
+      closeDbConnection(),
+      closeSub(),
+      closeRedisConnection(),
     ]);
   } catch (e) {
     console.error("failed to kill server", e);
