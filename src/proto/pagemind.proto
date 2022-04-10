@@ -8,6 +8,7 @@ service WebsiteService {
    rpc List (Empty) returns (WebsiteList) {}
    rpc Gather (Website) returns (Website) {}
    rpc Scan (ScanParams) returns (Web) {}
+   rpc SetScript (ScriptParams) returns (Script) {}
 }
 
 message Empty {}
@@ -22,6 +23,14 @@ message ScanParams {
    string url = 2;
    repeated Headers pageHeaders = 3;
    bool pageInsights = 4;
+}
+
+message ScriptParams {
+   bool editScript = 1;
+   string url = 2;
+   int64 userId = 3;
+   string script = 4;
+   string newScript = 5;
 }
 
 message PageInsights {

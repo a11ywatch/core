@@ -67,6 +67,13 @@ export const crawlPage = async (
         );
       }
 
+      // re-assign to key of json for backwords compat
+      if (dataSource?.webPage?.insight) {
+        dataSource.webPage.insight = {
+          json: dataSource?.webPage?.insight,
+        };
+      }
+
       // TODO: MOVE TO QUEUE
       let {
         script,

@@ -48,9 +48,22 @@ export const scan = (website = {}) => {
   });
 };
 
+export const setScripts = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    pageMindClient.setScripts(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
 export const controller = {
   scan,
   listWebsites,
   listIssue,
   insertIssue,
+  setScripts,
 };
