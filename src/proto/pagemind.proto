@@ -1,8 +1,4 @@
-
 syntax = "proto3";
-
-import "google/protobuf/any.proto";
-
 
 service WebsiteService {
    rpc List (Empty) returns (WebsiteList) {}
@@ -31,10 +27,6 @@ message ScriptParams {
    int64 userId = 3;
    string script = 4;
    string newScript = 5;
-}
-
-message PageInsights {
-   google.protobuf.Any json = 1;
 }
 
 message IssueMeta {
