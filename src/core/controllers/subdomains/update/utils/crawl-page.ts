@@ -9,10 +9,11 @@ import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getDomain } from "../../find";
-import { fetchPuppet, extractPageData } from "./";
+import { extractPageData } from "./";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
 import { Issue } from "@app/schema";
+import { fetchPuppet } from "./fetch-puppet";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -125,6 +126,7 @@ export const crawlPage = async (
       // // TODO: MERGE ISSUES FROM ALL PAGES
       const updateWebsiteProps: Website = Object.assign({}, webPage, {
         online: true,
+        userId,
       });
 
       // new domain found
@@ -137,6 +139,7 @@ export const crawlPage = async (
       }
 
       if (script) {
+        script.userId = userId;
         // TODO: look into auto meta reason
         if (!scripts?.scriptMeta) {
           script.scriptMeta = {
@@ -177,9 +180,13 @@ export const crawlPage = async (
 
       await collectionUpsert(script, [scriptsCollection, scripts]);
 
-      await collectionUpsert(webPage, [subDomainCollection, newSite], {
-        searchProps: { pageUrl, userId },
-      });
+      await collectionUpsert(
+        updateWebsiteProps,
+        [subDomainCollection, newSite],
+        {
+          searchProps: { pageUrl, userId },
+        }
+      );
 
       // prior website configs with new data returned
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);

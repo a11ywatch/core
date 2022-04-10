@@ -33,15 +33,6 @@ export const getDomain = async (
     const searchProps = websiteSearchParams({ url, userId });
     const website = await collection.findOne(searchProps);
 
-    if (website) {
-      if (typeof website?.pageInsights === "undefined") {
-        website.pageInsights = false;
-      }
-      if (typeof website?.insight === "undefined") {
-        website.insight = null;
-      }
-    }
-
     return chain ? [website, collection] : website;
   } catch (e) {
     console.error(e);

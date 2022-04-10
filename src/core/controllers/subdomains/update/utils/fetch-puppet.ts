@@ -1,32 +1,17 @@
-import fetcher from "node-fetch";
+import { controller } from "@app/proto/actions/calls";
 
-export const fetchPuppet = async ({
-  userId,
-  url,
-  pageHeaders,
-  pageInsights,
-}: any) => {
+interface Params {
+  url: string;
+  userId?: number;
+  pageHeaders?: any[];
+  pageInsights?: boolean;
+}
+
+// gRPC call to scan from pagemind
+export const fetchPuppet = async (params: Params) => {
   let dataSource;
   try {
-    // MOVE TO gRPC CALL
-    const data = await fetcher(
-      `${process.env.PUPPET_SERVICE}/api/getPageIssues`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          pageHeaders:
-            pageHeaders && Array.isArray(pageHeaders) ? pageHeaders : undefined,
-          url: String(encodeURIComponent(url)),
-          userId,
-          pageInsights,
-        }),
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-
-    if (data?.status === 200) {
-      dataSource = await data?.json();
-    }
+    dataSource = await controller.scan(params);
   } catch (e) {
     console.error(e);
   }

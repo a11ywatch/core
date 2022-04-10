@@ -12,6 +12,18 @@ export const listWebsites = () => {
   });
 };
 
+export const insertIssue = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    client.insert(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
 export const listIssue = (website = {}) => {
   return new Promise((resolve, reject) => {
     pageMindClient.gather(website, (error, res) => {
@@ -24,9 +36,9 @@ export const listIssue = (website = {}) => {
   });
 };
 
-export const insertWebsites = (website = {}) => {
+export const scan = (website = {}) => {
   return new Promise((resolve, reject) => {
-    client.insert(website, (error, res) => {
+    pageMindClient.scan(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -37,7 +49,8 @@ export const insertWebsites = (website = {}) => {
 };
 
 export const controller = {
-  listIssue,
+  scan,
   listWebsites,
-  insertWebsites,
+  listIssue,
+  insertIssue,
 };

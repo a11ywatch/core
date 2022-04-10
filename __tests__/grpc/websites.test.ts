@@ -2,7 +2,7 @@ import { createClient, killClient } from "@app/proto/website-client";
 import { controller } from "@app/proto/actions/calls";
 import { createServer, killServer } from "@app/proto/website-server";
 
-const { listWebsites, insertWebsites } = controller;
+const { listWebsites, insertIssue } = controller;
 
 describe("gRPC websites", () => {
   beforeAll(async () => {
@@ -21,7 +21,7 @@ describe("gRPC websites", () => {
 
   test("websites insert", async () => {
     const websiteAdd = { id: "3", title: "Website 3", content: "Content 3" };
-    const website = await insertWebsites(websiteAdd);
+    const website = await insertIssue(websiteAdd);
 
     expect(website).toStrictEqual(websiteAdd);
   });

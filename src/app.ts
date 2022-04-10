@@ -57,8 +57,6 @@ import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 
-import { controller } from "./proto/actions/calls";
-
 const { GRAPHQL_PORT, CRAWL_SERVER_PORT } = config;
 
 configureAgent();
@@ -259,9 +257,6 @@ const startServer = async () => {
 
   try {
     await startGRPC();
-    console.log(
-      await controller.listIssue({ id: "3", content: "h", title: "h" })
-    );
   } catch (e) {
     console.error(e);
   }
