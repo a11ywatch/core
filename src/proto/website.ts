@@ -15,9 +15,11 @@ export interface Service {
   };
 }
 
-export const getProto = async (): Promise<Service & GRPC> => {
+export const getProto = async (
+  target: string = "website.proto"
+): Promise<Service & GRPC> => {
   try {
-    const packageDef = await load(__dirname + "/website.proto", {
+    const packageDef = await load(`${__dirname}/${target}`, {
       keepCase: true,
       longs: String,
       enums: String,

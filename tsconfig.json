@@ -23,6 +23,6 @@
       "@app/*": ["./src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "*.proto"],
   "exclude": ["node_modules"]
 }

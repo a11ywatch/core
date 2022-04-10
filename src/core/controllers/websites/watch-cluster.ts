@@ -1,6 +1,5 @@
 import { Worker } from "worker_threads";
 import { getHours } from "date-fns";
-import { cpus } from "os";
 import { getWebsitesWithUsers } from "../websites";
 import type { Website } from "@app/schema";
 
@@ -20,28 +19,29 @@ const chunk = (target: Website[], max: number) => {
   return newArray;
 };
 
+const forkWatch = (workerData) =>
+  new Worker(`${__dirname}/watch_worker`, {
+    workerData,
+  });
+
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
-  let allWebPages = [];
-  let pageChunk = [];
   const morning = getHours(new Date()) === 11;
   const userFilter = morning ? { emailMorningOnly: { eq: true } } : {};
+  let allWebPages = [];
+  let pageChunk = [];
 
   try {
-    // TODO: move generate website in batch 20
+    // TODO: move generate website to queue
     [allWebPages] = await getWebsitesWithUsers(0, userFilter);
   } catch (e) {
     console.error(e);
   }
 
-  pageChunk = chunk(allWebPages, Math.max(2, cpus().length / 2));
-  allWebPages = []; // remove pages from memory
+  pageChunk = chunk(allWebPages, 2);
+  allWebPages = [];
 
-  const forked = new Worker(`${__dirname}/watch_worker`);
-  forked.unref();
-
-  let i = 0;
   for (const chunk of pageChunk) {
-    forked.postMessage({ websites: chunk, exit: i === pageChunk.length - 1 });
-    i++;
+    const forked = forkWatch(chunk);
+    forked.unref();
   }
 };

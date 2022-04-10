@@ -1,8 +1,5 @@
-import {
-  createClient,
-  killClient,
-  controller,
-} from "@app/proto/website-client";
+import { createClient, killClient } from "@app/proto/website-client";
+import { controller } from "@app/proto/actions/calls";
 import { createServer, killServer } from "@app/proto/website-server";
 
 const { listWebsites, insertWebsites } = controller;
@@ -10,7 +7,7 @@ const { listWebsites, insertWebsites } = controller;
 describe("gRPC websites", () => {
   beforeAll(async () => {
     await createServer();
-    await createClient();
+    await createClient(true); // atm simple switch for internal client
   });
   afterAll(async () => {
     await killClient();
