@@ -32,6 +32,7 @@ const createPageMindClient = async () => {
 
 export const killClient = () => {
   client?.close();
+  pageMindClient?.close();
 };
 
 export { client, pageMindClient, createClient, createPageMindClient };

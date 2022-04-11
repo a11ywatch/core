@@ -7,11 +7,9 @@ import { getHostName } from "@app/core/utils";
 import { redisClient } from "@app/database/memory-client";
 
 export const scanWebsite = async ({
-  userId: userIdMap,
+  userId,
   url: urlMap,
 }: any): Promise<ResponseModel> => {
-  const userId = !userIdMap && userIdMap !== 0 ? -1 : userIdMap;
-
   if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
@@ -33,6 +31,7 @@ export const scanWebsite = async ({
         pageHeaders: website?.pageHeaders,
         url: pageUrl,
         userId,
+        pageInsights: false,
       });
 
       if (dataSource) {

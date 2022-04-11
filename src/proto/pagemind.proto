@@ -15,7 +15,7 @@ message Headers {
 }
 
 message ScanParams {
-   int64 userId = 1;
+   uint32 userId = 1;
    string url = 2;
    repeated Headers pageHeaders = 3;
    bool pageInsights = 4;
@@ -24,7 +24,7 @@ message ScanParams {
 message ScriptParams {
    bool editScript = 1;
    string url = 2;
-   int64 userId = 3;
+   uint32 userId = 3;
    string script = 4;
    string newScript = 5;
 }
@@ -61,7 +61,7 @@ message Page {
    string insight = 8;
    IssuesInfo issuesInfo = 9;
    string lastScanDate = 10;  
-   int64 userId = 11;
+   uint32 userId = 11;
 }
 
 message Problem {
@@ -79,7 +79,7 @@ message Issues {
    string pageUrl = 2;
    repeated Problem issues = 3;
    string domain = 4;
-   int64 userId = 5;
+   uint32 userId = 5;
 }
 
 message Script {
@@ -89,7 +89,7 @@ message Script {
    string cdnUrlMinified = 4;
    string cdnUrl = 5;
    bool cdnConnected = 6;
-   int64 userId = 7;
+   uint32 userId = 7;
    IssueMeta issueMeta = 8;
 }
 

@@ -46,11 +46,13 @@ export const crawlPage = async (
       });
       let insightsEnabled = false;
 
-      // DETERMINE IF INSIGHTS CAN RUN PER USER ROLE
-      if (!userData?.role) {
-        insightsEnabled = pathname === "/";
-      } else {
-        insightsEnabled = pageInsights || website?.pageInsights;
+      if (website?.pageInsights || pageInsights) {
+        if (!userData?.role) {
+          // INSIGHTS ONLY ON ROOT PAGE IF ENABLED
+          insightsEnabled = pathname === "/";
+        } else {
+          insightsEnabled = pageInsights || website?.pageInsights;
+        }
       }
 
       const dataSource = await fetchPuppet({
