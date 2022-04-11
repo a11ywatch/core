@@ -17,16 +17,19 @@ export async function setWebsiteScore({ domain, userId }) {
       userId,
     });
 
-    const adaScore = await generateWebsiteAverage({ domain, userId });
-
-    const updateWebsiteProps = {
-      adaScore,
-    };
+    const adaScoreAverage = await generateWebsiteAverage({ domain, userId });
 
     await collectionUpsert(
-      updateWebsiteProps,
-      [websiteCollection, !!website, null],
-      { domain, userId }
+      {
+        adaScoreAverage,
+      },
+      [websiteCollection, !!website],
+      {
+        searchProps: {
+          domain,
+          userId,
+        },
+      }
     );
 
     // TODO: MOVE OUT OF METHOD
@@ -34,7 +37,7 @@ export async function setWebsiteScore({ domain, userId }) {
       crawlComplete: {
         userId,
         domain,
-        adaScore: adaScore || 0,
+        adaScoreAverage,
       },
     });
 

@@ -1,8 +1,6 @@
 syntax = "proto3";
 
 service WebsiteService {
-   rpc List (Empty) returns (WebsiteList) {}
-   rpc Gather (Website) returns (Website) {}
    rpc Scan (ScanParams) returns (Web) {}
    rpc SetScript (ScriptParams) returns (Script) {}
 }
@@ -55,13 +53,11 @@ message Page {
    string url = 2;  
    int64 adaScore = 3;
    bool cdnConnected = 4;
-   string screenshot = 5;
-   string screenshotStill = 6;
-   PageLoadTime pageLoadTime = 7;
-   string insight = 8;
-   IssuesInfo issuesInfo = 9;
-   string lastScanDate = 10;  
-   uint32 userId = 11;
+   PageLoadTime pageLoadTime = 5;
+   string insight = 6;
+   IssuesInfo issuesInfo = 7;
+   string lastScanDate = 8;  
+   uint32 userId = 9;
 }
 
 message Problem {
@@ -98,14 +94,3 @@ message Web {
    Issues issues = 2;
    Script script = 3;
 }
-
-message Website {
-   string id = 1;
-   string title = 2;
-   string content = 3;
-}
-
-message WebsiteList {
-   repeated Website websites = 1;
-}
-

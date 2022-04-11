@@ -485,8 +485,6 @@ export type Website = {
   userId?: Maybe<Scalars["Int"]>;
   domain?: Maybe<Scalars["String"]>;
   adaScore?: Maybe<Scalars["Float"]>;
-  screenshot?: Maybe<Scalars["String"]>;
-  screenshotStill?: Maybe<Scalars["String"]>;
   cdnConnected?: Maybe<Scalars["Boolean"]>;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;

@@ -11,8 +11,7 @@ export const website = `
 		userId: Int
 		domain: String
 		adaScore: Float
-		screenshot: String
-		screenshotStill: String
+		adaScoreAverage: Float
 		cdnConnected: Boolean
 		pageLoadTime: PageLoadTimeMeta
 		issues(filter: String): [Issue]

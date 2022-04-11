@@ -7,7 +7,7 @@ const { listWebsites, insertIssue } = controller;
 describe("gRPC websites", () => {
   beforeAll(async () => {
     await createServer();
-    await createClient(true); // atm simple switch for internal client
+    await createClient(); // atm simple switch for internal client
   });
   afterAll(async () => {
     await killClient();

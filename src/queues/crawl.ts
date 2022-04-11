@@ -33,7 +33,6 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
   try {
     if (isGenerateAverageMethod(meta)) {
       const props = meta?.extra;
-
       return await setWebsiteScore({
         domain: props?.domain,
         userId: Number(userId),

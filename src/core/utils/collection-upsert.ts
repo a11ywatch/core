@@ -2,7 +2,7 @@
  * update or add item into collection - some values are autofilled if empty
  * @param source: target updating
  * @param [collection, shouldUpdate, shouldDelete]: handle the updating of collection - deleting requires update + delete
- * @param config: search the db with the keys and values set
+ * @param config: Object. set the key [searchProps]: search the db with the keys and values set
  */
 export const collectionUpsert = async (
   source: any,

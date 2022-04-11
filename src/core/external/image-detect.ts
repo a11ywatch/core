@@ -1,5 +1,6 @@
 import fetcher from "node-fetch";
 
+// TODO: MOVE TO GRPC
 export const imageDetect = async ({ img }: { img: string }): Promise<any> => {
   let dataSource;
   try {

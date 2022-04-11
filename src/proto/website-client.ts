@@ -1,18 +1,20 @@
 import { credentials } from "@grpc/grpc-js";
-import { GRPC_HOST, GRPC_HOST_PAGEMIND } from "@app/config/rpc";
+import {
+  GRPC_HOST,
+  GRPC_HOST_PAGEMIND,
+  GRPC_HOST_CRAWLER,
+} from "@app/config/rpc";
 import { Service, getProto } from "./website";
 
 let client: Service["WebsiteService"]["service"]; // app rpc server
 let pageMindClient: Service["WebsiteService"]["service"]; // pagemind rpc server
+let crawlerClient: Service["WebsiteService"]["service"]; // pagemind rpc server
 
-// create gRPC client
-const createClient = async (internal?: boolean) => {
+// create gRPC client for central application (TESTING purposes)
+const createClient = async () => {
   try {
     const { WebsiteService } = await getProto();
-    client = new WebsiteService(
-      internal ? GRPC_HOST : GRPC_HOST_PAGEMIND,
-      credentials.createInsecure()
-    );
+    client = new WebsiteService(GRPC_HOST, credentials.createInsecure());
   } catch (e) {
     console.error(e);
   }
@@ -30,9 +32,28 @@ const createPageMindClient = async () => {
   }
 };
 
+const createCrawlerClient = async () => {
+  try {
+    const { WebsiteService } = await getProto("crawler.proto");
+    crawlerClient = new WebsiteService(
+      GRPC_HOST_CRAWLER,
+      credentials.createInsecure()
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const killClient = () => {
   client?.close();
   pageMindClient?.close();
+  crawlerClient?.close();
 };
 
-export { client, pageMindClient, createClient, createPageMindClient };
+export {
+  client,
+  pageMindClient,
+  createClient,
+  createPageMindClient,
+  createCrawlerClient,
+};
