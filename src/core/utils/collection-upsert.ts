@@ -1,3 +1,9 @@
+/*
+ * update or add item into collection - some values are autofilled if empty
+ * @param source: target updating
+ * @param [collection, shouldUpdate, shouldDelete]: handle the updating of collection - deleting requires update + delete
+ * @param config: search the db with the keys and values set
+ */
 export const collectionUpsert = async (
   source: any,
   [collection, shouldUpdate, shouldDelete]: [any, any, any?],
@@ -8,13 +14,19 @@ export const collectionUpsert = async (
   }
   try {
     const userId = config?.searchProps?.userId || source?.userId;
+    const pageUrl = config?.searchProps?.pageUrl || source?.pageUrl;
+
     const queryParams = config?.searchProps
       ? config?.searchProps
       : // default handle collections as pageURL. SHOULD REFACTOR single prop `url`
-        { userId, pageUrl: config?.searchProps?.pageUrl || source?.pageUrl };
+        { userId, pageUrl };
 
     if (typeof queryParams?.pageUrl === "undefined" && !queryParams.url) {
-      queryParams.url = source?.url;
+      if (source?.url) {
+        queryParams.url = source.url;
+      } else if (source.pageUrl) {
+        queryParams.pageUrl = source.pageUrl;
+      }
     }
 
     // mainly if issues exist and theres none on the page (delete the collection)

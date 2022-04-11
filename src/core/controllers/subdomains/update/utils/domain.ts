@@ -21,12 +21,15 @@ export const generateWebsiteAverage = async ({
           userId,
         });
     const getAvgAdaScore = allDomains
-      .filter((subd) => subd?.adaScore)
-      .map((fDomain) => fDomain?.adaScore);
+      .filter((subd) => Boolean(subd?.adaScore))
+      .map((fDomain) => Number(fDomain?.adaScore));
+
     const averageItems = arrayAverage(getAvgAdaScore);
+
     const avgScore = isNaN(averageItems) || perfectScore ? 100 : averageItems;
 
-    return avgScore;
+    // prevent floats
+    return Math.round(avgScore);
   } catch (e) {
     console.error(e);
     return 0;

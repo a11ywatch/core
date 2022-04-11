@@ -23,7 +23,11 @@ export async function setWebsiteScore({ domain, userId }) {
       adaScore,
     };
 
-    await collectionUpsert(updateWebsiteProps, [websiteCollection, !!website]);
+    await collectionUpsert(
+      updateWebsiteProps,
+      [websiteCollection, !!website, null],
+      { domain, userId }
+    );
 
     // TODO: MOVE OUT OF METHOD
     await pubsub.publish(CRAWL_COMPLETE, {
