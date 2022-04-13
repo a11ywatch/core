@@ -4,9 +4,8 @@ import type { Request, Response } from "express";
 import { pubsub } from "@app/database/pubsub";
 import { Channels } from "@app/database/config";
 
-// TODO: MOVE TO gRPC [USED INTERNAL ATM with CRAWLER]
-const websiteCrawl = async (req: Request, res: Response) => {
-  const { data } = req.body;
+// send a redis PUB SUB message to queue for scan
+export const crawlQueue = async (data) => {
   if (data) {
     try {
       const source = typeof data === "string" ? data : JSON.stringify(data);
@@ -14,6 +13,14 @@ const websiteCrawl = async (req: Request, res: Response) => {
     } catch (e) {
       console.error(e);
     }
+  }
+};
+
+// TODO: MOVE TO gRPC [USED INTERNAL ATM with CRAWLER]
+const websiteCrawl = async (req: Request, res: Response) => {
+  const { data } = req.body;
+  if (data) {
+    await crawlQueue(data);
   }
   res.send(true);
 };

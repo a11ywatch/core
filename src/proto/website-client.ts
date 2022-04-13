@@ -13,8 +13,11 @@ let crawlerClient: Service["WebsiteService"]["service"]; // pagemind rpc server
 // create gRPC client for central application (TESTING purposes)
 const createClient = async () => {
   try {
-    const { WebsiteService } = await getProto();
-    client = new WebsiteService(GRPC_HOST, credentials.createInsecure());
+    const { website } = (await getProto()) as any;
+    client = new website.WebsiteService(
+      GRPC_HOST,
+      credentials.createInsecure()
+    );
   } catch (e) {
     console.error(e);
   }

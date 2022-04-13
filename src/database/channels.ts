@@ -2,7 +2,7 @@ import { sub } from "./pubsub";
 import { Channels } from "./config";
 import { crawlPageQueue } from "@app/queues/crawl";
 
-// set pub sub channels for application
+// REDIS channels pub sub for application
 export const setChannels = () => {
   sub.subscribe(Channels.crawl_scan_queue, (err?: any, count?: any) => {
     if (err) {

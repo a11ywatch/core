@@ -35,3 +35,17 @@ export const getProto = async (
     console.error(e);
   }
 };
+
+export const getProtoBasic = async (target: string = "website.proto") => {
+  try {
+    return await load(`${__dirname}/${target}`, {
+      keepCase: true,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+};

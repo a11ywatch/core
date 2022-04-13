@@ -48,7 +48,9 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
 // TODO: determine queue order
 export const crawlPageQueue = async (message) => {
   try {
-    const data = JSON.parse(JSON.parse(message));
+    const data =
+      typeof message === "string" ? JSON.parse(JSON.parse(message)) : message;
+
     const { pages = [], user_id, meta } = data;
 
     if (isGenerateAverageMethod(meta)) {

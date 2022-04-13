@@ -13,7 +13,7 @@
     "generate": "graphql-codegen"
   },
   "dependencies": {
-    "@a11ywatch/website-source-builder": "^0.0.16",
+    "@a11ywatch/website-source-builder": "^0.0.18",
     "@graphql-tools/schema": "^8.3.2",
     "@grpc/grpc-js": "^1.6.2",
     "@grpc/proto-loader": "^0.6.9",
