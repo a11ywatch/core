@@ -1,4 +1,4 @@
-import { pageMindClient, client } from "../website-client";
+import { pageMindClient, crawlerClient, client } from "../website-client";
 
 export const listWebsites = () => {
   return new Promise((resolve, reject) => {
@@ -48,6 +48,32 @@ export const scan = (website = {}) => {
   });
 };
 
+// start scan job from crawler to gather pages [TODO: rename method]
+export const crawlerScan = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    crawlerClient.scan(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
+// start scan job from crawler to gather pages [TODO: rename method]
+export const crawlerCrawl = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    crawlerClient.crawl(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
 export const setScripts = (website = {}) => {
   return new Promise((resolve, reject) => {
     pageMindClient.setScripts(website, (error, res) => {
@@ -62,6 +88,8 @@ export const setScripts = (website = {}) => {
 
 export const controller = {
   scan,
+  crawlerScan,
+  crawlerCrawl,
   listWebsites,
   listIssue,
   insertIssue,

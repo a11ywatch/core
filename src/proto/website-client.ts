@@ -34,8 +34,9 @@ const createPageMindClient = async () => {
 
 const createCrawlerClient = async () => {
   try {
-    const { WebsiteService } = await getProto("crawler.proto");
-    crawlerClient = new WebsiteService(
+    const { crawler } = await getProto("crawler.proto");
+
+    crawlerClient = new crawler.Greeter(
       GRPC_HOST_CRAWLER,
       credentials.createInsecure()
     );
@@ -53,6 +54,7 @@ export const killClient = () => {
 export {
   client,
   pageMindClient,
+  crawlerClient,
   createClient,
   createPageMindClient,
   createCrawlerClient,

@@ -13,6 +13,9 @@ export interface Service {
   WebsiteService?: typeof Client & {
     service?: any;
   };
+  crawler?: typeof Client & {
+    Greeter?: any;
+  };
 }
 
 export const getProto = async (
