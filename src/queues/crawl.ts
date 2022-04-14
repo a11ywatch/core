@@ -45,33 +45,68 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
   }
 }
 
+interface MessageData {
+  pages: string[];
+  user_id: number;
+  meta: any; // meta information to call certain events
+}
+
+const extractData = (message, single?: boolean, skip?: boolean) => {
+  let data: MessageData;
+  try {
+    if (single) {
+      data = typeof message === "string" ? JSON.parse(message) : message;
+    } else {
+      data =
+        typeof message === "string" ? JSON.parse(JSON.parse(message)) : message;
+    }
+  } catch (e) {
+    if (!skip) {
+      // retry once
+      extractData(message, true, true);
+    } else {
+      console.error(e);
+    }
+  }
+
+  return data;
+};
+
 // TODO: determine queue order
 export const crawlPageQueue = async (message) => {
   try {
-    const data =
-      typeof message === "string" ? JSON.parse(JSON.parse(message)) : message;
-
+    const data = extractData(message);
     const { pages = [], user_id, meta } = data;
 
     if (isGenerateAverageMethod(meta)) {
-      await q.push({
+      return await q.push({
         userId: user_id,
         meta,
       });
-      return;
     }
 
     for (const url of pages) {
-      const usersPooling = await getActiveUsersCrawling({
-        userId: user_id,
-        urlMap: url,
-      });
+      if (
+        url.endsWith(".png") ||
+        url.endsWith(".jpg") ||
+        url.endsWith(".gif") ||
+        url.endsWith(".mp4") ||
+        url.endsWith(".mp3")
+      ) {
+        // ignore assets
+        console.error(`ASSETS CANNOT BE SCANNED ${url}`);
+      } else {
+        const usersPooling = await getActiveUsersCrawling({
+          userId: user_id,
+          urlMap: url,
+        });
 
-      await q.push({
-        url,
-        userId: user_id,
-        usersPooling,
-      });
+        await q.push({
+          url,
+          userId: user_id,
+          usersPooling,
+        });
+      }
     }
   } catch (e) {
     console.error(e);
