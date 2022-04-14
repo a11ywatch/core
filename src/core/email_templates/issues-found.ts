@@ -1,7 +1,7 @@
 import type { Issue } from "@app/types";
 
 export interface Data {
-  issues: [Issue] | [];
+  issues: Issue[] | [];
   pageUrl: string;
 }
 
@@ -14,9 +14,7 @@ const issuesFoundTemplate: IssuesFound = (
 ) => {
   let listData = "";
   const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`;
-  const errorIssues = data?.issues?.length
-    ? data?.issues?.filter((iss) => iss?.type === "error")
-    : [];
+  const errorIssues = data?.issues || [];
 
   if (errorIssues?.length) {
     errorIssues.some((item: Issue, i: number) => {

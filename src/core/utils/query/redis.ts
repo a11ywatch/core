@@ -13,11 +13,9 @@ export const getActiveUsersCrawling = async ({
 }: CrawlBasicInfo): Promise<string[]> => {
   let usersPool = [];
 
-  if (userId) {
+  if (typeof userId !== "undefined") {
     usersPool.push(userId);
-  }
-
-  if (userId === undefined || typeof userId === "undefined") {
+  } else {
     const bareHost = getHostName(urlMap);
 
     try {

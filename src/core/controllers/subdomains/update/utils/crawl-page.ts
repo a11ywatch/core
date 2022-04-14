@@ -23,6 +23,9 @@ export type CrawlConfig = {
   sendSub?: boolean; // use pub sub
 };
 
+// filter errors from issues
+const filterCb = (iss: Issue) => iss?.type === "error";
+
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean
@@ -69,7 +72,7 @@ export const crawlPage = async (
         );
       }
 
-      // // re-assign to key of json for backwords compat
+      // re-assign to key of json for backwords compat TODO: GET DATA AS JSON
       if (dataSource?.webPage?.insight) {
         dataSource.webPage.insight = JSON.parse(dataSource.webPage.insight);
       }
@@ -113,7 +116,7 @@ export const crawlPage = async (
         pageUrl,
       });
 
-      const subIssues: Issue[] = pageIssues?.issues;
+      const subIssues: Issue[] = pageIssues?.issues ?? [];
       const pageConstainsIssues = subIssues?.length;
 
       if (pageConstainsIssues) {
@@ -121,10 +124,12 @@ export const crawlPage = async (
           await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
         }
 
-        if (sendEmail && subIssues.some((iss) => iss.type === "error")) {
+        if (sendEmail && subIssues.some(filterCb)) {
+          const errorIssues = subIssues.filter(filterCb);
+          // TODO: queue email
           await emailMessager.sendMail({
             userId,
-            data: pageIssues,
+            data: { ...pageIssues, issues: errorIssues },
             confirmedOnly: true,
           });
         }
@@ -136,13 +141,11 @@ export const crawlPage = async (
         userId,
       });
 
-      // new domain found
-      if (webPage && !newSite) {
-        if (sendSub) {
-          await pubsub.publish(SUBDOMAIN_ADDED, {
-            subDomainAdded: updateWebsiteProps,
-          });
-        }
+      // new Page found send pub sub
+      if (webPage && !newSite && sendSub) {
+        await pubsub.publish(SUBDOMAIN_ADDED, {
+          subDomainAdded: updateWebsiteProps,
+        });
       }
 
       if (script) {
