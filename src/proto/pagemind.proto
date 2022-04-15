@@ -22,9 +22,8 @@ message ScanParams {
 message ScriptParams {
    bool editScript = 1;
    string url = 2;
-   uint32 userId = 3;
-   string script = 4;
-   string newScript = 5;
+   string script = 3;
+   string newScript = 4;
 }
 
 message IssueMeta {
@@ -57,7 +56,6 @@ message Page {
    string insight = 6;
    IssuesInfo issuesInfo = 7;
    string lastScanDate = 8;  
-   uint32 userId = 9;
 }
 
 message Problem {
@@ -75,7 +73,6 @@ message Issues {
    string pageUrl = 2;
    repeated Problem issues = 3;
    string domain = 4;
-   uint32 userId = 5;
 }
 
 message Script {
@@ -85,12 +82,12 @@ message Script {
    string cdnUrlMinified = 4;
    string cdnUrl = 5;
    bool cdnConnected = 6;
-   uint32 userId = 7;
-   IssueMeta issueMeta = 8;
+   IssueMeta issueMeta = 7;
 }
 
 message Web {
    Page webPage = 1;
    Issues issues = 2;
    Script script = 3;
+   uint32 userId = 4;
 }

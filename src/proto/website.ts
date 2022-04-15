@@ -18,33 +18,29 @@ export interface Service {
   };
 }
 
-export const getProto = async (
-  target: string = "website.proto"
-): Promise<Service & GRPC> => {
-  try {
-    const packageDef = await load(`${__dirname}/${target}`, {
-      keepCase: true,
-      longs: String,
-      enums: String,
-      defaults: true,
-      oneofs: true,
-    });
+const protoConfig = {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+};
 
-    return loadPackageDefinition(packageDef);
+export const loadProto = async (target: string = "website.proto") => {
+  try {
+    return await load(`${__dirname}/${target}`, protoConfig);
   } catch (e) {
     console.error(e);
   }
 };
 
-export const getProtoBasic = async (target: string = "website.proto") => {
+export const getProto = async (
+  target: string = "website.proto"
+): Promise<Service & GRPC> => {
   try {
-    return await load(`${__dirname}/${target}`, {
-      keepCase: true,
-      longs: String,
-      enums: String,
-      defaults: true,
-      oneofs: true,
-    });
+    const packageDef = await loadProto(target);
+
+    return loadPackageDefinition(packageDef);
   } catch (e) {
     console.error(e);
   }

@@ -6,7 +6,14 @@ export const extractPageData = (
   let noticeCount;
   let adaScore;
   let issuesInfo;
-  let { script, issues, webPage } = dataSource;
+  let { script, issues, webPage, userId } = dataSource;
+
+  // // mutate collection ids for inserts
+  // if (typeof userId !== "undefined") {
+  //   script.userId = userId;
+  //   issues.userId = userId;
+  //   webPage.userId = userId;
+  // }
 
   if (webPage) {
     issuesInfo = webPage.issuesInfo;
@@ -24,6 +31,7 @@ export const extractPageData = (
   }
 
   return {
+    userId,
     errorCount,
     warningCount,
     noticeCount,

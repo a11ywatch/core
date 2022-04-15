@@ -1,20 +1,8 @@
 import { pageMindClient, crawlerClient, client } from "../website-client";
 
-export const listWebsites = () => {
+export const scanAsync = (website = {}) => {
   return new Promise((resolve, reject) => {
-    client.list({}, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
-export const insertIssue = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    client.insert(website, (error, res) => {
+    client.scan(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -90,8 +78,7 @@ export const controller = {
   scan,
   crawlerScan,
   crawlerCrawl,
-  listWebsites,
+  scanAsync,
   listIssue,
-  insertIssue,
   setScripts,
 };

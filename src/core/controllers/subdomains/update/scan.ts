@@ -44,6 +44,7 @@ export const scanWebsite = async ({
               "Website timeout exceeded threshhold for scan, website rendered to slow under 15000 ms",
           });
         }
+
         const { script, issues, webPage } = extractPageData(dataSource);
 
         // TODO: simply use dataSource?.webPage
