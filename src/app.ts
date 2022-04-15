@@ -18,7 +18,6 @@ import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
 import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
-import fetcher from "node-fetch";
 
 import {
   CONFIRM_EMAIL,
@@ -56,6 +55,7 @@ import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
+import { httpGet } from "./core/utils";
 
 const { GRAPHQL_PORT, CRAWL_SERVER_PORT } = config;
 
@@ -118,16 +118,15 @@ function initServer(): HttpServer[] {
 
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
-
+  // email confirmation route
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
   // CDN SERVER TODO: USE DOWNLOAD PATH INSTEAD
   app.get("/scripts/:domain/:cdnPath", async (req, res) => {
     try {
-      const request = await fetcher(
+      const data = await httpGet(
         `${cdnBase}/${req.params.domain}/${req.params.cdnPath}`
       );
-      const data = await request.text();
 
       res.setHeader(
         "Content-disposition",

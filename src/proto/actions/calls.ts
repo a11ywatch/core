@@ -1,4 +1,9 @@
-import { pageMindClient, crawlerClient, client } from "../website-client";
+import {
+  pageMindClient,
+  crawlerClient,
+  client,
+  mavClient,
+} from "../website-client";
 
 export const scanAsync = (website = {}) => {
   return new Promise((resolve, reject) => {
@@ -62,9 +67,23 @@ export const crawlerCrawl = (website = {}) => {
   });
 };
 
+// store script into s3 | local
 export const setScripts = (website = {}) => {
   return new Promise((resolve, reject) => {
     pageMindClient.setScripts(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
+// detect image type
+const parseImg = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    mavClient.parseImg(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -81,4 +100,5 @@ export const controller = {
   scanAsync,
   listIssue,
   setScripts,
+  parseImg,
 };

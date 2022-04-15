@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+service WebsiteService {
+   rpc ParseImg (ScanParams) returns (Img) {}
+}
+
+message ScanParams {
+   string img = 1;
+   int64 width = 2;
+   int64 height = 3;
+}
+
+message Img {
+   string className = 1;
+}
