@@ -73,9 +73,10 @@ const extractData = (message, single?: boolean, skip?: boolean) => {
 };
 
 // TODO: determine queue order
-export const crawlPageQueue = async (message) => {
+export const crawlPageQueue = async (queueSource) => {
   try {
-    const data = extractData(message);
+    const data = extractData(queueSource);
+
     const { pages = [], user_id, meta } = data;
 
     if (isGenerateAverageMethod(meta)) {
@@ -86,27 +87,17 @@ export const crawlPageQueue = async (message) => {
     }
 
     for (const url of pages) {
-      if (
-        url.endsWith(".png") ||
-        url.endsWith(".jpg") ||
-        url.endsWith(".gif") ||
-        url.endsWith(".mp4") ||
-        url.endsWith(".mp3")
-      ) {
-        // ignore assets
-        console.error(`ASSETS CANNOT BE SCANNED ${url}`);
-      } else {
-        const usersPooling = await getActiveUsersCrawling({
-          userId: user_id,
-          urlMap: url,
-        });
+      const usersPooling = await getActiveUsersCrawling({
+        userId: user_id,
+        urlMap: url,
+      });
 
-        await q.push({
-          url,
-          userId: user_id,
-          usersPooling,
-        });
-      }
+      // remove mem queue
+      await q.push({
+        url,
+        userId: user_id,
+        usersPooling,
+      });
     }
   } catch (e) {
     console.error(e);

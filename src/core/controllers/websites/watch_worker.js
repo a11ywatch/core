@@ -1,9 +1,9 @@
+const { startClientsGRPC } = require("../../../proto/init-clients");
 const { initDbConnection } = require("../../../database/client");
 const { initRedisConnection } = require("../../../database/memory-client");
 const { websiteWatch } = require("./watch-pages");
-const { workerData } = require("worker_threads");
 
-(async function startUp() {
+process.on("message", async function ({ pages }) {
   try {
     await initDbConnection();
     await initRedisConnection();
@@ -12,10 +12,16 @@ const { workerData } = require("worker_threads");
   }
 
   try {
-    await websiteWatch(workerData);
+    await startClientsGRPC();
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    await websiteWatch(pages);
   } catch (e) {
     console.error(e);
   }
 
   process.exit();
-})();
+});

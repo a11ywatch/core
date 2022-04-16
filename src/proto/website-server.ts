@@ -31,7 +31,7 @@ export const createServer = async () => {
       scan: async (call, callback) => {
         // temp remove immediate for non-blocking Crawler
         setImmediate(async () => {
-          await crawlPageQueue(call.request);
+          await crawlPageQueue({ pages: call?.request?.pages });
         });
         callback(null, {});
       },

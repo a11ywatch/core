@@ -23,7 +23,6 @@ import {
   CONFIRM_EMAIL,
   IMAGE_CHECK,
   ROOT,
-  WEBSITE_CRAWL,
   UNSUBSCRIBE_EMAILS,
 } from "./core/routes";
 import {
@@ -41,13 +40,11 @@ import {
   detectImage,
   root,
   unSubEmails,
-  websiteCrawl,
   getWebsite,
 } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
 
-import { setCrawlManagerRoutes } from "./rest/routes_groups/crawl-manager";
 import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
 import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 import { setAuthRoutes } from "./rest/routes_groups/auth";
@@ -143,11 +140,6 @@ function initServer(): HttpServer[] {
   setAuthRoutes(app);
   // Announcements from the application (new features etc)
   setAnnouncementsRoutes(app);
-
-  // Crawler service manager control
-  crawlerApp.post(WEBSITE_CRAWL, websiteCrawl);
-  crawlerApp.post(`${WEBSITE_CRAWL}-background`, websiteCrawl); // TODO: remove endpoint
-  setCrawlManagerRoutes(crawlerApp);
 
   // GITHUB
   setGithubActionRoutes(app);

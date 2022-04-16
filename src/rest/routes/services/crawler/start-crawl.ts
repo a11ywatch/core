@@ -4,8 +4,9 @@ import { getParams } from "./get-params";
 import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils/get-host";
 
-export const crawlTrackerInit = async (data = {}) => {
-  const { user_id: userId, domain } = getParams(data);
+export const crawlTrackerInit = async (data) => {
+  const { user_id: userId, domain } =
+    typeof data === "string" ? getParams(data) : data;
 
   if (domain && redisClient) {
     try {

@@ -5,20 +5,19 @@ import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils";
 import { Method, Channels } from "@app/database/config";
 
-export const crawlTrackerComplete = async (data = {}) => {
-  const { user_id: userId, domain: dm } = getParams(data);
+export const crawlTrackerComplete = async (data) => {
+  const { user_id: userId, domain: dm } =
+    typeof data === "string" ? getParams(data) : data;
 
-  if (dm) {
+  if (dm && redisClient) {
     const domain = getHostName(dm);
 
-    if (redisClient) {
-      try {
-        const hostHash = hashString(domain);
+    try {
+      const hostHash = hashString(domain);
 
-        await redisClient.hdel(hostHash, userId + "");
-      } catch (e) {
-        console.error(e);
-      }
+      await redisClient.hdel(hostHash, userId + "");
+    } catch (e) {
+      console.error(e);
     }
 
     await pubsub.publish(

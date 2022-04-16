@@ -15,14 +15,16 @@ export const getActiveUsersCrawling = async ({
 
   if (typeof userId !== "undefined") {
     usersPool.push(userId);
-  } else {
-    const bareHost = getHostName(urlMap);
+  }
 
-    try {
-      usersPool = await redisClient.hkeys(hashString(bareHost));
-    } catch (e) {
-      console.error(e);
-    }
+  const bareHost = getHostName(urlMap);
+  const hostHash = hashString(bareHost);
+
+  try {
+    const mainPool = await redisClient.hkeys(hostHash);
+    usersPool = [...usersPool, ...mainPool];
+  } catch (e) {
+    console.error(e);
   }
 
   return usersPool;
