@@ -4,8 +4,8 @@ import { getParams } from "./get-params";
 import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils/get-host";
 
-export const startCrawlTracker = async (req: Request, res: Response) => {
-  const { user_id: userId, domain } = getParams(req.body?.data ?? {});
+export const crawlTrackerInit = async (data = {}) => {
+  const { user_id: userId, domain } = getParams(data);
 
   if (domain && redisClient) {
     try {
@@ -16,6 +16,14 @@ export const startCrawlTracker = async (req: Request, res: Response) => {
     } catch (e) {
       console.error(e);
     }
+  }
+};
+
+export const startCrawlTracker = async (req: Request, res: Response) => {
+  try {
+    await crawlTrackerInit(req?.body?.data);
+  } catch (e) {
+    console.error(e);
   }
 
   res.json({ ok: true });

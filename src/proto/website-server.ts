@@ -2,6 +2,8 @@ import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
 import { loadProto } from "./website";
 import { crawlPageQueue } from "@app/queues/crawl";
+import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
+import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 
 let server: Server;
 
@@ -14,6 +16,18 @@ export const createServer = async () => {
     websiteProto["website.WebsiteService"] as ServiceDefinition,
     {
       // async scan website page
+      scanStart: async (call, callback) => {
+        // temp remove immediate for non-blocking Crawler
+        await crawlTrackerInit(call.request);
+        callback(null, {});
+      },
+      scanEnd: async (call, callback) => {
+        // temp remove immediate for non-blocking Crawler
+        setImmediate(async () => {
+          await crawlTrackerComplete(call.request);
+        });
+        callback(null, {});
+      },
       scan: async (call, callback) => {
         // temp remove immediate for non-blocking Crawler
         setImmediate(async () => {
