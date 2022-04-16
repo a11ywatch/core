@@ -1,29 +1,7 @@
 import { getHours } from "date-fns";
 import { getWebsitesWithUsers } from "../websites";
-import { websiteWatch } from "./watch-pages";
-
-// [Internal] method to cleanup invalid domain adds
-export const cleanUpInvalidWebsite = async () => {
-  let allWebPages = [];
-  let collection;
-
-  try {
-    // TODO: recursive paginate 20 batch
-    [allWebPages, collection] = await getWebsitesWithUsers(0);
-  } catch (e) {
-    console.error(e);
-  }
-
-  const colMap = {};
-  allWebPages.forEach(async (item) => {
-    // remove duplicates
-    if (colMap[item.url]) {
-      await collection.findOneAndDelete({ url: item.url });
-    } else {
-      colMap[item.url] = true;
-    }
-  });
-};
+import { DEV } from "@app/config/config";
+import { fork } from "child_process";
 
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   let allWebPages = [];
@@ -32,13 +10,22 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   const userFilter = morning ? { emailMorningOnly: { eq: true } } : {};
 
   try {
-    // TODO: move generate website to queue
+    // TODO: move generate website to batch limit
     [allWebPages] = await getWebsitesWithUsers(0, userFilter);
   } catch (e) {
     console.error(e);
   }
 
+  // TODO: CHUNK IN HALF
+  const forked = fork(`${__dirname}/watch_worker`, [], {
+    detached: true,
+    execArgv: DEV
+      ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
+      : undefined,
+  });
+
   console.log(`total websites to scan ${allWebPages.length}`);
 
-  await websiteWatch(allWebPages);
+  forked.send({ pages: allWebPages });
+  forked.unref();
 };

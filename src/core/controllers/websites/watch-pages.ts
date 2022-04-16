@@ -12,21 +12,19 @@ export async function websiteWatch(pages: Page[] = []): Promise<void> {
   for (const website of pages) {
     const { userId, url } = website;
 
-    const [user] = await getUser({ id: userId }).catch((e) => {
-      console.error(e);
-      return [null];
-    });
+    try {
+      const [user] = await getUser({ id: userId });
 
-    if (user) {
-      const emailAvailable =
-        user && user.alertEnabled && Array.isArray(user.emailFilteredDates);
+      if (user) {
+        const { alertEnabled, emailFilteredDates } = user;
+        const emailAvailable =
+          alertEnabled && Array.isArray(emailFilteredDates);
 
-      // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
-      const sendEmail = emailAvailable
-        ? !user.emailFilteredDates.includes(getDay(subHours(new Date(), 12)))
-        : true;
+        // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
+        const sendEmail = emailAvailable
+          ? !emailFilteredDates.includes(getDay(subHours(new Date(), 12)))
+          : true;
 
-      try {
         await crawlWebsite(
           {
             url,
@@ -36,9 +34,9 @@ export async function websiteWatch(pages: Page[] = []): Promise<void> {
           },
           sendEmail
         );
-      } catch (e) {
-        console.error(e);
       }
+    } catch (e) {
+      console.error(e);
     }
   }
 }
