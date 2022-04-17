@@ -23,7 +23,6 @@ export const getReport = async (
     const websiteFindBy = timestamp
       ? {
           ...findBy,
-          lastScanDate: undefined,
         }
       : findBy;
 

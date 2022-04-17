@@ -2,7 +2,6 @@ import { getUser } from "../find";
 
 export const unsubscribeEmails = async ({ id, email }) => {
   try {
-    // TODO: remove collection find
     const [user, collection] = await getUser({ id, email });
 
     if (user) {
@@ -15,7 +14,7 @@ export const unsubscribeEmails = async ({ id, email }) => {
         }
       );
     } else {
-      console.log(`UNSUBSCRIBE FAILED - ID:${id}, Email:${email}`);
+      console.error(`UNSUBSCRIBE FAILED - ID:${id}, Email:${email}`);
     }
   } catch (e) {
     console.error(e);

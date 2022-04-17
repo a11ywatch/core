@@ -8,12 +8,18 @@ const downloadToExcel = async (
   _next: any,
   data: Issue | any
 ) => {
+  const source = data?.website ? data?.website : data;
+
+  if (!source) {
+    res.status(200).end();
+    return;
+  }
+
   try {
     const workbook = new excel.Workbook();
-    const pageName = data?.url ?? "Website";
-    const source = data?.website ? data?.website : data;
+    const pageName = source?.url ?? "Website";
 
-    const worksheet = workbook.addWorksheet(`${data?.domain} WCAG Audit`, {
+    const worksheet = workbook.addWorksheet(`${source?.domain} WCAG Audit`, {
       headerFooter: {
         firstHeader: `Accessibility score - ${source.adaScore}`,
         firstFooter: `Test ran ${source?.lastScanDate}`,
@@ -35,7 +41,7 @@ const downloadToExcel = async (
       },
     ] as any;
 
-    const rowIssues = source?.issue?.length ? source?.issue : source?.issues;
+    const rowIssues = source?.issue?.length ? source.issue : source?.issues;
 
     const rows = (rowIssues ?? []).map((items) => ({
       ...items,

@@ -54,16 +54,14 @@ import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { httpGet } from "./core/utils";
 
-const { GRAPHQL_PORT, CRAWL_SERVER_PORT } = config;
+const { GRAPHQL_PORT } = config;
 
 configureAgent();
 
 function initServer(): HttpServer[] {
   const app = express();
-  const crawlerApp = express();
 
   app.disable("x-powered-by");
-  crawlerApp.disable("x-powered-by");
 
   app.set("trust proxy", process.env.NODE_ENV !== "production"); // replace with docker env
   app.use(cookieParser());
@@ -71,9 +69,6 @@ function initServer(): HttpServer[] {
 
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
-  // private api between crawl service
-  crawlerApp.use(express.urlencoded({ extended: true }));
-  crawlerApp.use(express.json({ limit: "50mb" }));
 
   // rate limits
   app.use("/iframe", limiter);
@@ -178,7 +173,6 @@ function initServer(): HttpServer[] {
   server.applyMiddleware({ app, cors: corsOptions });
 
   let httpServer;
-  let crawlServer;
 
   if (process.env.ENABLE_SSL === "true") {
     httpServer = https.createServer(
@@ -192,13 +186,9 @@ function initServer(): HttpServer[] {
     httpServer = http.createServer(app);
   }
 
-  crawlServer = http.createServer(crawlerApp);
   server.installSubscriptionHandlers(httpServer);
 
   const listener = httpServer.listen(GRAPHQL_PORT);
-  // TODO: BIND WITH listener for close calls
-  const crawlListener = crawlServer.listen(CRAWL_SERVER_PORT);
-  console.log(`crawl server listening at ${crawlListener.address()?.port}`);
 
   logServerInit((listener.address() as AddressInfo).port, {
     subscriptionsPath: server.subscriptionsPath,
@@ -211,11 +201,10 @@ function initServer(): HttpServer[] {
     }
   }
 
-  return [listener, crawlListener];
+  return [listener];
 }
 
 let coreServer: HttpServer;
-let crawlServer: HttpServer;
 
 const connectClients = async () => {
   try {
@@ -254,9 +243,9 @@ const startServer = async () => {
 
   return new Promise(async (resolve, reject) => {
     try {
-      [coreServer, crawlServer] = initServer();
+      [coreServer] = initServer();
 
-      resolve([coreServer, crawlServer]);
+      resolve([coreServer]);
     } catch (e) {
       console.error(["SERVER FAILED TO START", e]);
       reject(e);
@@ -268,7 +257,6 @@ const killServer = async () => {
   try {
     await Promise.all([
       coreServer?.close(),
-      crawlServer?.close(),
       closeDbConnection(),
       closeSub(),
       closeRedisConnection(),

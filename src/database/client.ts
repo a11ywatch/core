@@ -25,7 +25,7 @@ const initDbConnection = async () => {
     client = createClient();
     connection = await client?.connect();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 
@@ -36,7 +36,7 @@ const connect = async (collectionType = "Websites") => {
     const db = await connection?.db(config.DB_NAME);
     collection = await db?.collection(collectionType);
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 
   return [collection, client];
@@ -52,7 +52,7 @@ const closeDbConnection = async () => {
       await client?.close();
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 

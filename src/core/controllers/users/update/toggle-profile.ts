@@ -15,7 +15,7 @@ const toggleProfile = async ({ keyid: id, profileVisible }) => {
       };
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     throw new Error(GENERAL_ERROR);
   }
 };

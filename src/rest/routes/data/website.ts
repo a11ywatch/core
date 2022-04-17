@@ -9,7 +9,6 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   let data: Website;
 
   if (!q) {
-    console.log(`query for website not found`);
     res.send(false);
     return;
   }
@@ -41,10 +40,14 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
 
   // download report to excel
   if (download) {
-    try {
-      return await downloadToExcel(req, res, next, data);
-    } catch (e) {
-      console.error(e);
+    if (data) {
+      try {
+        return await downloadToExcel(req, res, next, data);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      res.send("Error downloading report. Report not found.");
     }
   }
 
