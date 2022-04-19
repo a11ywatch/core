@@ -9,7 +9,8 @@ const createIframe = (req: Request, res: AppResponse) => {
       return res.send(false);
     }
 
-    let url = decodeURIComponent(baseUrl);
+    // TODO: REMOVE replace
+    let url = decodeURIComponent(baseUrl.replace("/api/iframe?url=", ""));
 
     if (/http|https/.test(url) === false) {
       const tp = req.protocol === "https" ? "https" : "http";
@@ -19,6 +20,8 @@ const createIframe = (req: Request, res: AppResponse) => {
     if (url.includes(".pdf")) {
       res.redirect(url);
     }
+
+    console.log(`temp log iframe url ${url}`);
 
     res.createIframe({
       url,
