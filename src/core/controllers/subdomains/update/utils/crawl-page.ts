@@ -180,15 +180,15 @@ export const crawlPage = async (
           adaScore,
         },
         [analyticsCollection, analytics]
-      );
+      ); // ANALYTICS
 
       await collectionUpsert(newIssue, [
         issuesCollection,
         issueExist,
-        pageConstainsIssues,
-      ]);
+        !pageConstainsIssues,
+      ]); // ISSUES COLLECTION
 
-      await collectionUpsert(script, [scriptsCollection, scripts]);
+      await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
 
       await collectionUpsert(
         updateWebsiteProps,
