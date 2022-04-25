@@ -9,6 +9,7 @@ import { redisClient } from "@app/database/memory-client";
 export const scanWebsite = async ({
   userId,
   url: urlMap,
+  noStore,
 }: any): Promise<ResponseModel> => {
   if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
@@ -32,6 +33,7 @@ export const scanWebsite = async ({
         url: pageUrl,
         userId,
         pageInsights: false,
+        noStore,
       });
 
       if (dataSource) {

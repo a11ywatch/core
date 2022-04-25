@@ -91,15 +91,14 @@ function initServer(): HttpServer[] {
     .get(cors(), unSubEmails)
     .post(cors(), unSubEmails);
 
-  // SCAN -> PAGEMIND
+  // SCAN -> PAGEMIND [does not store values to cdn]
   app.post("/api/scan-simple", cors(), async (req, res) => {
     try {
       const url = req.body?.websiteUrl || req.body?.url;
-      const userId: number = req.body?.userId;
 
       const data = await scan({
         url: decodeURIComponent(url + ""),
-        userId,
+        noStore: true,
       });
 
       res.json(data);
@@ -135,7 +134,6 @@ function initServer(): HttpServer[] {
   setAuthRoutes(app);
   // Announcements from the application (new features etc)
   setAnnouncementsRoutes(app);
-
   // GITHUB
   setGithubActionRoutes(app);
   // ADMIN ROUTES

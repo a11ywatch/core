@@ -17,6 +17,7 @@ message ScanParams {
    string url = 2;
    repeated Headers pageHeaders = 3;
    bool pageInsights = 4;
+   bool noStore = 5;
 }
 
 message ScriptParams {
