@@ -40,7 +40,7 @@ export const createServer = async () => {
 
   server.bindAsync(GRPC_HOST, ServerCredentials.createInsecure(), () => {
     server.start();
-    console.log("Server running at http://0.0.0.0:50051");
+    console.log("gRPC server running at http://0.0.0.0:50051");
   });
 };
 
