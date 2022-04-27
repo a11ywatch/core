@@ -13,8 +13,10 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
     return;
   }
 
+  let query = decodeURIComponent(q + "");
+
   try {
-    const memReport = await redisClient.get(decodeURIComponent(q + ""));
+    const memReport = await redisClient.get(query);
 
     if (memReport) {
       data = JSON.parse(memReport);
@@ -28,7 +30,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
 
   if (!data) {
     try {
-      const report = await getReport(q + "", timestamp && Number(timestamp));
+      const report = await getReport(query, timestamp && Number(timestamp));
 
       if (report?.website) {
         data = report.website;
@@ -48,6 +50,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
       }
     } else {
       res.send("Error downloading report. Report not found.");
+      return;
     }
   }
 

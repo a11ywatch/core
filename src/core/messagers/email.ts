@@ -28,6 +28,7 @@ export const emailMessager = {
       }
     }
   },
+  // send issues related to domain email report
   sendMail: async ({
     userId,
     data = {

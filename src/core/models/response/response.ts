@@ -20,6 +20,7 @@ const responseModel = (
       break;
   }
 
+  // for gQL
   switch (statusCode) {
     case ApiResponse.NotFound:
       code = 404;

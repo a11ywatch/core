@@ -1,5 +1,5 @@
 import fastq from "fastq";
-import { crawlWebsite as crawl } from "@app/core/controllers/subdomains/update";
+import { crawlWebsite as crawl } from "@app/core/actions";
 import { getActiveUsersCrawling } from "@app/core/utils/query";
 import { setWebsiteScore } from "@app/core/utils/stats/score";
 import { Method } from "@app/database/config";
@@ -18,7 +18,7 @@ type Task = {
   meta?: Meta;
 };
 
-const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 2);
+const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 4);
 
 const isGenerateAverageMethod = (meta: Meta) => {
   if (meta && typeof meta?.method !== "undefined") {

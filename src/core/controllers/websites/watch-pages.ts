@@ -1,5 +1,5 @@
 import { getDay, subHours } from "date-fns";
-import { crawlWebsite } from "@app/core/controllers/subdomains/update";
+import { crawlWebsite } from "@app/core/actions";
 import { getUser } from "@app/core/controllers/users";
 
 type Page = {

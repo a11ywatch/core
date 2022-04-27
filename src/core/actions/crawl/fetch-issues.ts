@@ -1,4 +1,5 @@
 import { controller } from "@app/proto/actions/calls";
+import { Website } from "@app/schema";
 
 interface Params {
   url: string;
@@ -10,13 +11,12 @@ interface Params {
 }
 
 // gRPC call to scan from pagemind
-export const fetchPuppet = async (params: Params) => {
-  let dataSource;
+export const fetchPageIssues = async (
+  params: Params
+): Promise<{ webPage?: Website }> => {
   try {
-    dataSource = await controller.scan(params);
+    return await controller.scan(params);
   } catch (e) {
     console.error(e);
   }
-
-  return dataSource;
 };

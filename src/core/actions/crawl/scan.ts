@@ -1,11 +1,13 @@
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-
 import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
-import { fetchPuppet, extractPageData, limitIssue } from "./utils";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getHostName } from "@app/core/utils";
 import { redisClient } from "@app/database/memory-client";
+import { fetchPageIssues } from "./fetch-issues";
+import { extractPageData } from "./extract-page-data";
+import { limitIssue } from "./limit-issue";
 
+// Send to gRPC pagemind un-auth request
 export const scanWebsite = async ({
   userId,
   url: urlMap,
@@ -28,7 +30,7 @@ export const scanWebsite = async ({
 
   return await new Promise(async (resolve, reject) => {
     try {
-      const dataSource = await fetchPuppet({
+      const dataSource = await fetchPageIssues({
         pageHeaders: website?.pageHeaders,
         url: pageUrl,
         userId,
@@ -77,7 +79,7 @@ export const scanWebsite = async ({
               script: undefined, // remove scripts from storage
             })
           );
-          await redisClient.expire(websiteTarget.url, 60 * 30); // expire in 5 mins
+          await redisClient.expire(websiteTarget.url, 60 * 30); // expire in 30 mins
         } catch (e) {
           console.error(e);
         }

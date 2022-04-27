@@ -9,6 +9,7 @@ export interface IssuesFound {
   (data: Data): string;
 }
 
+// return issues as in table form
 const issuesFoundTemplate: IssuesFound = (
   data = { issues: [], pageUrl: "" }
 ) => {
@@ -21,7 +22,7 @@ const issuesFoundTemplate: IssuesFound = (
       if (i === 10) {
         return true;
       }
-      listData = `${listData}<tr><td ${tdStyles}>${item?.type}</td><td ${tdStyles}><pre>${item?.context}</pre></td><td ${tdStyles}>${item?.message}</td></tr>`;
+      listData = `${listData}<tr><td ${tdStyles}><pre>${item?.context}</pre></td><td ${tdStyles}>${item?.message}</td></tr>`;
       return false;
     });
   }
@@ -29,7 +30,7 @@ const issuesFoundTemplate: IssuesFound = (
   const page = data?.pageUrl;
   const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`;
 
-  const target = encodeURI(page);
+  const target = encodeURIComponent(page); // TODO: use domain only
 
   return `
     <head>
@@ -43,7 +44,6 @@ const issuesFoundTemplate: IssuesFound = (
     <div style="overflow-x:auto;">
     <table class="a11y-view" style="font-family: system-ui, Arial, Helvetica, sans-serif; border-collapse: collapse; width: 100%;">
       <tr>
-        <th ${thStyles}>Type</th>
         <th ${thStyles}>Message</th>
         <th ${thStyles}>Context</th>
       </tr>

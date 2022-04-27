@@ -8,12 +8,12 @@ import { IssuesController } from "@app/core/controllers/issues";
 import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
-import { getDomain } from "../../find";
-import { extractPageData } from "./";
+import { getDomain } from "@app/core/controllers/subdomains/find";
 import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
 import { Issue } from "@app/schema";
-import { fetchPuppet } from "./fetch-puppet";
+import { extractPageData } from "./extract-page-data";
+import { fetchPageIssues } from "./fetch-issues";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -26,9 +26,10 @@ export type CrawlConfig = {
 // filter errors from issues
 const filterCb = (iss: Issue) => iss?.type === "error";
 
+// crawl the url for issues and update collection records
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
-  sendEmail?: boolean
+  sendEmail?: boolean // determine if email should be sent based on results
 ) => {
   const {
     userId,
@@ -61,7 +62,7 @@ export const crawlPage = async (
         }
       }
 
-      const dataSource = await fetchPuppet({
+      const dataSource = await fetchPageIssues({
         pageHeaders: website?.pageHeaders,
         url: urlMap,
         userId,
@@ -78,7 +79,9 @@ export const crawlPage = async (
 
       // re-assign to key of json for backwords compat TODO: GET DATA AS JSON
       if (dataSource?.webPage?.insight) {
-        dataSource.webPage.insight = JSON.parse(dataSource.webPage.insight);
+        dataSource.webPage.insight = JSON.parse(
+          dataSource.webPage.insight as any
+        );
       }
 
       // TODO: MOVE TO QUEUE
@@ -215,16 +218,6 @@ export const crawlPage = async (
 
       // if flat api return source
       const responseData = { data: apiData ? dataSource : websiteAdded };
-
-      // TODO: REMOVE UGLY LOGIC
-      if (responseData?.data) {
-        const timestamp = new Date().getTime();
-        if (responseData?.data?.website) {
-          responseData.data.website.timestamp = timestamp;
-        } else {
-          responseData.data.timestamp = timestamp;
-        }
-      }
 
       return resolve(responseModel(responseData));
     } catch (e) {
