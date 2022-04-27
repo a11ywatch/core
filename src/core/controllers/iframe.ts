@@ -21,8 +21,6 @@ const createIframe = (req: Request, res: AppResponse) => {
       res.redirect(url);
     }
 
-    console.log(`temp log iframe url ${url}`);
-
     res.createIframe({
       url,
       baseHref: !!req.query.baseHref,

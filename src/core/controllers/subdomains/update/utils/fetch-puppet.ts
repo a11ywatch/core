@@ -6,6 +6,7 @@ interface Params {
   pageHeaders?: any[];
   pageInsights?: boolean;
   noStore?: boolean; // prevent storing values to CDN server
+  scriptsEnabled?: boolean; // scripts storing enabled for user
 }
 
 // gRPC call to scan from pagemind

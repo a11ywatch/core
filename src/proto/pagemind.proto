@@ -18,6 +18,7 @@ message ScanParams {
    repeated Headers pageHeaders = 3;
    bool pageInsights = 4;
    bool noStore = 5;
+   bool scriptsEnabled = 6;
 }
 
 message ScriptParams {

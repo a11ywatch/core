@@ -49,8 +49,11 @@ export const crawlPage = async (
       });
       let insightsEnabled = false;
 
+      const freeAccount = !userData?.role; // free account
+      const scriptsEnabled = !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+
       if (website?.pageInsights || pageInsights) {
-        if (!userData?.role) {
+        if (freeAccount) {
           // INSIGHTS ONLY ON ROOT PAGE IF ENABLED
           insightsEnabled = pathname === "/";
         } else {
@@ -63,6 +66,7 @@ export const crawlPage = async (
         url: urlMap,
         userId,
         pageInsights: insightsEnabled,
+        scriptsEnabled,
       });
 
       // TODO: SET PAGE OFFLINE DB
@@ -105,11 +109,6 @@ export const crawlPage = async (
       const [analytics, analyticsCollection] =
         await AnalyticsController().getWebsite({ pageUrl, userId }, true);
 
-      const [scripts, scriptsCollection] = await ScriptsController().getScript(
-        { pageUrl, userId, noRetries: true },
-        true
-      );
-
       const newIssue = Object.assign({}, pageIssues, {
         domain,
         userId,
@@ -148,13 +147,24 @@ export const crawlPage = async (
         });
       }
 
-      if (script) {
-        script.userId = userId;
-        // TODO: look into auto meta reason
-        if (!scripts?.scriptMeta) {
-          script.scriptMeta = {
-            skipContentEnabled: true,
-          };
+      let scripts;
+      let scriptsCollection;
+
+      // if scripts enabled get collection
+      if (scriptsEnabled) {
+        [scripts, scriptsCollection] = await ScriptsController().getScript(
+          { pageUrl, userId, noRetries: true },
+          true
+        );
+
+        if (script) {
+          script.userId = userId;
+          // TODO: look into auto meta reason
+          if (!scripts?.scriptMeta) {
+            script.scriptMeta = {
+              skipContentEnabled: true,
+            };
+          }
         }
       }
 
@@ -188,7 +198,9 @@ export const crawlPage = async (
         !pageConstainsIssues,
       ]); // ISSUES COLLECTION
 
-      await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
+      if (scriptsEnabled) {
+        await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
+      }
 
       await collectionUpsert(
         updateWebsiteProps,
@@ -196,7 +208,7 @@ export const crawlPage = async (
         {
           searchProps: { pageUrl, userId },
         }
-      );
+      ); // pages - sub domains needs rename
 
       // prior website configs with new data returned
       const websiteAdded = Object.assign({}, website, updateWebsiteProps);
