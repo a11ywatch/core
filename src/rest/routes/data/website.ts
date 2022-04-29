@@ -4,16 +4,18 @@ import { downloadToExcel } from "@app/core/utils";
 import { Website } from "@app/types";
 import { redisClient } from "@app/database/memory-client";
 
+// TODO: Refactor usage
 const getWebsite = async (req: Request, res: Response, next?: any) => {
   const { q, timestamp, download } = req.query;
-  let data: Website;
 
   if (!q) {
     res.send(false);
     return;
   }
 
-  let query = decodeURIComponent(q + "");
+  let data: Website;
+
+  let query = decodeURI(q + "");
 
   try {
     const memReport = await redisClient.get(query);
@@ -30,7 +32,10 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
 
   if (!data) {
     try {
-      const report = await getReport(query, timestamp && Number(timestamp));
+      const report = await getReport(
+        decodeURI(q + ""),
+        timestamp && Number(timestamp)
+      );
 
       if (report?.website) {
         data = report.website;

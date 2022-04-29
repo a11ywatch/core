@@ -505,3 +505,10 @@ export type Website = {
 export type WebsiteIssuesArgs = {
   filter?: Maybe<Scalars["String"]>;
 };
+
+// response from pagemind gRPC request to gather website insight
+export type PageMindScanResponse = {
+  webPage?: Website;
+  issues?: Issue[];
+  script?: Script;
+};

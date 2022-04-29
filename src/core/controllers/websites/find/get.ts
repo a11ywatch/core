@@ -67,6 +67,36 @@ export const getWebsitesWithUsers = async (
   }
 };
 
+/*
+ * Get all the current users of the application with pagination
+ * @param [limit] a limit of users count: number
+ * @param [filter] query params
+ * @param [page] the page in the collection: number
+ *
+ * [Promise]: Partial<Website[]>
+ */
+export const getWebsitesPaginated = async (
+  limit = 20,
+  filter = {},
+  page = 0
+): Promise<[Website[], any]> => {
+  try {
+    const [collection] = await connect("Websites");
+    return [
+      await collection
+        .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
+        .project({ url: 1, userId: 1 })
+        .limit(limit)
+        .skip(limit * page)
+        .toArray(),
+      collection,
+    ];
+  } catch (e) {
+    console.error(e);
+    return [null, null];
+  }
+};
+
 export const getWebsites = async ({ userId }, chain?: boolean) => {
   try {
     const [collection] = await connect("Websites");

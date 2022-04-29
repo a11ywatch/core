@@ -69,7 +69,7 @@ export const ScriptsController = ({ user } = { user: null }) => ({
         script: prevScript,
         editScript: !!editScript,
         newScript: newScript,
-        url: String(encodeURIComponent(pageUrl)),
+        url: String(encodeURI(pageUrl)),
         userId,
       })) as any;
 

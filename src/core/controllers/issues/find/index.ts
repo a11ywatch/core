@@ -7,7 +7,7 @@ export const getIssue = async (
 ) => {
   try {
     const [collection] = await connect("Issues");
-    const queryUrl = decodeURIComponent(String(url || pageUrl));
+    const queryUrl = decodeURI(String(url || pageUrl));
 
     const searchProps = websiteSearchParams({
       pageUrl: queryUrl,
@@ -43,7 +43,7 @@ export const getIssues = async ({
   try {
     const [collection] = await connect("Issues");
 
-    const queryUrl = (pageUrl || url) && decodeURIComponent(pageUrl || url);
+    const queryUrl = (pageUrl || url) && decodeURI(pageUrl || url);
 
     const searchProps = websiteSearchParams({
       domain: domain || getHostName(queryUrl),

@@ -10,7 +10,7 @@ const createIframe = (req: Request, res: AppResponse) => {
     }
 
     // TODO: REMOVE replace
-    let url = decodeURIComponent(baseUrl.replace("/api/iframe?url=", ""));
+    let url = decodeURI(baseUrl.replace("/api/iframe?url=", ""));
 
     if (/http|https/.test(url) === false) {
       const tp = req.protocol === "https" ? "https" : "http";

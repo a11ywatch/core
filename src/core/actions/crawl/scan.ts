@@ -2,17 +2,23 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getHostName } from "@app/core/utils";
-import { redisClient } from "@app/database/memory-client";
 import { fetchPageIssues } from "./fetch-issues";
 import { extractPageData } from "./extract-page-data";
 import { limitIssue } from "./limit-issue";
+import type { PageMindScanResponse } from "@app/schema";
+
+type ScanParams = {
+  userId?: number;
+  url: string;
+  noStore?: boolean;
+};
 
 // Send to gRPC pagemind un-auth request
 export const scanWebsite = async ({
   userId,
   url: urlMap,
   noStore,
-}: any): Promise<ResponseModel> => {
+}: ScanParams): Promise<ResponseModel> => {
   if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
@@ -28,72 +34,56 @@ export const scanWebsite = async ({
 
   const website = makeWebsite({ url: pageUrl, domain });
 
-  return await new Promise(async (resolve, reject) => {
+  let dataSource: PageMindScanResponse;
+
+  try {
+    dataSource = await fetchPageIssues({
+      pageHeaders: website.pageHeaders,
+      url: pageUrl,
+      userId,
+      pageInsights: false,
+      noStore,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+
+  if (!dataSource) {
+    return responseModel();
+  }
+
+  if (!dataSource?.webPage) {
+    return {
+      website: null,
+      code: 300,
+      success: false,
+      message:
+        "Website timeout exceeded threshhold for scan, website rendered to slow under 15000 ms",
+    };
+  }
+
+  return new Promise((resolve, reject) => {
     try {
-      const dataSource = await fetchPageIssues({
-        pageHeaders: website?.pageHeaders,
-        url: pageUrl,
-        userId,
-        pageInsights: false,
-        noStore,
+      const { script, issues, webPage } = extractPageData(dataSource);
+
+      const slicedIssue = limitIssue(issues);
+
+      const data = Object.assign({}, website, webPage, {
+        timestamp: new Date().getTime(),
+        script,
+        issue: slicedIssue,
       });
 
-      if (dataSource) {
-        if (!dataSource?.webPage) {
-          return resolve({
-            website: null,
-            code: 300,
-            success: false,
-            message:
-              "Website timeout exceeded threshhold for scan, website rendered to slow under 15000 ms",
-          });
-        }
-
-        const { script, issues, webPage } = extractPageData(dataSource);
-
-        // TODO: simply use dataSource?.webPage
-        const updateWebsiteProps = {
-          ...website,
-          ...webPage,
-          timestamp: new Date().getTime(),
-          script,
-        };
-
-        const slicedIssue = limitIssue(issues);
-
-        if (updateWebsiteProps.issuesInfo) {
-          updateWebsiteProps.issuesInfo.limitedCount = slicedIssue.length;
-        }
-
-        const websiteTarget = {
-          issue: slicedIssue,
-          ...updateWebsiteProps,
-        };
-
-        try {
-          await redisClient.set(
-            websiteTarget.url,
-            JSON.stringify({
-              ...updateWebsiteProps,
-              issue: JSON.stringify(slicedIssue),
-              script: undefined, // remove scripts from storage
-            })
-          );
-          await redisClient.expire(websiteTarget.url, 60 * 30); // expire in 30 mins
-        } catch (e) {
-          console.error(e);
-        }
-
-        resolve(
-          responseModel({
-            website: websiteTarget,
-          })
-        );
-      } else {
-        resolve(responseModel());
+      if (data.issuesInfo) {
+        data.issuesInfo.limitedCount = slicedIssue.length;
       }
+
+      resolve(
+        responseModel({
+          website: data,
+        })
+      );
     } catch (e) {
-      console.error(e);
       reject(e);
     }
   });

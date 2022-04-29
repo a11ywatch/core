@@ -34,14 +34,8 @@ export const logPage = async (req: Request, res: Response) => {
     return res.sendStatus(200);
   }
 
-  const {
-    page,
-    ip,
-    userID,
-    screenResolution,
-    documentReferrer,
-    geo,
-  } = req.body;
+  const { page, ip, userID, screenResolution, documentReferrer, geo } =
+    req.body;
 
   const dr = documentReferrer ?? req.headers["referer"];
 
@@ -71,11 +65,11 @@ export const logPage = async (req: Request, res: Response) => {
     }
 
     if (dr) {
-      visitor.set("dr", encodeURIComponent(dr));
+      visitor.set("dr", encodeURI(dr));
     }
 
     if (!middleware && agent) {
-      visitor.set("ua", encodeURIComponent(agent));
+      visitor.set("ua", encodeURI(agent));
     }
 
     visitor.pageview(page ?? "/", origin).send();

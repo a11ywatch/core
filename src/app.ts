@@ -97,7 +97,7 @@ function initServer(): HttpServer[] {
       const url = req.body?.websiteUrl || req.body?.url;
 
       const data = await scan({
-        url: decodeURIComponent(url + ""),
+        url: decodeURI(url + ""),
         noStore: true,
       });
 
