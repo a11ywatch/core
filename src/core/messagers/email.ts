@@ -1,6 +1,6 @@
 import { isSameDay } from "date-fns";
 import { connect } from "@app/database";
-import { logoSvg, footer } from "@app/html";
+import { footer } from "@app/html";
 
 import { transporter, mailOptions, realUser, sendMailCallback } from "../utils";
 import { issuesFoundTemplate } from "../email_templates";
@@ -19,7 +19,7 @@ export const emailMessager = {
           Object.assign({}, mailOptions, {
             to: email,
             subject: subject,
-            html: `${logoSvg}<br />${html}`,
+            html: `${html}`,
           }),
           sendMailCallback
         );
@@ -69,7 +69,7 @@ export const emailMessager = {
               subject: `[Report] ${data.issues.length} issues found with ${
                 data?.pageUrl || data?.domain
               }.`,
-              html: `${logoSvg}<br /><h1>${issuesFoundTemplate(
+              html: `<br /><h1>${issuesFoundTemplate(
                 data
               )}<br />${footer.marketing({
                 userId,

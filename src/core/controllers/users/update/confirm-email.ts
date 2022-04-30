@@ -1,7 +1,6 @@
 import { addMinutes } from "date-fns";
 import { randomBytes } from "crypto";
 import { config } from "@app/config";
-import { logoSvg } from "@app/html";
 import { EMAIL_ERROR, GENERAL_ERROR, SUCCESS } from "../../../strings";
 import { transporter, mailOptions, sendMailCallback } from "../../../utils";
 import { getUser } from "../find";
@@ -30,8 +29,6 @@ export const confirmEmail = async ({ keyid: id }) => {
           to: user.email,
           subject: `A11yWatch - Email Confirmation.`,
           html: `
-            ${logoSvg}
-            <br />
             <h1>Click on this link to confirm your email for A11yWatch.</h1>
             <p>Confirmation code will expire in 30 minutes or you have to get a new link.</p>
             <div style="padding-top: 20px; padding-bottom: 40px">
