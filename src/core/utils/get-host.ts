@@ -4,7 +4,7 @@ export const getHostName = (url: string) => {
   try {
     let q = url;
     if (!/^(http|https)/.test(q)) {
-      q = `http://${q}`;
+      q = `https://${q}`;
     }
 
     const { hostname } = new URL(url);

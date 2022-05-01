@@ -1,4 +1,4 @@
-import { getHostName } from "@a11ywatch/website-source-builder";
+import { codecs, getHostName } from "@a11ywatch/website-source-builder";
 import type { Issue } from "@app/types";
 
 export interface Data {
@@ -23,7 +23,9 @@ const issuesFoundTemplate: IssuesFound = (
       if (i === 10) {
         return true;
       }
-      listData = `${listData}<tr><td ${tdStyles}><code>${item?.context}</code></td><td ${tdStyles}>${item?.message}</td></tr>`;
+      listData = `${listData}<tr><td ${tdStyles}><code>${
+        item?.context ?? "N/A"
+      }</code></td><td ${tdStyles}>${item?.message ?? "N/A"}</td></tr>`;
       return false;
     });
   }
@@ -32,9 +34,23 @@ const issuesFoundTemplate: IssuesFound = (
   const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`;
 
   const target = page; // TODO: use domain only
+  let hostName;
 
-  // TODO: APPEND SUBDOMAINS TO QUERY
-  const hostName = getHostName(target);
+  // TODO: use cypher for subdomain query
+  try {
+    hostName = getHostName(target);
+  } catch (e) {
+    console.error(e);
+  }
+
+  let cipherURL;
+
+  try {
+    // cipher target for reports page.
+    cipherURL = codecs.cipher(target);
+  } catch (e) {
+    console.error(e);
+  }
 
   return `
     <head>
@@ -48,14 +64,14 @@ const issuesFoundTemplate: IssuesFound = (
     <div style="overflow-x:auto;">
     <table class="a11y-view" style="font-family: system-ui, Arial, Helvetica, sans-serif; border-collapse: collapse; width: 100%;">
       <tr>
-        <th ${thStyles}>Message</th>
-        <th ${thStyles}>Context</th>
+        <th ${thStyles}>Element</th>
+        <th ${thStyles}>Recommendation</th>
       </tr>
       ${listData}
     </table>
     </div>
     <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none;">View Full Details</a>
-    <a href="https://a11ywatch.com/reports/${hostName}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
+    <a href="https://a11ywatch.com/reports/${cipherURL}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
     <a href="https://api.a11ywatch.com/api/get-website?q=${hostName}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #000; text-align: center; text-decoration: none;">Download Report</a>
     <p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>
 `.trim();
