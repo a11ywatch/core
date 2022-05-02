@@ -53,6 +53,9 @@ import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromApi, httpGet } from "./core/utils";
+import { getUserFromApiScan } from "./core/utils/get-user-data";
+import { watcherCrawl } from "./core/utils/watcher_crawl";
+import { responseModel } from "./core/models";
 
 const { GRAPHQL_PORT } = config;
 
@@ -64,20 +67,22 @@ function initServer(): HttpServer[] {
   app.disable("x-powered-by");
 
   app.set("trust proxy", process.env.NODE_ENV !== "production"); // replace with docker env
+  // mw parsers
   app.use(cookieParser());
   app.use(cors(corsOptions));
-
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json({ limit: "300mb" }));
 
-  // rate limits
-  app.use("/iframe", limiter);
-  app.use("/api/get-website", limiter);
-  app.use("/api/register", limiter);
-  app.use("/api/scan-simple", scanLimiter);
-  app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
-  app.use(createIframe);
+  // rate limits on expensive endpoints
+  if (!config.SUPER_MODE) {
+    app.use("/iframe", limiter);
+    app.use("/api/get-website", limiter);
+    app.use("/api/register", limiter);
+    app.use("/api/scan-simple", scanLimiter);
+    app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
+  }
 
+  app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(UNSUBSCRIBE_EMAILS, cors());
 
@@ -90,9 +95,8 @@ function initServer(): HttpServer[] {
     .route(UNSUBSCRIBE_EMAILS)
     .get(cors(), unSubEmails)
     .post(cors(), unSubEmails);
-
   /*
-   * SCAN -> PAGEMIND [does not store values to cdn]
+   * SCAN -> PAGEMIND: Single page [does not store values to cdn]
    * Free for use since its relatively fast to handle.
    * Points deduction will come into play when cors is
    * only enabled for the main domain.
@@ -100,14 +104,11 @@ function initServer(): HttpServer[] {
   app.post("/api/scan-simple", cors(), async (req, res) => {
     try {
       const url = req.body?.websiteUrl || req.body?.url;
-      /*
-       * Get the user if auth set or determine if request allowed.
-       * This method handles sending headers and will return void next action should not occur.
-       **/
+
       const userNext = await getUserFromApi(
         req.headers.authorization,
-        res,
-        req
+        req,
+        res
       );
 
       if (!!userNext) {
@@ -118,6 +119,40 @@ function initServer(): HttpServer[] {
         });
 
         res.json(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  /*
+   * SCAN -> PAGEMIND Multi page [stores values to cdn]
+   * Start website site-wide page scans. Requires front-end client to view web socket results.
+   **/
+  app.post("/api/scan-all", cors(), async (req, res) => {
+    try {
+      const url = req.body?.websiteUrl || req.body?.url;
+      /*
+       * Get the user if auth set or determine if request allowed.
+       * This method handles sending headers and will return void next action should not occur.
+       **/
+      const userNext = await getUserFromApiScan(
+        req.headers.authorization,
+        req,
+        res
+      );
+
+      if (!!userNext) {
+        setImmediate(async () => {
+          await watcherCrawl({ urlMap: url, userId: userNext.id, scan: true });
+        });
+        res.json(
+          responseModel({
+            website: undefined,
+            message:
+              "Site-wide scan commenced. Check the browser to see results.",
+          })
+        );
       }
     } catch (e) {
       console.error(e);

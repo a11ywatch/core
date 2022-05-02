@@ -7,10 +7,12 @@ export const getUserFromToken = (bearerToken: string): any => {
     : bearerToken;
 
   if (token) {
-    if (verifyJwt(token)) {
-      return decodeJwt(token);
+    try {
+      if (verifyJwt(token)) {
+        return decodeJwt(token);
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
-
-  return false;
 };

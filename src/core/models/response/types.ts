@@ -9,7 +9,8 @@ interface ResponseModel {
   code: number;
   success: boolean;
   message?: string;
-  // TODO: USE DATA PROP STRICTLY
+  data?: any;
+  errors?: any;
   [extra: string]: any;
 }
 

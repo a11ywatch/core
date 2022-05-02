@@ -66,6 +66,7 @@ export const config = {
   STRIPE_PREMIUM_PLAN: process.env.STRIPE_PREMIUM_PLAN,
   STRIPE_BASIC_PLAN_YEARLY: process.env.STRIPE_BASIC_PLAN_YEARLY,
   STRIPE_PREMIUM_PLAN_YEARLY: process.env.STRIPE_PREMIUM_PLAN_YEARLY,
+  SUPER_MODE,
 };
 
 let cookieConfigs: CookieOptions = {

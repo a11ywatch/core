@@ -45,6 +45,7 @@ export const scanWebsite = async ({
       userId,
       pageInsights: false, // TODO: get website if auth determine if Lighthouse enabled
       noStore,
+      scriptsEnabled: false,
     });
   } catch (e) {
     console.error(e);
@@ -66,29 +67,27 @@ export const scanWebsite = async ({
 
   return new Promise((resolve, reject) => {
     try {
-      const {
-        script,
-        issues: issueTarget,
-        webPage,
-      } = extractPageData(dataSource);
+      const { script, issues, webPage } = extractPageData(dataSource);
 
-      let issues = issueTarget;
+      let issue;
 
       if (typeof userId !== "undefined") {
+        issue = issues?.issues;
         // add userID to the website TODO: fix pagemind response
         website.userId = userId;
       } else {
-        issues = limitIssue(issueTarget);
+        issue = limitIssue(issues);
       }
 
       const data = Object.assign({}, website, webPage, {
         timestamp: new Date().getTime(),
         script,
-        issues,
+        issue,
       });
 
-      if (data.issuesInfo) {
-        data.issuesInfo.limitedCount = issues.length;
+      // return limited count from scan
+      if (data.issuesInfo && "limitedCount" in data.issuesInfo === false) {
+        data.issuesInfo.limitedCount = issue.length;
       }
 
       resolve(

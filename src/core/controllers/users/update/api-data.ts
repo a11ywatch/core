@@ -8,17 +8,17 @@ export const updateApiUsage = async ({ id }, chain?: boolean) => {
     if (!user) {
       return chain ? [user, collection] : user;
     }
+    const lastScanDate = new Date();
+    const defaultUsage = user?.apiUsage?.usage || 1;
+    const lastScan = user?.apiUsage?.lastScanDate || lastScanDate;
 
     const maxLimit = user.role === 0 ? 3 : user.role === 1 ? 100 : 500;
-    // IF SUPER_MODE SET USAGE TO 0 ALLOWING ALL
-    const currentUsage = SUPER_MODE ? 0 : user?.apiUsage?.usage || 1;
+
+    const currentUsage = SUPER_MODE ? 0 : defaultUsage;
+
     const blockScan = currentUsage >= maxLimit;
 
     let resetData = false;
-
-    const lastScanDate = new Date();
-
-    const lastScan = user?.apiUsage?.lastScanDate || new Date();
 
     if (!isSameDay(lastScan as Date, lastScanDate)) {
       resetData = true;
@@ -30,7 +30,7 @@ export const updateApiUsage = async ({ id }, chain?: boolean) => {
 
     const updateCollectionProps = !resetData
       ? {
-          apiUsage: { usage: user?.apiUsage?.usage + 1, lastScanDate },
+          apiUsage: { usage: currentUsage + 1, lastScanDate },
         }
       : { apiUsage: { usage: 1, lastScanDate } };
 
