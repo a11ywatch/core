@@ -52,7 +52,7 @@ import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
-import { httpGet } from "./core/utils";
+import { getUserFromApi, httpGet } from "./core/utils";
 
 const { GRAPHQL_PORT } = config;
 
@@ -91,17 +91,34 @@ function initServer(): HttpServer[] {
     .get(cors(), unSubEmails)
     .post(cors(), unSubEmails);
 
-  // SCAN -> PAGEMIND [does not store values to cdn]
+  /*
+   * SCAN -> PAGEMIND [does not store values to cdn]
+   * Free for use since its relatively fast to handle.
+   * Points deduction will come into play when cors is
+   * only enabled for the main domain.
+   **/
   app.post("/api/scan-simple", cors(), async (req, res) => {
     try {
       const url = req.body?.websiteUrl || req.body?.url;
+      /*
+       * Get the user if auth set or determine if request allowed.
+       * This method handles sending headers and will return void next action should not occur.
+       **/
+      const userNext = await getUserFromApi(
+        req.headers.authorization,
+        res,
+        req
+      );
 
-      const data = await scan({
-        url: decodeURI(url + ""),
-        noStore: true,
-      });
+      if (!!userNext) {
+        const data = await scan({
+          url: decodeURI(url + ""),
+          noStore: true,
+          userId: userNext?.id,
+        });
 
-      res.json(data);
+        res.json(data);
+      }
     } catch (e) {
       console.error(e);
     }

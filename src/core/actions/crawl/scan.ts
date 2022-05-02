@@ -13,7 +13,7 @@ type ScanParams = {
   noStore?: boolean;
 };
 
-// Send to gRPC pagemind un-auth request
+// Send to gRPC pagemind un-auth request Does not store any values into the DB from request
 export const scanWebsite = async ({
   userId,
   url: urlMap,
@@ -34,6 +34,8 @@ export const scanWebsite = async ({
 
   const website = makeWebsite({ url: pageUrl, domain });
 
+  // get auth header
+
   let dataSource: PageMindScanResponse;
 
   try {
@@ -41,7 +43,7 @@ export const scanWebsite = async ({
       pageHeaders: website.pageHeaders,
       url: pageUrl,
       userId,
-      pageInsights: false,
+      pageInsights: false, // TODO: get website if auth determine if Lighthouse enabled
       noStore,
     });
   } catch (e) {
@@ -64,18 +66,29 @@ export const scanWebsite = async ({
 
   return new Promise((resolve, reject) => {
     try {
-      const { script, issues, webPage } = extractPageData(dataSource);
+      const {
+        script,
+        issues: issueTarget,
+        webPage,
+      } = extractPageData(dataSource);
 
-      const slicedIssue = limitIssue(issues);
+      let issues = issueTarget;
+
+      if (typeof userId !== "undefined") {
+        // add userID to the website TODO: fix pagemind response
+        website.userId = userId;
+      } else {
+        issues = limitIssue(issueTarget);
+      }
 
       const data = Object.assign({}, website, webPage, {
         timestamp: new Date().getTime(),
         script,
-        issue: slicedIssue,
+        issues,
       });
 
       if (data.issuesInfo) {
-        data.issuesInfo.limitedCount = slicedIssue.length;
+        data.issuesInfo.limitedCount = issues.length;
       }
 
       resolve(

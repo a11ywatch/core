@@ -1,6 +1,7 @@
 import { getUser } from "../find";
 import { isSameDay } from "date-fns";
 
+// rename to crawl
 export const updateScanAttempt = async ({ userId }) => {
   const [user, collection] = await getUser({ id: userId });
 

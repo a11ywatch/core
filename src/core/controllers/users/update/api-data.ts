@@ -1,10 +1,8 @@
 import { getUser } from "../find";
 import { isSameDay } from "date-fns";
+import { SUPER_MODE } from "@app/config/config";
 
-export const updateApiUsage = async (
-  { email, id, emailConfirmCode },
-  chain?: boolean
-) => {
+export const updateApiUsage = async ({ id }, chain?: boolean) => {
   try {
     const [user, collection] = await getUser({ id });
     if (!user) {
@@ -12,7 +10,8 @@ export const updateApiUsage = async (
     }
 
     const maxLimit = user.role === 0 ? 3 : user.role === 1 ? 100 : 500;
-    const currentUsage = user?.apiUsage?.usage || 1;
+    // IF SUPER_MODE SET USAGE TO 0 ALLOWING ALL
+    const currentUsage = SUPER_MODE ? 0 : user?.apiUsage?.usage || 1;
     const blockScan = currentUsage >= maxLimit;
 
     let resetData = false;

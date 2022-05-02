@@ -16,3 +16,4 @@ export { parseCookie } from "./parse-cookie";
 export { getHostName } from "./get-host";
 export { hashString } from "./hash";
 export { httpGet } from "./http-get";
+export { getUserFromApi } from "./get-user-data";

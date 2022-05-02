@@ -6,7 +6,7 @@ export interface AppResponse extends Response {
 }
 
 export interface User extends UserGql {
-  googleId: string;
+  googleId?: string;
 }
 
 export type { Analytic, History, Website, SubDomain, Issue } from "./schema";

@@ -43,6 +43,9 @@ const GRAPHQL_PORT = Number(
 
 const CRAWL_SERVER_PORT = Number(process.env.CRAWL_SERVER_PORT || 8099);
 
+// if ran from the CLI prevent rate-limits and usage limits [TODO]
+export const SUPER_MODE = process.env.SUPER_MODE === "true";
+
 export const config = {
   DEV,
   DB_URL: process.env.MONGO_URL || process.env.DB_URL,
