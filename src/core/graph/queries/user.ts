@@ -24,7 +24,7 @@ export const user = async (_, { id, password }, context) => {
   }
 
   throw new ApolloError(
-    "Authorization token not found. Please add your authorization header and try again,",
+    "Authorization token not found. Please add your authorization header and try again.",
     "404"
   );
 };
