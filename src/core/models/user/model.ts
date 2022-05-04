@@ -11,6 +11,10 @@ const UserModel = {
   profileVisible: false,
   lastLoginDate: "",
   passwordRequired: false,
+  apiUsage: {
+    lastScanDate: null,
+    usage: 0, // amount of API calls made per day
+  },
   websiteLimit: 1, // limit of websites a user can have
 };
 

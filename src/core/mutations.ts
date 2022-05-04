@@ -10,6 +10,7 @@ import {
   logout,
 } from "./graph/mutations";
 import { watcherCrawl } from "./utils/watcher_crawl";
+import { scanWebsite } from "@app/core/actions";
 
 const defaultPayload = {
   keyid: null,
@@ -55,7 +56,7 @@ export const Mutation = {
     }
   },
   scanWebsite: async (_, { url }, context) => {
-    return await context.models.SubDomain.scanWebsite({
+    return await scanWebsite({
       url,
     });
   },

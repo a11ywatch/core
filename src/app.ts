@@ -17,7 +17,6 @@ import {
 import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
-import { scanWebsite as scan } from "@app/core/controllers/subdomains/update";
 
 import {
   CONFIRM_EMAIL,
@@ -41,10 +40,11 @@ import {
   root,
   unSubEmails,
   getWebsite,
+  websiteCrawl,
 } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
-
+import { scanSimple } from "./rest/routes/scan";
 import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
 import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 import { setAuthRoutes } from "./rest/routes_groups/auth";
@@ -52,7 +52,7 @@ import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
-import { getUserFromApi, httpGet } from "./core/utils";
+import { httpGet } from "./core/utils";
 import { getUserFromApiScan } from "./core/utils/get-user-data";
 import { watcherCrawl } from "./core/utils/watcher_crawl";
 import { responseModel } from "./core/models";
@@ -95,30 +95,25 @@ function initServer(): HttpServer[] {
     .route(UNSUBSCRIBE_EMAILS)
     .get(cors(), unSubEmails)
     .post(cors(), unSubEmails);
-  /*
-   * SCAN -> PAGEMIND: Single page [does not store values to cdn]
-   * Free for use since its relatively fast to handle.
-   * Points deduction will come into play when cors is
-   * only enabled for the main domain.
-   **/
-  app.post("/api/scan-simple", cors(), async (req, res) => {
-    try {
-      const url = req.body?.websiteUrl || req.body?.url;
 
-      const userNext = await getUserFromApi(
+  /*
+   * Single page scan
+   */
+  app.post("/api/scan-simple", cors(), scanSimple);
+
+  /*
+   * Multi page scan pushed to queue
+   */
+  app.post("/api/crawl", cors(), async (req, res) => {
+    try {
+      const userNext = await getUserFromApiScan(
         req.headers.authorization,
         req,
         res
       );
-
+      // add crawl to queue
       if (!!userNext) {
-        const data = await scan({
-          url: decodeURI(url + ""),
-          noStore: true,
-          userId: userNext?.id,
-        });
-
-        res.json(data);
+        await websiteCrawl(req, res);
       }
     } catch (e) {
       console.error(e);
@@ -126,12 +121,10 @@ function initServer(): HttpServer[] {
   });
 
   /*
-   * SCAN -> PAGEMIND Multi page [stores values to cdn]
-   * Start website site-wide page scans. Requires front-end client to view web socket results.
-   **/
+   * Multi page scan directly [TODO:] remove for single crawl endpoint at v1
+   */
   app.post("/api/scan-all", cors(), async (req, res) => {
     try {
-      const url = req.body?.websiteUrl || req.body?.url;
       /*
        * Get the user if auth set or determine if request allowed.
        * This method handles sending headers and will return void next action should not occur.
@@ -144,6 +137,8 @@ function initServer(): HttpServer[] {
 
       if (!!userNext) {
         setImmediate(async () => {
+          const url = req.body?.websiteUrl || req.body?.url;
+
           await watcherCrawl({ urlMap: url, userId: userNext.id, scan: true });
         });
         res.json(

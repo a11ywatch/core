@@ -9,11 +9,16 @@ export const updateApiUsage = async ({ id }, chain?: boolean) => {
       return chain ? [user, collection] : user;
     }
     const lastScanDate = new Date();
-    const defaultUsage = user?.apiUsage?.usage || 1;
+
+    // set the initial usage to 0 to inc bellow
+    const defaultUsage = user?.apiUsage?.usage || 0;
+
     const lastScan = user?.apiUsage?.lastScanDate || lastScanDate;
 
+    // API LIMITS HARD_CODED TODO: MOVE TO DB
     const maxLimit = user.role === 0 ? 3 : user.role === 1 ? 100 : 500;
 
+    // super mode defaults to 0 allowing all for every request
     const currentUsage = SUPER_MODE ? 0 : defaultUsage;
 
     const blockScan = currentUsage >= maxLimit;
