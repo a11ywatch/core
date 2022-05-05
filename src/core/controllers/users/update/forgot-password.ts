@@ -9,7 +9,11 @@ export const forgotPassword = async ({ email }) => {
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
-  const [user, collection] = await getUser({ email });
+
+  const [user, collection] = await getUser({ email }).catch((e) => {
+    console.error(e);
+    return [];
+  });
 
   if (user) {
     try {
@@ -18,13 +22,12 @@ export const forgotPassword = async ({ email }) => {
         { id: user.id },
         { $set: { resetCode } }
       );
-      await transporter.verify();
       await transporter.sendMail(
         {
           ...mailOptions,
           to: user.email,
           subject: `A11yWatch - Password reset.`,
-          html: `${logoSvg}<br /><h1>${resetCode} is your password reset code.</h1>`,
+          html: `${logoSvg}<br /><h1>${resetCode} is your one time password reset code.</h1>`,
         },
         sendMailCallback
       );

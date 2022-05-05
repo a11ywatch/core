@@ -1,5 +1,6 @@
 import { codecs, getHostName } from "@a11ywatch/website-source-builder";
 import type { Issue } from "@app/types";
+import { pluralize } from "../utils";
 
 export interface Data {
   issues: Issue[] | [];
@@ -16,9 +17,10 @@ const issuesFoundTemplate: IssuesFound = (
 ) => {
   let listData = "";
   const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`;
-  const errorIssues = data?.issues || [];
+  const errorIssues = data?.issues || []; // display with limits for email generation
 
   if (errorIssues?.length) {
+    // loop until
     errorIssues.some((item: Issue, i: number) => {
       if (i === 10) {
         return true;
@@ -52,6 +54,8 @@ const issuesFoundTemplate: IssuesFound = (
     console.error(e);
   }
 
+  const issueCount = data?.issues?.length;
+
   return `
     <head>
       <style>
@@ -59,16 +63,16 @@ const issuesFoundTemplate: IssuesFound = (
         tr:hover {background-color: #ddd;}
       </style>
     </head>
-    <h1>${data?.issues?.length} issues found for ${page}</h1>
+    <h1>${issueCount} ${pluralize(issueCount, "issue")} found for ${page}</h1>
     <div style="margin-bottom: 10px;">Login to see full report</div>
-    <div style="overflow-x:auto;">
-    <table class="a11y-view" style="font-family: system-ui, Arial, Helvetica, sans-serif; border-collapse: collapse; width: 100%;">
-      <tr>
-        <th ${thStyles}>Element</th>
-        <th ${thStyles}>Recommendation</th>
-      </tr>
-      ${listData}
-    </table>
+    <div style="overflow:auto;">
+      <table class="a11y-view" style="font-family: system-ui, Arial; border-collapse: collapse; table-layout: auto; width: 100%;">
+        <tr>
+          <th ${thStyles}>Element</th>
+          <th ${thStyles}>Recommendation</th>
+        </tr>
+        ${listData}
+      </table>
     </div>
     <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none;">View Full Details</a>
     <a href="https://a11ywatch.com/reports/${cipherURL}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>

@@ -2,7 +2,13 @@ import { isSameDay } from "date-fns";
 import { connect } from "@app/database";
 import { footer } from "@app/html";
 
-import { transporter, mailOptions, realUser, sendMailCallback } from "../utils";
+import {
+  transporter,
+  mailOptions,
+  realUser,
+  sendMailCallback,
+  pluralize,
+} from "../utils";
 import { issuesFoundTemplate } from "../email_templates";
 
 export const emailMessager = {
@@ -14,12 +20,11 @@ export const emailMessager = {
   }: any) => {
     if (emailConfirmed && email && subject && html) {
       try {
-        await transporter.verify();
         await transporter.sendMail(
           Object.assign({}, mailOptions, {
             to: email,
             subject: subject,
-            html: `${html}`,
+            html,
           }),
           sendMailCallback
         );
@@ -38,7 +43,8 @@ export const emailMessager = {
     },
     confirmedOnly = false,
   }: any) => {
-    if (realUser(userId) && data?.issues?.length) {
+    const issueCount = data?.issues?.length;
+    if (realUser(userId) && issueCount) {
       const [userCollection] = await connect("Users");
       const findUser = await userCollection.findOne({ id: userId });
 
@@ -62,13 +68,13 @@ export const emailMessager = {
             { $set: { lastAlertDateStamp: currentDate } }
           );
 
-          await transporter.verify();
           await transporter.sendMail(
             Object.assign({}, mailOptions, {
               to: findUser.email,
-              subject: `[Report] ${data.issues.length} issues found with ${
-                data?.pageUrl || data?.domain
-              }.`,
+              subject: `[Report] ${issueCount} ${pluralize(
+                issueCount,
+                "issue"
+              )} found with ${data?.pageUrl || data?.domain}.`,
               html: `<br /><h1>${issuesFoundTemplate(
                 data
               )}<br />${footer.marketing({

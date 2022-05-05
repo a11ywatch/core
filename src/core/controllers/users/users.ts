@@ -183,7 +183,6 @@ export const UsersController: UserControllerType = (
         );
       }
       if (shouldEmail) {
-        await transporter.verify();
         await transporter.sendMail(
           {
             ...mailOptions,

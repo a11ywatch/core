@@ -38,7 +38,6 @@ export const resetPassword = async ({ email, resetCode }) => {
         }
       );
 
-      await transporter.verify();
       await transporter.sendMail(
         {
           ...mailOptions,

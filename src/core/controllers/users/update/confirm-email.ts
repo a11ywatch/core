@@ -22,7 +22,6 @@ export const confirmEmail = async ({ keyid: id }) => {
         { id },
         { $set: { emailConfirmCode, emailExpDate } }
       );
-      await transporter.verify();
       await transporter.sendMail(
         {
           ...mailOptions,

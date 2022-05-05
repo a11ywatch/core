@@ -1,11 +1,16 @@
 import { createTransport } from "nodemailer";
+import type { Transporter } from "nodemailer";
 import { config } from "@app/config";
 
 const { EMAIL_SERVICE_URL, EMAIL_CLIENT_ID, EMAIL_CLIENT_KEY } = config;
 
-let transporter: any = {
-  verify: () => {},
-  sendMail: () => {},
+let transporter: Partial<Transporter<any>> = {
+  verify: () => {
+    return Promise.resolve(true as true);
+  },
+  sendMail: () => {
+    return Promise.resolve(true as true);
+  },
 };
 
 if (EMAIL_CLIENT_KEY && EMAIL_CLIENT_ID && EMAIL_SERVICE_URL) {
@@ -26,6 +31,7 @@ if (EMAIL_CLIENT_KEY && EMAIL_CLIENT_ID && EMAIL_SERVICE_URL) {
   }
 }
 
+// default mail options
 const mailOptions = {
   from: `A11yWatch <${EMAIL_SERVICE_URL}>`,
   to: "myfriend@yahoo.com",
@@ -33,6 +39,7 @@ const mailOptions = {
   text: "Some issues where found on your website.",
 };
 
+// TODO: look into callback handling
 const sendMailCallback = (er: any, _info: any, cb?: () => any) => {
   if (er) {
     console.error(er);
