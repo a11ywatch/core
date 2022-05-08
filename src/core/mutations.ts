@@ -10,11 +10,11 @@ import {
   logout,
 } from "./graph/mutations";
 import { watcherCrawl } from "./utils/watcher_crawl";
-import { scanWebsite } from "@app/core/actions";
+import { scanWebsite, crawlPage } from "@app/core/actions";
 
 const defaultPayload = {
-  keyid: null,
-  audience: null,
+  keyid: undefined,
+  audience: undefined,
 };
 
 export const Mutation = {
@@ -56,8 +56,34 @@ export const Mutation = {
     }
   },
   scanWebsite: async (_, { url }, context) => {
+    const { keyid } = context.user?.payload || defaultPayload;
+
+    // TODO: if keyID update SCAN LIMITS
+    if (typeof keyid !== "undefined") {
+      const page = (await crawlPage(
+        {
+          url,
+          userId: keyid,
+        },
+        false
+      )) as any;
+
+      const { website } = page?.data ?? {};
+      const { issues, ...props } = website ?? {};
+
+      // TODO: REFACTOR API TO RETURN MODEL FOR WEBSITE
+      return {
+        ...page,
+        website: {
+          ...props,
+          issue: issues?.issues ?? [], // refactor api
+        },
+      };
+    }
+
     return await scanWebsite({
       url,
+      noStore: true,
     });
   },
   removeWebsite: async (_, { url, deleteMany = false }, context) => {

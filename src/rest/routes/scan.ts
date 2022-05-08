@@ -1,12 +1,10 @@
 import { getUserFromApi } from "@app/core/utils";
-import { scanWebsite } from "@app/core/actions";
+import { scanWebsite, crawlPage } from "@app/core/actions";
 import type { Request, Response } from "express";
 
 /*
  * SCAN -> PAGEMIND: Single page [does not store values to cdn]
- * Free for use since its relatively fast to handle.
- * Points deduction will come into play when cors is
- * only enabled for the main domain.
+ * Deducts API usage for the day
  **/
 export const scanSimple = async (req: Request, res: Response) => {
   try {
@@ -16,11 +14,35 @@ export const scanSimple = async (req: Request, res: Response) => {
     const userNext = await getUserFromApi(req.headers.authorization, req, res);
 
     if (!!userNext) {
-      const data = await scanWebsite({
-        url: decodeURI(url + ""),
-        noStore: true,
-        userId: userNext?.id,
-      });
+      const userId = userNext?.id;
+      let data = {};
+
+      if (typeof userId !== "undefined") {
+        const page = (await crawlPage(
+          {
+            url,
+            userId,
+          },
+          false
+        )) as any;
+
+        const { website } = page?.data ?? {};
+        const { issues, ...props } = website ?? {};
+
+        data = {
+          ...page,
+          website: {
+            ...props,
+            issue: issues?.issues ?? [],
+          },
+        };
+      } else {
+        data = await scanWebsite({
+          url,
+          noStore: true,
+          userId,
+        });
+      }
 
       res.json(data);
     }

@@ -1,10 +1,11 @@
 const WebsiteModel = {
-  userId: -1,
+  userId: undefined,
   url: "",
   domain: "",
   adaScore: null,
   cdnConnected: false,
   pageInsights: false,
+  pageHeaders: undefined,
   insight: {
     json: "",
   },
@@ -19,7 +20,6 @@ const WebsiteModel = {
     totalIssues: 0,
   },
   lastScanDate: "",
-  pageHeaders: null,
   online: null,
   ua: "", // user agent to use when running
 };

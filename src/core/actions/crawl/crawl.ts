@@ -18,8 +18,7 @@ import { fetchPageIssues } from "./fetch-issues";
 export type CrawlConfig = {
   userId: number; // user id
   url: string;
-  pageInsights: boolean; // use page insights to get info
-  apiData: boolean;
+  pageInsights?: boolean; // use page insights to get info
   sendSub?: boolean; // use pub sub
 };
 
@@ -35,7 +34,6 @@ export const crawlPage = async (
     userId,
     url: urlMap,
     pageInsights = false,
-    apiData = false,
     sendSub = true,
   } = crawlConfig ?? {};
 
@@ -213,11 +211,12 @@ export const crawlPage = async (
         }
       ); // pages - sub domains needs rename
 
-      // prior website configs with new data returned
-      const websiteAdded = Object.assign({}, website, updateWebsiteProps);
-
       // if flat api return source
-      const responseData = { data: apiData ? dataSource : websiteAdded };
+      const responseData = {
+        data: Object.assign({}, website, updateWebsiteProps, {
+          issues: newIssue,
+        }),
+      };
 
       return resolve(responseModel(responseData));
     } catch (e) {
