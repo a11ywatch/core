@@ -41,7 +41,7 @@ export const scan = (website = {}) => {
   });
 };
 
-// start scan job from crawler to gather pages [TODO: rename method]
+// start scan job from crawler and gather links as found
 export const crawlerScan = (website = {}) => {
   return new Promise((resolve, reject) => {
     crawlerClient.scan(website, (error, res) => {
@@ -54,7 +54,7 @@ export const crawlerScan = (website = {}) => {
   });
 };
 
-// start scan job from crawler to gather pages [TODO: rename method]
+// start scan job from crawler and wait for all links to be found
 export const crawlerCrawl = (website = {}) => {
   return new Promise((resolve, reject) => {
     crawlerClient.crawl(website, (error, res) => {

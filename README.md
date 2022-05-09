@@ -37,11 +37,13 @@ entreprise = 3
 
 ### Emailing
 
-To get the emailer working add your `private.key` and `public.key` to the root of the project through ssh or another method.
+To get the emailer working add the following env variables to the project.
 
-## Release
-
-In order to send a production build using a docker image make sure to add your servers private and pubic keys at the root of the sub directory before building.
+```
+EMAIL_SERVICE_URL=support@someemail.com
+EMAIL_CLIENT_ID=
+EMAIL_CLIENT_KEY=
+```
 
 ## LICENSE
 

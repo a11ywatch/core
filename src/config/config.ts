@@ -41,8 +41,6 @@ const GRAPHQL_PORT = Number(
   TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 0
 );
 
-const CRAWL_SERVER_PORT = Number(process.env.CRAWL_SERVER_PORT || 8099);
-
 // if ran from the CLI prevent rate-limits and usage limits [TODO]
 export const SUPER_MODE = process.env.SUPER_MODE === "true";
 
@@ -51,9 +49,7 @@ export const config = {
   DB_URL: process.env.MONGO_URL || process.env.DB_URL,
   DB_NAME: process.env.DB_NAME || "a11ywatch",
   CLIENT_URL: replaceDockerNetwork(process.env.CLIENT_URL),
-  WATCHER_CLIENT_URL: replaceDockerNetwork(process.env.WATCHER_CLIENT_URL),
   GRAPHQL_PORT,
-  CRAWL_SERVER_PORT,
   ROOT_URL: process.env.ROOT_URL,
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
   // EMAIL

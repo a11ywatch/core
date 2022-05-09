@@ -2,13 +2,12 @@ FROM node:16-alpine3.14
 
 WORKDIR /usr/src/app
 
-COPY package*.json bootstrap.sh ./
+COPY package*.json ./
 
 RUN apk upgrade --update-cache --available && \
 	apk add openssl python3 make gcc g++ libc-dev && \
 	rm -rf /var/cache/apk/*
 
-RUN ./bootstrap.sh
 RUN npm ci
 
 COPY . .

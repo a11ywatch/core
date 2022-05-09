@@ -1,13 +1,12 @@
 import { config } from "./config";
 
-const { CLIENT_URL, WATCHER_CLIENT_URL, ROOT_URL, DEV } = config;
+const { CLIENT_URL, ROOT_URL, DEV } = config;
 
 const apiUrls = String(CLIENT_URL).split(",");
 
 export const whitelist: string[] = [
   ...apiUrls,
   ...apiUrls.map((url) => url.replace("http", "https")),
-  WATCHER_CLIENT_URL,
   "a11ywatch.vercel.app",
 ].filter(Boolean);
 
