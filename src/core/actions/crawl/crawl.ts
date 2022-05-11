@@ -66,6 +66,7 @@ export const crawlPage = async (
         userId,
         pageInsights: insightsEnabled,
         scriptsEnabled,
+        mobile: website?.mobile,
       });
 
       // TODO: SET PAGE OFFLINE DB

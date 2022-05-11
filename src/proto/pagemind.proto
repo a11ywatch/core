@@ -19,6 +19,7 @@ message ScanParams {
    bool pageInsights = 4;
    bool noStore = 5;
    bool scriptsEnabled = 6;
+   bool mobile = 7;
 }
 
 message ScriptParams {

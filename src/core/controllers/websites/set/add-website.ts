@@ -19,7 +19,7 @@ export const addWebsite = async ({
   userId,
   url: urlMap,
   customHeaders,
-  audience,
+  // audience,
   canScan,
   pageInsights,
   mobile,

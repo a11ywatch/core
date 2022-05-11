@@ -20,17 +20,21 @@ export const crawlTrackerComplete = async (data) => {
       console.error(e);
     }
 
-    // TODO: MOVE COMPLETE TO SEP QUQUE
-    await pubsub.publish(
-      Channels.crawl_scan_queue,
-      JSON.stringify({
-        user_id: userId,
-        meta: {
-          method: Method["crawl_complete"],
-          extra: { domain },
-        },
-      })
-    );
+    try {
+      // send pub sub complete
+      await pubsub.publish(
+        Channels.crawl_scan_queue,
+        JSON.stringify({
+          user_id: userId,
+          meta: {
+            method: Method["crawl_complete"],
+            extra: { domain },
+          },
+        })
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
 

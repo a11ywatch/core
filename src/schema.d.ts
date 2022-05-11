@@ -502,6 +502,7 @@ export type Website = {
   timestamp?: Maybe<Scalars["String"]>;
   pageInsights?: Maybe<Scalars["Boolean"]>;
   insight?: Maybe<PageInsights>;
+  mobile?: Maybe<Scalars["Boolean"]>;
 };
 
 export type WebsiteIssuesArgs = {

@@ -4,6 +4,7 @@ import { hashString } from "@app/core/utils";
 import { Analytic } from "@app/types";
 import type { Request, Response } from "express";
 
+// get the status badge for a domain
 export const statusBadge = async (req: Request, res: Response) => {
   const domain = req.params?.domain?.replace(".svg", "");
   const page: Analytic = await AnalyticsController().getWebsite(
@@ -11,9 +12,8 @@ export const statusBadge = async (req: Request, res: Response) => {
     false
   );
 
-  let statusColor = "#000";
-
   let score = 0;
+  let statusColor = "#000";
 
   if (page) {
     score = page?.adaScore;

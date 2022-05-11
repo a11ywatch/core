@@ -18,7 +18,7 @@ type Task = {
   meta?: Meta;
 };
 
-const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 4);
+const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 5);
 
 const isGenerateAverageMethod = (meta: Meta) => {
   if (meta && typeof meta?.method !== "undefined") {
@@ -31,6 +31,7 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
   const { url: urlMap, userId, usersPooling = [], meta } = arg;
 
   try {
+    // if method is crawl_complete
     if (isGenerateAverageMethod(meta)) {
       const props = meta?.extra;
       return await setWebsiteScore({

@@ -22,6 +22,7 @@ export const mutation = gql`
       url: String
       customHeaders: [CreatePageHeaders]
       pageInsights: Boolean
+      mobile: Boolean
     ): UpdateWebSiteMutationResponse
 
     updateScript(
