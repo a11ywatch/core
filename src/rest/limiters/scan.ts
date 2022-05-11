@@ -1,6 +1,11 @@
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import { redisClient } from "@app/database/memory-client";
+import {
+  createRateLimitDirective,
+  RedisStore as GraphQLRedisStore,
+  getGraphQLRateLimiter,
+} from "graphql-rate-limit";
 
 let limiter;
 let scanLimiter;
@@ -11,6 +16,7 @@ const connectLimiters = () => {
     // @ts-expect-error
     sendCommand: (...args: string[]) => redisClient.call(...args),
   });
+
   try {
     limiter = rateLimit({
       windowMs: 1 * 60 * 1000, // 60 seconds
@@ -32,4 +38,32 @@ const connectLimiters = () => {
   }
 };
 
-export { store, limiter, scanLimiter, connectLimiters };
+let gqlRateLimiter;
+
+const getGqlRateLimitDirective = () => {
+  try {
+    const rateLimitOptions = {
+      identifyContext: (ctx) =>
+        ctx?.request?.ipAddress || ctx.id || (ctx.user && ctx.user.id),
+      formatError: ({ fieldName, window }) =>
+        `Rate limited exceeded for ${fieldName}. Please wait ${
+          window / 1000
+        }s and try again`,
+      store: new GraphQLRedisStore(redisClient),
+    };
+    gqlRateLimiter = getGraphQLRateLimiter(rateLimitOptions);
+
+    return createRateLimitDirective(rateLimitOptions);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export {
+  gqlRateLimiter,
+  store,
+  limiter,
+  scanLimiter,
+  getGqlRateLimitDirective,
+  connectLimiters,
+};

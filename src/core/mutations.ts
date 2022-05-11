@@ -11,6 +11,7 @@ import {
 } from "./graph/mutations";
 import { watcherCrawl } from "./utils/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
+import { gqlRateLimiter } from "@app/rest/limiters/scan";
 
 const defaultPayload = {
   keyid: undefined,
@@ -55,11 +56,33 @@ export const Mutation = {
       );
     }
   },
-  scanWebsite: async (_, { url }, context) => {
+  scanWebsite: async (parent, args, context, info) => {
+    const { url } = args;
     const { keyid } = context.user?.payload || defaultPayload;
+    const unauth = typeof keyid === "undefined";
 
-    // TODO: if keyID update SCAN LIMITS
-    if (typeof keyid !== "undefined") {
+    // apply rate limit on unauth and assign if truthy
+    let errorMessage =
+      unauth &&
+      (await gqlRateLimiter(
+        {
+          parent,
+          args,
+          context,
+          info,
+        },
+        {
+          max: 2,
+          window: "14s",
+        }
+      ));
+
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+
+    if (!unauth) {
+      // TODO: INC API LIMITS
       const page = (await crawlPage(
         {
           url,

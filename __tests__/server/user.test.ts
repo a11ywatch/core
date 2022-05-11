@@ -1,9 +1,10 @@
 import { createTestClient } from "apollo-server-testing";
-import { Server } from "@app/apollo-server";
+import { getServerConfig } from "@app/apollo-server";
 import gql from "graphql-tag";
 import { initDbConnection, closeDbConnection } from "@app/database";
+import { ApolloServer } from "apollo-server-express";
 
-let server: Server;
+let server: ApolloServer;
 
 describe("user", () => {
   beforeAll(async () => {
@@ -15,7 +16,7 @@ describe("user", () => {
     done();
   });
   test("create user successfully", async (done) => {
-    server = new Server();
+    server = new ApolloServer(getServerConfig());
     const { mutate } = createTestClient(server);
 
     const mutation = gql`

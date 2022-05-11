@@ -333,6 +333,7 @@ export type ScanInformation = {
   __typename?: "ScanInformation";
   lastScanDate?: Maybe<Scalars["Date"]>;
   scanAttempts?: Maybe<Scalars["Int"]>;
+  usageLimit?: Maybe<Scalars["Int"]>;
 };
 
 export type Script = {

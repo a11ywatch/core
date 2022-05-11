@@ -1,7 +1,7 @@
-import { ApolloServer, ApolloServerExpressConfig } from "apollo-server-express";
+import { ApolloServerExpressConfig } from "apollo-server-express";
 import { config, BYPASS_AUTH } from "./config";
 import { getUserFromToken, parseCookie } from "./core/utils";
-import { schema } from "./core/schema";
+import { createScheme } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
 import { SubDomainController } from "./core/controllers/subdomains";
 import { ScriptsController } from "./core/controllers/scripts";
@@ -15,60 +15,58 @@ import { ApolloServerPluginUsageReportingDisabled } from "apollo-server-core";
 
 const { DEV } = config;
 
-const serverConfig: ApolloServerExpressConfig = {
-  schema,
-  subscriptions: {
-    onConnect: (_cnxnParams, webSocket, _cnxnContext) => {
-      // @ts-ignore
-      const cookie = webSocket?.upgradeReq?.headers?.cookie;
-      const parsedCookie = parseCookie(cookie);
-      const user = getUserFromToken(parsedCookie?.jwt || "");
+const getServerConfig = (): ApolloServerExpressConfig => {
+  const schema = createScheme();
+  return {
+    schema,
+    subscriptions: {
+      onConnect: (_cnxnParams, webSocket, _cnxnContext) => {
+        // @ts-ignore
+        const cookie = webSocket?.upgradeReq?.headers?.cookie;
+        const parsedCookie = parseCookie(cookie);
+        const user = getUserFromToken(parsedCookie?.jwt || "");
+
+        return {
+          userId: user?.payload?.keyid,
+        };
+      },
+    },
+    context: ({ req, res, connection }) => {
+      if (connection) {
+        return connection.context;
+      }
+      const authentication = req?.cookies?.jwt || req?.headers?.authorization;
+      const user = getUserFromToken(authentication);
+
+      if (
+        process.env.NODE_ENV !== "test" &&
+        !user &&
+        !BYPASS_AUTH.includes(req?.body?.operationName)
+      ) {
+        if (DEV && !req?.body?.operationName) {
+          console.log("Generating Graphql Schema");
+        } else {
+          throw new Error(AUTH_ERROR);
+        }
+      }
 
       return {
-        userId: user?.payload?.keyid,
+        user,
+        res,
+        models: {
+          User: UsersController({ user }),
+          Website: WebsitesController({ user }),
+          Issue: IssuesController({ user }),
+          Features: FeaturesController({ user }),
+          SubDomain: SubDomainController({ user }),
+          History: HistoryController({ user }),
+          Analytics: AnalyticsController({ user }),
+          Scripts: ScriptsController({ user }),
+        },
       };
     },
-  },
-  context: ({ req, res, connection }) => {
-    if (connection) {
-      return connection.context;
-    }
-    const authentication = req?.cookies?.jwt || req?.headers?.authorization;
-    const user = getUserFromToken(authentication);
-
-    if (
-      process.env.NODE_ENV !== "test" &&
-      !user &&
-      !BYPASS_AUTH.includes(req?.body?.operationName)
-    ) {
-      if (DEV && !req?.body?.operationName) {
-        console.log("Generating Graphql Schema");
-      } else {
-        throw new Error(AUTH_ERROR);
-      }
-    }
-
-    return {
-      user,
-      res,
-      models: {
-        User: UsersController({ user }),
-        Website: WebsitesController({ user }),
-        Issue: IssuesController({ user }),
-        Features: FeaturesController({ user }),
-        SubDomain: SubDomainController({ user }),
-        History: HistoryController({ user }),
-        Analytics: AnalyticsController({ user }),
-        Scripts: ScriptsController({ user }),
-      },
-    };
-  },
-  plugins: [ApolloServerPluginUsageReportingDisabled()],
+    plugins: [ApolloServerPluginUsageReportingDisabled()],
+  };
 };
 
-interface AppGqlServer {
-  new (apolloConfig?: ApolloServerExpressConfig): ApolloServer;
-}
-const Server: AppGqlServer = ApolloServer.bind(this, serverConfig);
-
-export { Server, serverConfig };
+export { getServerConfig };

@@ -17,8 +17,19 @@ import {
   meta,
   input,
 } from "./graph/gql_types";
+import { getGqlRateLimitDirective } from "@app/rest/limiters";
+import gql from "graphql-tag";
+import { applyMiddleware } from "graphql-middleware";
 
-const typeDefs = `
+const typeDefs = gql`
+  directive @rateLimit(
+    max: Int
+    window: String
+    message: String
+    identityArgs: [String]
+    arrayLengthField: String
+  ) on FIELD_DEFINITION
+
   ${pageInsights}
   ${meta}
   ${payments}
@@ -36,9 +47,18 @@ const typeDefs = `
   ${subscription}
 `;
 
-const scheme = {
-  typeDefs,
-  resolvers,
+const createScheme = () => {
+  const rateLimit = getGqlRateLimitDirective();
+
+  const scheme = {
+    typeDefs,
+    resolvers,
+    schemaDirectives: {
+      rateLimit,
+    },
+  };
+
+  return applyMiddleware(makeExecutableSchema(scheme as any));
 };
 
-export const schema = makeExecutableSchema(scheme as any);
+export { createScheme };

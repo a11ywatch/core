@@ -44,11 +44,11 @@ export const updateScanAttempt = async ({ userId }) => {
     if (role === 2 && scanInfo?.scanAttempts >= 100) {
       return false;
     }
-
     // default to max if none set for entreprise
-    const maxLimit = user.scanInfo.usageLimit || 100;
-
-    if (role === 3 && scanInfo?.scanAttempts >= maxLimit) {
+    if (
+      role === 3 &&
+      scanInfo?.scanAttempts >= (user?.scanInfo?.usageLimit || 100)
+    ) {
       return false;
     }
 
@@ -70,14 +70,22 @@ export const updateScanAttempt = async ({ userId }) => {
   return false;
 };
 
+/*
+ * @param {userId: number}
+ * determine if user has muti site scans enabled
+ */
 export const getScanEnabled = async ({ userId }) => {
   const [user] = await getUser({ id: userId });
+
   const scanAttempts = user?.scanInfo?.scanAttempts ?? 0;
+  const role = user?.role; // users role
 
   if (
     !user ||
-    (scanAttempts >= 3 && user?.role === 0) ||
-    (scanAttempts > 10 && user?.role === 1)
+    (role === 0 && scanAttempts >= 3) ||
+    (role === 1 && scanAttempts >= 10) ||
+    (role === 2 && scanAttempts >= 100) ||
+    (role == 3 && scanAttempts >= (user?.scanInfo?.usageLimit || 100))
   ) {
     return false;
   }

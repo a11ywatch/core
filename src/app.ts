@@ -33,7 +33,6 @@ import {
   closeSub,
   closeRedisConnection,
 } from "./database";
-import { Server } from "./apollo-server";
 import {
   confirmEmail,
   detectImage,
@@ -56,10 +55,44 @@ import { httpGet } from "./core/utils";
 import { getUserFromApiScan } from "./core/utils/get-user-data";
 import { watcherCrawl } from "./core/utils/watcher_crawl";
 import { responseModel } from "./core/models";
+import { ApolloServer } from "apollo-server-express";
 
 const { GRAPHQL_PORT } = config;
 
 configureAgent();
+
+let server;
+
+// all the clients for external request
+const connectClients = async () => {
+  try {
+    await initDbConnection();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    await initRedisConnection(); // redis client
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    await createSub(); // pub sub
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    createPubSub(); //gql sub
+    setChannels(); // queues
+    connectLimiters(); // rate limiters
+  } catch (e) {
+    console.error(e);
+  }
+
+  const { getServerConfig } = await import("./apollo-server");
+
+  server = new ApolloServer(getServerConfig());
+};
 
 function initServer(): HttpServer[] {
   const app = express();
@@ -214,7 +247,6 @@ function initServer(): HttpServer[] {
     res.json({ error: err });
   });
 
-  const server = new Server();
   server.applyMiddleware({ app, cors: corsOptions });
 
   let httpServer;
@@ -251,34 +283,8 @@ function initServer(): HttpServer[] {
 
 let coreServer: HttpServer;
 
-const connectClients = async () => {
-  try {
-    await initDbConnection();
-  } catch (e) {
-    console.error(e);
-  }
-  try {
-    await initRedisConnection(); // redis client
-  } catch (e) {
-    console.error(e);
-  }
-  try {
-    await createSub(); // pub sub
-  } catch (e) {
-    console.error(e);
-  }
-
-  try {
-    createPubSub(); //gql sub
-    setChannels(); // queues
-    connectLimiters(); // rate limiters
-  } catch (e) {
-    console.error(e);
-  }
-};
-
 const startServer = async () => {
-  await connectClients();
+  await connectClients(); // START ALL EXTERNAL CLIENTS LIKE REDIS ETC.
 
   try {
     await startGRPC();
