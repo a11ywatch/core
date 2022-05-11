@@ -22,6 +22,7 @@ export const addWebsite = async ({
   audience,
   canScan,
   pageInsights,
+  mobile,
 }) => {
   const domain = getHostName(urlMap);
 
@@ -39,10 +40,12 @@ export const addWebsite = async ({
   const collectionCount = await collection.countDocuments({ userId });
   const [user] = await getUser({ id: userId });
 
-  // TODO: FLAG TO BLOCK USER FROM WEBSITE ADDING
   if (
-    (user?.websiteLimit && collectionCount === user?.websiteLimit) ||
-    blockWebsiteAdd({ audience, collectionCount })
+    blockWebsiteAdd({
+      audience: user.role,
+      collectionCount,
+      limit: user?.websiteLimit,
+    })
   ) {
     throw new Error(ADD_FREE_MAX_ERROR);
   }
@@ -53,11 +56,13 @@ export const addWebsite = async ({
     domain,
     pageHeaders: customHeaders,
     pageInsights: !!pageInsights,
+    mobile,
   });
 
   await collection.insertOne(website);
 
   if (canScan) {
+    // TODO: mobile test
     setImmediate(async () => {
       await watcherCrawl({
         urlMap: url,

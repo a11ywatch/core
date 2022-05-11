@@ -66,7 +66,7 @@ function initServer(): HttpServer[] {
 
   app.disable("x-powered-by");
 
-  app.set("trust proxy", process.env.NODE_ENV !== "production"); // replace with docker env
+  app.set("trust proxy", 1);
   // mw parsers
   app.use(cookieParser());
   app.use(cors(corsOptions));

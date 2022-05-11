@@ -4,18 +4,20 @@ import { redisClient } from "@app/database/memory-client";
 
 let limiter;
 let scanLimiter;
+let store; // redis store to use
 
 const connectLimiters = () => {
+  store = new RedisStore({
+    // @ts-expect-error
+    sendCommand: (...args: string[]) => redisClient.call(...args),
+  });
   try {
     limiter = rateLimit({
       windowMs: 1 * 60 * 1000, // 60 seconds
       max: 30, // Limit each IP to 30 requests per `window` (here, per minute)
       standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
       legacyHeaders: false,
-      store: new RedisStore({
-        // @ts-expect-error
-        sendCommand: (...args: string[]) => redisClient.call(...args),
-      }),
+      store,
     });
 
     scanLimiter = rateLimit({
@@ -23,14 +25,11 @@ const connectLimiters = () => {
       max: 5, // Limit each IP to 5 requests per `window` (here, per 30 secs)
       standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
       legacyHeaders: false,
-      store: new RedisStore({
-        // @ts-expect-error
-        sendCommand: (...args: string[]) => redisClient.call(...args),
-      }),
+      store,
     });
   } catch (e) {
     console.error(e);
   }
 };
 
-export { limiter, scanLimiter, connectLimiters };
+export { store, limiter, scanLimiter, connectLimiters };

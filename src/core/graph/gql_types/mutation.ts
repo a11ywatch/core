@@ -69,6 +69,7 @@ export const mutation = `
 			url: String!
 			customHeaders: [CreatePageHeaders]
 			pageInsights: Boolean
+			mobile: Boolean
 		): UpdateWebSiteMutationResponse
 
 		filterEmailDates (

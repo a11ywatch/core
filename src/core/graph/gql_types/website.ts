@@ -27,6 +27,7 @@ export const website = `
 		timestamp: String
 		pageInsights: Boolean
 		insight: PageInsights
+		mobile: Boolean
 	}
 
 `;

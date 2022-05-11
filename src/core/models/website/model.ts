@@ -22,6 +22,7 @@ const WebsiteModel = {
   lastScanDate: "",
   online: null,
   ua: "", // user agent to use when running
+  mobile: false, // mobile first view port
 };
 
 const makeWebsite = (

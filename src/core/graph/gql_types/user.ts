@@ -1,12 +1,14 @@
 export const user = `
 
 	type ScanInformation {
-		lastScanDate: String
 		scanAttempts: Int
+		usageLimit: Int
+		lastScanDate: String
 	}
 
 	type ApiUsage {
 		usage: Int
+		usageLimit: Int
 		lastScanDate: String
 	}
 

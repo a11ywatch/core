@@ -7,7 +7,6 @@ import { Website } from "@app/types";
 // TODO: Refactor usage
 const getWebsite = async (req: Request, res: Response, next?: any) => {
   const { q, timestamp, download } = req.query;
-  console.log(req.query);
 
   if (!q) {
     res.status(404);

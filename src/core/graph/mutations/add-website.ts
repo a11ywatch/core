@@ -2,7 +2,7 @@ import { getPayLoad } from "../../utils/query-payload";
 
 export const addWebsite = async (
   _,
-  { url, customHeaders, pageInsights, ...props },
+  { url, customHeaders, pageInsights, mobile, ...props },
   context
 ) => {
   const { audience, userId } = getPayLoad(context, props);
@@ -25,5 +25,6 @@ export const addWebsite = async (
     customHeaders,
     canScan,
     pageInsights,
+    mobile,
   });
 };
