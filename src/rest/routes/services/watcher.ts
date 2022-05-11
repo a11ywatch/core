@@ -38,7 +38,11 @@ const detectImage = async (req: Request, res: Response) => {
   }).updateApiUsage({ id: keyid }, true);
 
   if (
-    usageExceededThreshold({ audience, usage: userData?.apiUsage?.usage || 0 })
+    usageExceededThreshold({
+      audience,
+      usage: userData?.apiUsage?.usage || 0,
+      usageLimit: userData?.apiUsage?.usageLimit,
+    })
   ) {
     res.json({
       data: null,

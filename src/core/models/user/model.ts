@@ -2,7 +2,7 @@ const UserModel = {
   email: "",
   password: "",
   salt: "",
-  id: -1,
+  id: -1, // [DEPRECATED DEFAULT]: was set to 1 to inc between as old counter
   jwt: "",
   role: process.env.SUPER_MODE ? 1 : 0,
   alertEnabled: true,
@@ -14,6 +14,7 @@ const UserModel = {
   apiUsage: {
     lastScanDate: null,
     usage: 0, // amount of API calls made per day
+    usageLimit: 3, // the limit to reset to after the day
   },
   websiteLimit: 1, // limit of websites a user can have
 };

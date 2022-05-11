@@ -73,6 +73,7 @@ export const getUserFromApi = async (
       usageExceededThreshold({
         audience,
         usage: userData?.apiUsage?.usage || 0,
+        usageLimit: userData?.apiUsage?.usageLimit,
       })
     ) {
       res.status(400);
