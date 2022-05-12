@@ -2,31 +2,26 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/e4ef08ad87b2fb9a2680/maintainability)](https://codeclimate.com/github/A11yWatch/a11ywatch-core/maintainability)
 
-HTTP API for a11ywatch
+Central API for A11yWatch available in REST, GraphQl, and GRPC.
 
 ## Getting Started
 
-### Docker
+To get started you can use docker or run on your local machine following the commands below. In order to run this repo effectively take a look at the docker compose file in the central command repo [compose](https://github.com/A11yWatch/a11ywatch/blob/main/docker-compose.yml).
 
-1. `docker-compose up`
+```sh
+docker-compose up
+```
 
-### Local Build
+or
 
-1. `npm install`
-2. `npm run dev`
-
-## Database
-
-Below is only needed to run locally currently.
-
-1. start mongodb locally and add the connection to the proper `DB_URL` env variable example `mongodb://127.0.0.1:27017/?compressors=zlib&gssapiServiceName=mongodb`.
-2. get mongodump contents from team member and run `mongorestore`.
-
-## Data Info
+```sh
+npm i
+npm run dev
+```
 
 ### User
 
-roles
+The following roles are indicated below.
 
 ```
 free = 0
