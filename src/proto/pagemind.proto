@@ -13,13 +13,14 @@ message Headers {
 }
 
 message ScanParams {
-   uint32 userId = 1;
-   string url = 2;
-   repeated Headers pageHeaders = 3;
-   bool pageInsights = 4;
-   bool noStore = 5;
-   bool scriptsEnabled = 6;
-   bool mobile = 7;
+   uint32 userId = 1; // user identifier.
+   string url = 2; // the page url to run tests on.
+   repeated Headers pageHeaders = 3; // heads to include when running.
+   bool pageInsights = 4; // Run lighthouse reports.
+   bool noStore = 5;  // Do not store to AWS script changes.
+   bool scriptsEnabled = 6; // Add js fix script.
+   bool mobile = 7; // Run as mobile view port.
+   repeated string actions = 8; // List of actions to run on page.
 }
 
 message ScriptParams {
