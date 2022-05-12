@@ -12,8 +12,13 @@ const {
   STRIPE_BASIC_PLAN_YEARLY,
 } = config;
 
-const stripe = require("stripe")(STRIPE_KEY);
+import Stripe from "stripe";
 
+const stripe = new Stripe(STRIPE_KEY, {
+  telemetry: false,
+});
+
+// add payment subscription between basic and premium plans. Does not work with entrprise.
 export const addPaymentSubscription = async ({
   keyid,
   email: emailP,
@@ -22,7 +27,7 @@ export const addPaymentSubscription = async ({
 }: {
   keyid?: number;
   email?: string;
-  stripeToken: string;
+  stripeToken: string; // returned from client upon success credit card submit
   yearly?: boolean;
 }) => {
   const [user, collection] = await getUser({ email: emailP, id: keyid });
@@ -38,8 +43,13 @@ export const addPaymentSubscription = async ({
       : { id: user.stripeID };
 
     if (user.stripeID) {
-      customer = await stripe.customers.retrieve(user.stripeID);
-      if (customer.deleted) {
+      try {
+        customer = await stripe.customers.retrieve(user.stripeID);
+      } catch (e) {
+        console.error(e);
+      }
+      // if customer not found on re-sub re-create user
+      if (!customer) {
         customer = await stripe.customers.create({
           email,
         });

@@ -1,3 +1,5 @@
+import type Stripe from "stripe";
+
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -457,7 +459,7 @@ export type User = {
   analytics?: Maybe<Array<Maybe<Analytic>>>;
   scripts?: Maybe<Array<Maybe<Script>>>;
   script?: Maybe<Script>;
-  paymentSubscription?: Maybe<PaymentSubScription>;
+  paymentSubscription?: Maybe<Stripe.subscriptions.ISubscription>;
   apiUsage?: Maybe<ApiUsage>;
   websiteLimit?: Maybe<Scalars["Int"]>;
   downAlerts?: Maybe<Array<Maybe<Website>>>;
