@@ -14,6 +14,7 @@ import { UsersController } from "@app/core/controllers/users";
 import { Issue } from "@app/schema";
 import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
+import { ResponseModel } from "@app/core/models/response/types";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -25,11 +26,11 @@ export type CrawlConfig = {
 // filter errors from issues
 const filterCb = (iss: Issue) => iss?.type === "error";
 
-// crawl the url for issues and update collection records
+// crawl the url for issues and update collection records Return API RESPONSE
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean // determine if email should be sent based on results
-) => {
+): Promise<ResponseModel> => {
   const {
     userId,
     url: urlMap,

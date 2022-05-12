@@ -68,30 +68,30 @@ export const scanWebsite = async ({
     try {
       const { script, issues, webPage } = extractPageData(dataSource);
 
-      let issue;
+      let currentIssues;
 
       if (typeof userId !== "undefined") {
-        issue = issues?.issues;
+        currentIssues = issues?.issues;
         // add userID to the website TODO: fix pagemind response
         website.userId = userId;
       } else {
-        issue = limitIssue(issues);
+        currentIssues = limitIssue(issues);
       }
 
       const data = Object.assign({}, website, webPage, {
         timestamp: new Date().getTime(),
         script,
-        issue,
+        issues: currentIssues,
       });
 
       // return limited count from scan
       if (data.issuesInfo && "limitedCount" in data.issuesInfo === false) {
-        data.issuesInfo.limitedCount = issue.length;
+        data.issuesInfo.limitedCount = currentIssues.length;
       }
 
       resolve(
         responseModel({
-          website: data,
+          data,
         })
       );
     } catch (e) {

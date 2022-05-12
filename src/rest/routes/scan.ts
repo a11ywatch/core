@@ -18,24 +18,13 @@ export const scanSimple = async (req: Request, res: Response) => {
       let data = {};
 
       if (typeof userId !== "undefined") {
-        const page = (await crawlPage(
+        data = await crawlPage(
           {
             url,
             userId,
           },
           false
-        )) as any;
-
-        const { website } = page?.data ?? {};
-        const { issues, ...props } = website ?? {};
-
-        data = {
-          ...page,
-          website: {
-            ...props,
-            issue: issues?.issues ?? [],
-          },
-        };
+        );
       } else {
         data = await scanWebsite({
           url,
