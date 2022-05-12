@@ -18,6 +18,36 @@ const defaultPayload = {
   audience: undefined,
 };
 
+/*
+ * return data formatted for graphQL. Reshapes API data to gql. TODO: move layers
+ * Reshapes issues to issue. TODO: consistent names.
+ */
+const websiteFormatter = (source: any) => {
+  const { data, website, ...rest } = source;
+
+  let w = {
+    issues: undefined,
+    issue: undefined, // remove dup keys
+  };
+
+  if (data) {
+    w = data;
+  }
+
+  w = w || website;
+
+  // remap to issue to prevent gql resolver gql 'issues'
+  if ("issues" in w) {
+    w.issue = w.issues;
+    delete w.issues;
+  }
+
+  return {
+    website: w,
+    ...rest,
+  };
+};
+
 export const Mutation = {
   updateUser,
   login,
@@ -91,23 +121,16 @@ export const Mutation = {
         false
       )) as any;
 
-      const { website } = page?.data ?? {};
-      const { issues, ...props } = website ?? {};
-
       // TODO: REFACTOR API TO RETURN MODEL FOR WEBSITE
-      return {
-        ...page,
-        website: {
-          ...props,
-          issue: issues?.issues ?? [], // refactor api
-        },
-      };
+      return websiteFormatter(page);
     }
 
-    return await scanWebsite({
+    const data = await scanWebsite({
       url,
       noStore: true,
     });
+
+    return websiteFormatter(data);
   },
   removeWebsite: async (_, { url, deleteMany = false }, context) => {
     const { keyid, audience } = context.user?.payload || defaultPayload;
