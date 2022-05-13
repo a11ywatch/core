@@ -1,5 +1,4 @@
 import { pubsub, redisClient } from "@app/database";
-import type { Request, Response } from "express";
 import { getParams } from "./get-params";
 import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils";
@@ -21,7 +20,7 @@ export const crawlTrackerComplete = async (data) => {
     }
 
     try {
-      // send pub sub complete
+      // send pub sub complete. TODO: remove pub sub since data is already at the container.
       await pubsub.publish(
         Channels.crawl_scan_queue,
         JSON.stringify({
@@ -36,14 +35,4 @@ export const crawlTrackerComplete = async (data) => {
       console.error(e);
     }
   }
-};
-
-// COMPLETE FULL CRAWL AND GENERATE WEBSITE AVERARAGES AND ANALYTICS[TODO]
-export const completeCrawlTracker = (req: Request, res: Response) => {
-  setImmediate(async () => {
-    await crawlTrackerComplete(req?.body?.data);
-  });
-
-  // TODO: GENERATE TOP LEVEL ANALYTICS FOR WEB TOTAL ISSUES
-  res.json({ ok: true });
 };

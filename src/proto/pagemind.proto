@@ -13,17 +13,17 @@ message Headers {
 }
 
 message ScanParams {
-   optional uint32 userId = 1; // user identifier.
+   uint32 userId = 1; // user identifier.
    string url = 2; // the page url to run tests on.
    repeated Headers pageHeaders = 3; // heads to include when running.
-   optional bool pageInsights = 4; // Run lighthouse reports.
-   optional bool noStore = 5;  // Do not store to AWS script changes.
-   optional bool scriptsEnabled = 6; // Add js fix script.
-   optional bool mobile = 7; // Run as mobile view port.
+   bool pageInsights = 4; // Run lighthouse reports.
+   bool noStore = 5;  // Do not store to AWS script changes.
+   bool scriptsEnabled = 6; // Add js fix script.
+   bool mobile = 7; // Run as mobile view port.
    repeated string actions = 8; // List of actions to run on page.
-   optional string userAgent = 9; // User agent to use for request.
-   optional string standard = 10; // The WCAG standard to use WCAG2A, WCAG2AA, or WCAG2AAA.
-   optional string hideElements = 11; // CSS selector to hide elements from testing, selectors can be comma separated.
+   string userAgent = 9; // User agent to use for request.
+   string standard = 10; // The WCAG standard to use WCAG2A, WCAG2AA, or WCAG2AAA.
+   string hideElements = 11; // CSS selector to hide elements from testing, selectors can be comma separated.
 }
 
 message ScriptParams {
