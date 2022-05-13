@@ -16,7 +16,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
 
   let data: Website;
 
-  let query = decodeURI(q + "");
+  let query = decodeURIComponent(q + "");
 
   // try {
   //   const memReport = await redisClient.get(query);

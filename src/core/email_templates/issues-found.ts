@@ -1,4 +1,4 @@
-import { codecs, getHostName } from "@a11ywatch/website-source-builder";
+import { getHostName } from "@a11ywatch/website-source-builder";
 import type { Issue } from "@app/types";
 import { pluralize } from "../utils";
 
@@ -38,21 +38,13 @@ const issuesFoundTemplate: IssuesFound = (
   const target = page; // TODO: use domain only
   let hostName;
 
-  // TODO: use cypher for subdomain query
   try {
     hostName = getHostName(target);
   } catch (e) {
     console.error(e);
   }
 
-  let cipherURL;
-
-  try {
-    // cipher target for reports page.
-    cipherURL = codecs.cipher(target);
-  } catch (e) {
-    console.error(e);
-  }
+  let targetUrl = encodeURIComponent(target);
 
   const issueCount = data?.issues?.length;
 
@@ -64,7 +56,7 @@ const issuesFoundTemplate: IssuesFound = (
       </style>
     </head>
     <h1>${issueCount} ${pluralize(issueCount, "issue")} found for ${page}</h1>
-    <div style="margin-bottom: 10px;">Login to see full report</div>
+    <div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
     <div style="overflow:auto;">
       <table class="a11y-view" style="font-family: system-ui, Arial; border-collapse: collapse; table-layout: auto; width: 100%;">
         <tr>
@@ -75,7 +67,7 @@ const issuesFoundTemplate: IssuesFound = (
       </table>
     </div>
     <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none;">View Full Details</a>
-    <a href="https://a11ywatch.com/reports/${cipherURL}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
+    <a href="https://a11ywatch.com/reports/${targetUrl}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
     <a href="https://api.a11ywatch.com/api/get-website?q=${hostName}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #000; text-align: center; text-decoration: none;">Download Report</a>
     <p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>
 `.trim();

@@ -18,6 +18,9 @@ const signOptions = {
   keyid,
 };
 
+let privateKey = String(PRIVATE_KEY).trim();
+let publicKey = String(PUBLIC_KEY).trim();
+
 export function signJwt({ email, role, keyid }, options = {}) {
   return jwt.sign(
     {
@@ -26,7 +29,7 @@ export function signJwt({ email, role, keyid }, options = {}) {
       audience: role,
       keyid,
     },
-    String(PRIVATE_KEY).trim(),
+    privateKey,
     Object.assign({}, signOptions, options) as any
   );
 }
@@ -34,7 +37,7 @@ export function signJwt({ email, role, keyid }, options = {}) {
 export function verifyJwt(token, options = {}) {
   return jwt.verify(
     token,
-    String(PUBLIC_KEY).trim(),
+    publicKey,
     Object.assign({}, signOptions, options, { algorithm: [algorithm] })
   );
 }

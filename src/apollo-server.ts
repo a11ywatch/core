@@ -38,11 +38,13 @@ const getServerConfig = (): ApolloServerExpressConfig => {
       const authentication = req?.cookies?.jwt || req?.headers?.authorization;
       const user = getUserFromToken(authentication);
 
+      // authentication error
       if (
         process.env.NODE_ENV !== "test" &&
         !user &&
         !BYPASS_AUTH.includes(req?.body?.operationName)
       ) {
+        // generating gql schema initially
         if (DEV && !req?.body?.operationName) {
           console.log("Generating Graphql Schema");
         } else {
