@@ -24,13 +24,15 @@ export const addWebsite = async ({
   pageInsights,
   mobile,
 }) => {
-  const domain = getHostName(urlMap);
+  const decodedUrl = decodeURIComponent(urlMap);
+  // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
+  const url = stripUrlEndingSlash(initUrl(decodedUrl));
+  const domain = getHostName(url);
 
   if (!domain) {
     throw new Error(WEBSITE_URL_ERROR);
   }
 
-  const url = stripUrlEndingSlash(initUrl(urlMap));
   const [siteExist, collection] = await getWebsite({ userId, url });
 
   if (siteExist) {

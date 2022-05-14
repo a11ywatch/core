@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { getReport } from "@app/core/controllers/reports";
 import { downloadToExcel } from "@app/core/utils";
 import { Website } from "@app/types";
+import { initUrl } from "@a11ywatch/website-source-builder";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage
@@ -16,7 +17,7 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
 
   let data: Website;
 
-  let query = decodeURIComponent(q + "");
+  let query = initUrl(decodeURIComponent(q + ""));
 
   // try {
   //   const memReport = await redisClient.get(query);

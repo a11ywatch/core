@@ -1,6 +1,7 @@
-import { getUserFromApi } from "@app/core/utils";
+import { getUserFromApi, stripUrlEndingSlash } from "@app/core/utils";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import type { Request, Response } from "express";
+import { initUrl } from "@a11ywatch/website-source-builder";
 
 /*
  * SCAN -> PAGEMIND: Single page [does not store values to cdn]
@@ -8,7 +9,8 @@ import type { Request, Response } from "express";
  **/
 export const scanSimple = async (req: Request, res: Response) => {
   try {
-    const url = req.body?.websiteUrl || req.body?.url;
+    const uri = req.body?.websiteUrl || req.body?.url;
+    const url = stripUrlEndingSlash(initUrl(uri));
 
     // returns truthy if can continue
     const userNext = await getUserFromApi(req.headers.authorization, req, res);

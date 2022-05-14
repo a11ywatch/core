@@ -146,6 +146,7 @@ function initServer(): HttpServer[] {
       );
       // add crawl to queue
       if (!!userNext) {
+        // TODO: validate data
         await websiteCrawl(req, res);
       }
     } catch (e) {

@@ -1,5 +1,6 @@
 import { Request } from "express";
 import type { AppResponse } from "@app/types";
+import { initUrl } from "@a11ywatch/website-source-builder";
 
 const createIframe = (req: Request, res: AppResponse) => {
   try {
@@ -9,13 +10,9 @@ const createIframe = (req: Request, res: AppResponse) => {
       return res.send(false);
     }
 
+    const decodedUrl = decodeURIComponent(baseUrl);
     // TODO: REMOVE replace
-    let url = decodeURIComponent(baseUrl);
-
-    if (/http|https/.test(url) === false) {
-      const tp = req.protocol === "https" ? "https" : "http";
-      url = `${tp}://${url}`;
-    }
+    const url = initUrl(decodedUrl);
 
     if (url.includes(".pdf")) {
       res.redirect(url);

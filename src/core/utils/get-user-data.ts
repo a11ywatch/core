@@ -92,7 +92,7 @@ export const getUserFromApi = async (
 // get user from token and db if allowed to perform request otherwise exit
 export const getUserFromApiScan = async (
   token: string,
-  req: Request,
+  _req: Request,
   res: Response
 ): Promise<User> => {
   // single get user from auth
