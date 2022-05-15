@@ -9,9 +9,14 @@ export const user = async (_, { id, password }, context) => {
   });
 
   if (typeof userId !== undefined && userId !== null) {
-    const [user] = await models.User.getUser({
-      id: userId,
-    });
+    let user;
+    try {
+      [user] = await models.User.getUser({
+        id: userId,
+      });
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       ...user,
@@ -19,7 +24,7 @@ export const user = async (_, { id, password }, context) => {
       activeSubscription: user?.paymentSubscription?.status === "active",
       loggedIn: !!ctx.user,
       accountType: audience ?? "",
-      passwordRequired: !user?.password && !user.googleId,
+      passwordRequired: !user?.password && !user?.googleId,
     };
   }
 

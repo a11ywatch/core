@@ -17,7 +17,7 @@ export const website = gql`
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issues(filter: String): [Issue]
-    issue: [Issue]
+    issue: [PageIssue]
     issuesInfo: IssueMeta
     subDomains: [SubDomain]
     script: Script

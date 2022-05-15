@@ -25,30 +25,25 @@ const defaultPayload = {
 const websiteFormatter = (source: any) => {
   const { data, website, ...rest } = source;
 
-  let w = {
-    issues: undefined,
-    issue: undefined, // remove dup keys
-  };
+  const webPage = data ? data : website;
 
-  if (data) {
-    w = data;
-  }
+  // pluck issues from respone [TODO: shape gql issues]
+  const { issues, ...websiteData } = webPage;
 
-  w = w || website;
+  if (websiteData) {
+    // remap to issue to prevent gql resolver gql 'issues'
+    if (issues) {
+      websiteData.issue = websiteData.websiteProps;
+    }
 
-  // remap to issue to prevent gql resolver gql 'issues'
-  if ("issues" in w) {
-    w.issue = w.issues;
-    delete w.issues;
-  }
-
-  // flatten issues to to [issue] field that returns Issue directly.
-  if (w?.issue && "issues" in w.issue) {
-    w.issue = w?.issue.issues;
+    // flatten issues to to [issue] field that returns Issue directly.
+    if (websiteData?.issue && "issues" in websiteData.issue) {
+      websiteData.issue = websiteData?.issue.issues;
+    }
   }
 
   return {
-    website: w,
+    website: websiteData,
     ...rest,
   };
 };
@@ -87,7 +82,7 @@ export const Mutation = {
       };
     } else {
       throw new Error(
-        "You hit your scan limit for the day, please try again tomorrow"
+        "You hit your scan limit for the day, please try again tomorrow."
       );
     }
   },

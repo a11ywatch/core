@@ -1,17 +1,18 @@
 import gql from "graphql-tag";
 
 export const issue = gql`
-  type Issue {
+  type PageIssue {
     code: String
-    type: String
-    typeCode: Int
-    message: String
     context: String
-    selector: String
+    message: String
     runner: String
-    documentTitle: String
-    issue: Issue
-    issues(filter: String): [Issue]
+    type: String
+    selector: String
+    typeCode: Int
+  }
+
+  type Issue {
+    issues(filter: String): [PageIssue]
     domain: String
     pageUrl: String
   }

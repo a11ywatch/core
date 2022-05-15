@@ -1,11 +1,10 @@
-import { IssuesController } from "../controllers/issues";
+// import { IssuesController } from "../controllers/issues";
 
 export const Issue = {
-  // TODO: delete resolver
-  issue: async ({ userId, url }) => {
-    return await IssuesController().getIssue({
-      id: userId,
-      url,
-    });
-  },
+  // issue: async ({ userId, url }) => {
+  //   return await IssuesController().getIssue({
+  //     id: userId,
+  //     url,
+  //   });
+  // },
 };
