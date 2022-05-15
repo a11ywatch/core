@@ -236,7 +236,7 @@ export type PageHeaders = {
 
 export type PageInsights = {
   __typename?: "PageInsights";
-  json?: Maybe<Scalars["String"]>;
+  json?: Maybe<Scalars["String"]>; // rest api receivves json
 };
 
 export type PageLoadTimeMeta = {
@@ -505,6 +505,8 @@ export type Website = {
   pageInsights?: Maybe<Scalars["Boolean"]>;
   insight?: Maybe<PageInsights>;
   mobile?: Maybe<Scalars["Boolean"]>;
+  standard?: Maybe<Scalars["String"]>;
+  ua?: Maybe<Scalars["String"]>;
 };
 
 export type WebsiteIssuesArgs = {

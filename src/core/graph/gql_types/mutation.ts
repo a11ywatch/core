@@ -23,6 +23,8 @@ export const mutation = gql`
       customHeaders: [CreatePageHeaders]
       pageInsights: Boolean
       mobile: Boolean
+      standard: String
+      ua: String
     ): UpdateWebSiteMutationResponse
 
     updateScript(
@@ -47,6 +49,8 @@ export const mutation = gql`
       customHeaders: [CreatePageHeaders]
       pageInsights: Boolean
       mobile: Boolean
+      standard: String
+      ua: String
     ): UpdateWebSiteMutationResponse
 
     filterEmailDates(emailFilteredDates: [Int], morning: Boolean): User

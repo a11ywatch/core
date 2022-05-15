@@ -42,6 +42,11 @@ const websiteFormatter = (source: any) => {
     delete w.issues;
   }
 
+  // flatten issues to to [issue] field that returns Issue directly.
+  if (w?.issue && "issues" in w.issue) {
+    w.issue = w?.issue.issues;
+  }
+
   return {
     website: w,
     ...rest,
@@ -111,24 +116,23 @@ export const Mutation = {
       throw new Error(errorMessage);
     }
 
+    let data;
+
     if (!unauth) {
       // TODO: INC API LIMITS
-      const page = (await crawlPage(
+      data = (await crawlPage(
         {
           url,
           userId: keyid,
         },
         false
       )) as any;
-
-      // TODO: REFACTOR API TO RETURN MODEL FOR WEBSITE
-      return websiteFormatter(page);
+    } else {
+      data = await scanWebsite({
+        url,
+        noStore: true,
+      });
     }
-
-    const data = await scanWebsite({
-      url,
-      noStore: true,
-    });
 
     return websiteFormatter(data);
   },

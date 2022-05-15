@@ -3,7 +3,7 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { pubsub } from "@app/database/pubsub";
 import { SUBDOMAIN_ADDED, ISSUE_ADDED } from "@app/core/static";
 import { responseModel } from "@app/core/models";
-import { collectionUpsert } from "@app/core/utils";
+import { collectionUpsert, jsonParse } from "@app/core/utils";
 import { IssuesController } from "@app/core/controllers/issues";
 import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
@@ -15,6 +15,7 @@ import { Issue } from "@app/schema";
 import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
+import type { Struct } from "pb-util";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -68,6 +69,8 @@ export const crawlPage = async (
         pageInsights: insightsEnabled,
         scriptsEnabled,
         mobile: website?.mobile,
+        ua: website?.ua,
+        standard: website?.standard,
       });
 
       // TODO: SET PAGE OFFLINE DB
@@ -77,11 +80,14 @@ export const crawlPage = async (
         );
       }
 
-      // re-assign to key of json for backwords compat TODO: GET DATA AS JSON
       if (dataSource?.webPage?.insight) {
-        dataSource.webPage.insight = JSON.parse(
-          dataSource.webPage.insight as any
-        );
+        try {
+          // extract data to valid JSON
+          dataSource.webPage.insight =
+            jsonParse(dataSource.webPage.insight as Struct) ?? undefined;
+        } catch (e) {
+          console.error(e);
+        }
       }
 
       // TODO: MOVE TO QUEUE

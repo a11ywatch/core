@@ -18,3 +18,4 @@ export { hashString } from "./hash";
 export { httpGet } from "./http-get";
 export { getUserFromApi } from "./get-user-data";
 export { pluralize } from "./pluralize";
+export { jsonParse } from "./json-parse";

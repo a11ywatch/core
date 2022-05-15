@@ -23,6 +23,8 @@ export const addWebsite = async ({
   canScan,
   pageInsights,
   mobile,
+  ua,
+  standard,
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -52,6 +54,15 @@ export const addWebsite = async ({
     throw new Error(ADD_FREE_MAX_ERROR);
   }
 
+  let wcagStandard: string | undefined = undefined;
+
+  if (
+    wcagStandard &&
+    ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(wcagStandard)
+  ) {
+    wcagStandard = standard;
+  }
+
   const website = makeWebsite({
     userId,
     url,
@@ -59,9 +70,15 @@ export const addWebsite = async ({
     pageHeaders: customHeaders,
     pageInsights: !!pageInsights,
     mobile,
+    ua,
+    standard: wcagStandard,
   });
 
-  await collection.insertOne(website);
+  try {
+    await collection.insertOne(website);
+  } catch (e) {
+    console.error(e);
+  }
 
   if (canScan) {
     // TODO: mobile test

@@ -23,6 +23,7 @@ const WebsiteModel = {
   online: null,
   ua: "", // user agent to use when running
   mobile: false, // mobile first view port
+  standard: "WCAG2AA", // standard for testing WCAG
 };
 
 const makeWebsite = (
