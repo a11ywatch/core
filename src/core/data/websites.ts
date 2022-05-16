@@ -10,10 +10,9 @@ export const Website = {
     return user;
   },
   issues: async ({ userId, url, pageUrl }, { filter }) => {
-    let issues = await IssuesController().getIssues({
+    const issues = await IssuesController().getIssues({
       userId,
-      pageUrl,
-      url,
+      pageUrl: decodeURIComponent(url || pageUrl),
       filter,
     });
 

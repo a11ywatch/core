@@ -1,6 +1,7 @@
 import { getUser } from "../find";
 import { isSameDay } from "date-fns";
 import { SUPER_MODE } from "@app/config/config";
+import { usageExceededThreshold } from "@app/core/utils";
 
 /*
  * @param {id}: number|string user identifier
@@ -8,7 +9,7 @@ import { SUPER_MODE } from "@app/config/config";
  * Increments user.apiUsage?.usage every time
  * and has reset detection if next day.
  */
-export const updateApiUsage = async ({ id }, chain?: boolean) => {
+export const updateApiUsage = async ({ id }) => {
   let user;
   let collection;
 
@@ -19,49 +20,43 @@ export const updateApiUsage = async ({ id }, chain?: boolean) => {
   }
 
   if (!user || SUPER_MODE) {
-    return chain ? [user, collection] : user;
+    // return true for api request allowed
+    return [user, collection, SUPER_MODE];
   }
+
+  const { role, apiUsage } = user ?? { role: 0, apiUsage: {} };
 
   // current day or the next scan
   const lastScanDate = new Date();
   // if api was used get the last date otherwise set to current
-  const lastScan = user?.apiUsage?.lastScanDate || lastScanDate;
 
-  // API LIMITS HARD_CODED TODO: MOVE TO DB
-  let maxLimit = user.role === 0 ? 3 : user.role === 1 ? 100 : 500;
-
-  // user has custom limit assigned. Default to max
-  if (user.role === 3 && user.apiUsage?.usageLimit > maxLimit) {
-    maxLimit = user.apiUsage?.usageLimit;
-  }
-
-  let currentUsage = user?.apiUsage?.usage || 0;
+  let currentUsage = apiUsage?.usage || 0;
 
   // if not the same day reset the user back to its limit
-  if (!isSameDay(lastScan as Date, lastScanDate)) {
+  if (!isSameDay(apiUsage?.lastScanDate as Date, lastScanDate)) {
     currentUsage = 0;
   }
 
-  // current usage exceeds the max limit block request
-  if (currentUsage >= maxLimit) {
-    return chain ? [user, collection] : user;
-  }
+  const blockScan = usageExceededThreshold({
+    audience: role,
+    usage: currentUsage,
+    usageLimit: apiUsage.usageLimit,
+  });
 
-  // get previus user usage
-  const apiUsageData = user?.apiUsage;
+  // current usage exceeds the max limit block request
+  if (blockScan) {
+    return [user, collection, false];
+  }
 
   const updateCollectionProps = {
     apiUsage: {
-      ...apiUsageData, // retain defaults besides usage - and last scan
+      ...apiUsage, // retain defaults besides usage - and last scan
       usage: currentUsage + 1,
       lastScanDate,
     },
   };
 
-  user.apiUsage = {
-    ...updateCollectionProps.apiUsage,
-    lastScanDate: lastScanDate + "",
-  };
+  user.apiUsage = updateCollectionProps.apiUsage;
 
   try {
     await collection.updateOne({ id }, { $set: updateCollectionProps });
@@ -69,5 +64,5 @@ export const updateApiUsage = async ({ id }, chain?: boolean) => {
     console.error(e);
   }
 
-  return chain ? [user, collection] : user;
+  return [user, collection, true];
 };

@@ -16,6 +16,11 @@ const UserModel = {
     usage: 0, // amount of API calls made per day
     usageLimit: 3, // the limit to reset to after the day
   },
+  scanInfo: {
+    lastScanDate: null,
+    scanAttempts: 0,
+    usageLimit: 3,
+  },
   websiteLimit: 1, // limit of websites a user can have
 };
 

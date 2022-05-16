@@ -20,6 +20,8 @@ export interface Params extends AuthParams {
   alertEnabled?: boolean;
   code?: string;
   domain?: string;
+  user?: User; // allow passing entire user
+  collection?: any; // the user collection to re-use
 }
 
 export interface UserControllerMethodsType {
@@ -27,7 +29,7 @@ export interface UserControllerMethodsType {
   getUser(params: Params): Promise<[User, any]>;
   getUsers(chain: boolean): Promise<User[]>;
   getAllUsers(chain: boolean): Promise<any[]>;
-  updateApiUsage(params: Params, chain: boolean): Promise<any>;
+  updateApiUsage(params: Params): Promise<any>;
   verifyUser(params: AuthParams): Promise<any>;
   confirmEmail(params: Params): Promise<any>;
   addPaymentSubscription(params: Params): Promise<any>;

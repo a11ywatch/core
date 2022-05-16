@@ -1,7 +1,9 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
 import { loadProto } from "./website";
-import { crawlPageQueue } from "@app/queues/crawl/crawl";
+import { crawlMultiSiteQueue } from "@app/queues/crawl/crawl";
+import { crawlWebsite } from "@app/core/actions";
+
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 
@@ -25,14 +27,26 @@ export const createServer = async () => {
       scanEnd: async (call, callback) => {
         // temp remove immediate for non-blocking Crawler
         setImmediate(async () => {
-          await crawlTrackerComplete(call.request);
+          // add delay of 400ms to assume the last page has finished scanning. [TODO: remove delays and better handle async followup via stream]
+          setTimeout(async () => {
+            await crawlTrackerComplete(call.request);
+          }, 400);
         });
         callback(null, {});
       },
       scan: async (call, callback) => {
-        // temp remove immediate for non-blocking Crawler. If multi pages returned treat as CI or crawl job.
+        const pages = call?.request?.pages ?? [];
+
         setImmediate(async () => {
-          await crawlPageQueue({ pages: call?.request?.pages });
+          if (pages.length > 1) {
+            await crawlMultiSiteQueue({
+              pages,
+              userId: call?.request?.user_id,
+            });
+            // TODO: send email follow up. REMOVE from section and to cron specific gRPC endpoints or flags
+          } else if (pages.length === 1) {
+            await crawlWebsite({ url: pages[0] });
+          }
         });
         callback(null, {});
       },

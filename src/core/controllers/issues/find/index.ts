@@ -7,7 +7,7 @@ export const getIssue = async (
 ) => {
   try {
     const [collection] = await connect("Issues");
-    const queryUrl = decodeURIComponent(String(url || pageUrl));
+    const queryUrl = String(url || pageUrl);
 
     const searchProps = websiteSearchParams({
       pageUrl: queryUrl,
@@ -33,20 +33,12 @@ export const getIssue = async (
   }
 };
 
-export const getIssues = async ({
-  userId,
-  domain,
-  pageUrl,
-  url,
-  filter,
-}: any) => {
+export const getIssues = async ({ userId, domain, pageUrl, filter }: any) => {
   try {
     const [collection] = await connect("Issues");
 
-    const queryUrl = (pageUrl || url) && decodeURIComponent(pageUrl || url);
-
     const searchProps = websiteSearchParams({
-      domain: domain || getHostName(queryUrl),
+      domain: domain || getHostName(pageUrl),
       filter,
       userId,
     });

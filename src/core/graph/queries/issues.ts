@@ -9,6 +9,6 @@ export const issue = async (_, { url: pageUrl, ...props }, context) => {
 export const issues = async (_, { url: pageUrl, ...props }, context) => {
   return await context.models.Issue.getIssues({
     userId: getPayLoad(context, props),
-    pageUrl,
+    pageUrl: decodeURIComponent(pageUrl),
   });
 };

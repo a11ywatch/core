@@ -7,22 +7,25 @@ type CrawlBasicInfo = {
   userId?: number;
 };
 
+// get all users crawling for a domain at a time.
 export const getActiveUsersCrawling = async ({
   urlMap,
   userId,
 }: CrawlBasicInfo): Promise<string[]> => {
-  let usersPool = [];
-
-  if (typeof userId !== "undefined") {
-    usersPool.push(userId);
-  }
+  const usersPool = [];
 
   const bareHost = getHostName(urlMap);
   const hostHash = hashString(bareHost);
 
   try {
     const mainPool = await redisClient.hkeys(hostHash);
-    usersPool = [...usersPool, ...mainPool];
+
+    usersPool.push(...mainPool);
+
+    // add user to list
+    if (typeof userId !== "undefined" && !usersPool.includes(userId)) {
+      usersPool.push(userId);
+    }
   } catch (e) {
     console.error(e);
   }

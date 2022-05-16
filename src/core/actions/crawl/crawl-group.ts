@@ -14,6 +14,7 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
 
+  // Todo: remove layer
   const usersPool =
     usersPooling ?? (await getActiveUsersCrawling({ userId, urlMap }));
 

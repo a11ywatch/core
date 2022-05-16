@@ -1,20 +1,7 @@
 import { getActiveUsersCrawling } from "@app/core/utils/query";
-import { Method } from "@app/database/config";
-import { q } from "./handle";
+import { q, isGenerateAverageMethod } from "./handle";
 import { parseData } from "./format";
-
-interface Meta {
-  method?: Method;
-  extra: any;
-}
-
-// if the gRPC request was crawl complete. TODO: seperate method call
-const isGenerateAverageMethod = (meta: Meta) => {
-  if (meta && typeof meta?.method !== "undefined") {
-    return meta.method === Method["crawl_complete"];
-  }
-  return false;
-};
+import { crawlPage } from "@app/core/actions";
 
 // send request for crawl queue
 export const crawlPageQueue = async (queueSource) => {
@@ -49,4 +36,30 @@ export const crawlPageQueue = async (queueSource) => {
   } catch (e) {
     console.error(e);
   }
+};
+
+/*
+ * Send request for crawl queue - Sends an email follow up on the crawl data
+ * Returns the scan results for all pages
+ */
+export const crawlMultiSiteQueue = async (queueSource) => {
+  let responseData = [];
+  const data = parseData(queueSource);
+
+  const { pages = [], user_id } = data;
+
+  // get users enqueed for crawl job matching the urls
+  for (const url of pages) {
+    let scanResult;
+    try {
+      scanResult = await crawlPage({ url, userId: Number(user_id) }, false);
+    } catch (e) {
+      console.error(e);
+    }
+    if (scanResult?.data) {
+      responseData.push(scanResult.data);
+    }
+  }
+
+  return responseData;
 };

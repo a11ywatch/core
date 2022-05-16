@@ -15,7 +15,6 @@ export const addDomain = async ({ userId, url }) => {
     userId,
     id: lastItem?.length && lastItem[0] ? lastItem[0].id + 1 : 0,
     url,
-    adaScore: 100,
   };
 
   await collection.insertOne(website);

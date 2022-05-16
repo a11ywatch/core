@@ -12,7 +12,7 @@ const initRedisConnection = async () => {
   try {
     redisClient = new Redis(options);
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 
@@ -21,7 +21,7 @@ const closeRedisConnection = () => {
   try {
     redisClient?.disconnect();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 

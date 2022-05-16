@@ -13,7 +13,6 @@ export const crawlTrackerComplete = async (data) => {
 
     try {
       const hostHash = hashString(domain);
-
       await redisClient.hdel(hostHash, userId + "");
     } catch (e) {
       console.error(e);

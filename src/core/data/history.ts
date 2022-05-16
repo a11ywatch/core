@@ -5,7 +5,7 @@ export const History = {
   issues: async ({ userId, url }, { filter }) => {
     const issues = await IssuesController().getIssues({
       userId,
-      url,
+      pageUrl: decodeURIComponent(url),
       filter,
     });
     if (["error", "notice", "warning"].includes(filter) && issues?.length) {

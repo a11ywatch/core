@@ -1,25 +1,28 @@
-export const meta = `
+import gql from "graphql-tag";
 
-	type IssueMeta {
-		issuesFixedByCdn: Int
-		possibleIssuesFixedByCdn: Int
-		totalIssues: Int
-		cdnConnected: Boolean
-		skipContentIncluded: Boolean
-		errorCount: Int
-		warningCount: Int
-		limitedCount: Int
-	}
+export const meta = gql`
+  type IssueMeta {
+    issuesFixedByCdn: Int
+    possibleIssuesFixedByCdn: Int
+    totalIssues: Int
+    cdnConnected: Boolean
+    skipContentIncluded: Boolean
+    adaScoreAverage: Int
+    adaScore: Int
+    errorCount: Int
+    warningCount: Int
+    noticeCount: Int
+    limitedCount: Int
+  }
 
-	type PageLoadTimeMeta {
-		duration: Int
-		durationFormated: String
-		color: String
-	}
+  type PageLoadTimeMeta {
+    duration: Int
+    durationFormated: String
+    color: String
+  }
 
-	type ScriptMeta {
-		skipContentEnabled: Boolean
-		translateEnabled: Boolean
-	}
-
+  type ScriptMeta {
+    skipContentEnabled: Boolean
+    translateEnabled: Boolean
+  }
 `;

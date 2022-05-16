@@ -1,5 +1,5 @@
 import { UsersController } from "@app/core/controllers";
-import { getUserFromToken, usageExceededThreshold } from "@app/core/utils";
+import { getUserFromToken } from "@app/core/utils";
 import { imageDetect } from "@app/core/external";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
 import type { Request, Response } from "express";
@@ -32,18 +32,13 @@ const detectImage = async (req: Request, res: Response) => {
     return;
   }
 
-  const { keyid, audience } = user?.payload;
-  const [userData] = await UsersController({
-    user,
-  }).updateApiUsage({ id: keyid }, true);
+  const { keyid } = user?.payload;
 
-  if (
-    usageExceededThreshold({
-      audience,
-      usage: userData?.apiUsage?.usage || 0,
-      usageLimit: userData?.apiUsage?.usageLimit,
-    })
-  ) {
+  const [_, __, canScan] = await UsersController({
+    user,
+  }).updateApiUsage({ id: keyid });
+
+  if (!canScan) {
     res.json({
       data: null,
       status: 17,

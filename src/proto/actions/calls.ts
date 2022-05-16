@@ -5,21 +5,10 @@ import {
   mavClient,
 } from "../website-client";
 
+// perform scan to gRPC -> pagemind for website issues
 export const scanAsync = (website = {}) => {
   return new Promise((resolve, reject) => {
     client.scan(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
-export const listIssue = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    pageMindClient.gather(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -98,7 +87,6 @@ export const controller = {
   crawlerScan,
   crawlerCrawl,
   scanAsync,
-  listIssue,
   setScripts,
   parseImg,
 };

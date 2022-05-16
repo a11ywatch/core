@@ -1,4 +1,4 @@
-import { CRAWLER_FINISHED } from "./strings";
+import { CRAWLER_FINISHED, RATE_EXCEEDED_ERROR } from "./strings";
 import {
   updateUser,
   addWebsite,
@@ -12,14 +12,21 @@ import {
 import { watcherCrawl } from "./utils/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { gqlRateLimiter } from "@app/rest/limiters/scan";
+import { frontendClientOrigin } from "./utils/is-client";
 
 const defaultPayload = {
   keyid: undefined,
   audience: undefined,
 };
 
+// TODO: move to limiter control file
+const scanRateLimitConfig = {
+  max: 2,
+  window: "14s",
+};
+
 /*
- * return data formatted for graphQL. Reshapes API data to gql. TODO: move layers
+ * Return data formatted for graphQL. Reshapes API data to gql. TODO: move layers
  * Reshapes issues to issue. TODO: consistent names.
  */
 const websiteFormatter = (source: any) => {
@@ -33,7 +40,7 @@ const websiteFormatter = (source: any) => {
   if (websiteData) {
     // remap to issue to prevent gql resolver gql 'issues'
     if (issues) {
-      websiteData.issue = websiteData.websiteProps;
+      websiteData.issue = issues;
     }
 
     // flatten issues to to [issue] field that returns Issue directly.
@@ -91,21 +98,41 @@ export const Mutation = {
     const { keyid } = context.user?.payload || defaultPayload;
     const unauth = typeof keyid === "undefined";
 
-    // apply rate limit on unauth and assign if truthy
-    let errorMessage =
-      unauth &&
-      (await gqlRateLimiter(
+    // coming from frontend origin
+    const isClient = frontendClientOrigin(context?.res?.req?.headers?.origin);
+
+    const rateLimitConfig = !unauth
+      ? {
+          max: 3,
+          window: "10s",
+        }
+      : scanRateLimitConfig;
+
+    let errorMessage;
+
+    // if the request did not come from the server update api usage
+    if (!isClient && !unauth) {
+      const [_, __, canScan] = await context.models.User.updateApiUsage({
+        userId: keyid,
+      });
+      if (!canScan) {
+        errorMessage = RATE_EXCEEDED_ERROR;
+      }
+    }
+
+    // check rate limits for request. TODO: adjust r
+    if (!errorMessage) {
+      // apply rate limit on un-auth.
+      errorMessage = await gqlRateLimiter(
         {
           parent,
           args,
           context,
           info,
         },
-        {
-          max: 2,
-          window: "14s",
-        }
-      ));
+        rateLimitConfig
+      );
+    }
 
     if (errorMessage) {
       throw new Error(errorMessage);

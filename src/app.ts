@@ -133,7 +133,6 @@ function initServer(): HttpServer[] {
    * Single page scan
    */
   app.post("/api/scan-simple", cors(), scanSimple);
-
   /*
    * Multi page scan pushed to queue
    */
@@ -193,7 +192,7 @@ function initServer(): HttpServer[] {
   // email confirmation route
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
-  // CDN SERVER TODO: USE DOWNLOAD PATH INSTEAD
+  // TODO: remove script downloading
   app.get("/scripts/:domain/:cdnPath", async (req, res) => {
     try {
       const data = await httpGet(

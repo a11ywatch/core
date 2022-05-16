@@ -1,4 +1,4 @@
-import { generateWebsiteAverage } from "@app/core/controllers/subdomains/update";
+import { generateWebsiteScore } from "@app/core/controllers/subdomains/update";
 import { getWebsite } from "@app/core/controllers/websites";
 import { CRAWL_COMPLETE } from "@app/core/static";
 import { pubsub } from "@app/database/pubsub";
@@ -17,11 +17,17 @@ export async function setWebsiteScore({ domain, userId }) {
       userId,
     });
 
-    const adaScoreAverage = await generateWebsiteAverage({ domain, userId });
+    const issueInfo = await generateWebsiteScore({ domain, userId });
+
+    // persist skip content included etc
+    const prevIssuesInfo = website?.issuesInfo;
 
     await collectionUpsert(
       {
-        adaScoreAverage,
+        issuesInfo: {
+          ...prevIssuesInfo,
+          ...issueInfo,
+        },
       },
       [websiteCollection, !!website],
       {
@@ -37,7 +43,7 @@ export async function setWebsiteScore({ domain, userId }) {
       crawlComplete: {
         userId,
         domain,
-        adaScoreAverage,
+        adaScoreAverage: issueInfo.adaScoreAverage,
       },
     });
 

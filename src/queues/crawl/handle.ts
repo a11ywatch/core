@@ -18,7 +18,7 @@ type Task = {
 };
 
 // if the gRPC request was crawl complete. TODO: seperate method call
-const isGenerateAverageMethod = (meta: Meta) => {
+export const isGenerateAverageMethod = (meta: Meta) => {
   if (meta && typeof meta?.method !== "undefined") {
     return meta.method === Method["crawl_complete"];
   }

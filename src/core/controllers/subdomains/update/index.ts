@@ -1,1 +1,1 @@
-export { generateWebsiteAverage, generateWebsiteAverageIssues } from "./utils";
+export { generateWebsiteScore } from "./utils";

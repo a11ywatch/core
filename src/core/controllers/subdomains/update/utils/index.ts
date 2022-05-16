@@ -1,1 +1,1 @@
-export { generateWebsiteAverage, generateWebsiteAverageIssues } from "./domain";
+export { generateWebsiteScore } from "./domain";

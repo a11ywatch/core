@@ -3,19 +3,19 @@ import { isSameDay } from "date-fns";
 import { SUPER_MODE } from "@app/config/config";
 
 // Determine if user can perform multi-site scan
-export const updateScanAttempt = async ({ userId }) => {
-  let user;
-  let collection;
-
+export const updateScanAttempt = async ({ userId, user, collection }) => {
   // if SUPER_MODE always return truthy
   if (SUPER_MODE) {
     return true;
   }
 
-  try {
-    [user, collection] = await getUser({ id: userId });
-  } catch (e) {
-    console.error(e);
+  // get collection if does not exist
+  if (!user && !collection && typeof userId !== "undefined") {
+    try {
+      [user, collection] = await getUser({ id: userId });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   if (user) {

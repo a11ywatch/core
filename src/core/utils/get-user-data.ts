@@ -2,51 +2,64 @@ import type { User } from "@app/schema";
 import { Request, Response } from "express";
 import { UsersController } from "../controllers";
 import { RATE_EXCEEDED_ERROR } from "../strings";
-import { usageExceededThreshold } from "./get-usage";
-import { getUserFromToken } from "./get-user";
+import { getUserFromToken, extractTokenKey } from "./get-user";
 import { config } from "@app/config/config";
+import { frontendClientOrigin } from "./is-client";
 
 // return a user from id
 const getUserFromId = async (user, keyid) => {
+  let userData;
+  let collectionData;
+
   if (typeof keyid !== "undefined") {
-    const [userData] = await UsersController({
+    const [data, collection] = await UsersController({
       user,
     }).getUser({ id: keyid });
-    return userData;
+
+    userData = data;
+    collectionData = collection;
   }
+
+  return [userData, collectionData];
 };
 
 /*
  * Get the user if auth set or determine if request allowed.
  * This method handles sending headers and will return void next action should not occur.
+ * @return User
  **/
 export const getUserFromApi = async (
   token: string,
   req: Request,
   res: Response
 ): Promise<User> => {
-  // single get user from auth
+  const jwt = extractTokenKey(token ? String(token).trim() : "");
+  const user = getUserFromToken(jwt);
+
+  // the user id from the token
+  const { keyid } = user?.payload ?? {};
+
+  // api key is set [ may not be valid ]
+  const authenticated = typeof keyid !== "undefined";
+
+  // response return data
   let data = {};
 
-  const user = getUserFromToken(token ? String(token).trim() : "");
-
-  const { keyid, audience } = user?.payload ?? {};
-
-  // simply get the user and return
+  // simply get the user and return [no updates on counters]
   if (config.SUPER_MODE) {
-    return (await getUserFromId(user, keyid)) ?? data;
+    const [userData] = await getUserFromId(user, keyid);
+
+    return userData ?? data;
   }
 
   // check if origin is from front-end client simply allow rate limits or super mode
-  const isClient =
-    req.get("origin") === config.CLIENT_URL ||
-    req.get("origin") === config.DOMAIN;
+  const isClient = frontendClientOrigin(req.get("origin"));
 
   // auth required unless front-end client
-  if (!isClient && typeof keyid === "undefined") {
+  if (!isClient && !authenticated) {
     res.status(401);
     res.json({
-      website: null, // TODO: return `data` key instead of website for json response
+      data: null, // TODO: return `data` key instead of website for json response
       message:
         "Authentication required. Add your authentication header and try again.",
       success: false,
@@ -56,54 +69,64 @@ export const getUserFromApi = async (
 
   /// front-end domain allow all besides rate limits
   if (isClient) {
-    if (typeof keyid !== "undefined") {
-      data = await getUserFromId(user, keyid);
+    if (authenticated) {
+      const [userData] = await getUserFromId(user, keyid);
+
+      data = userData;
     }
   } else {
-    const [userData] = await UsersController({
+    const [userData, _, canScan] = await UsersController({
       user,
-    }).updateApiUsage({ id: keyid }, true);
+    }).updateApiUsage({ id: keyid });
 
-    if (userData) {
-      data = userData;
+    // auth required unless front-end client. TODO: validate old keys with current user in DB. jwt === user.jwt.
+    if (jwt && !userData) {
+      res.json({
+        data: null,
+        message: "Error, API token is invalid. Please update your API token.",
+        success: false,
+      });
+      return;
     }
 
     // check usage limits
-    if (
-      usageExceededThreshold({
-        audience,
-        usage: userData?.apiUsage?.usage || 0,
-        usageLimit: userData?.apiUsage?.usageLimit,
-      })
-    ) {
-      res.status(400);
+    if (!canScan) {
       res.json({
-        website: null,
+        data: null,
         message: RATE_EXCEEDED_ERROR,
         success: false,
       });
       return;
+    }
+
+    if (userData) {
+      data = userData;
     }
   }
 
   return data;
 };
 
-// get user from token and db if allowed to perform request otherwise exit
+/*
+ * Get user from token and db if allowed to perform request otherwise exit
+ * Updates multi-site scan attempt counter.
+ * A user id is required to target the website.
+ */
 export const getUserFromApiScan = async (
   token: string,
   _req: Request,
   res: Response
 ): Promise<User> => {
   // single get user from auth
+  const jwt = extractTokenKey(token ? String(token).trim() : "");
 
-  const user = getUserFromToken(token ? String(token).trim() : "");
+  const user = getUserFromToken(jwt);
   const { keyid } = user?.payload ?? {};
 
   if (typeof keyid === "undefined") {
     res.status(401);
     res.json({
-      website: null,
+      data: null,
       message:
         "Authentication required. Add your authentication header and try again.",
       success: false,
@@ -111,16 +134,17 @@ export const getUserFromApiScan = async (
     return;
   }
 
-  const data = (await await getUserFromId(user, keyid)) ?? {};
+  const [userData, collection] = await getUserFromId(user, keyid);
+
+  const data = userData ?? {};
 
   const canScan = await UsersController({
     user,
-  }).updateScanAttempt({ id: keyid }, true);
+  }).updateScanAttempt({ id: keyid, user: data, collection }, true);
 
   if (!config.SUPER_MODE && !canScan) {
-    res.status(400);
     res.json({
-      website: null,
+      data: null,
       message: RATE_EXCEEDED_ERROR,
       success: false,
     });
