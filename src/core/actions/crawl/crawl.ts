@@ -132,6 +132,7 @@ export const crawlPage = async (
         pageUrl,
       });
 
+      // issues array
       const subIssues: Issue[] = pageIssues?.issues ?? [];
       const pageConstainsIssues = subIssues?.length;
 
@@ -147,6 +148,7 @@ export const crawlPage = async (
             userId,
             data: { ...pageIssues, issues: errorIssues },
             confirmedOnly: true,
+            sendEmail: errorIssues?.length,
           });
         }
       }

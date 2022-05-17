@@ -7,7 +7,7 @@ export const getIssue = async (
 ) => {
   try {
     const [collection] = await connect("Issues");
-    const queryUrl = String(url || pageUrl);
+    const queryUrl = decodeURIComponent(String(url || pageUrl));
 
     const searchProps = websiteSearchParams({
       pageUrl: queryUrl,

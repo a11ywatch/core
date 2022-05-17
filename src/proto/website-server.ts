@@ -36,28 +36,30 @@ export const createServer = async () => {
         callback(null, {});
       },
       scan: async (call, callback) => {
-        const pages = call?.request?.pages ?? [];
+        const { pages: p, user_id: userId, domain } = call?.request ?? {};
+
+        const pages = p ?? [];
 
         setImmediate(async () => {
-          if (pages.length > 1) {
-            const userId = call?.request?.user_id;
-            try {
+          try {
+            if (pages.length > 1) {
               const allPageIssues = await crawlMultiSiteQueue({
                 pages,
                 userId,
               });
 
-              // TODO: queue email
+              // TODO: REVISIT  add extra gRPC userID or scan detect flag queue email
               await emailMessager.sendMailMultiPage({
                 userId,
                 data: allPageIssues,
+                domain,
               });
-            } catch (e) {
-              console.error(e);
+              // TODO: send email follow up. REMOVE from section and to cron specific gRPC endpoints or flags
+            } else if (pages.length === 1) {
+              await crawlWebsite({ url: pages[0] });
             }
-            // TODO: send email follow up. REMOVE from section and to cron specific gRPC endpoints or flags
-          } else if (pages.length === 1) {
-            await crawlWebsite({ url: pages[0] });
+          } catch (e) {
+            console.error(e);
           }
         });
         callback(null, {});

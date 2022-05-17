@@ -21,16 +21,28 @@ interface VerifySend {
 // filter errors from issues
 const filterCb = (iss: Issue) => iss?.type === "error";
 
+const updateLastScanDate = async (userId, userCollection) => {
+  try {
+    await userCollection.findOneAndUpdate(
+      { id: userId },
+      { $set: { lastAlertDateStamp: new Date() } }
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 const verifyUserSend = async ({
   userId,
-  confirmedOnly = false,
-  sendEmail = false,
+  confirmedOnly = false, // confirmed only requires user id - non marketing sending.
+  sendEmail = false, // conditional to determine email sending. Without having to use conditionals.
 }: VerifySend) => {
-  let user;
-  let collection;
+  let userResponse;
+  let collectionResponse;
 
-  if (realUser(userId) && sendEmail) {
-    const [u, c] = await getUser({ id: userId });
+  // if the boolean is true the email send is allowed. TODO: remove from section.
+  if (sendEmail && realUser(userId)) {
+    const [user, collection] = await getUser({ id: userId });
 
     const alertsDisabled =
       !user || !user?.alertEnabled || (confirmedOnly && !user?.emailConfirmed);
@@ -40,12 +52,12 @@ const verifyUserSend = async ({
       (!user.lastAlertDateStamp ||
         !isSameDay(user?.lastAlertDateStamp, new Date()))
     ) {
-      user = u;
-      collection = c;
+      userResponse = user;
+      collectionResponse = collection;
     }
   }
 
-  return [user, collection];
+  return [userResponse, collectionResponse];
 };
 
 // refactor to generic email sending [this is for single page scans]
@@ -57,24 +69,22 @@ const sendMail = async ({
     domain: "",
   },
   confirmedOnly = false,
+  sendEmail,
 }: any) => {
-  const issueCount = data?.issues?.issues?.length;
-
   const [findUser, userCollection] = await verifyUserSend({
     userId,
     confirmedOnly,
-    sendEmail: issueCount,
+    sendEmail,
   });
 
   if (findUser) {
     try {
-      await userCollection.findOneAndUpdate(
-        { id: userId },
-        { $set: { lastAlertDateStamp: new Date() } }
-      );
+      await updateLastScanDate(userId, userCollection);
     } catch (e) {
       console.error(e);
     }
+
+    const issueCount = data?.issues?.length;
 
     try {
       await transporter.sendMail(
@@ -101,9 +111,11 @@ const sendMail = async ({
 const sendMailMultiPage = async ({
   userId,
   data,
+  domain,
 }: {
   userId: number;
   data: Website[];
+  domain: string;
 }) => {
   const [findUser, userCollection] = await verifyUserSend({
     userId,
@@ -113,16 +125,12 @@ const sendMailMultiPage = async ({
 
   if (findUser) {
     try {
-      await userCollection.findOneAndUpdate(
-        { id: userId },
-        { $set: { lastAlertDateStamp: new Date() } }
-      );
+      await updateLastScanDate(userId, userCollection);
     } catch (e) {
       console.error(e);
     }
 
     let totalIssues = 0;
-    let domain;
     let issuesTable = "";
 
     for (const page of data) {
@@ -130,17 +138,13 @@ const sendMailMultiPage = async ({
       // @ts-ignore
       const subIssues: Issue[] = pageIssues?.issues ?? [];
 
-      const issueCount = pageIssues?.length;
+      const issueCount = subIssues?.length;
 
       if (subIssues.some(filterCb)) {
         const errorIssues = subIssues.filter(filterCb);
 
-        if (!domain) {
-          domain = page.domain;
-        }
-
         if (issueCount) {
-          totalIssues = totalIssues + errorIssues.length;
+          totalIssues = totalIssues + subIssues.length;
         }
 
         issuesTable =
@@ -156,24 +160,27 @@ const sendMailMultiPage = async ({
       }
     }
 
-    try {
-      await transporter.sendMail(
-        Object.assign({}, mailOptions, {
-          to: findUser.email,
-          subject: `[Report] ${totalIssues} ${pluralize(
-            totalIssues,
-            "issue"
-          )} found with ${domain}.`,
-          html: `<div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
-          ${issuesTable}<br />${footer.marketing({
-            userId,
-            email: findUser?.email,
-          })}`,
-        }),
-        sendMailCallback
-      );
-    } catch (e) {
-      console.error(e);
+    // if errors exist send email
+    if (Number(totalIssues) >= 1) {
+      try {
+        await transporter.sendMail(
+          Object.assign({}, mailOptions, {
+            to: findUser.email,
+            subject: `[Report] ${totalIssues} ${pluralize(
+              totalIssues,
+              "issue"
+            )} found with ${domain}.`,
+            html: `<div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
+            ${issuesTable}<br />${footer.marketing({
+              userId,
+              email: findUser?.email,
+            })}`,
+          }),
+          sendMailCallback
+        );
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };

@@ -44,15 +44,13 @@ export const crawlPageQueue = async (queueSource) => {
  */
 export const crawlMultiSiteQueue = async (queueSource) => {
   let responseData = [];
-  const data = parseData(queueSource);
+  const { pages = [], userId } = queueSource;
 
-  const { pages = [], user_id } = data;
-
-  // get users enqueed for crawl job matching the urls
+  // get users for crawl job matching the urls
   for (const url of pages) {
     let scanResult;
     try {
-      scanResult = await crawlPage({ url, userId: Number(user_id) }, false);
+      scanResult = await crawlPage({ url, userId }, false);
     } catch (e) {
       console.error(e);
     }

@@ -2,7 +2,7 @@ import { URL } from "url";
 
 export const getHostName = (url: string) => {
   try {
-    let q = url;
+    let q = decodeURIComponent(url);
     if (!/^(http|https)/.test(q)) {
       if (q.startsWith("://")) {
         q = `https${q}`;

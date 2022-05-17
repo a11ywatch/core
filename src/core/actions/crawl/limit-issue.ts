@@ -12,35 +12,3 @@ export const limitIssue = (issues: Issue) => {
       .sort(issueSort) || []
   );
 };
-
-// limit the issue records and shape the response API if un-auth
-export const limitResponse = ({
-  authenticated,
-  websiteAdded,
-  issues,
-  pageUrl,
-  script,
-}: {
-  authenticated: boolean;
-  websiteAdded: any;
-  issues: any;
-  pageUrl: string;
-  script: any;
-}): any => {
-  if (!authenticated) {
-    const slicedIssue = limitIssue(issues);
-
-    if (websiteAdded.issuesInfo) {
-      websiteAdded.issuesInfo.limitedCount = slicedIssue.length;
-    }
-
-    return {
-      website: {
-        ...websiteAdded,
-        url: pageUrl,
-        issue: slicedIssue,
-        script,
-      },
-    };
-  }
-};

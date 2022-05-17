@@ -19,7 +19,7 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
     usersPooling ?? (await getActiveUsersCrawling({ userId, urlMap }));
 
   for (const id of usersPool) {
-    await crawlPage({ ...params, userId: Number(id) }, sendEmail);
+    await crawlPage({ ...params, url: urlMap, userId: Number(id) }, sendEmail);
   }
 
   return responseModel({ msgType: ApiResponse.Success });

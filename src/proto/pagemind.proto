@@ -40,13 +40,13 @@ message IssueMeta {
 }
 
 message IssuesInfo {
-   int64 possibleIssuesFixedByCdn = 1;
-   int64 totalIssues = 2;
-   int64 issuesFixedByCdn = 3;
-   int64 errorCount = 4;
-   int64 warningCount = 5;
-   int64 noticeCount = 6;
-   int64 adaScore = 7;
+   int32 possibleIssuesFixedByCdn = 1;
+   int32 totalIssues = 2;
+   int32 issuesFixedByCdn = 3;
+   int32 errorCount = 4;
+   int32 warningCount = 5;
+   int32 noticeCount = 6;
+   int32 adaScore = 7;
    IssueMeta issueMeta = 8;
 }
 
