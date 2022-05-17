@@ -447,6 +447,7 @@ export type User = {
   passwordRequired?: Maybe<Scalars["Boolean"]>;
   alertEnabled?: Maybe<Scalars["Boolean"]>;
   lastAlertSent?: Maybe<Scalars["Int"]>;
+  lastAlertDateStamp?: Maybe<Scalars["Int"]>;
   stripeToken?: Maybe<Scalars["String"]>;
   role?: Maybe<Scalars["Int"]>;
   activeSubscription?: Maybe<Scalars["Boolean"]>;

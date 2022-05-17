@@ -9,7 +9,7 @@ import { initUrl } from "@a11ywatch/website-source-builder";
  **/
 export const scanSimple = async (req: Request, res: Response) => {
   try {
-    const uri = req.body?.websiteUrl || req.body?.url;
+    const uri = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
     const url = stripUrlEndingSlash(initUrl(uri));
 
     // returns truthy if can continue

@@ -1,3 +1,2 @@
-export const realUser = (userId?: number): boolean | number =>
-  typeof userId !== "undefined" &&
-  (Number(userId) < 0 || userId || userId === 0);
+export const realUser = (userId?: number): boolean =>
+  typeof userId !== "undefined";

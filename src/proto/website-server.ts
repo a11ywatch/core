@@ -6,6 +6,7 @@ import { crawlWebsite } from "@app/core/actions";
 
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
+import { emailMessager } from "@app/core/messagers";
 
 let server: Server;
 
@@ -39,10 +40,21 @@ export const createServer = async () => {
 
         setImmediate(async () => {
           if (pages.length > 1) {
-            await crawlMultiSiteQueue({
-              pages,
-              userId: call?.request?.user_id,
-            });
+            const userId = call?.request?.user_id;
+            try {
+              const allPageIssues = await crawlMultiSiteQueue({
+                pages,
+                userId,
+              });
+
+              // TODO: queue email
+              await emailMessager.sendMailMultiPage({
+                userId,
+                data: allPageIssues,
+              });
+            } catch (e) {
+              console.error(e);
+            }
             // TODO: send email follow up. REMOVE from section and to cron specific gRPC endpoints or flags
           } else if (pages.length === 1) {
             await crawlWebsite({ url: pages[0] });

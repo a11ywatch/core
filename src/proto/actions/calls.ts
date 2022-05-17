@@ -1,23 +1,6 @@
-import {
-  pageMindClient,
-  crawlerClient,
-  client,
-  mavClient,
-} from "../website-client";
+import { pageMindClient, crawlerClient, mavClient } from "../website-client";
 
 // perform scan to gRPC -> pagemind for website issues
-export const scanAsync = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    client.scan(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
 export const scan = (website = {}) => {
   return new Promise((resolve, reject) => {
     pageMindClient.scan(website, (error, res) => {
@@ -86,7 +69,6 @@ export const controller = {
   scan,
   crawlerScan,
   crawlerCrawl,
-  scanAsync,
   setScripts,
   parseImg,
 };

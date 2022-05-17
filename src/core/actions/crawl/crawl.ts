@@ -19,7 +19,7 @@ import type { Struct } from "pb-util";
 
 export type CrawlConfig = {
   userId: number; // user id
-  url: string;
+  url: string; // the target url to crawl
   pageInsights?: boolean; // use page insights to get info
   sendSub?: boolean; // use pub sub
 };
@@ -27,7 +27,15 @@ export type CrawlConfig = {
 // filter errors from issues
 const filterCb = (iss: Issue) => iss?.type === "error";
 
-// crawl the url for issues and update collection records Return API RESPONSE
+/**
+ * Send to gRPC pagemind request. Stores data upon return into database.
+ *
+ * Examples:
+ *
+ *     await crawlPage({ url: "https://a11ywatch.com" });
+ *     await crawlPage({ url: "https://a11ywatch.com", sendSub: true }); // send pub sub to front-end client
+ *     await crawlPage({ url: "https://a11ywatch.com", userId: 122, pageInsights: true }); // run request with lighthouse
+ */
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean // determine if email should be sent based on results
@@ -76,7 +84,7 @@ export const crawlPage = async (
       // TODO: SET PAGE OFFLINE DB
       if (!dataSource || !dataSource?.webPage) {
         return resolve(
-          responseModel({ website: null, code: 300, success: false })
+          responseModel({ data: null, code: 300, success: false })
         );
       }
 
@@ -222,7 +230,7 @@ export const crawlPage = async (
       // if flat api return source
       const responseData = {
         data: Object.assign({}, website, updateWebsiteProps, {
-          issues: newIssue,
+          issues: newIssue?.issues,
         }),
       };
 

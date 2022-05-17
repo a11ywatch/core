@@ -6,6 +6,7 @@ import { extractPageData } from "./extract-page-data";
 import { limitIssue } from "./limit-issue";
 import type { PageMindScanResponse } from "@app/schema";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
+import { SUPER_MODE } from "@app/config/config";
 
 type ScanParams = {
   userId?: number;
@@ -13,7 +14,15 @@ type ScanParams = {
   noStore?: boolean;
 };
 
-// Send to gRPC pagemind un-auth request Does not store any values into the DB from request
+/**
+ * Send to gRPC pagemind request. Does not store any values into the DB from request. Full req -> res.
+ *
+ * Examples:
+ *
+ *     await scanWebsite({ url: "https://a11ywatch.com" });
+ *     await scanWebsite({ url: "https://a11ywatch.com", noStore: true }); // prevent storing contents to CDN from pagemind
+ *     await scanWebsite({ url: "https://a11ywatch.com", userId: 122, noStore: true });
+ */
 export const scanWebsite = async ({
   userId,
   url,
@@ -69,13 +78,15 @@ export const scanWebsite = async ({
       const { script, issues, webPage } = extractPageData(dataSource);
 
       let currentIssues;
+      let limitedCount = false;
 
       if (typeof userId !== "undefined") {
-        currentIssues = issues?.issues;
         // add userID to the website TODO: fix pagemind response
+        currentIssues = issues?.issues;
         website.userId = userId;
-      } else {
+      } else if (!SUPER_MODE) {
         currentIssues = limitIssue(issues);
+        limitedCount = true;
       }
 
       const data = Object.assign({}, website, webPage, {
@@ -85,7 +96,7 @@ export const scanWebsite = async ({
       });
 
       // return limited count from scan
-      if (data.issuesInfo && "limitedCount" in data.issuesInfo === false) {
+      if (limitedCount) {
         data.issuesInfo.limitedCount = currentIssues.length;
       }
 

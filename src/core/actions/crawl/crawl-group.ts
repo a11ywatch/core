@@ -18,12 +18,8 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const usersPool =
     usersPooling ?? (await getActiveUsersCrawling({ userId, urlMap }));
 
-  if (usersPool.length) {
-    for (const id of usersPool) {
-      await crawlPage({ ...params, userId: Number(id) }, sendEmail);
-    }
-  } else {
-    await crawlPage(params, sendEmail);
+  for (const id of usersPool) {
+    await crawlPage({ ...params, userId: Number(id) }, sendEmail);
   }
 
   return responseModel({ msgType: ApiResponse.Success });

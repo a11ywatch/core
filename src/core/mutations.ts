@@ -93,6 +93,7 @@ export const Mutation = {
       );
     }
   },
+  // run scans to the pagemind -> browser -> mav -> api
   scanWebsite: async (parent, args, context, info) => {
     const { url } = args;
     const { keyid } = context.user?.payload || defaultPayload;

@@ -8,12 +8,14 @@ export interface Data {
 }
 
 export interface IssuesFound {
-  (data: Data): string;
+  (data: Data, headingElement?: string, hideFooter?: boolean): string;
 }
 
 // return issues as in table form
 const issuesFoundTemplate: IssuesFound = (
-  data = { issues: [], pageUrl: "" }
+  data = { issues: [], pageUrl: "" },
+  headingElement = "h1",
+  hideFooter = false
 ) => {
   let listData = "";
   const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`;
@@ -55,8 +57,15 @@ const issuesFoundTemplate: IssuesFound = (
         tr:hover {background-color: #ddd;}
       </style>
     </head>
-    <h1>${issueCount} ${pluralize(issueCount, "issue")} found for ${page}</h1>
-    <div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
+    <${headingElement || "h1"}>${issueCount} ${pluralize(
+    issueCount,
+    "issue"
+  )} found for ${page}</${headingElement || "h1"}>
+    ${
+      hideFooter
+        ? ""
+        : `<div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>`
+    }
     <div style="overflow:auto;">
       <table class="a11y-view" style="font-family: system-ui, Arial; border-collapse: collapse; table-layout: auto; width: 100%;">
         <tr>
@@ -69,7 +78,11 @@ const issuesFoundTemplate: IssuesFound = (
     <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none;">View Full Details</a>
     <a href="https://a11ywatch.com/reports/${targetUrl}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
     <a href="https://api.a11ywatch.com/api/get-website?q=${hostName}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #000; text-align: center; text-decoration: none;">Download Report</a>
-    <p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>
+    ${
+      hideFooter
+        ? ""
+        : `<p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>`
+    }
 `.trim();
 };
 
