@@ -1,12 +1,14 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
-import { loadProto } from "./website";
 import { crawlMultiSiteQueue } from "@app/queues/crawl/crawl";
 import { crawlWebsite } from "@app/core/actions";
 
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
+import { crawlEmitter } from "@app/event/crawl";
+
+import { loadProto } from "./website";
 
 let server: Server;
 
@@ -49,11 +51,18 @@ export const createServer = async () => {
                 userId,
               });
 
+              crawlEmitter.emit(
+                `crawl-${domain}-${userId || 0}`,
+                domain,
+                allPageIssues
+              );
+
               await emailMessager.sendMailMultiPage({
                 userId,
                 data: allPageIssues,
                 domain,
               });
+
               // TODO: send email follow up. REMOVE from section and to cron specific gRPC endpoints or flags
             } else if (pages.length === 1) {
               await crawlWebsite({ url: pages[0] });

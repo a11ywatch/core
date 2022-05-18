@@ -32,9 +32,6 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
       scanInfo.scanAttempts = 0;
     }
 
-    // increment scan attempt
-    scanInfo.scanAttempts = scanInfo.scanAttempts + 1;
-
     if (!role && scanInfo?.scanAttempts >= 3) {
       return false;
     }
@@ -52,6 +49,8 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
       return false;
     }
 
+    // increment scan attempt
+    scanInfo.scanAttempts = scanInfo.scanAttempts + 1;
     scanInfo.lastScanDate = currentDate;
 
     try {

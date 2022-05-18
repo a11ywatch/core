@@ -52,7 +52,7 @@ import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { httpGet } from "./core/utils";
 import { getUserFromApiScan } from "./core/utils/get-user-data";
-import { watcherCrawl } from "./core/utils/watcher_crawl";
+import { crawlMultiSiteWithEvent } from "./core/utils/multi-site";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
 
@@ -111,6 +111,7 @@ function initServer(): HttpServer[] {
     app.use("/api/get-website", limiter);
     app.use("/api/register", limiter);
     app.use("/api/scan-simple", scanLimiter);
+    app.use("/api/crawl", scanLimiter);
     app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
   }
 
@@ -133,28 +134,34 @@ function initServer(): HttpServer[] {
    */
   app.post("/api/scan-simple", cors(), scanSimple);
   /*
-   * Multi page scan pushed to queue
-   * TODO: Add Event based handling to get pages.
+   * Site wide scan.
+   * Uses Event based handling to get pages max timeout 30s.
    */
   app.post("/api/crawl", cors(), async (req, res) => {
+    if (config.SUPER_MODE) {
+      req.setTimeout(120000 * 10);
+    }
+
     try {
       const userNext = await getUserFromApiScan(
         req.headers.authorization,
         req,
         res
       );
-      if (!!userNext) {
-        const url = req.body?.websiteUrl || req.body?.url;
 
-        setImmediate(async () => {
-          await watcherCrawl({ urlMap: url, userId: userNext.id, scan: true });
+      if (!!userNext) {
+        const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
+
+        const { data, message } = await crawlMultiSiteWithEvent({
+          url,
+          userId: userNext.id,
+          scan: true,
         });
 
         res.json(
           responseModel({
-            data: undefined,
-            message:
-              "Site-wide scan commenced. Check the browser to see results.",
+            data,
+            message,
           })
         );
       }
@@ -227,7 +234,7 @@ function initServer(): HttpServer[] {
 
   server.applyMiddleware({ app, cors: corsOptions });
 
-  let httpServer;
+  let httpServer: HttpServer;
 
   if (process.env.ENABLE_SSL === "true") {
     httpServer = https.createServer(
@@ -268,6 +275,10 @@ const startServer = async () => {
     await startGRPC();
   } catch (e) {
     console.error(e);
+  }
+
+  if (config.SUPER_MODE) {
+    console.log("Application started in SUPER mode. All restrictions removed.");
   }
 
   return new Promise(async (resolve, reject) => {

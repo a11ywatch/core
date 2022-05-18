@@ -77,14 +77,15 @@ export const scanWebsite = async ({
     try {
       const { script, issues, webPage } = extractPageData(dataSource);
 
-      let currentIssues;
+      // Issues.issues returned. Map against
+      let currentIssues = issues?.issues;
       let limitedCount = false;
 
       if (typeof userId !== "undefined") {
-        // add userID to the website TODO: fix pagemind response
-        currentIssues = issues?.issues;
         website.userId = userId;
-      } else if (!SUPER_MODE) {
+      }
+
+      if (!SUPER_MODE && typeof userId === "undefined") {
         currentIssues = limitIssue(issues);
         limitedCount = true;
       }

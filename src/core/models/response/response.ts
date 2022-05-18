@@ -8,16 +8,18 @@ const responseModel = (
     success: true,
   }
 ): ResponseModel => {
-  let message;
+  let message = extra?.message;
   let code;
 
-  switch (msgType) {
-    case ApiResponse.NotFound:
-      message = WEBSITE_NOT_FOUND;
-      break;
-    default:
-      message = CRAWLER_FINISHED;
-      break;
+  if (!message) {
+    switch (msgType) {
+      case ApiResponse.NotFound:
+        message = WEBSITE_NOT_FOUND;
+        break;
+      default:
+        message = CRAWLER_FINISHED;
+        break;
+    }
   }
 
   // for gQL

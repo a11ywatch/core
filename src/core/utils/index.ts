@@ -19,3 +19,4 @@ export { httpGet } from "./http-get";
 export { getUserFromApi } from "./get-user-data";
 export { pluralize } from "./pluralize";
 export { jsonParse } from "./json-parse";
+export { crawlMultiSiteWithEvent } from "./multi-site";
