@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { pubsub } from "@app/database/pubsub";
 import { Channels } from "@app/database/config";
 
-// send a redis PUB SUB message to queue for scan
+// TODO: remove pub sub
 export const crawlQueue = async (data) => {
   if (data) {
     try {

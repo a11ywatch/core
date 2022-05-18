@@ -1,3 +1,6 @@
+import { User } from "@app/schema";
+import { getDay, subHours } from "date-fns";
+
 export function userParams({
   id,
   email,
@@ -23,3 +26,14 @@ export function userParams({
 
   return searchProps;
 }
+
+// determine if user can send email based on filter days @returns boolean
+export const getEmailAllowedForDay = (user: User) => {
+  const { alertEnabled, emailFilteredDates } = user;
+  const emailAvailable = alertEnabled && Array.isArray(emailFilteredDates);
+
+  // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
+  return emailAvailable
+    ? !emailFilteredDates.includes(getDay(subHours(new Date(), 12)))
+    : true;
+};

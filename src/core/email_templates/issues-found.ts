@@ -51,12 +51,16 @@ const issuesFoundTemplate: IssuesFound = (
   const issueCount = data?.issues?.length;
 
   return `
-    <head>
+    ${
+      hideFooter
+        ? `<head>
       <style>
         tr:nth-child(even){background-color: #f2f2f2;}
         tr:hover {background-color: #ddd;}
       </style>
-    </head>
+    </head>`
+        : ""
+    }
     <${headingElement || "h1"}>${issueCount} ${pluralize(
     issueCount,
     "issue"

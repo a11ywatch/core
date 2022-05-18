@@ -39,7 +39,6 @@ import {
   root,
   unSubEmails,
   getWebsite,
-  websiteCrawl,
 } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
@@ -135,6 +134,7 @@ function initServer(): HttpServer[] {
   app.post("/api/scan-simple", cors(), scanSimple);
   /*
    * Multi page scan pushed to queue
+   * TODO: Add Event based handling to get pages.
    */
   app.post("/api/crawl", cors(), async (req, res) => {
     try {
@@ -143,40 +143,16 @@ function initServer(): HttpServer[] {
         req,
         res
       );
-      // add crawl to queue
       if (!!userNext) {
-        // TODO: validate data
-        await websiteCrawl(req, res);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  });
+        const url = req.body?.websiteUrl || req.body?.url;
 
-  /*
-   * Multi page scan directly [TODO:] remove for single crawl endpoint at v1
-   */
-  app.post("/api/scan-all", cors(), async (req, res) => {
-    try {
-      /*
-       * Get the user if auth set or determine if request allowed.
-       * This method handles sending headers and will return void next action should not occur.
-       **/
-      const userNext = await getUserFromApiScan(
-        req.headers.authorization,
-        req,
-        res
-      );
-
-      if (!!userNext) {
         setImmediate(async () => {
-          const url = req.body?.websiteUrl || req.body?.url;
-
           await watcherCrawl({ urlMap: url, userId: userNext.id, scan: true });
         });
+
         res.json(
           responseModel({
-            website: undefined,
+            data: undefined,
             message:
               "Site-wide scan commenced. Check the browser to see results.",
           })
@@ -221,7 +197,9 @@ function initServer(): HttpServer[] {
     const { password } = req.body;
     try {
       if (password === process.env.ADMIN_PASSWORD) {
-        await crawlAllAuthedWebsitesCluster();
+        setImmediate(async () => {
+          await crawlAllAuthedWebsitesCluster();
+        });
         res.send(true);
       } else {
         res.send(false);

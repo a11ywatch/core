@@ -7,7 +7,7 @@ export const watcherCrawl = async ({ urlMap, userId, scan = false }) => {
   const method = scan ? "crawlerScan" : "crawlerCrawl"; // either real time links or gather all until
 
   try {
-    await controller[method]({
+    return await controller[method]({
       url,
       id: userId,
     });

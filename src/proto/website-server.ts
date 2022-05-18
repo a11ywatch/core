@@ -28,10 +28,10 @@ export const createServer = async () => {
       scanEnd: async (call, callback) => {
         // temp remove immediate for non-blocking Crawler
         setImmediate(async () => {
-          // add delay of 400ms to assume the last page has finished scanning. [TODO: remove delays and better handle async followup via stream]
+          // add delay of 500ms to assume the last page has finished scanning. [TODO: remove delays and better handle async followup via stream]
           setTimeout(async () => {
             await crawlTrackerComplete(call.request);
-          }, 400);
+          }, 500);
         });
         callback(null, {});
       },
@@ -42,13 +42,13 @@ export const createServer = async () => {
 
         setImmediate(async () => {
           try {
+            // TODO: REVISIT  add extra gRPC userID or scan detect flag queue email
             if (pages.length > 1) {
               const allPageIssues = await crawlMultiSiteQueue({
                 pages,
                 userId,
               });
 
-              // TODO: REVISIT  add extra gRPC userID or scan detect flag queue email
               await emailMessager.sendMailMultiPage({
                 userId,
                 data: allPageIssues,

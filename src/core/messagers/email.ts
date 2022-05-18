@@ -11,6 +11,8 @@ import {
 import { issuesFoundTemplate } from "../email_templates";
 import { getUser } from "../controllers/users";
 import { Issue, Website } from "@app/schema";
+import { DEV } from "@app/config";
+import { getEmailAllowedForDay } from "@app/core/utils/filters";
 
 interface VerifySend {
   userId?: number;
@@ -44,16 +46,20 @@ const verifyUserSend = async ({
   if (sendEmail && realUser(userId)) {
     const [user, collection] = await getUser({ id: userId });
 
-    const alertsDisabled =
-      !user || !user?.alertEnabled || (confirmedOnly && !user?.emailConfirmed);
+    const userAlertsDisabled = !user || !user?.alertEnabled; // user alerts set to disabled.
+    const confirmedOnlyUsers = confirmedOnly && !user?.emailConfirmed; // user email is not confirmed.
 
-    if (
-      !alertsDisabled &&
-      (!user.lastAlertDateStamp ||
-        !isSameDay(user?.lastAlertDateStamp, new Date()))
-    ) {
-      userResponse = user;
-      collectionResponse = collection;
+    const alertsDisabled = userAlertsDisabled || confirmedOnlyUsers; // if  user alerts disabled or email confirmed do not send.
+
+    if (!alertsDisabled && getEmailAllowedForDay(user)) {
+      // if not the same day from last email
+      if (
+        !user.lastAlertDateStamp ||
+        !isSameDay(user?.lastAlertDateStamp, new Date())
+      ) {
+        userResponse = user;
+        collectionResponse = collection;
+      }
     }
   }
 
@@ -73,7 +79,7 @@ const sendMail = async ({
 }: any) => {
   const [findUser, userCollection] = await verifyUserSend({
     userId,
-    confirmedOnly,
+    confirmedOnly: DEV ? false : confirmedOnly,
     sendEmail,
   });
 
@@ -117,13 +123,13 @@ const sendMailMultiPage = async ({
   data: Website[];
   domain: string;
 }) => {
-  const [findUser, userCollection] = await verifyUserSend({
+  const [user, userCollection] = await verifyUserSend({
     userId,
-    confirmedOnly: true,
+    confirmedOnly: DEV ? false : true,
     sendEmail: true,
   });
 
-  if (findUser) {
+  if (user) {
     try {
       await updateLastScanDate(userId, userCollection);
     } catch (e) {
@@ -134,17 +140,14 @@ const sendMailMultiPage = async ({
     let issuesTable = "";
 
     for (const page of data) {
-      const pageIssues = page?.issues;
-      // @ts-ignore
-      const subIssues: Issue[] = pageIssues?.issues ?? [];
+      const issues = page?.issues ?? [];
+      const issueCount = issues?.length;
 
-      const issueCount = subIssues?.length;
-
-      if (subIssues.some(filterCb)) {
-        const errorIssues = subIssues.filter(filterCb);
+      if (issues.some(filterCb)) {
+        const errorIssues = issues.filter(filterCb);
 
         if (issueCount) {
-          totalIssues = totalIssues + subIssues.length;
+          totalIssues = totalIssues + errorIssues.length;
         }
 
         issuesTable =
@@ -165,15 +168,22 @@ const sendMailMultiPage = async ({
       try {
         await transporter.sendMail(
           Object.assign({}, mailOptions, {
-            to: findUser.email,
+            to: user.email,
             subject: `[Report] ${totalIssues} ${pluralize(
               totalIssues,
               "issue"
             )} found with ${domain}.`,
-            html: `<div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
+            html: `
+            <head>
+              <style>
+                tr:nth-child(even){background-color: #f2f2f2;}
+                tr:hover {background-color: #ddd;}
+              </style>
+            </head>
+            <div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
             ${issuesTable}<br />${footer.marketing({
               userId,
-              email: findUser?.email,
+              email: user?.email,
             })}`,
           }),
           sendMailCallback

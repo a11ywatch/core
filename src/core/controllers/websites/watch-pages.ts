@@ -1,7 +1,8 @@
-import { getDay, subHours } from "date-fns";
 import { crawlPage } from "@app/core/actions";
 import { getUser } from "@app/core/controllers/users";
 import { watcherCrawl } from "@app/core/utils/watcher_crawl";
+import { Website } from "@app/schema";
+import { getEmailAllowedForDay } from "@app/core/utils/filters";
 
 type Page = {
   userId?: number;
@@ -9,7 +10,9 @@ type Page = {
 };
 
 // run a set of websites and get issues [DAILY CRON]
-export async function websiteWatch(pages: Page[] = []): Promise<void> {
+export async function websiteWatch(
+  pages: Page[] | Website[] = []
+): Promise<void> {
   if (pages && Array.isArray(pages)) {
     for (const website of pages) {
       const { userId, url } = website;
@@ -22,15 +25,8 @@ export async function websiteWatch(pages: Page[] = []): Promise<void> {
       }
 
       if (user) {
-        const { alertEnabled, emailFilteredDates } = user;
-
-        const emailAvailable =
-          alertEnabled && Array.isArray(emailFilteredDates);
-
         // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
-        const sendEmail = emailAvailable
-          ? !emailFilteredDates.includes(getDay(subHours(new Date(), 12)))
-          : true;
+        const sendEmail = getEmailAllowedForDay(user);
 
         try {
           // TODO: move to queue
@@ -45,7 +41,6 @@ export async function websiteWatch(pages: Page[] = []): Promise<void> {
               sendEmail
             );
           } else {
-            console.log("running watching crawl #e");
             await watcherCrawl({ urlMap: url, userId, scan: false });
           }
         } catch (e) {
