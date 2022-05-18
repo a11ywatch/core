@@ -57,9 +57,8 @@ export const getUserFromApi = async (
 
   // auth required unless front-end client
   if (!isClient && !authenticated) {
-    res.status(401);
     res.json({
-      data: null, // TODO: return `data` key instead of website for json response
+      data: null,
       message:
         "Authentication required. Add your authentication header and try again.",
       success: false,
@@ -119,16 +118,17 @@ export const getUserFromApiScan = async (
 ): Promise<User> => {
   // single get user from auth
   const jwt = extractTokenKey(token ? String(token).trim() : "");
-
   const user = getUserFromToken(jwt);
+
   const { keyid } = user?.payload ?? {};
 
-  if (typeof keyid === "undefined") {
+  // auth required unless SUPER MODE
+  if (typeof keyid === "undefined" && !config.SUPER_MODE) {
     res.status(401);
     res.json({
       data: null,
       message:
-        "Authentication required. Add your authentication header and try again.",
+        "Authentication required. Add your Authorization header and try again.",
       success: false,
     });
     return;
@@ -136,11 +136,14 @@ export const getUserFromApiScan = async (
 
   const [userData, collection] = await getUserFromId(user, keyid);
 
-  const data = userData ?? {};
+  // if SUPER mode allow request reguardless of scans
+  if (config.SUPER_MODE) {
+    return userData || {};
+  }
 
   const canScan = await UsersController({
     user,
-  }).updateScanAttempt({ id: keyid, user: data, collection }, true);
+  }).updateScanAttempt({ id: keyid, user: userData, collection }, true);
 
   if (!config.SUPER_MODE && !canScan) {
     res.json({
@@ -151,5 +154,5 @@ export const getUserFromApiScan = async (
     return;
   }
 
-  return data;
+  return userData;
 };

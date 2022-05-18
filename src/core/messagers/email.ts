@@ -118,15 +118,17 @@ const sendMailMultiPage = async ({
   userId,
   data,
   domain,
+  sendEmail = true,
 }: {
   userId: number;
   data: Website[];
   domain: string;
+  sendEmail?: boolean;
 }) => {
   const [user, userCollection] = await verifyUserSend({
     userId,
     confirmedOnly: DEV ? false : true,
-    sendEmail: true,
+    sendEmail,
   });
 
   if (user) {

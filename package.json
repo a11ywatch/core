@@ -67,7 +67,7 @@
     "prettier": "^2.2.1",
     "supertest": "^6.1.1",
     "ts-node-dev": "^1.1.6",
-    "tsc-alias": "^1.6.3",
+    "tsc-alias": "1.6.3",
     "tsconfig-paths": "^3.9.0",
     "typescript": "4.2.4",
     "typescript-eslint": "0.0.1-alpha.0"
