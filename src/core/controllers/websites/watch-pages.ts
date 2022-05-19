@@ -13,40 +13,43 @@ type Page = {
 export async function websiteWatch(
   pages: Page[] | Website[] = []
 ): Promise<void> {
-  if (pages && Array.isArray(pages)) {
-    for (const website of pages) {
-      const { userId, url } = website;
+  if (pages && Array.isArray(!pages)) {
+    return Promise.resolve(null);
+  }
 
-      let user;
+  for (const website of pages) {
+    const { userId, url } = website;
+
+    let user;
+    try {
+      [user] = await getUser({ id: userId });
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (!user) {
+      continue;
+    }
+
+    // TODO: move to queue
+    if (user.role === 0) {
       try {
-        [user] = await getUser({ id: userId });
+        await crawlPage(
+          {
+            url,
+            userId,
+            pageInsights: false,
+            sendSub: false,
+          },
+          getEmailAllowedForDay(user)
+        );
       } catch (e) {
         console.error(e);
       }
-
-      if (user) {
-        // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
-        const sendEmail = getEmailAllowedForDay(user);
-
-        try {
-          // TODO: move to queue
-          if (user.role === 0) {
-            await crawlPage(
-              {
-                url,
-                userId,
-                pageInsights: false,
-                sendSub: false,
-              },
-              sendEmail
-            );
-          } else {
-            await watcherCrawl({ urlMap: url, userId, scan: false });
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    } else {
+      setImmediate(async () => {
+        await watcherCrawl({ urlMap: url, userId, scan: false });
+      });
     }
   }
 }

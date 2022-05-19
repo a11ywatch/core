@@ -43,8 +43,8 @@ export const crawlPageQueue = async (queueSource) => {
  * Returns the scan results for all pages
  */
 export const crawlMultiSiteQueue = async (queueSource) => {
-  let responseData = [];
   const { pages = [], userId } = queueSource;
+  let responseData = [];
 
   // get users for crawl job matching the urls
   for (const url of pages) {

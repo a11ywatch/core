@@ -84,7 +84,12 @@ export const crawlPage = async (
       // TODO: SET PAGE OFFLINE DB
       if (!dataSource || !dataSource?.webPage) {
         return resolve(
-          responseModel({ data: null, code: 300, success: false })
+          responseModel({
+            data: null,
+            code: 300,
+            success: false,
+            message: "Web site had issues during scan and may be offline.",
+          })
         );
       }
 
@@ -232,7 +237,7 @@ export const crawlPage = async (
       // if flat api return source
       const responseData = {
         data: Object.assign({}, website, updateWebsiteProps, {
-          issues: newIssue?.issues,
+          issues: subIssues,
         }),
       };
 

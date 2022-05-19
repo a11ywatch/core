@@ -38,36 +38,58 @@ export const createServer = async () => {
         callback(null, {});
       },
       scan: async (call, callback) => {
-        const { pages: p, user_id: userId, domain } = call?.request ?? {};
+        const { pages: p, user_id: userId, domain, full } = call?.request ?? {};
 
         const pages = p ?? [];
 
         setImmediate(async () => {
-          try {
-            // TODO: REVISIT  add extra gRPC userID or scan detect flag queue email
-            if (pages.length > 1) {
-              const allPageIssues = await crawlMultiSiteQueue({
+          // full scan was commenced and all links are sent.
+          if (full) {
+            let allPageIssues = [];
+            let sendEmail = false;
+
+            try {
+              // all page issues
+              allPageIssues = await crawlMultiSiteQueue({
                 pages,
                 userId,
               });
+            } catch (e) {
+              console.error(e);
+            }
 
-              const sendEmail = crawlEmitter.emit(
+            try {
+              // determine if email should be send if not event
+              sendEmail = crawlEmitter.emit(
                 `crawl-${domain}-${userId || 0}`,
                 domain,
                 allPageIssues
               );
+            } catch (e) {
+              console.error(e);
+            }
 
+            try {
               await emailMessager.sendMailMultiPage({
                 userId,
                 data: allPageIssues,
                 domain,
                 sendEmail: !sendEmail, // if the event did not emit send email from CRON.
               });
-            } else if (pages.length === 1) {
-              await crawlWebsite({ url: pages[0] });
+            } catch (e) {
+              console.error(e);
             }
-          } catch (e) {
-            console.error(e);
+
+            return;
+          }
+
+          // Single link sent real time. TODO: add events for stream api/crawl-stream endpoint.
+          if (pages.length === 1) {
+            try {
+              await crawlWebsite({ url: pages[0] });
+            } catch (e) {
+              console.error(e);
+            }
           }
         });
         callback(null, {});

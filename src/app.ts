@@ -55,6 +55,7 @@ import { getUserFromApiScan } from "./core/utils/get-user-data";
 import { crawlMultiSiteWithEvent } from "./core/utils/multi-site";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
+import { clearInterval } from "timers";
 
 const { GRAPHQL_PORT } = config;
 
@@ -166,6 +167,68 @@ function initServer(): HttpServer[] {
     }
   });
 
+  /*
+   * Site wide scan handles via stream.
+   * Uses Event based handling to get pages max timeout 30s.
+   * Sends a scan in progress response every 500ms.
+   * TODO: use real time crawl API for response feedback on crawl.
+   */
+  app.post("/api/crawl-stream", cors(), async (req, res) => {
+    try {
+      const userNext = await getUserFromApiScan(
+        req.headers.authorization,
+        req,
+        res
+      );
+
+      if (!!userNext) {
+        const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+        });
+
+        res.write("[");
+
+        // remove interval for EVENT emmiter.
+        const streamInterval = setInterval(() => {
+          res.write(
+            `${JSON.stringify({
+              data: null,
+              message: "scan in progress...",
+              success: true,
+              code: 200,
+            })},`
+          );
+        }, 250);
+
+        const { data, message } = await crawlMultiSiteWithEvent({
+          url,
+          userId: userNext.id,
+          scan: false,
+        });
+
+        if (streamInterval) {
+          clearInterval(streamInterval);
+        }
+
+        res.write(
+          JSON.stringify(
+            responseModel({
+              data,
+              message,
+            })
+          )
+        );
+
+        res.write("]");
+        res.end();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
   // email confirmation route
@@ -254,8 +317,9 @@ function initServer(): HttpServer[] {
   });
 
   if (process.env.NODE_ENV !== "test") {
+    // compatability with heroku dynos if deployed.
     if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-      new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+      new CronJob("0 9,23 * * *", crawlAllAuthedWebsitesCluster).start();
     }
   }
 
