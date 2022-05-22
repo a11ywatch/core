@@ -146,6 +146,7 @@ export const crawlPage = async (
           await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
         }
 
+        // send email if issues of type error exist for the page.
         if (sendEmail && subIssues.some(filterCb)) {
           const errorIssues = subIssues.filter(filterCb);
           // TODO: queue email
@@ -216,11 +217,14 @@ export const crawlPage = async (
         [analyticsCollection, analytics]
       ); // ANALYTICS
 
-      await collectionUpsert(newIssue, [
-        issuesCollection,
-        issueExist,
-        !pageConstainsIssues,
-      ]); // ISSUES COLLECTION
+      // Add to Issues collection if page contains issues or if record should update/delete.
+      if (pageConstainsIssues || issueExist) {
+        await collectionUpsert(newIssue, [
+          issuesCollection,
+          issueExist,
+          !pageConstainsIssues,
+        ]); // ISSUES COLLECTION
+      }
 
       if (scriptsEnabled) {
         await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION

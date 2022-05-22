@@ -30,12 +30,10 @@ export const collectionUpsert = async (
       }
     }
 
-    // mainly if issues exist and theres none on the page (delete the collection)
     if (shouldUpdate && shouldDelete) {
+      // delete the record when update & delete
       return await collection.deleteOne(queryParams);
-    }
-
-    if (!shouldUpdate) {
+    } else if (!shouldUpdate) {
       return await collection.insertOne(source);
     } else if (shouldUpdate === "many") {
       return await collection.updateMany(queryParams, { $set: source });
