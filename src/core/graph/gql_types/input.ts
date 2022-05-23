@@ -1,13 +1,13 @@
-export const input = `
+import gql from "graphql-tag";
 
-    input CreatePageHeaders {
-      key: String!
-      value: String!
-    }
+export const input = gql`
+  input CreatePageHeaders {
+    key: String!
+    value: String!
+  }
 
-    input ScriptMetaInput {
-      skipContentEnabled: Boolean
-      translateEnabled: Boolean
-    }
-
+  input ScriptMetaInput {
+    skipContentEnabled: Boolean
+    translateEnabled: Boolean
+  }
 `;

@@ -38,3 +38,17 @@ export const getDomain = async (
     console.error(e);
   }
 };
+
+// get all the pages in the database
+export const getAllPages = async () => {
+  try {
+    const [collection] = await connect("SubDomains");
+
+    // TODO: ADD PAGINATION
+    const websites = await collection.find({}).limit(0).toArray();
+
+    return [websites, collection];
+  } catch (e) {
+    console.error(e);
+  }
+};

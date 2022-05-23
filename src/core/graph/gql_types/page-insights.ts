@@ -1,6 +1,8 @@
+import gql from "graphql-tag";
+
 // SEND RAW JSON OBJECT FOR NOW
-export const pageInsights = `
-	type PageInsights {
-        json: String
-	}
+export const pageInsights = gql`
+  type PageInsights {
+    json: String
+  }
 `;

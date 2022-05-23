@@ -28,6 +28,7 @@ message ScanParams {
    string hideElements = 11; // CSS selector to hide elements from testing, selectors can be comma separated.
 }
 
+// upsert script params
 message ScriptParams {
    bool editScript = 1;
    string url = 2;
@@ -35,10 +36,12 @@ message ScriptParams {
    string newScript = 4;
 }
 
+// meta details for the page to include extra supportive features. 
 message IssueMeta {
-   bool skipContentIncluded = 1;
+   bool skipContentIncluded = 1; // add a skip content button onto the script if not found.
 }
 
+// info to use to gather all stats for the issues on the page.
 message IssuesInfo {
    int32 possibleIssuesFixedByCdn = 1;
    int32 totalIssues = 2;
@@ -50,16 +53,18 @@ message IssuesInfo {
    IssueMeta issueMeta = 8;
 }
 
+// how fast the page loaded.
 message PageLoadTime {
    int64 duration = 1;
    string durationFormated = 2;
    string color = 3;
 }
 
+// page model of all helpful insight
 message Page {
    string domain = 1;
    string url = 2;  
-   int64 adaScore = 3;
+   int64 adaScore = 3; // TODO: remove top level score for issuesInfo usage.
    bool cdnConnected = 4;
    PageLoadTime pageLoadTime = 5;
    google.protobuf.Struct insight = 6; // the json details from lighthouse
@@ -67,21 +72,23 @@ message Page {
    string lastScanDate = 8;  
 }
 
+// the issue that occured, either of type error, notice, warning in desc order.
 message Problem {
    string code = 1;
    string type = 2;
-   int64 typeCode = 3;
+   int32 typeCode = 3; // TODO convert to int32.
    string message = 4;
    string context = 5;
    string selector = 6;
    string runner = 7;
+   int32 recurrence = 8;
 }
 
 message Issues {
-   string documentTitle = 1;
-   string pageUrl = 2;
-   repeated Problem issues = 3;
-   string domain = 4;
+   string documentTitle = 1; // document page title
+   string pageUrl = 2; // the page url for the issue report
+   repeated Problem issues = 3; // all of the issues that occured on the page
+   string domain = 4; // the domain of the page.
 }
 
 message Script {
@@ -94,6 +101,7 @@ message Script {
    IssueMeta issueMeta = 7;
 }
 
+// fields that build that Website that is treated as a Page.
 message Web {
    Page webPage = 1;
    Issues issues = 2;

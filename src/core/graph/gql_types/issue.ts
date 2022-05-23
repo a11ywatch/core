@@ -9,6 +9,7 @@ export const issue = gql`
     type: String
     selector: String
     typeCode: Int
+    recurrence: Int
   }
 
   type Issue {

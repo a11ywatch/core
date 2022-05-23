@@ -319,7 +319,7 @@ function initServer(): HttpServer[] {
   if (process.env.NODE_ENV !== "test") {
     // compatability with heroku dynos if deployed.
     if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-      new CronJob("0 9,23 * * *", crawlAllAuthedWebsitesCluster).start();
+      new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
     }
   }
 
