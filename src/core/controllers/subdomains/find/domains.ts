@@ -24,6 +24,8 @@ export const getDomains = async (
   }
 };
 
+// Get the page from the collection
+// @example await getDomain({userID: 2}) // returns Pages collection and not Website
 export const getDomain = async (
   { userId, url }: { userId?: number; url?: string },
   chain?: boolean

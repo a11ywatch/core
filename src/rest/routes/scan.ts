@@ -15,10 +15,10 @@ export const scanSimple = async (req: Request, res: Response) => {
       const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
       const userId = userNext?.id;
 
-      let data = {};
+      let resData = {};
 
       if (typeof userId !== "undefined") {
-        data = await crawlPage(
+        resData = await crawlPage(
           {
             url,
             userId,
@@ -26,14 +26,14 @@ export const scanSimple = async (req: Request, res: Response) => {
           false
         );
       } else {
-        data = await scanWebsite({
+        resData = await scanWebsite({
           url,
           noStore: true,
           userId,
         });
       }
 
-      res.json(data);
+      res.json(resData);
     }
   } catch (e) {
     console.error(e);

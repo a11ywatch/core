@@ -22,26 +22,6 @@ export const getWebsite = async ({
   }
 };
 
-export const getWebsitesCrawler = async (
-  { userId, domain }: { userId?: any; domain?: string },
-  chain?: boolean
-): Promise<Website[] | [Website[], any]> => {
-  try {
-    const [collection] = await connect("Websites");
-    const websites = await collection
-      .find({
-        domain,
-        userId: typeof userId !== "undefined" ? userId : { $gt: 0 },
-      })
-      .limit(100)
-      .toArray();
-
-    return chain ? [websites, collection] : websites;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
 /*
  * Get all the current users of the application
  * @param [userLimit] a limit of users count: number
@@ -76,24 +56,50 @@ export const getWebsitesWithUsers = async (
  * [Promise]: Partial<Website[]>
  */
 export const getWebsitesPaginated = async (
-  limit = 20,
+  limit: number = 20,
   filter = {},
-  page = 0
+  page = 0, // page in collection
+  offset?: number // use offset to skip
 ): Promise<[Website[], any]> => {
+  let data;
+  let collection;
+
   try {
-    const [collection] = await connect("Websites");
-    return [
-      await collection
-        .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
-        .project({ url: 1, userId: 1 })
-        .limit(limit)
-        .skip(limit * page)
-        .toArray(),
-      collection,
-    ];
+    [collection] = await connect("Websites");
   } catch (e) {
     console.error(e);
-    return [null, null];
+  }
+
+  try {
+    data = await collection
+      .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
+      .project({ url: 1, userId: 1 })
+      .limit(limit)
+      .skip(offset ?? limit * page)
+      .toArray();
+  } catch (e) {
+    console.error(e);
+  }
+
+  return [data, collection];
+};
+
+// get websites for a user with pagination offsets.
+export const getWebsitesPaging = async (
+  { userId, limit = 3, offset = 0 },
+  chain?: boolean
+) => {
+  try {
+    const [collection] = await connect("Websites");
+    const websites = await collection
+      .find({ userId })
+      .limit(limit)
+      .skip(offset)
+      .toArray();
+
+    return chain ? [websites, collection] : websites;
+  } catch (e) {
+    console.error(e);
   }
 };
 

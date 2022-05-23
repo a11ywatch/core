@@ -28,7 +28,7 @@ export const user = gql`
     activeSubscription: Boolean
     emailConfirmed: Boolean
     emailFilteredDates: [Int]
-    websites: [Website]
+    websites(limit: Int = 0, offset: Int = 0): [Website]
     profileVisible: Boolean
     history: [History]
     scanInfo: ScanInformation

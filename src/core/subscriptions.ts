@@ -2,7 +2,6 @@ import {
   emailVerified,
   issueAdded,
   websiteAdded,
-  subDomainAdded,
   websiteRemoved,
   crawlComplete,
 } from "./graph/subscriptions";
@@ -10,7 +9,6 @@ import {
 export const Subscription = {
   emailVerified,
   issueAdded,
-  subDomainAdded,
   websiteAdded,
   websiteRemoved,
   crawlComplete,

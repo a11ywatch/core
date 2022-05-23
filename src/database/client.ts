@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, Collection } from "mongodb";
 import { config } from "../config/config";
 
 const createClient = (): MongoClient => {
@@ -13,7 +13,6 @@ const createClient = (): MongoClient => {
 };
 
 let client: MongoClient; // shared client across application
-let connection;
 
 const initDbConnection = async () => {
   try {
@@ -23,17 +22,20 @@ const initDbConnection = async () => {
   }
   try {
     client = createClient();
-    connection = await client?.connect();
+    client = await client?.connect();
   } catch (e) {
     console.error(e);
   }
 };
 
-const connect = async (collectionType = "Websites") => {
-  let collection = [];
+// @return [collection, client]  a MongoDb Collection to use and the top level client? TODO: refactor
+const connect = async (
+  collectionType = "Websites"
+): Promise<[Collection, MongoClient]> => {
+  let collection: Collection<any>;
 
   try {
-    const db = await connection?.db(config.DB_NAME);
+    const db = await client?.db(config.DB_NAME);
     collection = await db?.collection(collectionType);
   } catch (e) {
     console.error(e);
@@ -42,9 +44,14 @@ const connect = async (collectionType = "Websites") => {
   return [collection, client];
 };
 
-// detect if client is connected
-const isConnected = () =>
-  client && client.topology && client.topology?.isConnected();
+// detect if client is connected use back compat topology
+const isConnected = () => {
+  if (client && "topology" in client) {
+    // @ts-ignore
+    return client && client.topology && client.topology?.isConnected();
+  }
+  return client?.isConnected();
+};
 
 const closeDbConnection = async () => {
   try {

@@ -7,7 +7,7 @@ export const website = gql`
   }
 
   type Website {
-    id: ID
+    _id: ID
     url: String
     user: User
     userId: Int

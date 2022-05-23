@@ -44,6 +44,7 @@ export const generateWebsiteScore = async ({
 }: ScoreProps) => {
   let pages = [];
   try {
+    // TODO: use paginated recursive call.
     pages = await getAllPages({
       domain,
       userId,
@@ -104,13 +105,16 @@ export const generateWebsiteScore = async ({
   const avgScore = isNaN(averageItems) || perfectScore ? 100 : averageItems;
 
   return {
-    adaScoreAverage: Math.round(avgScore),
-    possibleIssuesFixedByCdn: websitePossibleIssuesFixedByCdn,
-    totalIssues: websiteErrors + websiteWarnings + websiteNotices,
-    issuesFixedByCdn: websiteIssuesFixedByCdn,
-    // issue counters
-    errorCount: websiteErrors,
-    warningCount: websiteWarnings,
-    noticeCount: websiteNotices,
+    issueInfo: {
+      adaScoreAverage: Math.round(avgScore),
+      possibleIssuesFixedByCdn: websitePossibleIssuesFixedByCdn,
+      totalIssues: websiteErrors + websiteWarnings + websiteNotices,
+      issuesFixedByCdn: websiteIssuesFixedByCdn,
+      // issue counters
+      errorCount: websiteErrors,
+      warningCount: websiteWarnings,
+      noticeCount: websiteNotices,
+    },
+    pageCount: pages.length,
   };
 };

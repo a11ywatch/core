@@ -59,18 +59,20 @@ export const scanWebsite = async ({
     console.error(e);
   }
 
+  // an issue occured with the request in general.
   if (!dataSource) {
     return responseModel();
   }
 
+  // handled successful but, page did not exist or rendered to slow.
   if (!dataSource?.webPage) {
-    return {
-      website: null,
-      code: 300,
+    return responseModel({
+      data: null,
+      statusCode: ApiResponse.BadRequest,
       success: false,
       message:
-        "Website timeout exceeded threshhold for scan, website rendered too slow over 15000 ms",
-    };
+        "Website timeout, rendered too slow over 25000 ms or not at all. Check your url and try again.",
+    });
   }
 
   return new Promise((resolve, reject) => {

@@ -2,10 +2,10 @@ const WebsiteModel = {
   userId: undefined,
   url: "",
   domain: "",
-  adaScore: undefined,
+  adaScore: 100,
   cdnConnected: false,
   pageInsights: false,
-  pageHeaders: undefined,
+  pageHeaders: [],
   insight: {
     json: "",
   },
@@ -15,16 +15,21 @@ const WebsiteModel = {
     color: "",
   },
   issuesInfo: {
+    adaScore: 0,
     warningCount: 0,
     errorCount: 0,
     noticeCount: 0,
-    adaScore: 0,
     adaScoreAverage: 0,
     issuesFixedByCdn: 0,
     possibleIssuesFixedByCdn: 0,
+    totalIssues: 0,
+    issueMeta: {
+      skipContentIncluded: false,
+    },
   },
+  pageCount: 0,
   lastScanDate: "",
-  online: null,
+  online: true,
   ua: "", // user agent to use when running
   mobile: false, // mobile first view port
   standard: "WCAG2AA", // standard for testing WCAG

@@ -17,7 +17,10 @@ export async function setWebsiteScore({ domain, userId }) {
       userId,
     });
 
-    const issueInfo = await generateWebsiteScore({ domain, userId });
+    const { issueInfo } = await generateWebsiteScore({
+      domain,
+      userId,
+    });
 
     // persist skip content included etc
     const prevIssuesInfo = website?.issuesInfo;

@@ -3,10 +3,10 @@ import gql from "graphql-tag";
 export const query = gql`
   type Query {
     features: [Feature]
-    websites(filter: String): [Website]
+    websites: [Website]
     website(url: String): Website
     subDomains(filter: String): [SubDomain]
-    issues(filter: String): [Issue]
+    issues(filter: String, limit: Int = 0, offset: Int = 0): [Issue]
     history(filter: String): [History]
     analytics(filter: String): [Analytic]
     scripts(filter: String): [Script]

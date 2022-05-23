@@ -9,7 +9,7 @@ const responseModel = (
   }
 ): ResponseModel => {
   let message = extra?.message;
-  let code;
+  let code = extra?.code;
 
   if (!message) {
     switch (msgType) {
@@ -22,14 +22,19 @@ const responseModel = (
     }
   }
 
-  // for gQL
-  switch (statusCode) {
-    case ApiResponse.NotFound:
-      code = 404;
-      break;
-    default:
-      code = 200;
-      break;
+  if (!code) {
+    // for gQL
+    switch (statusCode) {
+      case ApiResponse.NotFound:
+        code = 404;
+        break;
+      case ApiResponse.BadRequest:
+        code = 400;
+        break;
+      default:
+        code = 200;
+        break;
+    }
   }
 
   return {

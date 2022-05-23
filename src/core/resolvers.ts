@@ -12,6 +12,7 @@ import {
   Script,
 } from "./data";
 
+// graphQL resolvers
 export const resolvers = {
   Query,
   Mutation,

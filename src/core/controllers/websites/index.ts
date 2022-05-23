@@ -2,7 +2,6 @@ export { WebsitesController } from "./websites";
 export {
   getWebsitesPaginated,
   getWebsitesWithUsers,
-  getWebsitesCrawler,
   getWebsite,
   getWebsites,
 } from "./find";

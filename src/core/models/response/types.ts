@@ -17,6 +17,7 @@ interface ResponseModel {
 enum ApiResponse {
   Success,
   NotFound,
+  BadRequest,
 }
 
 export { ApiResponse, ResponseParamsModel, ResponseModel };

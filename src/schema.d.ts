@@ -387,7 +387,6 @@ export type Subscription = {
   __typename?: "Subscription";
   websiteAdded?: Maybe<Website>;
   issueAdded?: Maybe<Issue>;
-  subDomainAdded?: Maybe<SubDomain>;
   emailVerified?: Maybe<User>;
   issueRemoved?: Maybe<Issue>;
   subDomainRemoved?: Maybe<SubDomain>;

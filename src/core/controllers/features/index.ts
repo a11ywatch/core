@@ -16,7 +16,7 @@ export const FeaturesController = ({ user } = { user: null }) => ({
     const [collection] = await connect("Features");
 
     if (features?.length) {
-      await collection.deleteMany();
+      await collection.deleteMany({});
       await collection.insertMany(features);
       return true;
     }

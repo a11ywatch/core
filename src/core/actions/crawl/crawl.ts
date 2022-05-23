@@ -1,7 +1,7 @@
 import { emailMessager } from "@app/core/messagers";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { pubsub } from "@app/database/pubsub";
-import { SUBDOMAIN_ADDED, ISSUE_ADDED } from "@app/core/static";
+import { ISSUE_ADDED } from "@app/core/static";
 import { responseModel } from "@app/core/models";
 import { collectionUpsert, jsonParse } from "@app/core/utils";
 import { IssuesController } from "@app/core/controllers/issues";
@@ -165,13 +165,6 @@ export const crawlPage = async (
         userId,
       });
 
-      // new Page found send pub sub
-      if (webPage && !newSite && sendSub) {
-        await pubsub.publish(SUBDOMAIN_ADDED, {
-          subDomainAdded: updateWebsiteProps,
-        });
-      }
-
       let scripts;
       let scriptsCollection;
 
@@ -217,26 +210,30 @@ export const crawlPage = async (
         [analyticsCollection, analytics]
       ); // ANALYTICS
 
+      const shouldUpsertCollections = pageConstainsIssues || issueExist;
+
       // Add to Issues collection if page contains issues or if record should update/delete.
-      if (pageConstainsIssues || issueExist) {
+      if (shouldUpsertCollections) {
         await collectionUpsert(newIssue, [
           issuesCollection,
           issueExist,
-          !pageConstainsIssues,
+          !pageConstainsIssues, // delete collection if issues do not exist
         ]); // ISSUES COLLECTION
+      }
+
+      if (shouldUpsertCollections || newSite) {
+        await collectionUpsert(
+          updateWebsiteProps,
+          [subDomainCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
+          {
+            searchProps: { pageUrl, userId },
+          }
+        ); // pages - sub domains needs rename
       }
 
       if (scriptsEnabled) {
         await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
       }
-
-      await collectionUpsert(
-        updateWebsiteProps,
-        [subDomainCollection, newSite],
-        {
-          searchProps: { pageUrl, userId },
-        }
-      ); // pages - sub domains needs rename
 
       // if flat api return source
       const responseData = {

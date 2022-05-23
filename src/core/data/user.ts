@@ -1,9 +1,9 @@
 import {
   AnalyticsController,
-  WebsitesController,
   HistoryController,
   ScriptsController,
 } from "../controllers";
+import { getWebsitesPaging } from "../controllers/websites/find/get";
 
 export const User = {
   history: async ({ id, filter, keyid }) => {
@@ -38,10 +38,10 @@ export const User = {
       pageUrl: url || pageUrl,
     });
   },
-  websites: async ({ id, keyid }) => {
-    const websites = await WebsitesController().getWebsites({
+  websites: async ({ id, keyid }, params) => {
+    return await getWebsitesPaging({
       userId: id || keyid,
+      ...params,
     });
-    return websites;
   },
 };

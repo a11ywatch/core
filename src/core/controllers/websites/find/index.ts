@@ -1,6 +1,5 @@
 export {
   getWebsitesPaginated,
-  getWebsitesCrawler,
   getWebsitesWithUsers,
   getWebsite,
   getWebsites,

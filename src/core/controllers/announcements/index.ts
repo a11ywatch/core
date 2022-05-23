@@ -15,7 +15,7 @@ export const AnnouncementsController = ({ user } = { user: null }) => ({
     const [collection] = await connect("Announcements");
 
     if (announcements?.length) {
-      await collection.deleteMany();
+      await collection.deleteMany({});
       await collection.insertMany(announcements);
       return true;
     }
