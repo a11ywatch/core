@@ -7,7 +7,6 @@ import { crawlPage } from "@app/core/actions";
 export const crawlPageQueue = async (queueSource) => {
   try {
     const data = parseData(queueSource);
-
     const { pages = [], user_id, meta } = data;
 
     // TODOL move out of file. Generate averagewebsite scores
@@ -42,8 +41,8 @@ export const crawlPageQueue = async (queueSource) => {
  * Send request for crawl queue - Sends an email follow up on the crawl data
  * Returns the scan results for all pages
  */
-export const crawlMultiSiteQueue = async (queueSource) => {
-  const { pages = [], userId } = queueSource;
+export const crawlMultiSiteQueue = async (data) => {
+  const { pages = [], userId } = data;
   let responseData = [];
 
   // get users for crawl job matching the urls

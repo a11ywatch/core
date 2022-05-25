@@ -1,8 +1,6 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
 import { crawlMultiSiteQueue } from "@app/queues/crawl/crawl";
-import { crawlWebsite } from "@app/core/actions";
-
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
@@ -20,75 +18,54 @@ export const createServer = async () => {
   server.addService(
     websiteProto["website.WebsiteService"] as ServiceDefinition,
     {
-      // async scan website page start track user
+      // async scan website page start track user [TODO: move to stream]
       scanStart: async (call, callback) => {
-        // temp remove immediate for non-blocking Crawler
         await crawlTrackerInit(call.request);
         callback(null, {});
       },
-      // remove user from crawl and generate average scores
+      // remove user from crawl and generate average scores. [TODO: move to stream]
       scanEnd: async (call, callback) => {
-        // temp remove immediate for non-blocking Crawler
-        setImmediate(async () => {
-          await crawlTrackerComplete(call.request);
-        });
+        await crawlTrackerComplete(call.request);
+
         callback(null, {});
       },
+      // scan website for issues - syncs with crawl finished. [TODO: move to stream client streaming START, PROCESS, END ]
       scan: async (call, callback) => {
         const { pages: p, user_id: userId, domain, full } = call?.request ?? {};
-
         const pages = p ?? [];
 
-        setImmediate(async () => {
-          // full scan was commenced and all links are sent.
-          if (full) {
-            let allPageIssues = [];
-            let sendEmail = false;
+        // the collection of issues found for page scans.
+        let data = [];
 
-            try {
-              // all page issues
-              allPageIssues = await crawlMultiSiteQueue({
-                pages,
-                userId,
-              });
-            } catch (e) {
-              console.error(e);
-            }
+        try {
+          // perform scans across all website urls.
+          data = await crawlMultiSiteQueue({
+            pages,
+            userId,
+          });
+        } catch (e) {
+          console.error(e);
+        }
 
-            try {
-              // determine if email should be send if not event
-              sendEmail = crawlEmitter.emit(
-                `crawl-${domain}-${userId || 0}`,
-                domain,
-                allPageIssues
-              );
-            } catch (e) {
-              console.error(e);
-            }
-
-            try {
-              await emailMessager.sendMailMultiPage({
-                userId,
-                data: allPageIssues,
-                domain,
-                sendEmail: !sendEmail, // if the event did not emit send email from CRON.
-              });
-            } catch (e) {
-              console.error(e);
-            }
-
-            return;
+        // a full site wide-scan performed. Send scan event including email.
+        if (full) {
+          try {
+            const emitCrawledEvent = crawlEmitter.emit(
+              `crawl-${domain}-${userId || 0}`,
+              domain,
+              data
+            );
+            await emailMessager.sendMailMultiPage({
+              userId,
+              data,
+              domain,
+              sendEmail: !emitCrawledEvent, // if the event did not emit send email from CRON job.
+            });
+          } catch (e) {
+            console.error(e);
           }
+        }
 
-          // Single link sent real time. TODO: add events for stream api/crawl-stream endpoint.
-          if (pages.length === 1) {
-            try {
-              await crawlWebsite({ url: pages[0] });
-            } catch (e) {
-              console.error(e);
-            }
-          }
-        });
         callback(null, {});
       },
     }

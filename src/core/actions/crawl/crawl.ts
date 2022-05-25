@@ -60,11 +60,12 @@ export const crawlPage = async (
 
       const freeAccount = !userData?.role; // free account
       const scriptsEnabled = !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+      const rootPage = pathname === "/"; // the url is the base domain index.
 
       if (website?.pageInsights || pageInsights) {
         if (freeAccount) {
           // INSIGHTS ONLY ON ROOT PAGE IF ENABLED
-          insightsEnabled = pathname === "/";
+          insightsEnabled = rootPage;
         } else {
           insightsEnabled = pageInsights || website?.pageInsights;
         }
@@ -186,8 +187,8 @@ export const crawlPage = async (
         }
       }
 
-      // TODO: REMOVE UPDATING WEBSITE DATA FROM BASE
-      if (pathname === "/") {
+      // if ROOT domain for scan update Website Collection.
+      if (rootPage) {
         await collectionUpsert(
           updateWebsiteProps,
           [websiteCollection, !!updateWebsiteProps],
@@ -197,23 +198,22 @@ export const crawlPage = async (
         );
       }
 
-      await collectionUpsert(
-        {
-          pageUrl,
-          domain,
-          errorCount,
-          warningCount,
-          noticeCount,
-          userId,
-          adaScore,
-        },
-        [analyticsCollection, analytics]
-      ); // ANALYTICS
-
       const shouldUpsertCollections = pageConstainsIssues || issueExist;
 
       // Add to Issues collection if page contains issues or if record should update/delete.
       if (shouldUpsertCollections) {
+        await collectionUpsert(
+          {
+            pageUrl,
+            domain,
+            errorCount,
+            warningCount,
+            noticeCount,
+            userId,
+            adaScore,
+          },
+          [analyticsCollection, analytics]
+        ); // ANALYTICS
         await collectionUpsert(newIssue, [
           issuesCollection,
           issueExist,
@@ -231,11 +231,12 @@ export const crawlPage = async (
         ); // pages - sub domains needs rename
       }
 
+      // every page gets a script ATM. TODO conditional scripts.
       if (scriptsEnabled) {
         await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
       }
 
-      // if flat api return source
+      // Flatten issues with the array set results without meta.
       const responseData = {
         data: Object.assign({}, website, updateWebsiteProps, {
           issues: subIssues,

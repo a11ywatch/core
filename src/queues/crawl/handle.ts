@@ -45,4 +45,4 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
   }
 }
 
-export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 5);
+export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 4);
