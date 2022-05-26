@@ -27,7 +27,12 @@ export const forgotPassword = async ({ email }) => {
           ...mailOptions,
           to: user.email,
           subject: `A11yWatch - Password reset.`,
-          html: `${logoSvg}<br /><h1>${resetCode} is your one time password reset code.</h1>`,
+          html: `${logoSvg}<br />
+          <h1>Reset your password to A11yWatch</h1>
+          <p style="font-size: 1rem;">Use the code below to reset your password.</p>
+          <h2 style="margin-top: 18px; font-weight: bold; font-size: 2.3rem;">${resetCode}</h2>
+          <p style="margin-top: 13px; font-size: 0.85rem;">Go to the profile screen to change your password using the reset-code afterwards.</p>
+          `,
         },
         sendMailCallback
       );

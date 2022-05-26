@@ -1,5 +1,5 @@
 import { initUrl } from "@a11ywatch/website-source-builder";
-import { controller } from "@app/proto/actions/calls";
+import { controller } from "../../proto/actions/calls";
 
 interface CrawlParams {
   urlMap?: string; // [Deprecated]: use url
@@ -14,17 +14,26 @@ export const watcherCrawl = async ({
   userId,
   scan = false,
 }: CrawlParams) => {
-  const method = scan ? "crawlerScan" : "crawlerCrawl"; // either real time links or gather all until
   const target = urlMap || urlTarget;
-
   const url = String(initUrl(target, true));
 
+  let data;
+
   try {
-    return await controller[method]({
-      url,
-      id: userId,
-    });
+    if (scan) {
+      data = await controller.crawlerScan({
+        url,
+        id: userId,
+      });
+    } else {
+      data = await controller.crawlerCrawl({
+        url,
+        id: userId,
+      });
+    }
   } catch (e) {
     console.error(e);
   }
+
+  return data;
 };
