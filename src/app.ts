@@ -55,6 +55,7 @@ import { crawlMultiSiteWithEvent } from "./core/utils/multi-site";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
 import { clearInterval } from "timers";
+import { getWebsiteReport } from "./rest/routes/data/website";
 
 const { GRAPHQL_PORT } = config;
 
@@ -122,7 +123,10 @@ function initServer(): HttpServer[] {
 
   app.get("/iframe", cors(), createIframeEvent);
   app.get("/status/:domain", cors(), statusBadge);
+  // used for reports [TODO: rate limit]
   app.get("/api/get-website", cors(), getWebsite);
+  // get a previus run report @query {q: string}
+  app.get("/api/report", cors(), getWebsiteReport);
   app
     .route(UNSUBSCRIBE_EMAILS)
     .get(cors(), unSubEmails)

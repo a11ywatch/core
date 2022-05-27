@@ -3,6 +3,7 @@ import { getReport } from "@app/core/controllers/reports";
 import { downloadToExcel } from "@app/core/utils";
 import { Website } from "@app/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
+import { retreiveUserByToken } from "@app/core/utils/get-user-data";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage
@@ -16,23 +17,9 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
   }
 
   let data: Website;
-
   let query = initUrl(decodeURIComponent(q + ""));
 
-  // try {
-  //   const memReport = await redisClient.get(query);
-  //   if (memReport) {
-  //     data = JSON.parse(memReport);
-  //     if (typeof data.issue === "string") {
-  //       data.issue = JSON.parse(data.issue);
-  //     }
-  //   }
-  // } catch (e) {
-  //   console.error(e);
-  // }
-
   try {
-    // TODO: MOVE CIPHER HANDLING TO SEPERATE ENDPOINT AND DOWNLOADING
     const report = await getReport(query, timestamp && Number(timestamp));
     if (report?.website) {
       data = report.website;
@@ -53,6 +40,40 @@ const getWebsite = async (req: Request, res: Response, next?: any) => {
       res.send("Error downloading report. Report not found.");
       return;
     }
+  }
+
+  res.json(data);
+};
+
+// get a report and include the authenticated user
+export const getWebsiteReport = async (req: Request, res: Response) => {
+  const { q } = req.query;
+
+  if (!q) {
+    res.status(404);
+    res.send(false);
+    return;
+  }
+
+  let userId;
+
+  try {
+    const [user] = await retreiveUserByToken(req.headers.authorization);
+    if (user) {
+      userId = user.id;
+    }
+  } catch (_) {}
+
+  let data: Website;
+  let query = initUrl(decodeURIComponent(q + ""));
+
+  try {
+    const report = await getReport(query, null, userId);
+    if (report?.website) {
+      data = report.website;
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   res.json(data);

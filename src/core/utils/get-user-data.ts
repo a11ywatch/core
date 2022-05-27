@@ -25,7 +25,7 @@ const getUserFromId = async (user, keyid) => {
 
 /*
  * Get the user if auth set or determine if request allowed.
- * This method handles sending headers and will return void next action should not occur.
+ * This method handles sending headers and will return void next action should not occur. [TODO: refactor]
  * @return User
  **/
 export const getUserFromApi = async (
@@ -35,10 +35,8 @@ export const getUserFromApi = async (
 ): Promise<User> => {
   const jwt = extractTokenKey(token ? String(token).trim() : "");
   const user = getUserFromToken(jwt);
-
   // the user id from the token
   const { keyid } = user?.payload ?? {};
-
   // api key is set [ may not be valid ]
   const authenticated = typeof keyid !== "undefined";
 
@@ -56,7 +54,7 @@ export const getUserFromApi = async (
   const isClient = frontendClientOrigin(req.get("origin"));
 
   // auth required unless front-end client
-  if (!isClient && !authenticated) {
+  if (!isClient && !token) {
     res.json({
       data: null,
       message:
@@ -116,14 +114,8 @@ export const getUserFromApiScan = async (
   _req: Request,
   res: Response
 ): Promise<User> => {
-  // single get user from auth
-  const jwt = extractTokenKey(token ? String(token).trim() : "");
-  const user = getUserFromToken(jwt);
-
-  const { keyid } = user?.payload ?? {};
-
   // auth required unless SUPER MODE
-  if (typeof keyid === "undefined" && !config.SUPER_MODE) {
+  if (!token && !config.SUPER_MODE) {
     res.status(401);
     res.json({
       data: null,
@@ -134,16 +126,16 @@ export const getUserFromApiScan = async (
     return;
   }
 
-  const [userData, collection] = await getUserFromId(user, keyid);
+  const [user, collection] = await retreiveUserByToken(token);
 
   // if SUPER mode allow request reguardless of scans
   if (config.SUPER_MODE) {
-    return userData || {};
+    return user || {};
   }
 
   const canScan = await UsersController({
     user,
-  }).updateScanAttempt({ id: keyid, user: userData, collection }, true);
+  }).updateScanAttempt({ id: user.id, user: user, collection }, true);
 
   if (!config.SUPER_MODE && !canScan) {
     res.json({
@@ -154,5 +146,32 @@ export const getUserFromApiScan = async (
     return;
   }
 
-  return userData;
+  return user;
+};
+
+/*
+ * Get the user by jwt.
+ * @return User
+ **/
+export const retreiveUserByToken = async (
+  token: string
+): Promise<[User, any]> => {
+  const jwt = extractTokenKey(token ? String(token).trim() : "");
+  const user = getUserFromToken(jwt);
+  // the user id from the token
+  const { keyid } = user?.payload ?? {};
+  // api key is set [ may not be valid ]
+  const authenticated = typeof keyid !== "undefined";
+
+  // response return data
+
+  try {
+    const [u, c] = authenticated ? await getUserFromId(user, keyid) : [];
+
+    return [u, c];
+  } catch (e) {
+    console.error(e);
+
+    return [null, null];
+  }
 };

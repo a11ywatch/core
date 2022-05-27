@@ -3,8 +3,12 @@ import { URL } from "url";
 
 const findSort = { sort: { $natural: -1 } };
 
-// get the page report for a website. TODO: REFACTOR and get auth user for report
-export const getReport = async (url: string, timestamp?: string | number) => {
+// get the page report for a website. TODO: REFACTOR and get auth user for report and remove timestamp
+export const getReport = async (
+  url: string,
+  timestamp?: string | number,
+  userId?: number
+) => {
   if (!url) {
     return { website: undefined };
   }
@@ -23,22 +27,29 @@ export const getReport = async (url: string, timestamp?: string | number) => {
     console.error(e);
   }
 
+  const lastScanDate = timestamp ? new Date(timestamp) : undefined;
+
   // not base path -> target SubDomains(Pages)
   if (targetPages) {
     try {
       const [domainCollection] = await connect("SubDomains");
       const [collection] = await connect("Issues");
 
-      const findBy = {
-        url,
-      };
+      // include the user id for the report when passed in.
+      const findBy =
+        typeof userId !== "undefined"
+          ? {
+              url,
+            }
+          : {
+              url,
+              userId,
+            };
 
-      const websiteFindBy = timestamp
-        ? {
-            lastScanDate: new Date(timestamp),
-            ...findBy,
-          }
-        : findBy;
+      const websiteFindBy = {
+        lastScanDate,
+        ...findBy,
+      };
 
       // TODO: ADD USER_ID AND TIMESTAMP
       website = await domainCollection.findOne(websiteFindBy, findSort);
@@ -47,10 +58,11 @@ export const getReport = async (url: string, timestamp?: string | number) => {
         // find the issues for the website page
         const issuesFindBy = timestamp
           ? {
-              lastScanDate: new Date(timestamp),
+              lastScanDate,
               pageUrl: website.url,
             }
           : { pageUrl: website.url };
+
         const websiteIssues = await collection.findOne(issuesFindBy, findSort);
 
         if (websiteIssues && websiteIssues.issues) {
@@ -65,16 +77,20 @@ export const getReport = async (url: string, timestamp?: string | number) => {
       const [domainCollection] = await connect("Websites");
       const [collection] = await connect("Issues");
 
-      const findBy = {
-        domain,
-      };
+      const findBy =
+        typeof userId !== "undefined"
+          ? {
+              userId,
+              domain,
+            }
+          : {
+              domain,
+            };
 
-      const websiteFindBy = timestamp
-        ? {
-            lastScanDate: new Date(timestamp),
-            ...findBy,
-          }
-        : findBy;
+      const websiteFindBy = {
+        lastScanDate,
+        ...findBy,
+      };
 
       // TODO: ADD USER_ID AND TIMESTAMP
       website = await domainCollection.findOne(websiteFindBy, findSort);
@@ -83,12 +99,13 @@ export const getReport = async (url: string, timestamp?: string | number) => {
         // find the issues for the website page
         const issuesFindBy = timestamp
           ? {
-              lastScanDate: new Date(timestamp),
+              lastScanDate,
               pageUrl: website.url,
             }
           : { pageUrl: website.url };
 
         const websiteIssues = await collection.findOne(issuesFindBy, findSort);
+
         if (websiteIssues && websiteIssues.issues) {
           website.issues = websiteIssues.issues ?? [];
         }
