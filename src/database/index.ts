@@ -5,4 +5,3 @@ export {
   closeRedisConnection,
 } from "./memory-client";
 export { pubsub, createPubSub, closeSub } from "./pubsub";
-export { setChannels } from "./channels";

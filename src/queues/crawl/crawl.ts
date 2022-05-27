@@ -1,35 +1,21 @@
-import { getActiveUsersCrawling } from "@app/core/utils/query";
-import { q, isGenerateAverageMethod } from "./handle";
-import { parseData } from "./format";
+import { q } from "./handle";
 import { crawlPage } from "@app/core/actions";
 
-// send request for crawl queue
-export const crawlPageQueue = async (queueSource) => {
+/*
+ * Send request for crawl to memory queue.
+ * @return Promise<void>
+ */
+export const crawlEnqueue = async (data) => {
   try {
-    const data = parseData(queueSource);
-    const { pages = [], user_id, meta } = data;
-
-    // TODOL move out of file. Generate averagewebsite scores
-    if (isGenerateAverageMethod(meta)) {
-      return await q.push({
-        userId: user_id,
-        meta,
-      });
-    }
+    const { pages = [], user_id } = data;
 
     // get users enqueed for crawl job matching the urls
     for (const url of pages) {
-      // add single user crawls with users in pool
-      const usersPooling = await getActiveUsersCrawling({
-        userId: user_id,
-        urlMap: url,
-      });
-
       // remove mem queue
       await q.push({
         url,
         userId: user_id,
-        usersPooling,
+        usersPooling: [], // TODO: remove from config
       });
     }
   } catch (e) {
@@ -39,9 +25,9 @@ export const crawlPageQueue = async (queueSource) => {
 
 /*
  * Send request for crawl queue - Sends an email follow up on the crawl data
- * Returns the scan results for all pages
+ * @return Promise<Websites | Pages>
  */
-export const crawlMultiSiteQueue = async (data) => {
+export const crawlMultiSite = async (data) => {
   const { pages = [], userId } = data;
   let responseData = [];
 

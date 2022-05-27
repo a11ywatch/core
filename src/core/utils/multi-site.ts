@@ -21,18 +21,19 @@ export const crawlMultiSiteWithEvent = (props): Promise<CrawlMultiSite> => {
     } catch (e) {
       console.error(e);
     }
+
     let requestTimeout;
 
     if (!SUPER_MODE) {
-      // TODO: adjust threshold limit. and move to STREAM. Max limit 30s
+      // Max limit 15mins. TODO: remove for full stream usage.
       requestTimeout = setTimeout(() => {
         resolve({
           success: false,
           data: null,
           message:
-            "Scan exceeded timeout 5mins. Try to login and use the website for larger scans.",
+            "Scan exceeded timeout 15mins. Try to login and use the website for larger scans.",
         });
-      }, 1000 * 30);
+      }, 900000);
     }
 
     // wait for crawl event to finish.

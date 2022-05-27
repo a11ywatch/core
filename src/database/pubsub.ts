@@ -23,7 +23,7 @@ function createPubSub() {
 
 // used as primary redis sub
 function createSub() {
-  new Promise((resolve, reject) => {
+  new Promise((resolve) => {
     try {
       sub = new Redis(options);
       resolve(sub);

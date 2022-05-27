@@ -8,15 +8,16 @@ import { crawlPage } from "./crawl";
  *  @returns response model defaults {success: true}
  */
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
-  const { userId, url: urlMap, usersPooling } = params ?? {};
+  const { userId, url: urlMap, usersPooling = [] } = params ?? {};
 
   if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
 
   // Todo: remove layer
-  const usersPool =
-    usersPooling ?? (await getActiveUsersCrawling({ userId, urlMap }));
+  const usersPool = usersPooling?.length
+    ? usersPooling
+    : await getActiveUsersCrawling({ userId, urlMap });
 
   for (const id of usersPool) {
     await crawlPage({ ...params, url: urlMap, userId: Number(id) }, sendEmail);

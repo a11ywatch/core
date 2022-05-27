@@ -1,6 +1,6 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
-import { crawlMultiSiteQueue } from "@app/queues/crawl/crawl";
+import { crawlMultiSite, crawlEnqueue } from "@app/queues/crawl/crawl";
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
@@ -20,26 +20,37 @@ export const createServer = async () => {
     {
       // async scan website page start track user [TODO: move to stream]
       scanStart: async (call, callback) => {
-        await crawlTrackerInit(call.request);
+        try {
+          await crawlTrackerInit(call.request);
+        } catch (e) {
+          console.error(e);
+        }
         callback(null, {});
       },
       // remove user from crawl and generate average scores. [TODO: move to stream]
       scanEnd: async (call, callback) => {
-        await crawlTrackerComplete(call.request);
-
+        try {
+          await crawlTrackerComplete(call.request);
+        } catch (e) {
+          console.error(e);
+        }
         callback(null, {});
       },
       // scan website for issues - syncs with crawl finished. [TODO: move to stream client streaming START, PROCESS, END ]
       scan: async (call, callback) => {
-        const { pages: p, user_id: userId, domain, full } = call?.request ?? {};
-        const pages = p ?? [];
+        const {
+          pages = [],
+          user_id: userId,
+          domain,
+          full,
+        } = call?.request ?? {};
 
         // the collection of issues found for page scans.
         let data = [];
 
         try {
           // perform scans across all website urls.
-          data = await crawlMultiSiteQueue({
+          data = await crawlMultiSite({
             pages,
             userId,
           });
@@ -67,6 +78,18 @@ export const createServer = async () => {
         }
 
         callback(null, {});
+      },
+      // scan website for issues that pushes task into queues.
+      scanStream: async (call) => {
+        call.write({});
+        call.end();
+
+        try {
+          // user queue to control cors output.
+          await crawlEnqueue(call?.request);
+        } catch (e) {
+          console.error(e);
+        }
       },
     }
   );

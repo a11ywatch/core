@@ -27,7 +27,6 @@ import {
 import {
   initDbConnection,
   closeDbConnection,
-  setChannels,
   createPubSub,
   initRedisConnection,
   closeSub,
@@ -83,7 +82,6 @@ const connectClients = async () => {
 
   try {
     createPubSub(); //gql sub
-    setChannels(); // queues
     connectLimiters(); // rate limiters
   } catch (e) {
     console.error(e);
@@ -200,8 +198,9 @@ function initServer(): HttpServer[] {
               code: 200,
             })},`
           );
-        }, 250);
+        }, 300);
 
+        // TODO: pass in res and allow emitter of page when processed.
         const { data, message } = await crawlMultiSiteWithEvent({
           url,
           userId: userNext.id,
