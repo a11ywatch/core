@@ -40,6 +40,8 @@ export const mutation = gql`
 
     forgotPassword(email: String): User
 
+    sortWebsites(order: [String]): BasicMutationResponse
+
     confirmEmail(email: String): UpdateUserMutationResponse
 
     resetPassword(email: String, resetCode: String, jwt: String): User

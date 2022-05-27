@@ -91,10 +91,12 @@ export const getWebsitesPaging = async (
 ) => {
   try {
     const [collection] = await connect("Websites");
+
     const websites = await collection
       .find({ userId })
-      .limit(limit)
+      .sort({ order: 1 })
       .skip(offset)
+      .limit(limit)
       .toArray();
 
     return chain ? [websites, collection] : websites;

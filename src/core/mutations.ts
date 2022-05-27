@@ -244,6 +244,14 @@ export const Mutation = {
       newScript,
     });
   },
+  sortWebsites: async (_, { order }, context) => {
+    const { keyid } = context.user?.payload || defaultPayload;
+
+    return await context.models.Website.sortWebsites({
+      userId: keyid,
+      order,
+    });
+  },
   addPaymentSubscription,
   cancelSubscription,
   filterEmailDates,

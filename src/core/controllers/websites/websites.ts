@@ -4,7 +4,7 @@ import {
   getWebsitesWithUsers,
   getWebsitesPaginated,
 } from "./find";
-import { updateWebsite } from "./update";
+import { updateWebsite, sortWebsites } from "./update";
 import { addWebsite } from "./set";
 import { removeWebsite } from "./remove";
 
@@ -16,4 +16,5 @@ export const WebsitesController = ({ user } = { user: null }) => ({
   addWebsite,
   removeWebsite,
   updateWebsite,
+  sortWebsites,
 });

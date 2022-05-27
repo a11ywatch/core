@@ -43,7 +43,7 @@ export const resetPassword = async ({ email, resetCode }) => {
           ...mailOptions,
           to: user.email,
           subject: `A11yWatch - Temporary Password.`,
-          html: `<h1>${resetCode} is your temp password. Login and go to profile to reset now.</h1>`,
+          html: `<h1 style="font-weight:400;"><b>${resetCode}</b> is your temp password. Login and go to profile to reset now.</h1>`,
         },
         sendMailCallback
       );
