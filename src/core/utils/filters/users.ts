@@ -1,15 +1,13 @@
 import { User } from "@app/schema";
 import { getDay, subHours } from "date-fns";
 
-export function userParams({
-  id,
-  email,
-  emailConfirmCode,
-}: {
+interface Params {
   id?: any;
   email?: string;
   emailConfirmCode?: string;
-}) {
+}
+
+export function userParams({ id, email, emailConfirmCode }: Params) {
   let searchProps = {};
 
   if (typeof email !== "undefined") {

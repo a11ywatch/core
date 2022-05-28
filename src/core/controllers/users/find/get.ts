@@ -26,11 +26,19 @@ type GetUserParams = {
   emailConfirmCode?: string;
 };
 
-function getUser(params: GetUserParams): Promise<[User, any]>;
-async function getUser({ email, id, emailConfirmCode }) {
+async function getUser({
+  email,
+  id,
+  emailConfirmCode,
+}: GetUserParams): Promise<[User, any]> {
+  const params = userParams({ email, id, emailConfirmCode });
+
+  if (Object.keys(params).length === 0) {
+    return [null, null];
+  }
+
   try {
     const [collection] = await connect("Users");
-    const params = userParams({ email, id, emailConfirmCode });
     const user = await collection.findOne(params);
 
     return [user, collection];

@@ -14,3 +14,4 @@ export { query } from "./query";
 export { mutation } from "./mutation";
 export { subscription } from "./subscription";
 export { input } from "./input";
+export { invoice } from "./invoice";

@@ -14,7 +14,7 @@ const {
 
 import Stripe from "stripe";
 
-const stripe = new Stripe(STRIPE_KEY, {
+export const stripe = new Stripe(STRIPE_KEY, {
   telemetry: false,
 });
 
@@ -176,4 +176,30 @@ export const cancelSubscription = async ({ keyid }) => {
     success: true,
     message: SUCCESS,
   };
+};
+
+// get the users upcoming invoice
+export const viewUpcomingInvoice = async ({ userId }) => {
+  // if key not found exit
+  if (userId === "undefined") {
+    return Promise.resolve(null);
+  }
+
+  const [user] = await getUser({ id: userId });
+
+  if (!user) {
+    throw new Error(EMAIL_ERROR);
+  }
+
+  if (user && user.stripeID) {
+    const invoice = await stripe.invoices
+      .retrieveUpcoming({
+        customer: user.stripeID,
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+
+    return invoice;
+  }
 };

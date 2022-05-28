@@ -16,6 +16,7 @@ import {
   payments,
   meta,
   input,
+  invoice,
 } from "./graph/gql_types";
 import { getGqlRateLimitDirective } from "@app/rest/limiters";
 import gql from "graphql-tag";
@@ -30,6 +31,7 @@ const typeDefs = gql`
     arrayLengthField: String
   ) on FIELD_DEFINITION
 
+  ${invoice}
   ${pageInsights}
   ${meta}
   ${payments}

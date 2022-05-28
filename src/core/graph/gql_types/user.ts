@@ -42,5 +42,6 @@ export const user = gql`
     emailExpDate: String
     resetCode: String
     stripeID: String
+    invoice: Invoice
   }
 `;

@@ -3,25 +3,22 @@ import {
   HistoryController,
   ScriptsController,
 } from "../controllers";
+import { viewUpcomingInvoice } from "../controllers/users/update/payments";
 import { getWebsitesPaging } from "../controllers/websites/find/get";
 
 export const User = {
-  history: async ({ id, filter, keyid }) => {
-    const history = await HistoryController().getHistory({
+  history: async ({ id, keyid }) => {
+    return await HistoryController().getHistory({
       userId: id || keyid,
     });
-
-    return history;
   },
-  analytics: async ({ id, filter, keyid }) => {
-    const analytics = await AnalyticsController().getAnalytics({
+  analytics: async ({ id, keyid }) => {
+    return await AnalyticsController().getAnalytics({
       userId: id || keyid,
     });
-
-    return analytics;
   },
   script: async ({ id, filter, keyid }, { url, pageUrl }) => {
-    const script = await ScriptsController().getScript(
+    return await ScriptsController().getScript(
       {
         userId: id || keyid,
         pageUrl: url || pageUrl,
@@ -30,7 +27,6 @@ export const User = {
       },
       false
     );
-    return script;
   },
   scripts: async ({ id, keyid }, { url, pageUrl }) => {
     return await ScriptsController().getScripts({
@@ -40,6 +36,13 @@ export const User = {
   },
   websites: async ({ id, keyid }, params) => {
     return await getWebsitesPaging({
+      userId: id || keyid,
+      ...params,
+    });
+  },
+  // view upcoming invoice
+  invoice: async ({ id, keyid }, params) => {
+    return await viewUpcomingInvoice({
       userId: id || keyid,
       ...params,
     });
