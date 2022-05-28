@@ -163,10 +163,10 @@ export const retreiveUserByToken = async (
   // api key is set [ may not be valid ]
   const authenticated = typeof keyid !== "undefined";
 
-  // response return data
-
   try {
-    const [u, c] = authenticated ? await getUserFromId(user, keyid) : [];
+    const [u, c] = authenticated
+      ? await getUserFromId(user, keyid)
+      : [null, null];
 
     return [u, c];
   } catch (e) {

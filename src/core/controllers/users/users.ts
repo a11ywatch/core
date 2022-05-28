@@ -1,5 +1,5 @@
 import { isBefore } from "date-fns";
-import { footer } from "@app/html";
+import { footer } from "../../../html";
 import { GENERAL_ERROR, PASSWORD_ERROR, SUCCESS } from "../../strings";
 import {
   transporter,

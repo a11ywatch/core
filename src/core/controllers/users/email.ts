@@ -1,4 +1,4 @@
-import { emailMessager } from "@app/core/messagers";
+import { emailMessager } from "../../../core/messagers";
 import { UsersController } from "./users";
 
 // send an email to a user using an html template

@@ -50,7 +50,10 @@ import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { httpGet } from "./core/utils";
-import { getUserFromApiScan } from "./core/utils/get-user-data";
+import {
+  getUserFromApiScan,
+  retreiveUserByToken,
+} from "./core/utils/get-user-data";
 import { crawlMultiSiteWithEvent } from "./core/utils/multi-site";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
@@ -110,8 +113,11 @@ function initServer(): HttpServer[] {
     app.use("/iframe", limiter);
     app.use("/api/get-website", limiter);
     app.use("/api/register", limiter);
+    app.use("/api/report", limiter);
+    app.use("/api/login", limiter);
     app.use("/api/scan-simple", scanLimiter);
     app.use("/api/crawl", scanLimiter);
+    app.use("/api/crawl-ctream", scanLimiter);
     app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
   }
 
@@ -119,18 +125,36 @@ function initServer(): HttpServer[] {
   app.options(CONFIRM_EMAIL, cors());
   app.options(UNSUBSCRIBE_EMAILS, cors());
 
+  // root index api [TODO: remove for HC or return html of API endpoints etc]
   app.get(ROOT, root);
 
+  /*
+   * Create an iframe based off a url and reverse engineer the content for CORS.
+   * Uses node-iframe package to handle iframes.
+   */
   app.get("/iframe", cors(), createIframeEvent);
   app.get("/status/:domain", cors(), statusBadge);
-  // used for reports [TODO: rate limit]
-  app.get("/api/get-website", cors(), getWebsite);
   // get a previus run report @query {q: string}
   app.get("/api/report", cors(), getWebsiteReport);
-  app
-    .route(UNSUBSCRIBE_EMAILS)
-    .get(cors(), unSubEmails)
-    .post(cors(), unSubEmails);
+  // retreive a user from the database.
+  app.get("/api/user", cors(), async (req, res) => {
+    let data;
+    try {
+      const [user] = await retreiveUserByToken(req.headers.authorization);
+      if (user) {
+        data = user;
+      }
+    } catch (_) {}
+
+    res.json(
+      responseModel({
+        data,
+        message: data
+          ? "Successfully retrieved user."
+          : "Failed to retrieved user.",
+      })
+    );
+  });
 
   /*
    * Single page scan
@@ -234,8 +258,8 @@ function initServer(): HttpServer[] {
 
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
-  // email confirmation route
-  app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
+
+  // END of ACTIONS
 
   // TODO: remove script downloading
   app.get("/scripts/:domain/:cdnPath", async (req, res) => {
@@ -254,6 +278,9 @@ function initServer(): HttpServer[] {
       console.error(error);
     }
   });
+
+  // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
+  app.get("/api/get-website", cors(), getWebsite);
 
   // AUTH ROUTES
   setAuthRoutes(app);
@@ -277,6 +304,17 @@ function initServer(): HttpServer[] {
       console.error(e);
     }
   });
+
+  // EMAIL handling
+  // unsubscribe to emails or Alerts.
+  app
+    .route(UNSUBSCRIBE_EMAILS)
+    .get(cors(), unSubEmails)
+    .post(cors(), unSubEmails);
+
+  // email confirmation route
+  app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
+
   /*  ANALYTICS */
   app.post("/api/log/page", cors(), logPage);
   // INTERNAL
