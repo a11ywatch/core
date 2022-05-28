@@ -208,17 +208,20 @@ function initServer(): HttpServer[] {
     let data;
     let code = 200;
     let message = "Failed to retrieved websites.";
+    const uid = usr?.payload?.keyid;
 
-    try {
-      [data] = await getWebsitesPaging({
-        userId: usr?.payload?.keyid,
-        limit: 2,
-        offset: Number(req.query.offset) || 0,
-      });
-      message = "Successfully retrieved websites.";
-    } catch (e) {
-      code = 400;
-      message = `${message} - ${e}`;
+    if (typeof uid !== "undefined") {
+      try {
+        [data] = await getWebsitesPaging({
+          userId: uid,
+          limit: 2,
+          offset: Number(req.query.offset) || 0,
+        });
+        message = "Successfully retrieved websites.";
+      } catch (e) {
+        code = 400;
+        message = `${message} - ${e}`;
+      }
     }
 
     res.json(

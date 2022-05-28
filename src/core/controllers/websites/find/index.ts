@@ -3,5 +3,4 @@ export {
   getWebsitesWithUsers,
   getWebsite,
   getWebsites,
-  getWebsitesDaily,
 } from "./get";
