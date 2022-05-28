@@ -1,12 +1,15 @@
 import { WEBSITE_NOT_FOUND, SUCCESS } from "@app/core/strings";
 import { getWebsite } from "../find";
 
+// update a website by properties from form input on adding/
 export const updateWebsite = async ({
   userId,
   url,
   pageHeaders,
   pageInsights,
   mobile,
+  standard,
+  ua,
 }) => {
   let website;
   let collection;
@@ -24,8 +27,10 @@ export const updateWebsite = async ({
   // params prior - we mutate this on update
   const pageParams = {
     pageHeaders: website.pageHeaders,
-    pageInsights: !!website.pageInsights,
-    mobile: !!website.mobile,
+    pageInsights: website?.pageInsights ? true : false,
+    mobile: website?.mobile ? true : false,
+    standard: website.standard ? website.standard : undefined,
+    ua: website.ua ? website.ua : undefined,
   };
 
   // if page headers are sent add them
@@ -44,6 +49,16 @@ export const updateWebsite = async ({
   // if mobile viewport is enabled
   if (typeof mobile !== "undefined") {
     pageParams.mobile = !!mobile;
+  }
+
+  // if standard is set
+  if (typeof standard !== "undefined") {
+    pageParams.standard = standard;
+  }
+
+  // if user agent is defined
+  if (typeof ua !== "undefined") {
+    pageParams.ua = ua;
   }
 
   try {

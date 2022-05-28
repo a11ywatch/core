@@ -53,6 +53,7 @@ import { AnalyticsController } from "./core/controllers";
 import { crawlStreamLazy } from "./core/streams/crawl";
 import { crawlRest } from "./rest/routes/crawl";
 import { getWebsitesPaging } from "./core/controllers/websites/find/get";
+import { getIssuesPaging } from "./core/controllers/issues/find";
 
 const { GRAPHQL_PORT } = config;
 
@@ -202,7 +203,7 @@ function initServer(): HttpServer[] {
     );
   });
 
-  // paginated retreive a websites from the database.
+  // paginated retreive websites from the database.
   app.get("/api/list/website", cors(), async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization);
     let data;
@@ -218,6 +219,40 @@ function initServer(): HttpServer[] {
           offset: Number(req.query.offset) || 0,
         });
         message = "Successfully retrieved websites.";
+      } catch (e) {
+        code = 400;
+        message = `${message} - ${e}`;
+      }
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+
+  // paginated retreive issues from the database.
+  app.get("/api/list/issue", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    let data;
+    let code = 200;
+    let message = "Failed to retrieved issues.";
+    const uid = usr?.payload?.keyid;
+
+    if (typeof uid !== "undefined") {
+      try {
+        [data] = await getIssuesPaging({
+          userId: uid,
+          limit: req.query.limit
+            ? Math.max(Number(req.query.limit || 0), 500)
+            : undefined,
+          domain: String(req.query.domain) || undefined,
+          pageUrl: String(req.query.pageUrl) || undefined,
+        });
+        message = "Successfully retrieved issues.";
       } catch (e) {
         code = 400;
         message = `${message} - ${e}`;

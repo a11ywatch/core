@@ -53,3 +53,29 @@ export const getIssues = async ({ userId, domain, pageUrl, filter }: any) => {
     console.error(e);
   }
 };
+
+// get issues for a user with pagination offsets.
+export const getIssuesPaging = async (
+  { userId, domain, pageUrl, limit = 100, offset = 0 },
+  chain?: boolean
+) => {
+  try {
+    const [collection] = await connect("Issues");
+
+    const searchProps = websiteSearchParams({
+      domain: domain || getHostName(pageUrl),
+      pageUrl,
+      userId,
+    });
+
+    const websites = await collection
+      .find(searchProps)
+      .skip(offset)
+      .limit(limit)
+      .toArray();
+
+    return chain ? [websites, collection] : websites;
+  } catch (e) {
+    console.error(e);
+  }
+};
