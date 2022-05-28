@@ -10,11 +10,19 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
       userId,
       domain,
     }: { pageUrl?: string; userId?: number; domain?: string },
-    chain: boolean
+    chain?: boolean
   ) => {
     const [collection] = await connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId, domain });
-    const analytics = await collection.findOne(searchProps);
+    let analytics;
+
+    if (Object.keys(searchProps).length) {
+      try {
+        analytics = await collection.findOne(searchProps);
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     return chain ? [analytics, collection] : analytics;
   },

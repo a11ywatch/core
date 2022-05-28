@@ -32,14 +32,15 @@ async function getUser({
   emailConfirmCode,
 }: GetUserParams): Promise<[User, any]> {
   const params = userParams({ email, id, emailConfirmCode });
-
-  if (Object.keys(params).length === 0) {
-    return [null, null];
-  }
+  let user;
 
   try {
     const [collection] = await connect("Users");
-    const user = await collection.findOne(params);
+
+    // only perform find if keys exist
+    if (Object.keys(params).length) {
+      user = await collection.findOne(params);
+    }
 
     return [user, collection];
   } catch (e) {

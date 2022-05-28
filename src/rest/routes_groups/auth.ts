@@ -47,10 +47,11 @@ export const setAuthRoutes = (app: Application) => {
 
   // A NEW INSTANCE OF THE APP BASIC PING (RUNS ONCE ON APP START)
   app.post("/api/ping", cors(), async (req, res) => {
-    const parsedToken = getUserFromToken(req.cookies.jwt);
+    const usr = getUserFromToken(req.cookies.jwt);
 
-    if (parsedToken) {
-      const id = parsedToken?.payload?.keyid;
+    const id = usr?.payload?.keyid;
+
+    if (typeof id !== "undefined") {
       const [user, collection] = await getUser({ id });
 
       if (user) {

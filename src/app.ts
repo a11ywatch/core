@@ -32,13 +32,7 @@ import {
   closeSub,
   closeRedisConnection,
 } from "./database";
-import {
-  confirmEmail,
-  detectImage,
-  root,
-  unSubEmails,
-  getWebsite,
-} from "./rest/routes";
+import { confirmEmail, detectImage, root, unSubEmails } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./rest/routes/resources/badge";
 import { scanSimple } from "./rest/routes/scan";
@@ -49,16 +43,16 @@ import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
-import { httpGet } from "./core/utils";
-import {
-  getUserFromApiScan,
-  retreiveUserByToken,
-} from "./core/utils/get-user-data";
-import { crawlMultiSiteWithEvent } from "./core/utils/multi-site";
+import { getUserFromToken, httpGet } from "./core/utils";
+import { retreiveUserByToken } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
-import { clearInterval } from "timers";
-import { getWebsiteReport } from "./rest/routes/data/website";
+import { getWebsiteAPI, getWebsiteReport } from "./rest/routes/data/website";
+import { getWebsite } from "@app/core/controllers/websites";
+import { AnalyticsController } from "./core/controllers";
+import { crawlStreamLazy } from "./core/streams/crawl";
+import { crawlRest } from "./rest/routes/crawl";
+import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 
 const { GRAPHQL_PORT } = config;
 
@@ -120,14 +114,11 @@ function initServer(): HttpServer[] {
     app.use("/api/crawl-ctream", scanLimiter);
     app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
   }
-
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(UNSUBSCRIBE_EMAILS, cors());
-
-  // root index api [TODO: remove for HC or return html of API endpoints etc]
+  // root
   app.get(ROOT, root);
-
   /*
    * Create an iframe based off a url and reverse engineer the content for CORS.
    * Uses node-iframe package to handle iframes.
@@ -155,6 +146,89 @@ function initServer(): HttpServer[] {
       })
     );
   });
+  // retreive a website from the database.
+  app.get("/api/website", cors(), async (req, res) => {
+    let data;
+    let code = 200;
+    let message = "Failed to retrieved website.";
+
+    const usr = getUserFromToken(req.headers.authorization);
+
+    try {
+      [data] = await getWebsite({
+        userId: usr?.payload?.keyid,
+        domain: decodeURIComponent(req.query.domain + ""),
+      });
+      message = "Successfully retrieved website.";
+    } catch (e) {
+      code = 400;
+      message = `${message} - ${e}`;
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+  // retreive a page analytic from the database.
+  app.get("/api/analytics", cors(), async (req, res) => {
+    let data;
+    let code = 200;
+    let message = "Failed to retrieved analytic.";
+
+    const usr = getUserFromToken(req.headers.authorization);
+
+    try {
+      data = await AnalyticsController().getWebsite({
+        userId: usr?.payload?.keyid,
+        pageUrl: decodeURIComponent(String(req.query.pageUrl || req.query.url)),
+        domain: req.query.domain ? req.query.domain + "" : undefined,
+      });
+      message = "Successfully retrieved analytic for page.";
+    } catch (e) {
+      code = 400;
+      message = `${message} - ${e}`;
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+
+  // paginated retreive a websites from the database.
+  app.get("/api/list/website", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    let data;
+    let code = 200;
+    let message = "Failed to retrieved websites.";
+
+    try {
+      [data] = await getWebsitesPaging({
+        userId: usr?.payload?.keyid,
+        limit: 2,
+        offset: Number(req.query.offset) || 0,
+      });
+      message = "Successfully retrieved websites.";
+    } catch (e) {
+      code = 400;
+      message = `${message} - ${e}`;
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
 
   /*
    * Single page scan
@@ -164,34 +238,7 @@ function initServer(): HttpServer[] {
    * Site wide scan.
    * Uses Event based handling to get pages max timeout 30s.
    */
-  app.post("/api/crawl", cors(), async (req, res) => {
-    try {
-      const userNext = await getUserFromApiScan(
-        req.headers.authorization,
-        req,
-        res
-      );
-
-      if (!!userNext) {
-        const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
-
-        const { data, message } = await crawlMultiSiteWithEvent({
-          url,
-          userId: userNext.id,
-          scan: false,
-        });
-
-        res.json(
-          responseModel({
-            data,
-            message,
-          })
-        );
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  app.post("/api/crawl", cors(), crawlRest);
 
   /*
    * Site wide scan handles via stream.
@@ -199,62 +246,7 @@ function initServer(): HttpServer[] {
    * Sends a scan in progress response every 500ms.
    * TODO: use real time crawl API for response feedback on crawl.
    */
-  app.post("/api/crawl-stream", cors(), async (req, res) => {
-    try {
-      const userNext = await getUserFromApiScan(
-        req.headers.authorization,
-        req,
-        res
-      );
-
-      if (!!userNext) {
-        const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
-        res.writeHead(200, {
-          "Content-Type": "application/json",
-          "Transfer-Encoding": "chunked",
-        });
-
-        res.write("[");
-
-        // remove interval for EVENT emmiter.
-        const streamInterval = setInterval(() => {
-          res.write(
-            `${JSON.stringify({
-              data: null,
-              message: "scan in progress...",
-              success: true,
-              code: 200,
-            })},`
-          );
-        }, 300);
-
-        // TODO: pass in res and allow emitter of page when processed.
-        const { data, message } = await crawlMultiSiteWithEvent({
-          url,
-          userId: userNext.id,
-          scan: false,
-        });
-
-        if (streamInterval) {
-          clearInterval(streamInterval);
-        }
-
-        res.write(
-          JSON.stringify(
-            responseModel({
-              data,
-              message,
-            })
-          )
-        );
-
-        res.write("]");
-        res.end();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  app.post("/api/crawl-stream", cors(), crawlStreamLazy);
 
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
@@ -280,7 +272,7 @@ function initServer(): HttpServer[] {
   });
 
   // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
-  app.get("/api/get-website", cors(), getWebsite);
+  app.get("/api/get-website", cors(), getWebsiteAPI);
 
   // AUTH ROUTES
   setAuthRoutes(app);

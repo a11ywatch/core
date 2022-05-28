@@ -7,7 +7,7 @@ import { retreiveUserByToken } from "@app/core/utils/get-user-data";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage
-const getWebsite = async (req: Request, res: Response, next?: any) => {
+const getWebsiteAPI = async (req: Request, res: Response, next?: any) => {
   const { q, timestamp, download } = req.query;
 
   if (!q) {
@@ -79,4 +79,4 @@ export const getWebsiteReport = async (req: Request, res: Response) => {
   res.json(data);
 };
 
-export { getWebsite };
+export { getWebsiteAPI };

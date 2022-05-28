@@ -27,7 +27,7 @@ const getServerConfig = (): ApolloServerExpressConfig => {
         const user = getUserFromToken(parsedCookie?.jwt || "");
 
         return {
-          userId: user?.payload?.keyid,
+          userId: user ? user?.payload?.keyid : undefined,
         };
       },
     },

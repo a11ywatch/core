@@ -2,6 +2,7 @@ import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
 import type { Website } from "@app/types";
 
+// get a website from the database
 export const getWebsite = async ({
   userId,
   url,
@@ -14,11 +15,17 @@ export const getWebsite = async ({
       url,
       domain,
     });
-    const website = await collection.findOne(params);
+    let website;
+
+    if (Object.keys(params).length) {
+      website = await collection.findOne(params);
+    }
 
     return [website, collection];
   } catch (e) {
     console.error(e);
+
+    return [null, null];
   }
 };
 
@@ -48,7 +55,7 @@ export const getWebsitesWithUsers = async (
 };
 
 /*
- * Get all the current users of the application with pagination
+ * Get all the current users of the application with pagination. Returns partial results for the website.
  * @param [limit] a limit of users count: number
  * @param [filter] query params
  * @param [page] the page in the collection: number
@@ -105,28 +112,11 @@ export const getWebsitesPaging = async (
   }
 };
 
+// return a list of websites for the user by 20
 export const getWebsites = async ({ userId }, chain?: boolean) => {
   try {
     const [collection] = await connect("Websites");
     const websites = await collection.find({ userId }).limit(20).toArray();
-
-    return chain ? [websites, collection] : websites;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-export const getWebsitesDaily = async (page?: number, chain?: boolean) => {
-  try {
-    const [collection] = await connect("Websites");
-    const websites = await collection
-      .find({
-        adaScore: { $gte: 40 },
-      })
-      .skip(page * 8)
-      .project({ url: 1, _id: 0 })
-      .limit(8)
-      .toArray();
 
     return chain ? [websites, collection] : websites;
   } catch (e) {
