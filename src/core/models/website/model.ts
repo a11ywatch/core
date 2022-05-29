@@ -23,11 +23,11 @@ const WebsiteModel = {
     issuesFixedByCdn: 0,
     possibleIssuesFixedByCdn: 0,
     totalIssues: 0,
+    pageCount: 0,
     issueMeta: {
       skipContentIncluded: false,
     },
   },
-  pageCount: 0,
   lastScanDate: "",
   online: true,
   ua: "", // user agent to use when running

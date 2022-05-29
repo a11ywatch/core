@@ -54,15 +54,15 @@ export const generateWebsiteScore = async ({
     console.error(e);
   }
 
-  const adaScores: number[] = [];
-
   let websiteErrors = 0;
   let websiteWarnings = 0;
   let websiteNotices = 0;
   let websiteIssuesFixedByCdn = 0;
   let websitePossibleIssuesFixedByCdn = 0;
+  const adaScores: number[] = [];
 
-  pages.forEach((page) => {
+  // collect website stats by iterating through pages.
+  pages?.forEach((page) => {
     if (page) {
       const { issuesInfo } = page ?? {};
       const {
@@ -101,7 +101,6 @@ export const generateWebsiteScore = async ({
   });
 
   const averageItems = arrayAverage(adaScores);
-
   const avgScore = isNaN(averageItems) || perfectScore ? 100 : averageItems;
 
   return {
@@ -114,7 +113,8 @@ export const generateWebsiteScore = async ({
       errorCount: websiteErrors,
       warningCount: websiteWarnings,
       noticeCount: websiteNotices,
+      // amount of pages with possible issues
+      pageCount: pages.length,
     },
-    pageCount: pages.length,
   };
 };

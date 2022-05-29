@@ -13,6 +13,7 @@ export const issue = gql`
   }
 
   type Issue {
+    _id: ID
     issues(filter: String): [PageIssue]
     domain: String
     pageUrl: String

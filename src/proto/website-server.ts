@@ -4,7 +4,7 @@ import { crawlMultiSite, crawlEnqueue } from "@app/queues/crawl/crawl";
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
-import { crawlEmitter } from "@app/event/crawl";
+import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 
 import { loadProto } from "./website";
 
@@ -25,6 +25,9 @@ export const createServer = async () => {
         } catch (e) {
           console.error(e);
         }
+
+        crawlTrackingEmitter.emit("crawl-start", call.request);
+
         callback(null, {});
       },
       // remove user from crawl and generate average scores. [TODO: move to stream]
@@ -34,6 +37,9 @@ export const createServer = async () => {
         } catch (e) {
           console.error(e);
         }
+
+        crawlTrackingEmitter.emit("crawl-complete", call.request);
+
         callback(null, {});
       },
       // scan website for issues - syncs with crawl finished. [TODO: move to stream client streaming START, PROCESS, END ]
@@ -83,6 +89,8 @@ export const createServer = async () => {
       scanStream: async (call) => {
         call.write({});
         call.end();
+
+        crawlTrackingEmitter.emit("crawl-processing", call.request);
 
         try {
           // user queue to control cors output.

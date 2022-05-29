@@ -24,7 +24,7 @@ export const crawlEnqueue = async (data) => {
 };
 
 /*
- * Send request for crawl queue - Sends an email follow up on the crawl data
+ * Send request for crawl queue - Sends an email follow up on the crawl data. TODO: remove from file.
  * @return Promise<Websites | Pages>
  */
 export const crawlMultiSite = async (data) => {

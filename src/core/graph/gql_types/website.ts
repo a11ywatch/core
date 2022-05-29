@@ -18,7 +18,7 @@ export const website = gql`
     pageLoadTime: PageLoadTimeMeta
     issues(filter: String): [Issue]
     issue: [PageIssue]
-    issuesInfo: IssueMeta
+    issuesInfo: IssueInfo
     subDomains: [SubDomain]
     script: Script
     lastScanDate: String

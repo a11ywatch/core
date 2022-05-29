@@ -1,6 +1,6 @@
 import { SUPER_MODE } from "@app/config/config";
 import { watcherCrawl } from "@app/core/utils/watcher_crawl";
-import { crawlEmitter } from "@app/event/crawl";
+import { crawlEmitter } from "@app/event";
 
 interface CrawlMultiSite {
   data?: any[];
@@ -39,9 +39,11 @@ export const crawlMultiSiteWithEvent = (props): Promise<CrawlMultiSite> => {
     // wait for crawl event to finish.
     crawlEmitter.once(`crawl-${url}-${userId || 0}`, (_target, data) => {
       const pageCount = data?.length ?? 0;
+
       if (requestTimeout) {
         clearTimeout(requestTimeout);
       }
+
       resolve({
         data,
         message: `Scan finished and ${pageCount} page${

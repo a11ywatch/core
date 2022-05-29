@@ -54,6 +54,8 @@ import { crawlStreamLazy } from "./core/streams/crawl";
 import { crawlRest } from "./rest/routes/crawl";
 import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
+import { getServerConfig } from "./apollo-server";
+import { establishCrawlTracking } from "./event";
 
 const { GRAPHQL_PORT } = config;
 
@@ -85,8 +87,6 @@ const connectClients = async () => {
   } catch (e) {
     console.error(e);
   }
-
-  const { getServerConfig } = await import("./apollo-server");
 
   server = new ApolloServer(getServerConfig());
 };
@@ -407,6 +407,9 @@ const startServer = async () => {
   } catch (e) {
     console.error(e);
   }
+
+  // tracking event emitter
+  establishCrawlTracking();
 
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");

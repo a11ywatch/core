@@ -12,7 +12,7 @@ export const getWebsiteAPI = async (
   res: Response,
   next?: any
 ) => {
-  const { q, timestamp, download } = req.query;
+  const { q, download } = req.query;
 
   if (!q) {
     res.status(404);
@@ -24,7 +24,8 @@ export const getWebsiteAPI = async (
   let query = initUrl(decodeURIComponent(q + ""));
 
   try {
-    const report = await getReport(query, timestamp && Number(timestamp));
+    const report = await getReport(query);
+
     if (report?.website) {
       data = report.website;
     }
@@ -72,7 +73,7 @@ export const getWebsiteReport = async (req: Request, res: Response) => {
   let query = initUrl(decodeURIComponent(q + ""));
 
   try {
-    const report = await getReport(query, null, userId);
+    const report = await getReport(query, userId);
     if (report?.website) {
       data = report.website;
     }

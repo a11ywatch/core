@@ -1,12 +1,15 @@
-import { pubsub, redisClient } from "@app/database";
+import { redisClient } from "@app/database";
 import { getParams } from "./get-params";
 import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils";
-import { Method, Channels } from "@app/database/config";
+import { qWebsiteWorker } from "@app/queues/crawl";
 
-export const crawlTrackerComplete = async (data) => {
-  const { user_id: userId, domain: dm } =
-    typeof data === "string" ? getParams(data) : data;
+export const crawlTrackerComplete = async (data?: any) => {
+  const {
+    user_id: userId,
+    domain: dm,
+    full,
+  } = typeof data === "string" ? getParams(data) : data;
 
   if (dm && redisClient) {
     const domain = getHostName(dm);
@@ -18,20 +21,19 @@ export const crawlTrackerComplete = async (data) => {
       console.error(e);
     }
 
-    try {
-      // send pub sub complete. TODO: remove pub sub since data is already at the container.
-      await pubsub.publish(
-        Channels.crawl_scan_queue,
-        JSON.stringify({
-          user_id: userId,
+    // if a full scan was performed allow performing website averaging.
+    if (full) {
+      try {
+        // send pub sub complete. TODO: remove pub sub since data is already at the container.
+        await qWebsiteWorker.push({
+          userId,
           meta: {
-            method: Method["crawl_complete"],
             extra: { domain },
           },
-        })
-      );
-    } catch (e) {
-      console.error(e);
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };

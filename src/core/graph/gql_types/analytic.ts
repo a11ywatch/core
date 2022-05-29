@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export const analytic = gql`
   type Analytic {
-    id: ID
+    _id: ID
     pageUrl: String
     errorCount: Int
     warningCount: Int

@@ -16,18 +16,18 @@ export const collectionUpsert = async (
   try {
     const userId = config?.searchProps?.userId || source?.userId;
     const pageUrl = config?.searchProps?.pageUrl || source?.pageUrl;
+    const url = config?.searchProps?.url || source?.url;
 
-    const queryParams = config?.searchProps
-      ? config?.searchProps
-      : // default handle collections as pageURL. SHOULD REFACTOR single prop `url`
-        { userId, pageUrl };
+    let queryParams = {};
 
-    if (typeof queryParams?.pageUrl === "undefined" && !queryParams.url) {
-      if (source?.url) {
-        queryParams.url = source.url;
-      } else if (source.pageUrl) {
-        queryParams.pageUrl = source.pageUrl;
-      }
+    if (typeof userId !== "undefined") {
+      queryParams = { userId };
+    }
+    if (typeof pageUrl !== "undefined") {
+      queryParams = { ...queryParams, pageUrl };
+    }
+    if (typeof url !== "undefined" && !pageUrl) {
+      queryParams = { ...queryParams, url };
     }
 
     if (shouldUpdate && shouldDelete) {

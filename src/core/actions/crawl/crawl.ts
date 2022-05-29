@@ -16,6 +16,8 @@ import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import type { Struct } from "pb-util";
+import { crawlTrackingEmitter } from "@app/event";
+import { SUPER_MODE } from "@app/config/config";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -63,7 +65,8 @@ export const crawlPage = async (
       const rootPage = pathname === "/"; // the url is the base domain index.
 
       if (website?.pageInsights || pageInsights) {
-        if (freeAccount) {
+        // only premium and above get lh on all pages.
+        if (!SUPER_MODE && (freeAccount || userData?.role === 1)) {
           // INSIGHTS ONLY ON ROOT PAGE IF ENABLED
           insightsEnabled = rootPage;
         } else {
@@ -187,53 +190,56 @@ export const crawlPage = async (
         }
       }
 
-      // if ROOT domain for scan update Website Collection.
-      if (rootPage) {
-        await collectionUpsert(
-          updateWebsiteProps,
-          [websiteCollection, !!updateWebsiteProps],
-          {
-            searchProps: { url: pageUrl, userId },
-          }
-        );
-      }
+      // if basse website record exist update data.
+      if (dataSource) {
+        // if ROOT domain for scan update Website Collection.
+        if (rootPage) {
+          await collectionUpsert(
+            updateWebsiteProps,
+            [websiteCollection, !!updateWebsiteProps],
+            {
+              searchProps: { url: pageUrl, userId },
+            }
+          );
+        }
 
-      const shouldUpsertCollections = pageConstainsIssues || issueExist;
+        const shouldUpsertCollections = pageConstainsIssues || issueExist;
 
-      // Add to Issues collection if page contains issues or if record should update/delete.
-      if (shouldUpsertCollections) {
-        await collectionUpsert(
-          {
-            pageUrl,
-            domain,
-            errorCount,
-            warningCount,
-            noticeCount,
-            userId,
-            adaScore,
-          },
-          [analyticsCollection, analytics]
-        ); // ANALYTICS
-        await collectionUpsert(newIssue, [
-          issuesCollection,
-          issueExist,
-          !pageConstainsIssues, // delete collection if issues do not exist
-        ]); // ISSUES COLLECTION
-      }
+        // Add to Issues collection if page contains issues or if record should update/delete.
+        if (shouldUpsertCollections) {
+          await collectionUpsert(
+            {
+              pageUrl,
+              domain,
+              errorCount,
+              warningCount,
+              noticeCount,
+              userId,
+              adaScore,
+            },
+            [analyticsCollection, analytics]
+          ); // ANALYTICS
+          await collectionUpsert(newIssue, [
+            issuesCollection,
+            issueExist,
+            !pageConstainsIssues, // delete record if issues do not exist
+          ]); // ISSUES COLLECTION
+        }
 
-      if (shouldUpsertCollections || newSite) {
-        await collectionUpsert(
-          updateWebsiteProps,
-          [subDomainCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
-          {
-            searchProps: { pageUrl, userId },
-          }
-        ); // pages - sub domains needs rename
-      }
+        if ((!newSite && shouldUpsertCollections) || newSite) {
+          await collectionUpsert(
+            updateWebsiteProps,
+            [subDomainCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
+            {
+              searchProps: { url: pageUrl, userId },
+            }
+          ); // pages - sub domains needs rename
+        }
 
-      // every page gets a script ATM. TODO conditional scripts.
-      if (scriptsEnabled) {
-        await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
+        // every page gets a script ATM. TODO conditional scripts.
+        if (scriptsEnabled) {
+          await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
+        }
       }
 
       // Flatten issues with the array set results without meta.
@@ -242,6 +248,12 @@ export const crawlPage = async (
           issues: subIssues,
         }),
       };
+
+      crawlTrackingEmitter.emit("crawl-processed", {
+        user_id: userId,
+        domain,
+        pages: [urlMap],
+      });
 
       return resolve(responseModel(responseData));
     } catch (e) {

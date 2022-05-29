@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export const history = gql`
   type History {
-    id: ID
+    _id: ID
     url: String
     user: User
     issues(filter: String): [Issue]

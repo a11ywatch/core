@@ -4,3 +4,5 @@ import EventEmitter from "events";
 class CrawlEmitter extends EventEmitter {}
 
 export const crawlEmitter = new CrawlEmitter();
+
+export const crawlTrackingEmitter = new CrawlEmitter();
