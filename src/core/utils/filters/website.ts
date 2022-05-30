@@ -3,13 +3,11 @@ export function websiteSearchParams({
   url,
   pageUrl,
   domain,
-  filter,
 }: {
   userId?: any;
   url?: string;
   pageUrl?: string;
   domain?: string;
-  filter?: string;
 }) {
   let searchProps = {};
 
@@ -20,13 +18,13 @@ export function websiteSearchParams({
   }
 
   if (typeof url !== "undefined") {
-    searchProps = Object.assign({}, searchProps, { url });
+    searchProps = { ...searchProps, url };
   }
   if (typeof pageUrl !== "undefined") {
-    searchProps = Object.assign({}, searchProps, { pageUrl });
+    searchProps = { ...searchProps, pageUrl };
   }
   if (typeof domain !== "undefined") {
-    searchProps = Object.assign({}, searchProps, { domain });
+    searchProps = { ...searchProps, domain };
   }
 
   return searchProps;

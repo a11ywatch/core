@@ -1,8 +1,6 @@
 import { connect } from "@app/database";
 import { URL } from "url";
 
-const findSort = { sort: { $natural: -1 } };
-
 // get the page report for a website. TODO: REFACTOR..
 export const getReport = async (url: string, userId?: number) => {
   if (!url) {
@@ -32,7 +30,7 @@ export const getReport = async (url: string, userId?: number) => {
     findBy = { url };
     pageCollection = "SubDomains";
   } else {
-    findBy = { domain };
+    findBy = { url };
     pageCollection = "Websites";
   }
 
@@ -41,13 +39,24 @@ export const getReport = async (url: string, userId?: number) => {
       ...findBy,
       userId,
     };
+  } else {
+    websiteFindBy = {
+      ...findBy,
+    };
+  }
+
+  // if no keys exit
+  if (!Object.keys(websiteFindBy).length) {
+    return {
+      website: null,
+    };
   }
 
   const [issueCollection] = await connect("Issues");
   const [domainCollection] = await connect(pageCollection);
 
   try {
-    website = await domainCollection.findOne(websiteFindBy, findSort);
+    website = await domainCollection.findOne(websiteFindBy);
   } catch (e) {
     console.error(e);
   }
@@ -55,7 +64,16 @@ export const getReport = async (url: string, userId?: number) => {
   // retry and get the base issue unless password protected page.
   if (!website && authenticated) {
     try {
-      website = await domainCollection.findOne(findBy, findSort);
+      website = await domainCollection.findOne(findBy);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // retry and get the base issue unless password protected page.
+  if (!website && !targetPages) {
+    try {
+      website = await domainCollection.findOne({ domain });
     } catch (e) {
       console.error(e);
     }
@@ -64,10 +82,9 @@ export const getReport = async (url: string, userId?: number) => {
   // find the issues for the website page
   if (website) {
     try {
-      const websiteIssues = await issueCollection.findOne(
-        { pageUrl: website.url },
-        findSort
-      );
+      const websiteIssues = await issueCollection.findOne({
+        pageUrl: website.url,
+      });
 
       if (websiteIssues && websiteIssues.issues) {
         website.issues = websiteIssues.issues;
