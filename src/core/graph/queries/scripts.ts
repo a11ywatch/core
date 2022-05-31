@@ -5,6 +5,6 @@ export const scripts = async (_, { url: pageUrl, ...props }, context) => {
 
   return await context.models.Scripts.getScripts({
     userId,
-    pageUrl,
+    pageUrl: decodeURIComponent(pageUrl),
   });
 };

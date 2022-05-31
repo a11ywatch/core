@@ -54,3 +54,38 @@ export const getAllPages = async () => {
     console.error(e);
   }
 };
+
+// get websites for a user with pagination offsets.
+export const getPagesPaging = async (
+  {
+    userId,
+    domain,
+    limit = 5,
+    offset = 0,
+  }: { userId?: number; domain?: string; limit: number; offset: number },
+  chain?: boolean
+) => {
+  try {
+    const [collection] = await connect("SubDomains");
+
+    let params = {};
+
+    if (typeof userId !== "undefined") {
+      params = { userId };
+    }
+    if (typeof domain !== "undefined" && domain) {
+      params = { ...params, domain };
+    }
+
+    const pages = await collection
+      .find(params)
+      .sort({ order: 1 })
+      .skip(offset)
+      .limit(limit)
+      .toArray();
+
+    return chain ? [pages, collection] : pages;
+  } catch (e) {
+    console.error(e);
+  }
+};

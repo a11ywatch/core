@@ -23,7 +23,8 @@ interface VerifySend {
 // filter errors from issues
 const filterCb = (iss: Issue) => iss?.type === "error";
 
-const updateLastScanDate = async (userId, userCollection) => {
+// determine when a user last got alerted.
+const updateLastAlertDate = async (userId, userCollection) => {
   try {
     await userCollection.findOneAndUpdate(
       { id: userId },
@@ -85,7 +86,7 @@ const sendMail = async ({
 
   if (findUser) {
     try {
-      await updateLastScanDate(userId, userCollection);
+      await updateLastAlertDate(userId, userCollection);
     } catch (e) {
       console.error(e);
     }
@@ -127,13 +128,13 @@ const sendMailMultiPage = async ({
 }) => {
   const [user, userCollection] = await verifyUserSend({
     userId,
-    confirmedOnly: DEV ? false : true,
+    confirmedOnly: true,
     sendEmail,
   });
 
   if (user) {
     try {
-      await updateLastScanDate(userId, userCollection);
+      await updateLastAlertDate(userId, userCollection);
     } catch (e) {
       console.error(e);
     }

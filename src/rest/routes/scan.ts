@@ -1,6 +1,7 @@
 import { getUserFromApi } from "@app/core/utils";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import type { Request, Response } from "express";
+import { paramParser } from "../extracter";
 
 /*
  * SCAN -> PAGEMIND: Single page [does not store values to cdn]
@@ -12,7 +13,13 @@ export const scanSimple = async (req: Request, res: Response) => {
     const userNext = await getUserFromApi(req.headers.authorization, req, res);
 
     if (!!userNext) {
-      const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
+      const url = decodeURIComponent(
+        paramParser(req, "websiteUrl") || paramParser(req, "url")
+      );
+
+      const pageInsights =
+        paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
+
       const userId = userNext?.id;
 
       let resData = {};
@@ -22,6 +29,7 @@ export const scanSimple = async (req: Request, res: Response) => {
           {
             url,
             userId,
+            pageInsights,
           },
           false
         );
@@ -29,7 +37,7 @@ export const scanSimple = async (req: Request, res: Response) => {
         resData = await scanWebsite({
           url,
           noStore: true,
-          userId,
+          pageInsights,
         });
       }
 

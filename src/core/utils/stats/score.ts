@@ -27,6 +27,7 @@ export async function setWebsiteScore({ domain, userId }) {
 
     await collectionUpsert(
       {
+        ...website,
         issuesInfo: {
           ...prevIssuesInfo,
           ...issueInfo,

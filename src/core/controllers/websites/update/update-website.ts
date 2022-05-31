@@ -34,7 +34,7 @@ export const updateWebsite = async ({
   };
 
   // if page headers are sent add them
-  if (typeof pageHeaders !== "undefined") {
+  if (typeof pageHeaders !== "undefined" && Array.isArray(pageHeaders)) {
     const pageHeaderSrc =
       pageHeaders?.length === 1 && !pageHeaders[0].key ? null : pageHeaders;
 

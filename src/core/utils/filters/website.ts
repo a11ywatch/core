@@ -17,13 +17,13 @@ export function websiteSearchParams({
     };
   }
 
-  if (typeof url !== "undefined") {
+  if (typeof url !== "undefined" && url) {
     searchProps = { ...searchProps, url };
   }
-  if (typeof pageUrl !== "undefined") {
+  if (typeof pageUrl !== "undefined" && pageUrl) {
     searchProps = { ...searchProps, pageUrl };
   }
-  if (typeof domain !== "undefined") {
+  if (typeof domain !== "undefined" && domain) {
     searchProps = { ...searchProps, domain };
   }
 

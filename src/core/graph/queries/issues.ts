@@ -5,7 +5,7 @@ export const issue = async (_, { url: pageUrl, ...props }, context) => {
 
   return await context.models.Issue.getIssue({
     userId,
-    pageUrl,
+    pageUrl: decodeURIComponent(pageUrl),
   });
 };
 export const issues = async (_, { url: pageUrl, ...props }, context) => {

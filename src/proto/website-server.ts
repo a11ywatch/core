@@ -1,6 +1,7 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
-import { crawlMultiSite, crawlEnqueue } from "@app/queues/crawl/crawl";
+import { crawlMultiSite } from "@app/core/actions";
+import { crawlEnqueue } from "@app/queues/crawl/crawl";
 import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
@@ -55,7 +56,7 @@ export const createServer = async () => {
         let data = [];
 
         try {
-          // perform scans across all website urls.
+          // perform scans across all website urls passed.
           data = await crawlMultiSite({
             pages,
             userId,
@@ -66,20 +67,23 @@ export const createServer = async () => {
 
         // a full site wide-scan performed. Send scan event including email.
         if (full) {
-          try {
-            const emitCrawledEvent = crawlEmitter.emit(
-              `crawl-${domain}-${userId || 0}`,
-              domain,
-              data
-            );
-            await emailMessager.sendMailMultiPage({
-              userId,
-              data,
-              domain,
-              sendEmail: !emitCrawledEvent, // if the event did not emit send email from CRON job.
-            });
-          } catch (e) {
-            console.error(e);
+          const sendEmail = crawlEmitter.emit(
+            `crawl-${domain}-${userId || 0}`,
+            domain,
+            data
+          );
+
+          if (!sendEmail) {
+            try {
+              await emailMessager.sendMailMultiPage({
+                userId,
+                data,
+                domain,
+                sendEmail, // if the event did not emit send email from CRON job.
+              });
+            } catch (e) {
+              console.error(e);
+            }
           }
         }
 

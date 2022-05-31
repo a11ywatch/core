@@ -23,10 +23,10 @@ export const collectionUpsert = async (
     if (typeof userId !== "undefined") {
       queryParams = { userId };
     }
-    if (typeof pageUrl !== "undefined") {
+    if (pageUrl && typeof pageUrl !== "undefined") {
       queryParams = { ...queryParams, pageUrl };
     }
-    if (typeof url !== "undefined" && !pageUrl) {
+    if (url && typeof url !== "undefined" && !pageUrl) {
       queryParams = { ...queryParams, url };
     }
 

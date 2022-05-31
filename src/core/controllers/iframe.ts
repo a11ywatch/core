@@ -10,9 +10,8 @@ const createIframe = (req: Request, res: AppResponse) => {
       return res.send(false);
     }
 
-    const decodedUrl = decodeURIComponent(baseUrl);
+    const url = initUrl(decodeURIComponent(baseUrl));
     // TODO: REMOVE replace
-    const url = initUrl(decodedUrl);
 
     if (url.includes(".pdf")) {
       res.redirect(url);

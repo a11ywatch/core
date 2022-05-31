@@ -14,10 +14,13 @@ import {
   PRIVATE_KEY,
   PUBLIC_KEY,
 } from "./config";
-import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
+import {
+  addWebsite,
+  crawlAllAuthedWebsitesCluster,
+} from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
-
+import { paramParser } from "./rest/extracter";
 import {
   CONFIRM_EMAIL,
   IMAGE_CHECK,
@@ -56,6 +59,8 @@ import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
+import { getPagesPaging } from "./core/controllers/subdomains/find/domains";
+import { updateWebsite } from "./core/controllers/websites/update";
 
 const { GRAPHQL_PORT } = config;
 
@@ -106,6 +111,7 @@ function initServer(): HttpServer[] {
   // rate limits on expensive endpoints
   if (!config.SUPER_MODE) {
     app.use("/iframe", limiter);
+    app.use("/api/iframe", limiter);
     app.use("/api/get-website", limiter);
     app.use("/api/register", limiter);
     app.use("/api/report", limiter);
@@ -120,12 +126,13 @@ function initServer(): HttpServer[] {
   app.options(UNSUBSCRIBE_EMAILS, cors());
   // root
   app.get(ROOT, root);
+  app.get("/status/:domain", cors(), statusBadge);
   /*
    * Create an iframe based off a url and reverse engineer the content for CORS.
    * Uses node-iframe package to handle iframes.
    */
   app.get("/iframe", cors(), createIframeEvent);
-  app.get("/status/:domain", cors(), statusBadge);
+  app.get("/api/iframe", cors(), createIframeEvent);
   // get a previus run report @query {q: string}
   app.get("/api/report", cors(), getWebsiteReport);
   // retreive a user from the database.
@@ -154,12 +161,23 @@ function initServer(): HttpServer[] {
     let message = "Failed to retrieved website.";
 
     const usr = getUserFromToken(req.headers.authorization);
+    const dman = req.query.domain || req.body.domain;
+    const domain = dman ? decodeURIComponent(dman + "") : undefined;
+    // flexible params for url [backwards compat api support] TODO: remove
+    const url1 = paramParser(req, "url");
+    const url2 = paramParser(req, "websiteUrl");
+    const url3 = paramParser(req, "pageUrl");
+
+    const urlBase = url1 || url2 || url3;
+    const url = urlBase ? decodeURIComponent(urlBase + "") : undefined;
 
     try {
-      [data] = await getWebsite({
+      const [page] = await getWebsite({
         userId: usr?.payload?.keyid,
-        domain: decodeURIComponent(req.query.domain + ""),
+        domain,
+        url,
       });
+      data = page;
       message = "Successfully retrieved website.";
     } catch (e) {
       code = 400;
@@ -181,12 +199,15 @@ function initServer(): HttpServer[] {
     let message = "Failed to retrieved analytic.";
 
     const usr = getUserFromToken(req.headers.authorization);
-
+    const targetQuery = paramParser(req, "pageUrl");
+    const targetBody = paramParser(req, "url");
+    const targetUrl = targetQuery || targetBody;
+    const domain = paramParser(req, "domain");
     try {
       data = await AnalyticsController().getWebsite({
         userId: usr?.payload?.keyid,
-        pageUrl: decodeURIComponent(String(req.query.pageUrl || req.query.url)),
-        domain: req.query.domain ? req.query.domain + "" : undefined,
+        pageUrl: targetUrl ? decodeURIComponent(String(targetUrl)) : undefined,
+        domain: domain ? decodeURIComponent(domain) : undefined,
       });
       message = "Successfully retrieved analytic for page.";
     } catch (e) {
@@ -215,7 +236,7 @@ function initServer(): HttpServer[] {
       try {
         [data] = await getWebsitesPaging({
           userId: uid,
-          limit: 2,
+          limit: 5,
           offset: Number(req.query.offset) || 0,
         });
         message = "Successfully retrieved websites.";
@@ -234,12 +255,55 @@ function initServer(): HttpServer[] {
     );
   });
 
-  // paginated retreive issues from the database.
-  app.get("/api/list/issue", cors(), async (req, res) => {
+  // paginated retreive pages from the database.
+  app.get("/api/list/pages", cors(), async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization);
     let data;
     let code = 200;
+    let message = "Failed to retrieved pages.";
+    const uid = usr?.payload?.keyid;
+    const domain = paramParser(req, "domain");
+
+    if (typeof uid !== "undefined") {
+      try {
+        [data] = await getPagesPaging({
+          userId: uid,
+          limit: 2,
+          offset: Number(req.query.offset) || 0,
+          domain: domain || undefined,
+        });
+        if (data) {
+          message = "Successfully retrieved pages.";
+        }
+      } catch (e) {
+        code = 400;
+        message = `${message} - ${e}`;
+      }
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+
+  // paginated retreive issues from the database.
+  app.get("/api/list/issue", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+
+    let data;
+    let code = 200;
     let message = "Failed to retrieved issues.";
+
+    const dman = paramParser(req, "domain");
+    const purl = paramParser(req, "pageUrl");
+    const url = paramParser(req, "url");
+    const domain = dman ? encodeURIComponent(dman + "") : undefined;
+    const pageUrl = purl || url ? encodeURIComponent(purl || url) : undefined;
+
     const uid = usr?.payload?.keyid;
 
     if (typeof uid !== "undefined") {
@@ -249,8 +313,8 @@ function initServer(): HttpServer[] {
           limit: req.query.limit
             ? Math.max(Number(req.query.limit || 0), 500)
             : undefined,
-          domain: String(req.query.domain) || undefined,
-          pageUrl: String(req.query.pageUrl) || undefined,
+          domain,
+          pageUrl,
         });
         message = "Successfully retrieved issues.";
       } catch (e) {
@@ -307,6 +371,85 @@ function initServer(): HttpServer[] {
     } catch (error) {
       console.error(error);
     }
+  });
+
+  /*
+   * Update website configuration.
+   * This sets the website configuration for crawling like user agents, headers, and etc.
+   */
+  app.put("/api/website", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    const userId = usr?.payload?.keyid;
+
+    if (typeof userId === "undefined") {
+      return res.json({
+        data: null,
+        message: "Authentication required",
+      });
+    }
+
+    const url = paramParser(req, "url");
+    const customHeaders = paramParser(req, "customHeaders");
+    const mobile = paramParser(req, "mobile");
+    const pageInsights = paramParser(req, "pageInsights");
+    const ua = paramParser(req, "ua");
+    const standard = paramParser(req, "standard");
+
+    const { website } = await updateWebsite({
+      userId,
+      url,
+      pageHeaders: customHeaders,
+      mobile,
+      pageInsights,
+      ua,
+      standard,
+    });
+
+    return res.json({
+      data: website,
+      message:
+        "This endpoint is a WIP. It will be used to update your website configuration",
+    });
+  });
+
+  /*
+   * Add website.
+   * This sets the website configuration for crawling like user agents, headers, and etc.
+   */
+  app.post("/api/website", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    const userId = usr?.payload?.keyid;
+
+    if (typeof userId === "undefined") {
+      return res.json({
+        data: null,
+        message: "Authentication required",
+      });
+    }
+
+    const url = paramParser(req, "url");
+    const customHeaders = paramParser(req, "customHeaders");
+    const mobile = paramParser(req, "mobile");
+    const pageInsights = paramParser(req, "pageInsights");
+    const ua = paramParser(req, "ua");
+    const standard = paramParser(req, "standard");
+
+    const { website } = await addWebsite({
+      userId,
+      url,
+      customHeaders,
+      mobile,
+      pageInsights,
+      ua,
+      standard,
+      canScan: false,
+    });
+
+    return res.json({
+      data: website,
+      message:
+        "This endpoint is a WIP. It will be used to update your website configuration",
+    });
   });
 
   // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.

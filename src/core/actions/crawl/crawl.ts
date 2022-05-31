@@ -58,16 +58,16 @@ export const crawlPage = async (
         domain,
         userId,
       });
-      let insightsEnabled = false;
-
       const freeAccount = !userData?.role; // free account
       const scriptsEnabled = !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
       const rootPage = pathname === "/"; // the url is the base domain index.
+      const insightsLocked = freeAccount || userData?.role === 1;
+
+      let insightsEnabled = false;
 
       if (website?.pageInsights || pageInsights) {
-        // only premium and above get lh on all pages.
-        if (!SUPER_MODE && (freeAccount || userData?.role === 1)) {
-          // INSIGHTS ONLY ON ROOT PAGE IF ENABLED
+        // only premium and above get lighthouse on all pages.
+        if (insightsLocked && !SUPER_MODE) {
           insightsEnabled = rootPage;
         } else {
           insightsEnabled = pageInsights || website?.pageInsights;
@@ -85,8 +85,18 @@ export const crawlPage = async (
         standard: website?.standard,
       });
 
+      const trackerProccess = () => {
+        crawlTrackingEmitter.emit("crawl-processed", {
+          user_id: userId,
+          domain,
+          pages: [urlMap],
+        });
+      };
+
       // TODO: SET PAGE OFFLINE DB
       if (!dataSource || !dataSource?.webPage) {
+        trackerProccess();
+
         return resolve(
           responseModel({
             data: null,
@@ -219,11 +229,13 @@ export const crawlPage = async (
             },
             [analyticsCollection, analytics]
           ); // ANALYTICS
-          await collectionUpsert(newIssue, [
-            issuesCollection,
-            issueExist,
-            !pageConstainsIssues, // delete record if issues do not exist
-          ]); // ISSUES COLLECTION
+          await collectionUpsert(
+            newIssue,
+            [issuesCollection, issueExist, !pageConstainsIssues],
+            {
+              searchProps: { pageUrl, userId },
+            }
+          ); // ISSUES COLLECTION
         }
 
         if ((!newSite && shouldUpsertCollections) || newSite) {
@@ -249,11 +261,7 @@ export const crawlPage = async (
         }),
       };
 
-      crawlTrackingEmitter.emit("crawl-processed", {
-        user_id: userId,
-        domain,
-        pages: [urlMap],
-      });
+      trackerProccess();
 
       return resolve(responseModel(responseData));
     } catch (e) {
@@ -261,4 +269,28 @@ export const crawlPage = async (
     }
     return resolve(responseModel());
   });
+};
+
+/*
+ * Send request for crawl queue - Sends an email follow up on the crawl data. TODO: remove from file.
+ * @return Promise<Websites | Pages>
+ */
+export const crawlMultiSite = async (data) => {
+  const { pages = [], userId } = data;
+  let responseData = [];
+
+  // get users for crawl job matching the urls
+  for (const url of pages) {
+    let scanResult;
+    try {
+      scanResult = await crawlPage({ url, userId }, false);
+    } catch (e) {
+      console.error(e);
+    }
+    if (scanResult?.data) {
+      responseData.push(scanResult.data);
+    }
+  }
+
+  return responseData;
 };

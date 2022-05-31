@@ -6,6 +6,6 @@ export const subDomains = async (_, { domain, ...props }, context) => {
 
   return await context.models.SubDomain.getDomains({
     userId,
-    domain,
+    domain: decodeURIComponent(domain),
   });
 };

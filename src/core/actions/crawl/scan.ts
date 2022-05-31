@@ -12,6 +12,7 @@ type ScanParams = {
   userId?: number;
   url: string;
   noStore?: boolean;
+  pageInsights?: boolean; // lighthouse insights
 };
 
 /**
@@ -27,6 +28,7 @@ export const scanWebsite = async ({
   userId,
   url,
   noStore = false,
+  pageInsights = false,
 }: ScanParams): Promise<ResponseModel> => {
   const pageUrl = removeTrailingSlash(url);
   const domain = getHostName(pageUrl);
@@ -51,7 +53,7 @@ export const scanWebsite = async ({
       pageHeaders: website.pageHeaders,
       url: pageUrl,
       userId,
-      pageInsights: false, // TODO: get website if auth determine if Lighthouse enabled
+      pageInsights, // TODO: get website if auth determine if Lighthouse enabled
       noStore,
       scriptsEnabled: false,
     });

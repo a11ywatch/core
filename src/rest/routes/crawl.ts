@@ -4,6 +4,7 @@ import { Channels } from "@app/database/config";
 import { getUserFromApiScan } from "@app/core/utils/get-user-data";
 import { crawlMultiSiteWithEvent } from "@app/core/utils";
 import { responseModel } from "@app/core/models";
+import { paramParser } from "../extracter";
 
 // TODO: remove pub sub
 export const crawlQueue = async (data) => {
@@ -36,7 +37,9 @@ export const crawlRest = async (req, res) => {
     );
 
     if (!!userNext) {
-      const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
+      const url = decodeURIComponent(
+        paramParser(req, "websiteUrl") || paramParser(req, "url")
+      );
 
       const { data, message } = await crawlMultiSiteWithEvent({
         url,

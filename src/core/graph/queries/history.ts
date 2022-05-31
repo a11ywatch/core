@@ -5,6 +5,6 @@ export const history = async (_, { url, ...props }, context) => {
 
   return await context.models.History.getHistory({
     userId,
-    url,
+    url: decodeURIComponent(url),
   });
 };
