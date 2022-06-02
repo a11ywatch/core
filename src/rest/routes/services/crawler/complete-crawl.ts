@@ -23,17 +23,14 @@ export const crawlTrackerComplete = async (data?: any) => {
 
     // if a full scan was performed allow performing website averaging.
     if (full) {
-      try {
-        // send pub sub complete. TODO: remove pub sub since data is already at the container.
-        await qWebsiteWorker.push({
+      await qWebsiteWorker
+        .push({
           userId,
           meta: {
             extra: { domain },
           },
-        });
-      } catch (e) {
-        console.error(e);
-      }
+        })
+        .catch((err) => console.error(err));
     }
   }
 };

@@ -13,24 +13,14 @@ interface Meta {
 type Task = {
   userId?: number;
   url?: string;
-  usersPooling?: string[];
   meta?: Meta;
+  fromQueue?: boolean;
 };
-
-// // if the gRPC request was crawl complete. TODO: seperate method call
-// export const isGenerateAverageMethod = (meta: Meta) => {
-//   if (meta && typeof meta?.method !== "undefined") {
-//     return meta.method === Method["crawl_complete"];
-//   }
-//   return false;
-// };
 
 // the async worker to use for crawling pages
 async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
-  const { url: urlMap, userId, usersPooling = [] } = arg;
-
   try {
-    return await crawl({ userId, url: urlMap, usersPooling });
+    return await crawl(arg);
   } catch (e) {
     console.error(e);
   }
@@ -44,7 +34,6 @@ async function asyncWorkerCrawlComplete(
   const props = meta?.extra;
 
   try {
-    // if method is crawl_complete
     return await setWebsiteScore({
       domain: props?.domain,
       userId: Number(userId),
@@ -54,8 +43,10 @@ async function asyncWorkerCrawlComplete(
   }
 }
 
-export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 3);
-
+// crawl queue
+export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 4);
+// crawl queue lighthouse - only one process allowed at time
+export const qLh: queueAsPromised<Task> = fastq.promise(asyncWorker, 1);
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
   asyncWorkerCrawlComplete,
   20

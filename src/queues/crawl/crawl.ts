@@ -5,19 +5,18 @@ import { q } from "./handle";
  * @return Promise<void>
  */
 export const crawlEnqueue = async (data) => {
-  try {
-    const { pages = [], user_id } = data;
+  const { pages = [], user_id } = data;
 
-    // get users enqueed for crawl job matching the urls
-    for (const url of pages) {
-      // remove mem queue
+  // get users for crawl job matching the urls
+  for (const url of pages) {
+    try {
       await q.push({
         url,
         userId: user_id,
-        usersPooling: [], // TODO: remove from config
+        fromQueue: true,
       });
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
 };

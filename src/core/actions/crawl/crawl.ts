@@ -18,6 +18,7 @@ import { ResponseModel } from "@app/core/models/response/types";
 import type { Struct } from "pb-util";
 import { crawlTrackingEmitter } from "@app/event";
 import { SUPER_MODE } from "@app/config/config";
+import { qLh } from "@app/queues/crawl/handle";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -40,7 +41,8 @@ const filterCb = (iss: Issue) => iss?.type === "error";
  */
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
-  sendEmail?: boolean // determine if email should be sent based on results
+  sendEmail?: boolean, // determine if email should be sent based on results
+  fromQueue?: boolean // the website is from a queue
 ): Promise<ResponseModel> => {
   const {
     userId,
@@ -74,6 +76,14 @@ export const crawlPage = async (
         }
       }
 
+      // push into single queue for results [TODO: if not from queue setup event Emitter for results]
+      if (fromQueue && insightsEnabled) {
+        return await qLh
+          .push({ url: pageUrl, userId })
+          .catch((e) => console.error(e));
+      }
+
+      console.log("RUNNING ");
       const dataSource = await fetchPageIssues({
         pageHeaders: website?.pageHeaders,
         url: urlMap,
@@ -276,7 +286,8 @@ export const crawlPage = async (
  * @return Promise<Websites | Pages>
  */
 export const crawlMultiSite = async (data) => {
-  const { pages = [], userId } = data;
+  const { pages = [], userId: uid, user_id } = data;
+  const userId = uid ?? user_id;
   let responseData = [];
 
   // get users for crawl job matching the urls

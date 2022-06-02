@@ -62,12 +62,14 @@ export const establishCrawlTracking = () => {
       if (crawlingSet[key].current === crawlingSet[key].total) {
         // Dispatch other events to signal done.
         crawlingSet = removeKey(key, crawlingSet);
-        await qWebsiteWorker.push({
-          userId,
-          meta: {
-            extra: { domain: target.domain },
-          },
-        });
+        await qWebsiteWorker
+          .push({
+            userId,
+            meta: {
+              extra: { domain: target.domain },
+            },
+          })
+          .catch((err) => console.error(err));
       }
     }
   });
