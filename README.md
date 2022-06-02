@@ -40,6 +40,10 @@ EMAIL_CLIENT_ID=
 EMAIL_CLIENT_KEY=
 ```
 
+## Queue
+
+Set the limit to number of test in parrallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.
+
 ## LICENSE
 
 check the license file in the root of the project.

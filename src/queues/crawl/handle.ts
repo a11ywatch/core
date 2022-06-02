@@ -14,7 +14,6 @@ type Task = {
   userId?: number;
   url?: string;
   meta?: Meta;
-  fromQueue?: boolean;
 };
 
 // the async worker to use for crawling pages
@@ -43,10 +42,11 @@ async function asyncWorkerCrawlComplete(
   }
 }
 
-// crawl queue
-export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 4);
-// crawl queue lighthouse - only one process allowed at time
-export const qLh: queueAsPromised<Task> = fastq.promise(asyncWorker, 1);
+// crawl queue [32gb 16, 16gb 8, 8gb 4, 4gb 2]
+export const q: queueAsPromised<Task> = fastq.promise(
+  asyncWorker,
+  Number(process.env.CRAWL_QUEUE_LIMIT || 8)
+);
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
   asyncWorkerCrawlComplete,
   20

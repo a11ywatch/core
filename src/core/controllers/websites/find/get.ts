@@ -80,6 +80,7 @@ export const getWebsitesPaginated = async (
   try {
     data = await collection
       .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
+      .sort({ order: 1 })
       .project({ url: 1, userId: 1 })
       .limit(limit)
       .skip(offset ?? limit * page)

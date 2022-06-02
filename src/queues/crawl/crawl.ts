@@ -13,7 +13,6 @@ export const crawlEnqueue = async (data) => {
       await q.push({
         url,
         userId: user_id,
-        fromQueue: true,
       });
     } catch (e) {
       console.error(e);

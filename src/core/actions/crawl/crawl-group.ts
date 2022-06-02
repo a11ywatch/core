@@ -8,7 +8,8 @@ import { crawlPage } from "./crawl";
  *  @returns response model defaults {success: true}
  */
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
-  const { userId, url: urlMap, fromQueue } = params ?? {};
+  const { userId: uid, user_id, url: urlMap } = params ?? {};
+  const userId = uid ?? user_id;
 
   if (!getHostName(urlMap)) {
     return responseModel({ msgType: ApiResponse.NotFound });
@@ -18,11 +19,7 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
   const usersPool = await getActiveUsersCrawling({ userId, urlMap });
 
   for (const id of usersPool) {
-    await crawlPage(
-      { ...params, url: urlMap, userId: Number(id) },
-      sendEmail,
-      fromQueue
-    );
+    await crawlPage({ ...params, url: urlMap, userId: Number(id) }, sendEmail);
   }
 
   return responseModel({ msgType: ApiResponse.Success });
