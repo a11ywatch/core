@@ -51,35 +51,53 @@ export const establishCrawlTracking = () => {
   });
 
   // track the amount of pages the website should have and determine if complete.
-  crawlTrackingEmitter.on("crawl-processed", async (target) => {
+  crawlTrackingEmitter.on("crawl-processed", (target) => {
     // process a new item tracking count
     const userId = target.user_id;
     const key = getKey(target.domain, target.pages, userId);
 
     if (crawlingSet[key]) {
       crawlingSet[key].current = crawlingSet[key].current + 1;
-      // crawl has completed.
-      if (crawlingSet[key].current === crawlingSet[key].total) {
-        // Dispatch other events to signal done.
-        crawlingSet = removeKey(key, crawlingSet);
-        await qWebsiteWorker
+      if (
+        crawlingSet[key].current === crawlingSet[key].total &&
+        !crawlingSet[key].crawling
+      ) {
+        qWebsiteWorker
           .push({
             userId,
             meta: {
-              extra: { domain: target.domain },
+              extra: { domain: extractHostname(target.domain) },
             },
           })
           .catch((err) => console.error(err));
+
+        // Dispatch other events to signal done.
+        crawlingSet = removeKey(key, crawlingSet);
       }
     }
   });
 
   // track when the crawler has processed the pages and sent.
   crawlTrackingEmitter.on("crawl-complete", (target) => {
-    const key = getKey(target.domain, target.pages, target.user_id);
+    const userId = target.user_id;
+    const key = getKey(target.domain, target.pages, userId);
 
     if (crawlingSet[key]) {
       crawlingSet[key].crawling = false;
+
+      if (crawlingSet[key].current === crawlingSet[key].total) {
+        qWebsiteWorker
+          .push({
+            userId,
+            meta: {
+              extra: { domain: extractHostname(target.domain) },
+            },
+          })
+          .catch((err) => console.error(err));
+
+        // Dispatch other events to signal done.
+        crawlingSet = removeKey(key, crawlingSet);
+      }
     }
   });
 };

@@ -45,7 +45,7 @@ async function asyncWorkerCrawlComplete(
 // crawl queue [32gb 16, 16gb 8, 8gb 4, 4gb 2]
 export const q: queueAsPromised<Task> = fastq.promise(
   asyncWorker,
-  Number(process.env.CRAWL_QUEUE_LIMIT || 8)
+  Number(process.env.CRAWL_QUEUE_LIMIT || 4)
 );
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
   asyncWorkerCrawlComplete,

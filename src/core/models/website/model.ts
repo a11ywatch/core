@@ -2,7 +2,6 @@ const WebsiteModel = {
   userId: undefined,
   url: "",
   domain: "",
-  adaScore: 100,
   cdnConnected: false,
   pageInsights: false,
   pageHeaders: [],

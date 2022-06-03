@@ -9,7 +9,6 @@ export const history = gql`
     subDomains: [SubDomain]
     userId: Int
     domain: String
-    adaScore: Float
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issuesInfo: IssueMeta

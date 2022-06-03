@@ -64,12 +64,11 @@ message PageLoadTime {
 message Page {
    string domain = 1;
    string url = 2;  
-   int64 adaScore = 3; // TODO: remove top level score for issuesInfo usage.
-   bool cdnConnected = 4;
-   PageLoadTime pageLoadTime = 5;
-   google.protobuf.Struct insight = 6; // the json details from lighthouse
-   IssuesInfo issuesInfo = 7;
-   string lastScanDate = 8;  
+   bool cdnConnected = 3;
+   PageLoadTime pageLoadTime = 4;
+   google.protobuf.Struct insight = 5; // the json details from lighthouse
+   IssuesInfo issuesInfo = 6;
+   string lastScanDate = 7;  
 }
 
 // the issue that occured, either of type error, notice, warning in desc order.

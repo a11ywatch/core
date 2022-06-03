@@ -12,7 +12,6 @@ export const website = gql`
     user: User
     userId: Int
     domain: String
-    adaScore: Float
     adaScoreAverage: Float
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta

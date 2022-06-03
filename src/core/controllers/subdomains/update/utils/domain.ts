@@ -151,9 +151,7 @@ export const generateWebsiteScore = async (
   props: ScoreProps
 ): Promise<{ issuesInfo: IssuesInfo }> => {
   try {
-    const data = await getRecursiveResults(props);
-
-    return data;
+    return await getRecursiveResults(props);
   } catch (e) {
     console.error(e);
   }

@@ -8,7 +8,6 @@ export const subdomain = gql`
     domain: String
     userId: Int
     online: Boolean
-    adaScore: Float
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issues(filter: String): [PageIssue]

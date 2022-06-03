@@ -10,7 +10,7 @@ export const crawlEnqueue = async (data) => {
   // get users for crawl job matching the urls
   for (const url of pages) {
     try {
-      await q.push({
+      q.push({
         url,
         userId: user_id,
       });

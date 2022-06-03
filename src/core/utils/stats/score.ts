@@ -30,25 +30,22 @@ export async function setWebsiteScore({ domain, userId }) {
     });
 
     const issuesInfo = data?.issuesInfo;
-    // persist skip content included etc
-    const prevIssuesInfo = website?.issuesInfo;
 
-    await collectionUpsert(
-      {
-        ...website,
-        issuesInfo: {
-          ...prevIssuesInfo,
-          ...issuesInfo,
+    if (issuesInfo && website) {
+      await collectionUpsert(
+        {
+          ...website,
+          issuesInfo,
         },
-      },
-      [websiteCollection, !!website],
-      {
-        searchProps: {
-          domain,
-          userId,
-        },
-      }
-    );
+        [websiteCollection, !!website],
+        {
+          searchProps: {
+            domain,
+            userId,
+          },
+        }
+      );
+    }
 
     // TODO: MOVE OUT OF METHOD
     await pubsub.publish(CRAWL_COMPLETE, {
