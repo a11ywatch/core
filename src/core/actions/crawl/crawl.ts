@@ -124,10 +124,8 @@ export const crawlPage = async (
         script,
         issues: pageIssues,
         webPage,
-        errorCount,
-        noticeCount,
-        warningCount,
         adaScore,
+        issuesInfo,
       } = extractPageData(dataSource);
 
       // PAGE COLLECTION
@@ -219,15 +217,14 @@ export const crawlPage = async (
 
         // Add to Issues collection if page contains issues or if record should update/delete.
         if (shouldUpsertCollections) {
+          const { issueMeta, ...issuesProps } = issuesInfo;
           await collectionUpsert(
             {
               pageUrl,
               domain,
-              errorCount,
-              warningCount,
-              noticeCount,
               userId,
               adaScore,
+              ...issuesProps,
             },
             [analyticsCollection, analytics]
           ); // ANALYTICS

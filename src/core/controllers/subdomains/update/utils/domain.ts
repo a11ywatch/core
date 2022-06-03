@@ -1,11 +1,10 @@
+import { getAnalyticsPaging } from "@app/core/controllers/analytics";
 import { arrayAverage } from "@app/core/utils";
-import { getDomains } from "../../find";
 
 interface ScoreProps {
   domain?: string;
   perfectScore?: boolean;
   userId?: number;
-  allDomains?: any[];
 }
 
 const defaultIssuesInfo = {
@@ -17,97 +16,145 @@ const defaultIssuesInfo = {
   possibleIssuesFixedByCdn: 0,
 };
 
-// TODO: use Analytics collection and remove storing issue info in pages.
-const getAllPages = async ({ domain, userId }: ScoreProps) => {
-  try {
-    return await getDomains({
-      domain,
-      userId,
-    });
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
-};
+interface IssuesInfo {
+  adaScoreAverage: number;
+  possibleIssuesFixedByCdn: any;
+  totalIssues: any;
+  issuesFixedByCdn: any;
+  errorCount: any;
+  warningCount: any;
+  noticeCount: any;
+  pageCount: number;
+}
 
-// gets the website score for total issues, warnings, and errors on page including average. @returns IssueInfo
-export const generateWebsiteScore = async ({
+export const getRecursiveResults = async ({
   domain,
   perfectScore,
   userId,
-}: ScoreProps) => {
-  let pages = [];
+}: ScoreProps): Promise<{ issuesInfo: IssuesInfo }> => {
+  return new Promise(async (resolve) => {
+    const getDataUntil = async (
+      { domain, perfectScore, userId }: ScoreProps,
+      offset?: number,
+      prevIssuesInfo?: any
+    ): Promise<{ issuesInfo: IssuesInfo }> => {
+      let pages = [];
+      try {
+        pages = await getAnalyticsPaging(
+          {
+            domain,
+            userId,
+            limit: 10,
+            offset,
+          },
+          false
+        );
+      } catch (e) {
+        console.error(e);
+      }
+
+      let websiteErrors = prevIssuesInfo?.errorCount ?? 0;
+      let websiteWarnings = prevIssuesInfo?.warningCount ?? 0;
+      let websiteNotices = prevIssuesInfo?.noticeCount ?? 0;
+      let websiteIssuesFixedByCdn = prevIssuesInfo?.issuesFixedByCdn ?? 0;
+      let websitePossibleIssuesFixedByCdn =
+        prevIssuesInfo?.possibleIssuesFixedByCdn ?? 0;
+
+      const adaScores: number[] = [];
+
+      const pageCounter = pages?.length ?? 0;
+
+      const pageCount = (prevIssuesInfo?.pageCount ?? 0) + pageCounter;
+
+      if (pageCounter) {
+        // collect website stats by iterating through pages.
+        pages?.forEach((page) => {
+          if (page) {
+            const {
+              warningCount,
+              errorCount,
+              noticeCount,
+              adaScore,
+              issuesFixedByCdn,
+              possibleIssuesFixedByCdn,
+            } = page ?? Object.assign({}, defaultIssuesInfo);
+
+            adaScores.push(Number(adaScore));
+
+            if (errorCount) {
+              websiteErrors = websiteErrors + Number(errorCount);
+            }
+
+            if (warningCount) {
+              websiteWarnings = websiteWarnings + Number(warningCount);
+            }
+
+            if (noticeCount) {
+              websiteNotices = websiteNotices + Number(noticeCount);
+            }
+
+            if (issuesFixedByCdn) {
+              websiteIssuesFixedByCdn =
+                websiteIssuesFixedByCdn + Number(issuesFixedByCdn);
+            }
+
+            if (possibleIssuesFixedByCdn) {
+              websiteIssuesFixedByCdn =
+                websitePossibleIssuesFixedByCdn +
+                Number(possibleIssuesFixedByCdn);
+            }
+          }
+        });
+      }
+
+      let avgScore = prevIssuesInfo?.adaScoreAverage;
+
+      if (pageCounter) {
+        const averageItems = arrayAverage(adaScores);
+        avgScore = Math.round(
+          isNaN(averageItems) || perfectScore ? 100 : averageItems
+        );
+      }
+
+      const issuesInfo = {
+        adaScoreAverage: avgScore,
+        possibleIssuesFixedByCdn: websitePossibleIssuesFixedByCdn,
+        totalIssues: websiteErrors + websiteWarnings + websiteNotices,
+        issuesFixedByCdn: websiteIssuesFixedByCdn,
+        // issue counters
+        errorCount: websiteErrors,
+        warningCount: websiteWarnings,
+        noticeCount: websiteNotices,
+        // amount of pages with possible issues
+        pageCount: pageCount,
+      };
+
+      // recursively get the next page until scores are complete.
+      if (pageCounter) {
+        await getDataUntil(
+          { domain, perfectScore, userId },
+          pageCount,
+          issuesInfo
+        );
+      } else {
+        resolve({ issuesInfo });
+        return;
+      }
+    };
+
+    await getDataUntil({ domain, perfectScore, userId });
+  });
+};
+
+// Recursive get the website score for total issues, warnings, and errors on page including average. @returns IssueInfo
+export const generateWebsiteScore = async (
+  props: ScoreProps
+): Promise<{ issuesInfo: IssuesInfo }> => {
   try {
-    // TODO: use paginated recursive call. USE analytics collection
-    pages = await getAllPages({
-      domain,
-      userId,
-    });
+    const data = await getRecursiveResults(props);
+
+    return data;
   } catch (e) {
     console.error(e);
   }
-
-  let websiteErrors = 0;
-  let websiteWarnings = 0;
-  let websiteNotices = 0;
-  let websiteIssuesFixedByCdn = 0;
-  let websitePossibleIssuesFixedByCdn = 0;
-  const adaScores: number[] = [];
-
-  // collect website stats by iterating through pages.
-  pages?.forEach((page) => {
-    if (page) {
-      const { issuesInfo } = page ?? {};
-      const {
-        warningCount,
-        errorCount,
-        noticeCount,
-        adaScore,
-        issuesFixedByCdn,
-        possibleIssuesFixedByCdn,
-      } = issuesInfo ?? Object.assign({}, defaultIssuesInfo);
-
-      adaScores.push(Number(adaScore));
-
-      if (errorCount) {
-        websiteErrors = websiteErrors + Number(errorCount);
-      }
-
-      if (warningCount) {
-        websiteWarnings = websiteWarnings + Number(warningCount);
-      }
-
-      if (noticeCount) {
-        websiteNotices = websiteNotices + Number(noticeCount);
-      }
-
-      if (issuesFixedByCdn) {
-        websiteIssuesFixedByCdn =
-          websiteIssuesFixedByCdn + Number(issuesFixedByCdn);
-      }
-
-      if (possibleIssuesFixedByCdn) {
-        websiteIssuesFixedByCdn =
-          websitePossibleIssuesFixedByCdn + Number(possibleIssuesFixedByCdn);
-      }
-    }
-  });
-
-  const averageItems = arrayAverage(adaScores);
-  const avgScore = isNaN(averageItems) || perfectScore ? 100 : averageItems;
-
-  return {
-    issueInfo: {
-      adaScoreAverage: Math.round(avgScore),
-      possibleIssuesFixedByCdn: websitePossibleIssuesFixedByCdn,
-      totalIssues: websiteErrors + websiteWarnings + websiteNotices,
-      issuesFixedByCdn: websiteIssuesFixedByCdn,
-      // issue counters
-      errorCount: websiteErrors,
-      warningCount: websiteWarnings,
-      noticeCount: websiteNotices,
-      // amount of pages with possible issues
-      pageCount: pages.length,
-    },
-  };
 };

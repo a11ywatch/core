@@ -2,6 +2,42 @@ import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
 import { logPage } from "./ga";
 
+// get analytics by domain for a user with pagination offsets.
+export const getAnalyticsPaging = async (
+  {
+    userId,
+    domain,
+    limit = 20,
+    offset = 0,
+  }: { userId?: number; domain?: string; limit?: number; offset?: number },
+  chain?: boolean
+) => {
+  try {
+    const [collection] = await connect("Analytics");
+
+    let params = {};
+
+    if (typeof userId !== "undefined") {
+      params = { userId };
+    }
+    if (typeof domain !== "undefined" && domain) {
+      params = { ...params, domain };
+    }
+
+    const items = await collection
+      .find(params)
+      .skip(offset)
+      .limit(limit)
+      .toArray();
+
+    const pages = items ?? [];
+
+    return chain ? [pages, collection] : pages;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const AnalyticsController = ({ user } = { user: null }) => ({
   logPage,
   getWebsite: async (
@@ -37,4 +73,5 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     const searchProps = websiteSearchParams({ pageUrl, userId });
     return await collection.find(searchProps).limit(20).toArray();
   },
+  getAnalyticsPaging,
 });

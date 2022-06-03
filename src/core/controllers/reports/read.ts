@@ -1,3 +1,4 @@
+import { SUPER_MODE } from "@app/config/config";
 import { connect } from "@app/database";
 import { URL } from "url";
 
@@ -91,7 +92,7 @@ export const getReport = async (url: string, userId?: number) => {
       }
 
       // remove google lighthouse data from request
-      if (!authenticated && website) {
+      if (!authenticated && !SUPER_MODE) {
         website.insight = undefined;
         website.pageHeaders = undefined;
         website.ua = undefined;

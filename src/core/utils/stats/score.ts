@@ -11,17 +11,25 @@ export function setWebsiteScore(props: {
 
 // set website score and send complete subcription
 export async function setWebsiteScore({ domain, userId }) {
+  let website;
+  let websiteCollection;
+
   try {
-    const [website, websiteCollection] = await getWebsite({
+    [website, websiteCollection] = await getWebsite({
+      domain,
+      userId,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    const data = await generateWebsiteScore({
       domain,
       userId,
     });
 
-    const { issueInfo } = await generateWebsiteScore({
-      domain,
-      userId,
-    });
-
+    const issuesInfo = data?.issuesInfo;
     // persist skip content included etc
     const prevIssuesInfo = website?.issuesInfo;
 
@@ -30,7 +38,7 @@ export async function setWebsiteScore({ domain, userId }) {
         ...website,
         issuesInfo: {
           ...prevIssuesInfo,
-          ...issueInfo,
+          ...issuesInfo,
         },
       },
       [websiteCollection, !!website],
@@ -47,7 +55,7 @@ export async function setWebsiteScore({ domain, userId }) {
       crawlComplete: {
         userId,
         domain,
-        adaScoreAverage: issueInfo.adaScoreAverage,
+        adaScoreAverage: issuesInfo?.adaScoreAverage,
       },
     });
 

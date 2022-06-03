@@ -79,7 +79,6 @@ export const getPagesPaging = async (
 
     const pages = await collection
       .find(params)
-      .sort({ order: 1 })
       .skip(offset)
       .limit(limit)
       .toArray();
