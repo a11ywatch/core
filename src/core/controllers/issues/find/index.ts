@@ -16,7 +16,7 @@ export const getIssue = async (
 
     let issue;
 
-    if (Object.keys(websiteSearchParams).length) {
+    if (Object.keys(searchProps).length) {
       issue = await collection.findOne(searchProps);
 
       // get issues from general bucket

@@ -227,6 +227,7 @@ export const crawlPage = async (
           },
           [analyticsCollection, analytics]
         ); // ANALYTICS
+
         await collectionUpsert(
           newIssue,
           [issuesCollection, issueExist, !pageConstainsIssues],
