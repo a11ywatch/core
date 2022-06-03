@@ -44,9 +44,13 @@ export const addWebsite = async ({
   const collectionCount = await collection.countDocuments({ userId });
   const [user] = await getUser({ id: userId });
 
+  if (!user) {
+    throw new Error("Error user not found");
+  }
+
   if (
     blockWebsiteAdd({
-      audience: user.role,
+      audience: user?.role,
       collectionCount,
       limit: user?.websiteLimit,
     })

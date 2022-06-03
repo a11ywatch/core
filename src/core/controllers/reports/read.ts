@@ -89,6 +89,14 @@ export const getReport = async (url: string, userId?: number) => {
       if (websiteIssues && websiteIssues.issues) {
         website.issues = websiteIssues.issues;
       }
+
+      // remove google lighthouse data from request
+      if (!authenticated && website) {
+        website.insight = undefined;
+        website.pageHeaders = undefined;
+        website.ua = undefined;
+        website.userId = undefined;
+      }
     } catch (e) {
       console.error(e);
     }

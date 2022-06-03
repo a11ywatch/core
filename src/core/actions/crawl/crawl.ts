@@ -58,16 +58,18 @@ export const crawlPage = async (
         domain,
         userId,
       });
+
       const freeAccount = !userData?.role; // free account
       const scriptsEnabled = !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
       const rootPage = pathname === "/"; // the url is the base domain index.
-      const insightsLocked = freeAccount || userData?.role === 1;
+      const insightsLocked =
+        !SUPER_MODE && (freeAccount || userData?.role === 1);
 
       let insightsEnabled = false;
 
       if (website?.pageInsights || pageInsights) {
         // only premium and above get lighthouse on all pages.
-        if (insightsLocked && !SUPER_MODE) {
+        if (insightsLocked) {
           insightsEnabled = rootPage;
         } else {
           insightsEnabled = pageInsights || website?.pageInsights;
@@ -200,8 +202,8 @@ export const crawlPage = async (
         }
       }
 
-      // if basse website record exist update data.
-      if (dataSource) {
+      // if website record exist update data the entegrity of the data.
+      if (website) {
         // if ROOT domain for scan update Website Collection.
         if (rootPage) {
           await collectionUpsert(
@@ -256,7 +258,7 @@ export const crawlPage = async (
 
       // Flatten issues with the array set results without meta.
       const responseData = {
-        data: Object.assign({}, website, updateWebsiteProps, {
+        data: Object.assign({}, updateWebsiteProps, {
           issues: subIssues,
         }),
       };

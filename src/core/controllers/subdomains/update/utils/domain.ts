@@ -17,13 +17,8 @@ const defaultIssuesInfo = {
   possibleIssuesFixedByCdn: 0,
 };
 
-// TODO paginate or recursive async
-const getAllPages = async ({ domain, userId, allDomains }: ScoreProps) => {
-  // return all the pages if scan came with full list.
-  if (allDomains && allDomains?.length) {
-    return allDomains;
-  }
-
+// TODO: use Analytics collection and remove storing issue info in pages.
+const getAllPages = async ({ domain, userId }: ScoreProps) => {
   try {
     return await getDomains({
       domain,
@@ -40,15 +35,13 @@ export const generateWebsiteScore = async ({
   domain,
   perfectScore,
   userId,
-  allDomains,
 }: ScoreProps) => {
   let pages = [];
   try {
-    // TODO: use paginated recursive call.
+    // TODO: use paginated recursive call. USE analytics collection
     pages = await getAllPages({
       domain,
       userId,
-      allDomains,
     });
   } catch (e) {
     console.error(e);

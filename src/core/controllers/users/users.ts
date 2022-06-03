@@ -80,6 +80,9 @@ export const UsersController: UserControllerType = (
     ) {
       throw new Error(PASSWORD_ERROR);
     }
+    if (!user) {
+      throw new Error("Error user not found.");
+    }
 
     if (
       newPassword &&
@@ -87,8 +90,8 @@ export const UsersController: UserControllerType = (
     ) {
       const jwt = await signJwt({
         email,
-        role: user.role,
-        keyid: user.id,
+        role: user?.role,
+        keyid: user?.id,
       });
       const newSaltHash = saltHashPassword(newPassword);
 
@@ -98,7 +101,7 @@ export const UsersController: UserControllerType = (
           $set: {
             jwt,
             password: newSaltHash?.passwordHash,
-            salt: newSaltHash.salt,
+            salt: newSaltHash?.salt,
             stripeToken,
           },
         }

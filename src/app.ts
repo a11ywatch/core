@@ -118,7 +118,7 @@ function initServer(): HttpServer[] {
     app.use("/api/login", limiter);
     app.use("/api/scan-simple", scanLimiter);
     app.use("/api/crawl", scanLimiter);
-    app.use("/api/crawl-ctream", scanLimiter);
+    app.use("/api/crawl-stream", scanLimiter);
     app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
   }
   app.use(createIframe);

@@ -16,6 +16,8 @@ export const extractPageData = (
       adaScore = issuesInfo.adaScore;
       noticeCount = issuesInfo.noticeCount;
     }
+
+    // TODO: move Lighthouse into its own collection since it impacts search lookups
     if (webPage?.insight) {
       webPage.insight = {
         json: JSON.stringify(webPage?.insight),
