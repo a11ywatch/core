@@ -543,6 +543,9 @@ function initServer(): HttpServer[] {
 let coreServer: HttpServer;
 
 const startServer = async () => {
+  // tracking event emitter
+  establishCrawlTracking();
+
   await connectClients(); // START ALL EXTERNAL CLIENTS LIKE REDIS ETC.
 
   try {
@@ -550,9 +553,6 @@ const startServer = async () => {
   } catch (e) {
     console.error(e);
   }
-
-  // tracking event emitter
-  establishCrawlTracking();
 
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");

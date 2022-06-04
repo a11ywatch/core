@@ -1,8 +1,8 @@
-import { crawlPage } from "@app/core/actions";
-import { getUser } from "@app/core/controllers/users";
-import { watcherCrawl } from "@app/core/utils/watcher_crawl";
-import { Website } from "@app/schema";
-import { getEmailAllowedForDay } from "@app/core/utils/filters";
+import { crawlPage } from "../../actions";
+import { getUser } from "../../controllers/users";
+import { watcherCrawl } from "../../utils/watcher_crawl";
+import { getEmailAllowedForDay } from "../../utils/filters";
+import type { Website } from "../../../schema";
 
 type Page = {
   userId?: number;

@@ -1,5 +1,4 @@
 import {
-  // createClient,
   createMavClient,
   createPageMindClient,
   createCrawlerClient,
@@ -25,7 +24,8 @@ export const startClientsGRPC = async (retry?: boolean) => {
 
         resolve(true);
       }, 60);
+    } else {
+      resolve(true);
     }
-    resolve(true);
   });
 };

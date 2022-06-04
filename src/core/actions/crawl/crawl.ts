@@ -9,12 +9,12 @@ import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getDomain } from "@app/core/controllers/subdomains/find";
-import type { Website } from "@app/types";
 import { UsersController } from "@app/core/controllers/users";
-import { Issue } from "@app/schema";
 import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
+import type { Website } from "@app/types";
+import type { Issue } from "../../../schema";
 import type { Struct } from "pb-util";
 import { crawlTrackingEmitter } from "@app/event";
 import { SUPER_MODE } from "@app/config/config";
@@ -203,8 +203,10 @@ export const crawlPage = async (
     if (website) {
       // if ROOT domain for scan update Website Collection.
       if (rootPage) {
+        const { issuesInfo, ...updateProps } = updateWebsiteProps;
+
         await collectionUpsert(
-          updateWebsiteProps,
+          updateProps,
           [websiteCollection, !!updateWebsiteProps],
           {
             searchProps: { url: pageUrl, userId },

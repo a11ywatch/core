@@ -1,5 +1,5 @@
-import { controller } from "@app/proto/actions/calls";
-import type { PageMindScanResponse } from "@app/schema";
+import { controller } from "../../../proto/actions/calls";
+import type { PageMindScanResponse } from "../../../schema";
 
 interface Params {
   url: string;
