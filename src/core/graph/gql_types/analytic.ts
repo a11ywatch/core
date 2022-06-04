@@ -3,13 +3,15 @@ import gql from "graphql-tag";
 export const analytic = gql`
   type Analytic {
     _id: ID
+    domain: String
     pageUrl: String
     errorCount: Int
     warningCount: Int
     noticeCount: Int
-    errorOccurances: String
     userId: Int
-    domain: String
     adaScore: Float
+    possibleIssuesFixedByCdn: Int
+    totalIssues: Int
+    issuesFixedByCdn: Int
   }
 `;

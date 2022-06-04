@@ -26,7 +26,6 @@ export type Analytic = {
   errorCount?: Maybe<Scalars["Int"]>;
   warningCount?: Maybe<Scalars["Int"]>;
   noticeCount?: Maybe<Scalars["Int"]>;
-  errorOccurances?: Maybe<Scalars["String"]>;
   userId?: Maybe<Scalars["Int"]>;
   domain?: Maybe<Scalars["String"]>;
   adaScore?: Maybe<Scalars["Float"]>;

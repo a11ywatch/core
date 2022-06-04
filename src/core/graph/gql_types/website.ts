@@ -15,6 +15,7 @@ export const website = gql`
     adaScoreAverage: Float
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
+    analytics: [Analytic]
     issues(filter: String): [Issue]
     issue: [PageIssue]
     issuesInfo: IssueInfo

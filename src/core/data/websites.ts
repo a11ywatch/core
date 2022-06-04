@@ -2,6 +2,7 @@ import { UsersController } from "../controllers/users";
 import { IssuesController } from "../controllers/issues";
 import { SubDomainController } from "../controllers/subdomains";
 import { ScriptsController } from "../controllers/scripts";
+import { AnalyticsController } from "../controllers";
 
 export const Website = {
   user: async ({ userId }) => {
@@ -33,6 +34,13 @@ export const Website = {
       { userId: userId, pageUrl: url || pageUrl },
       false
     );
+  },
+  analytics: async ({ userId, domain }) => {
+    // get analytics for one website
+    return await AnalyticsController().getWebsiteAnalytics({
+      userId,
+      domain,
+    });
   },
   subDomains: async ({ userId, url, domain }) => {
     return await SubDomainController().getDomains({

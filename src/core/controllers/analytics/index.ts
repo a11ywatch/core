@@ -62,6 +62,17 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
 
     return chain ? [analytics, collection] : analytics;
   },
+  getWebsiteAnalytics: async ({
+    userId,
+    domain,
+  }: {
+    userId?: number;
+    domain?: string;
+  }) => {
+    const [collection] = await connect("Analytics");
+    const searchProps = websiteSearchParams({ domain, userId });
+    return await collection.find(searchProps).limit(0).toArray();
+  },
   getAnalytics: async ({
     userId,
     pageUrl,
