@@ -40,9 +40,9 @@ export const crawlerCrawl = (website = {}) => {
 };
 
 // store script into s3 | local
-export const setScripts = (website = {}) => {
+export const setScript = (website = {}) => {
   return new Promise((resolve, reject) => {
-    pageMindClient.setScripts(website, (error, res) => {
+    pageMindClient.setScript(website, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -69,6 +69,6 @@ export const controller = {
   scan,
   crawlerScan,
   crawlerCrawl,
-  setScripts,
+  setScript,
   parseImg,
 };

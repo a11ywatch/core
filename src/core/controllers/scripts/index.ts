@@ -14,7 +14,6 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     {
       pageUrl,
       userId,
-      noRetries,
     }: {
       pageUrl?: string;
       userId?: number;
@@ -26,11 +25,13 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     try {
       const [collection] = await connect("Scripts");
       const searchProps = websiteSearchParams({ pageUrl, userId });
-      let scripts = await collection.findOne(searchProps);
 
-      if (!scripts && !noRetries) {
-        scripts = await collection.findOne({ pageUrl });
+      let scripts;
+
+      if (Object.keys(searchProps).length) {
+        scripts = await collection.findOne(searchProps);
       }
+
       return chain ? [scripts, collection] : scripts;
     } catch (e) {
       console.error(e);
@@ -41,6 +42,22 @@ export const ScriptsController = ({ user } = { user: null }) => ({
       const [collection] = await connect("Scripts");
       const searchProps = websiteSearchParams({ pageUrl, userId });
       const scripts = await collection.find(searchProps).limit(1000).toArray();
+
+      return scripts;
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  getWebsiteScripts: async function ({ userId, domain }) {
+    try {
+      const [collection] = await connect("Scripts");
+      const searchProps = websiteSearchParams({ domain, userId });
+
+      let scripts = [];
+
+      if (Object.keys(searchProps).length) {
+        scripts = await collection.find(searchProps).limit(0).toArray();
+      }
 
       return scripts;
     } catch (e) {
@@ -58,29 +75,40 @@ export const ScriptsController = ({ user } = { user: null }) => ({
       userId,
       pageUrl,
     };
+
     try {
-      let [prevScript, collection] = await this.getScript(params, true);
+      let [prevScript, collection] = await ScriptsController().getScript(
+        params,
+        true
+      );
 
       if (typeof scriptMeta !== "undefined") {
         prevScript.scriptMeta = scriptMeta;
       }
 
-      const script = (await controller.setScripts({
+      const script = (await controller.setScript({
         script: prevScript,
         editScript: !!editScript,
         newScript: newScript,
-        url: String(encodeURI(pageUrl)),
+        url: decodeURIComponent(pageUrl),
         userId,
       })) as any;
 
-      script.userId = userId;
+      // the response
+      let updatedScript;
 
-      await collection.updateOne(params, {
-        $set: script,
-      });
+      if (script) {
+        updatedScript = Object.assign({}, prevScript, script);
+      }
+
+      if (Object.keys(params).length) {
+        await collection.updateOne(params, {
+          $set: updatedScript,
+        });
+      }
 
       return Object.assign({}, DEFAULT_RESPONSE, {
-        script,
+        script: updatedScript,
       });
     } catch (e) {
       console.error(e);

@@ -29,11 +29,18 @@ export const Website = {
 
     return issues;
   },
+  // find one script for a page -- TODO: move to pages
   script: async ({ userId, url, pageUrl }) => {
     return await ScriptsController().getScript(
       { userId: userId, pageUrl: url || pageUrl },
       false
     );
+  },
+  scripts: async ({ userId, domain }) => {
+    return await ScriptsController().getWebsiteScripts({
+      userId: userId,
+      domain,
+    });
   },
   analytics: async ({ userId, domain }) => {
     // get analytics for one website

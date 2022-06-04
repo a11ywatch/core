@@ -32,13 +32,18 @@ message ScanParams {
 message ScriptParams {
    bool editScript = 1;
    string url = 2;
-   string script = 3;
-   string newScript = 4;
+   Script script = 3; // pass in script object
+   string newScript = 4; // new script to replace content
 }
 
 // meta details for the page to include extra supportive features. 
 message IssueMeta {
    bool skipContentIncluded = 1; // add a skip content button onto the script if not found.
+}
+
+// script meta adjustments
+message ScriptMeta {
+   bool skipContentEnabled = 1; // is skip content enabled for the page
 }
 
 // info to use to gather all stats for the issues on the page.
@@ -98,6 +103,7 @@ message Script {
    string cdnUrl = 5;
    bool cdnConnected = 6;
    IssueMeta issueMeta = 7;
+   ScriptMeta scriptMeta = 8;
 }
 
 // fields that build that Website that is treated as a Page.

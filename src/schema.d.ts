@@ -344,7 +344,6 @@ export type Script = {
   script?: Maybe<Scalars["String"]>;
   cdnUrl?: Maybe<Scalars["String"]>;
   cdnUrlMinified?: Maybe<Scalars["String"]>;
-  googleTranslateInclude?: Maybe<Scalars["Boolean"]>;
   cdnConnected?: Maybe<Scalars["Boolean"]>;
   issueMeta?: Maybe<IssueMeta>;
   scriptMeta?: Maybe<ScriptMeta>;
