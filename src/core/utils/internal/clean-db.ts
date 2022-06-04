@@ -31,7 +31,7 @@ export const cleanUpDeprecatedFields = async (fields) => {
       "Fields requires a object with properties to remove."
     );
   }
-  const [collection] = await connect("SubDomains");
+  const [collection] = await connect("Pages");
   const [websiteCollection] = await connect("Websites");
 
   try {

@@ -6,7 +6,7 @@ export const getDomains = async (
   chain?: boolean
 ) => {
   try {
-    const [collection] = await connect("SubDomains");
+    const [collection] = await connect("Pages");
     const searchProps = websiteSearchParams({
       userId,
       domain: domain || (url && getHostName(url)),
@@ -31,7 +31,7 @@ export const getDomain = async (
   chain?: boolean
 ) => {
   try {
-    const [collection] = await connect("SubDomains");
+    const [collection] = await connect("Pages");
     const searchProps = websiteSearchParams({ url, userId });
     const website = await collection.findOne(searchProps);
 
@@ -44,7 +44,7 @@ export const getDomain = async (
 // get all the pages in the database
 export const getAllPages = async () => {
   try {
-    const [collection] = await connect("SubDomains");
+    const [collection] = await connect("Pages");
 
     // TODO: ADD PAGINATION
     const websites = await collection.find({}).limit(0).toArray();
@@ -66,7 +66,7 @@ export const getPagesPaging = async (
   chain?: boolean
 ) => {
   try {
-    const [collection] = await connect("SubDomains");
+    const [collection] = await connect("Pages");
 
     let params = {};
 

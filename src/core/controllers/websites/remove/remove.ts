@@ -14,7 +14,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
 
   const [scriptsCollection] = await connect("Scripts");
   const [analyticsCollection] = await connect("Analytics");
-  const [subdomainsCollection] = await connect("SubDomains");
+  const [pagesCollection] = await connect("Pages");
   const [issuesCollection] = await connect("Issues");
 
   if (deleteMany) {
@@ -22,7 +22,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     await webcollection.deleteMany({ userId });
     await scriptsCollection.deleteMany({ userId });
     await analyticsCollection.deleteMany({ userId });
-    await subdomainsCollection.deleteMany({ userId });
+    await pagesCollection.deleteMany({ userId });
     await issuesCollection.deleteMany({ userId });
 
     return { code: 200, success: true, message: SUCCESS_DELETED_ALL };
@@ -43,7 +43,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
 
   await scriptsCollection.deleteMany(deleteQuery);
   await analyticsCollection.deleteMany(deleteQuery);
-  await subdomainsCollection.deleteMany(deleteQuery);
+  await pagesCollection.deleteMany(deleteQuery);
   await issuesCollection.deleteMany(deleteQuery);
   await collection.findOneAndDelete(deleteQuery);
 

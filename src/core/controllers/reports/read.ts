@@ -29,7 +29,7 @@ export const getReport = async (url: string, userId?: number) => {
 
   if (targetPages) {
     findBy = { url };
-    pageCollection = "SubDomains";
+    pageCollection = "Pages";
   } else {
     findBy = { url };
     pageCollection = "Websites";
