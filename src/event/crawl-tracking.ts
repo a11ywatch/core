@@ -14,7 +14,7 @@ const extractHostname = (domain?: string, pages?: string[]) => {
 
 // get a key for the event based on domain and uid.
 export const getKey = (domain, pages, user_id) => {
-  return `${extractHostname(domain, pages)}-${user_id}`;
+  return `${extractHostname(domain, pages)}-${user_id || 0}`;
 };
 
 // remove key from object
@@ -23,6 +23,7 @@ export const removeKey = (key, { [key]: _, ...rest }) => rest;
 /*  Emit events to track crawling progress.
  *  This mainly tracks at a higher level the progress between the gRPC crawling across modules.
  *  TODO: allow configuring a url and passing in optional Promise handling.
+ *  @param url: scope the events to track one domain
  */
 export const establishCrawlTracking = () => {
   // track when a new website starts and determine page completion
@@ -45,6 +46,7 @@ export const establishCrawlTracking = () => {
   crawlTrackingEmitter.on("crawl-processing", (target) => {
     // process a new item tracking count
     const key = getKey(target.domain, target.pages, target.user_id);
+
     if (crawlingSet[key] && crawlingSet[key].crawling) {
       crawlingSet[key].total = crawlingSet[key].total + 1;
     }
@@ -62,6 +64,8 @@ export const establishCrawlTracking = () => {
         crawlingSet[key].current === crawlingSet[key].total &&
         !crawlingSet[key].crawling
       ) {
+        crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
+
         qWebsiteWorker
           .push({
             userId,
@@ -71,7 +75,7 @@ export const establishCrawlTracking = () => {
           })
           .catch((err) => console.error(err));
 
-        // Dispatch other events to signal done.
+        // Crawl completed
         crawlingSet = removeKey(key, crawlingSet);
       }
     }
@@ -86,6 +90,8 @@ export const establishCrawlTracking = () => {
       crawlingSet[key].crawling = false;
 
       if (crawlingSet[key].current === crawlingSet[key].total) {
+        crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
+
         qWebsiteWorker
           .push({
             userId,
@@ -95,7 +101,7 @@ export const establishCrawlTracking = () => {
           })
           .catch((err) => console.error(err));
 
-        // Dispatch other events to signal done.
+        // Crawl completed
         crawlingSet = removeKey(key, crawlingSet);
       }
     }

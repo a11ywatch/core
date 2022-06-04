@@ -1,9 +1,9 @@
-import { responseModel } from "../models";
-import { crawlMultiSiteWithEvent } from "../utils";
+import type { Request, Response } from "express";
+import { crawlHttpStream } from "../utils/crawl-stream";
 import { getUserFromApiScan } from "../utils/get-user-data";
 
 // perform a lazy stream to keep connection alive.
-export const crawlStreamLazy = async (req, res) => {
+export const crawlStreamLazy = async (req: Request, res: Response) => {
   try {
     const userNext = await getUserFromApiScan(
       req.headers.authorization,
@@ -20,36 +20,14 @@ export const crawlStreamLazy = async (req, res) => {
 
       res.write("[");
 
-      // remove interval for EVENT emmiter.
-      const streamInterval = setInterval(() => {
-        res.write(
-          `${JSON.stringify({
-            data: null,
-            message: "scan in progress...",
-            success: true,
-            code: 200,
-          })},`
-        );
-      }, 300);
-
       // TODO: pass in res and allow emitter of page when processed.
-      const { data, message } = await crawlMultiSiteWithEvent({
-        url,
-        userId: userNext.id,
-        scan: false,
-      });
-
-      if (streamInterval) {
-        clearInterval(streamInterval);
-      }
-
-      res.write(
-        JSON.stringify(
-          responseModel({
-            data,
-            message,
-          })
-        )
+      await crawlHttpStream(
+        {
+          url,
+          userId: userNext.id,
+          scan: false,
+        },
+        res
       );
 
       res.write("]");

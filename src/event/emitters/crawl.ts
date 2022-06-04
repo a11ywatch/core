@@ -3,6 +3,11 @@ import { EventEmitter } from "events";
 // crawl emiiter for data
 class CrawlEmitter extends EventEmitter {}
 
-export const crawlEmitter = new CrawlEmitter();
+const crawlEmitter = new CrawlEmitter();
 
-export const crawlTrackingEmitter = new CrawlEmitter();
+const crawlTrackingEmitter = new CrawlEmitter();
+
+crawlEmitter.setMaxListeners(0);
+crawlTrackingEmitter.setMaxListeners(0);
+
+export { crawlTrackingEmitter, crawlEmitter };

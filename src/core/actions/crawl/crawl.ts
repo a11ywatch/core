@@ -13,11 +13,11 @@ import { UsersController } from "@app/core/controllers/users";
 import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
+import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
+import { SUPER_MODE } from "@app/config/config";
 import type { Website } from "@app/types";
 import type { Issue } from "../../../schema";
 import type { Struct } from "pb-util";
-import { crawlTrackingEmitter } from "@app/event";
-import { SUPER_MODE } from "@app/config/config";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -86,12 +86,14 @@ export const crawlPage = async (
       standard: website?.standard,
     });
 
-    const trackerProccess = () => {
+    const trackerProccess = (data?: any) => {
       crawlTrackingEmitter.emit("crawl-processed", {
         user_id: userId,
         domain,
         pages: [urlMap],
       });
+
+      crawlEmitter.emit(`crawl-${domain}-${userId || 0}`, data);
     };
 
     // TODO: SET PAGE OFFLINE DB
@@ -262,7 +264,7 @@ export const crawlPage = async (
       }),
     };
 
-    trackerProccess();
+    trackerProccess(responseData);
 
     return resolve(responseModel(responseData));
   });
