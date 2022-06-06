@@ -50,7 +50,7 @@ export const config = {
   DB_NAME: process.env.DB_NAME || "a11ywatch",
   CLIENT_URL: replaceDockerNetwork(process.env.CLIENT_URL),
   GRAPHQL_PORT,
-  ROOT_URL: process.env.ROOT_URL,
+  ROOT_URL: process.env.ROOT_URL || "http://localhost:3280",
   DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
   // EMAIL
   EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL,

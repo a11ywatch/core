@@ -62,6 +62,7 @@ import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
 import { getPagesPaging } from "./core/controllers/subdomains/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
+import { getAnalyticsPaging } from "./core/controllers/analytics";
 
 const { GRAPHQL_PORT } = config;
 
@@ -122,6 +123,7 @@ function initServer(): HttpServer[] {
     app.use("/api/crawl-stream", scanLimiter);
     app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
   }
+
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(UNSUBSCRIBE_EMAILS, cors());
@@ -235,12 +237,46 @@ function initServer(): HttpServer[] {
 
     if (typeof uid !== "undefined") {
       try {
-        [data] = await getWebsitesPaging({
+        data = await getWebsitesPaging({
           userId: uid,
           limit: 5,
           offset: Number(req.query.offset) || 0,
         });
         message = "Successfully retrieved websites.";
+      } catch (e) {
+        code = 400;
+        message = `${message} - ${e}`;
+      }
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+
+  // paginated retreive analytics from the database. Limit default is set to 20.
+  app.get("/api/list/analytics", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    let data;
+    let code = 200;
+    let message = "Failed to retrieved analytics.";
+    const uid = usr?.payload?.keyid;
+
+    if (typeof uid !== "undefined") {
+      const domain = paramParser(req, "domain");
+
+      try {
+        data = await getAnalyticsPaging({
+          userId: uid,
+          limit: 5,
+          offset: Number(req.query.offset) || 0,
+          domain,
+        });
+        message = "Successfully retrieved analytics.";
       } catch (e) {
         code = 400;
         message = `${message} - ${e}`;
@@ -267,9 +303,9 @@ function initServer(): HttpServer[] {
 
     if (typeof uid !== "undefined") {
       try {
-        [data] = await getPagesPaging({
+        data = await getPagesPaging({
           userId: uid,
-          limit: 2,
+          limit: 5,
           offset: Number(req.query.offset) || 0,
           domain: domain || undefined,
         });
@@ -291,8 +327,7 @@ function initServer(): HttpServer[] {
     );
   });
 
-  // paginated retreive issues from the database.
-  app.get("/api/list/issue", cors(), async (req, res) => {
+  const pagingIssues = async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization);
 
     let data;
@@ -309,11 +344,9 @@ function initServer(): HttpServer[] {
 
     if (typeof uid !== "undefined") {
       try {
-        [data] = await getIssuesPaging({
+        data = await getIssuesPaging({
           userId: uid,
-          limit: req.query.limit
-            ? Math.max(Number(req.query.limit || 0), 500)
-            : undefined,
+          limit: 5,
           domain,
           pageUrl,
         });
@@ -331,7 +364,12 @@ function initServer(): HttpServer[] {
         message,
       })
     );
-  });
+  };
+
+  // paginated retreive issues from the database.
+  app.get("/api/list/issue", cors(), pagingIssues);
+  // add friendly handling for incorrect API name
+  app.get("/api/list/issues", cors(), pagingIssues);
 
   /*
    * Single page scan
