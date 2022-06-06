@@ -33,5 +33,6 @@ export const website = gql`
     mobile: Boolean
     standard: String
     ua: String
+    crawlDuration: Float
   }
 `;
