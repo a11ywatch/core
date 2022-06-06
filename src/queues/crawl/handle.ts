@@ -36,6 +36,7 @@ async function asyncWorkerCrawlComplete(
     return await setWebsiteScore({
       domain: props?.domain,
       userId: Number(userId),
+      duration: props?.duration,
     });
   } catch (e) {
     console.error(e);

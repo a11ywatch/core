@@ -1,5 +1,5 @@
 import { ApolloServerExpressConfig } from "apollo-server-express";
-import { config, BYPASS_AUTH } from "./config";
+import { BYPASS_AUTH } from "./config";
 import { getUserFromToken, parseCookie } from "./core/utils";
 import { createScheme } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
@@ -13,11 +13,11 @@ import { FeaturesController } from "./core/controllers/features";
 import { AnalyticsController } from "./core/controllers/analytics";
 import { ApolloServerPluginUsageReportingDisabled } from "apollo-server-core";
 
-const { DEV } = config;
-
 const getServerConfig = (): ApolloServerExpressConfig => {
   const schema = createScheme();
   return {
+    introspection: true,
+    playground: true,
     schema,
     subscriptions: {
       onConnect: (_cnxnParams, webSocket, _cnxnContext) => {
@@ -45,7 +45,7 @@ const getServerConfig = (): ApolloServerExpressConfig => {
         !BYPASS_AUTH.includes(req?.body?.operationName)
       ) {
         // generating gql schema initially
-        if (DEV && !req?.body?.operationName) {
+        if (!req?.body?.operationName) {
           console.log("Generating Graphql Schema");
         } else {
           throw new Error(AUTH_ERROR);

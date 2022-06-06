@@ -1,6 +1,7 @@
 import { getHostName } from "@a11ywatch/website-source-builder";
 import { qWebsiteWorker } from "@app/queues/crawl";
 import { crawlTrackingEmitter } from "./emitters/crawl";
+import { performance } from "perf_hooks";
 
 const extractHostname = (domain?: string, pages?: string[]) => {
   if (pages && pages.length === 1) {
@@ -38,6 +39,7 @@ export const establishCrawlTracking = () => {
         total: 0,
         current: 0,
         crawling: true,
+        duration: performance.now(),
       };
     }
   });
@@ -64,13 +66,19 @@ export const establishCrawlTracking = () => {
         crawlingSet[key].current === crawlingSet[key].total &&
         !crawlingSet[key].crawling
       ) {
+        crawlingSet[key].duration =
+          performance.now() - crawlingSet[key].duration;
+
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
 
         qWebsiteWorker
           .push({
             userId,
             meta: {
-              extra: { domain: extractHostname(target.domain) },
+              extra: {
+                domain: extractHostname(target.domain),
+                duration: crawlingSet[key].duration,
+              },
             },
           })
           .catch((err) => console.error(err));
@@ -90,13 +98,18 @@ export const establishCrawlTracking = () => {
       crawlingSet[key].crawling = false;
 
       if (crawlingSet[key].current === crawlingSet[key].total) {
+        crawlingSet[key].duration =
+          performance.now() - crawlingSet[key].duration;
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
 
         qWebsiteWorker
           .push({
             userId,
             meta: {
-              extra: { domain: extractHostname(target.domain) },
+              extra: {
+                domain: extractHostname(target.domain),
+                duration: crawlingSet[key].duration,
+              },
             },
           })
           .catch((err) => console.error(err));

@@ -5,12 +5,13 @@ import { pubsub } from "@app/database/pubsub";
 import { collectionUpsert } from "../collection-upsert";
 
 export function setWebsiteScore(props: {
-  domain?: string;
-  userId?: number;
+  domain: string;
+  userId: number;
+  duration: number;
 }): Promise<boolean>;
 
 // set website score and send complete subcription
-export async function setWebsiteScore({ domain, userId }) {
+export async function setWebsiteScore({ domain, userId, duration }) {
   let website;
   let websiteCollection;
 
@@ -36,6 +37,7 @@ export async function setWebsiteScore({ domain, userId }) {
         {
           ...website,
           issuesInfo,
+          crawlDurationMs: duration, // time it took to crawl the entire website in ms
         },
         [websiteCollection, !!website],
         {
