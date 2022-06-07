@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { getReport } from "@app/core/controllers/reports";
-import { downloadToExcel } from "@app/core/utils";
+import { downloadToExcel, getUserFromToken } from "@app/core/utils";
 import { Website } from "@app/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { retreiveUserByToken } from "@app/core/utils/get-user-data";
@@ -25,11 +25,14 @@ export const getWebsiteAPI = async (
     return;
   }
 
+  const usr = getUserFromToken(req.headers.authorization);
+  const userId = usr?.payload?.keyid;
+
   const query = initUrl(decodeURIComponent(slug));
   let data: Website;
 
   try {
-    const report = await getReport(query);
+    const report = await getReport(query, userId);
 
     if (report?.website) {
       data = report.website;

@@ -62,24 +62,6 @@ export const getReport = async (url: string, userId?: number) => {
     console.error(e);
   }
 
-  // retry and get the base issue unless password protected page.
-  if (!website && authenticated) {
-    try {
-      website = await domainCollection.findOne(findBy);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  // retry and get the base issue unless password protected page.
-  if (!website && !targetPages) {
-    try {
-      website = await domainCollection.findOne({ domain });
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   // find the issues for the website page
   if (website) {
     try {
@@ -91,7 +73,7 @@ export const getReport = async (url: string, userId?: number) => {
         website.issues = websiteIssues.issues;
       }
 
-      // remove google lighthouse data from request
+      // remove google lighthouse data from request [PREVENT ALL AUTH DATA FROM BEING SENT]
       if (!authenticated && !SUPER_MODE) {
         website.insight = undefined;
         website.pageHeaders = undefined;
