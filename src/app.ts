@@ -63,6 +63,7 @@ import { establishCrawlTracking } from "./event";
 import { getPagesPaging } from "./core/controllers/subdomains/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
 import { getAnalyticsPaging } from "./core/controllers/analytics";
+import expressPlayground from "graphql-playground-middleware-express";
 
 const { GRAPHQL_PORT } = config;
 
@@ -113,6 +114,7 @@ function initServer(): HttpServer[] {
   // rate limits on expensive endpoints
   if (!config.SUPER_MODE) {
     app.use("/iframe", limiter);
+    app.use("/graphql", limiter);
     app.use("/api/iframe", limiter);
     app.use("/api/get-website", limiter);
     app.use("/api/register", limiter);
@@ -129,7 +131,11 @@ function initServer(): HttpServer[] {
   app.options(UNSUBSCRIBE_EMAILS, cors());
   // root
   app.get(ROOT, root);
+
   app.get("/status/:domain", cors(), statusBadge);
+
+  app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
+
   /*
    * Create an iframe based off a url and reverse engineer the content for CORS.
    * Uses node-iframe package to handle iframes.

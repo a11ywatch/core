@@ -63,4 +63,4 @@ const createScheme = () => {
   return applyMiddleware(makeExecutableSchema(scheme as any));
 };
 
-export { createScheme };
+export { createScheme, typeDefs };

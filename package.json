@@ -28,6 +28,7 @@
     "express-rate-limit": "^6.3.0",
     "fastq": "^1.13.0",
     "graphql": "15.7.2",
+    "graphql-playground-middleware-express": "^1.7.23",
     "graphql-rate-limit": "^3.3.0",
     "graphql-redis-subscriptions": "^2.4.2",
     "graphql-subscriptions": "^2.0.0",
