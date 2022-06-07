@@ -1,6 +1,9 @@
 import gql from "graphql-tag";
 
 export const history = gql`
+  """
+  Websites that have been added and removed.
+  """
   type History {
     _id: ID
     url: String

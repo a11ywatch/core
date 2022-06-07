@@ -11,6 +11,9 @@ export const website = gql`
     events: [String]
   }
 
+  """
+  A website to monitor and perform site wide scans.
+  """
   type Website {
     _id: ID
     url: String

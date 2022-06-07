@@ -1,6 +1,9 @@
 import gql from "graphql-tag";
 
 export const subdomain = gql`
+  """
+  Pages that have issues [Schema invalid name].
+  """
   type SubDomain {
     _id: ID
     url: String

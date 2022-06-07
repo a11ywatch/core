@@ -1,6 +1,9 @@
 import gql from "graphql-tag";
 
 export const invoice = gql`
+  """
+  A invoice for a plan.
+  """
   type Invoice {
     amount_due: Int
     amount_paid: Int

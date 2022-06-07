@@ -1,6 +1,9 @@
 import gql from "graphql-tag";
 
 export const payments = gql`
+  """
+  Payment plan handled by stripe.
+  """
   type PaymentPlan {
     id: String
     object: String
@@ -13,6 +16,9 @@ export const payments = gql`
     product: String
   }
 
+  """
+  Payment sub handled by stripe.
+  """
   type PaymentSubScription {
     id: String
     object: String

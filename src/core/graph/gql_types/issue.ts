@@ -1,6 +1,9 @@
 import gql from "graphql-tag";
 
 export const issue = gql`
+  """
+  A WCAG issue from a report.
+  """
   type PageIssue {
     code: String
     context: String
@@ -12,6 +15,9 @@ export const issue = gql`
     recurrence: Int
   }
 
+  """
+  Issues stored in the database.
+  """
   type Issue {
     _id: ID
     issues(filter: String): [PageIssue]

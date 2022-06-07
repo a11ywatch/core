@@ -18,6 +18,9 @@ export const mutation = gql`
 
     toggleProfile(toggleAlert: Boolean): UpdateUserMutationResponse
 
+    """
+    Update website configuration
+    """
     updateWebsite(
       url: String
       customHeaders: [CreatePageHeaders]
@@ -46,6 +49,9 @@ export const mutation = gql`
 
     resetPassword(email: String, resetCode: String, jwt: String): User
 
+    """
+    Add a website and perform a site wide scan
+    """
     addWebsite(
       url: String!
       customHeaders: [CreatePageHeaders]
@@ -100,6 +106,9 @@ export const mutation = gql`
     script: Script
   }
 
+  """
+  General Mutation Response.
+  """
   interface MutationResponse {
     code: String!
     success: Boolean!

@@ -1,6 +1,9 @@
 import gql from "graphql-tag";
 
 export const user = gql`
+  """
+  Site wide scan info.
+  """
   type ScanInformation {
     scanAttempts: Int
     usageLimit: Int
@@ -13,6 +16,9 @@ export const user = gql`
     lastScanDate: String
   }
 
+  """
+  User of the application.
+  """
   type User {
     id: Int
     email: String
