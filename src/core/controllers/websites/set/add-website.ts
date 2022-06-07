@@ -14,6 +14,7 @@ import { initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
 import { watcherCrawl } from "@app/core/utils/watcher_crawl";
+import { connect } from "@app/database";
 
 export const addWebsite = async ({
   userId,
@@ -25,6 +26,7 @@ export const addWebsite = async ({
   mobile,
   ua,
   standard,
+  actions,
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -84,16 +86,40 @@ export const addWebsite = async ({
     console.error(e);
   }
 
-  if (canScan) {
-    // TODO: mobile test
-    setImmediate(async () => {
+  setImmediate(async () => {
+    // store into actions collection
+    if (actions && Array.isArray(actions) && actions.length) {
+      const [actionsCollection] = await connect("PageActions");
+
+      actions.forEach(async (action) => {
+        try {
+          await actionsCollection.findOneAndUpdate(
+            {
+              userId,
+              domain,
+              path: action.path,
+            },
+            {
+              ...action,
+              userId,
+              domain,
+            }
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+
+    // perform extra scan on mutation. [TODO: add optional input field]
+    if (canScan) {
       await watcherCrawl({
         urlMap: url,
         userId,
         scan: true,
       });
-    });
-  }
+    }
+  });
 
   return {
     website,

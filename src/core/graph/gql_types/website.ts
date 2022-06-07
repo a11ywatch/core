@@ -1,14 +1,22 @@
 import gql from "graphql-tag";
 
 export const website = gql`
+  """
+  Custom page header for network request.
+  """
   type PageHeaders {
     key: String
     value: String
   }
 
+  """
+  Custom page actions to run before running test.
+  """
   type PageActions {
+    _id: ID
     path: String
-    events: [String]
+    domain: String
+    events: String
   }
 
   """
@@ -42,6 +50,6 @@ export const website = gql`
     standard: String
     ua: String
     crawlDuration: Float
-    actions: [PageActions]
+    actions: PageActions
   }
 `;

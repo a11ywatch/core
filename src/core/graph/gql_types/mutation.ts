@@ -28,6 +28,7 @@ export const mutation = gql`
       mobile: Boolean
       standard: String
       ua: String
+      actions: [PageActionsInput]
     ): UpdateWebSiteMutationResponse
 
     updateScript(
@@ -59,6 +60,7 @@ export const mutation = gql`
       mobile: Boolean
       standard: String
       ua: String
+      actions: [PageActionsInput]
     ): UpdateWebSiteMutationResponse
 
     filterEmailDates(emailFilteredDates: [Int], morning: Boolean): User

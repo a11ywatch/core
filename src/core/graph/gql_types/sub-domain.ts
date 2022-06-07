@@ -17,5 +17,6 @@ export const subdomain = gql`
     issuesInfo: IssueInfo
     pageInsights: Boolean
     insight: PageInsights
+    actions: PageActions
   }
 `;

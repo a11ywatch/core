@@ -10,4 +10,9 @@ export const input = gql`
     skipContentEnabled: Boolean
     translateEnabled: Boolean
   }
+
+  input PageActionsInput {
+    path: String
+    events: String
+  }
 `;
