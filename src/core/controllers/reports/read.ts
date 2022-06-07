@@ -31,7 +31,7 @@ export const getReport = async (url: string, userId?: number) => {
     findBy = { url };
     pageCollection = "Pages";
   } else {
-    findBy = { url };
+    findBy = { domain };
     pageCollection = "Websites";
   }
 

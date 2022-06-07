@@ -37,7 +37,7 @@ export async function setWebsiteScore({ domain, userId, duration }) {
         {
           ...website,
           issuesInfo,
-          crawlDurationMs: duration, // time it took to crawl the entire website in ms
+          crawlDuration: duration, // time it took to crawl the entire website in ms
         },
         [websiteCollection, !!website],
         {

@@ -25,8 +25,8 @@ export const getWebsiteAPI = async (
     return;
   }
 
+  const query = initUrl(decodeURIComponent(slug));
   let data: Website;
-  let query = initUrl(decodeURIComponent(slug));
 
   try {
     const report = await getReport(query);
