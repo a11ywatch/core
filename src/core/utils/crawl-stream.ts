@@ -6,18 +6,17 @@ import { getHostName } from "./get-host";
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlHttpStream = (props, res: Response): Promise<boolean> => {
-  return new Promise(async (resolve) => {
-    const { url, userId } = props;
+  const { url, userId } = props;
+  try {
+    // start site-wide crawls
+    setImmediate(async () => {
+      await watcherCrawl({ url, scan: true, userId });
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
-    try {
-      // start site-wide crawls
-      setImmediate(async () => {
-        await watcherCrawl({ url, scan: true, userId });
-      });
-    } catch (e) {
-      console.error(e);
-    }
-
+  return new Promise((resolve) => {
     const domain = getHostName(url);
 
     crawlEmitter.on(`crawl-${domain}-${userId || 0}`, (source) => {

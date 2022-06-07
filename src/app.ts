@@ -114,7 +114,7 @@ function initServer(): HttpServer[] {
   // rate limits on expensive endpoints
   if (!config.SUPER_MODE) {
     app.use("/iframe", limiter);
-    app.use("/graphql", limiter);
+    app.use("/playground", limiter);
     app.use("/api/iframe", limiter);
     app.use("/api/get-website", limiter);
     app.use("/api/register", limiter);

@@ -25,9 +25,7 @@ const UserModel = {
 };
 
 // add defaults from user model and set the lastLoginDate to the current date
-const makeUser = (
-  { url, domain, ...extra }: any = { url: "", domain: "" }
-): typeof UserModel => {
+const makeUser = (extra: any = {}): typeof UserModel => {
   return Object.assign(
     {},
     UserModel,

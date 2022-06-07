@@ -46,8 +46,7 @@ const issuesFoundTemplate: IssuesFound = (
     console.error(e);
   }
 
-  let targetUrl = encodeURIComponent(target);
-
+  const targetUrl = encodeURIComponent(target);
   const issueCount = data?.issues?.length;
 
   return `

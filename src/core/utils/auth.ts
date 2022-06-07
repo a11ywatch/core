@@ -18,8 +18,8 @@ const signOptions = {
   keyid,
 };
 
-let privateKey = String(PRIVATE_KEY).trim();
-let publicKey = String(PUBLIC_KEY).trim();
+const privateKey = String(PRIVATE_KEY).trim();
+const publicKey = String(PUBLIC_KEY).trim();
 
 export function signJwt({ email, role, keyid }, options = {}) {
   return jwt.sign(

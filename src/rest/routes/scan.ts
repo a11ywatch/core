@@ -12,7 +12,7 @@ export const scanSimple = async (req: Request, res: Response) => {
     // returns truthy if can continue
     const userNext = await getUserFromApi(req.headers.authorization, req, res);
 
-    if (!!userNext) {
+    if (userNext) {
       const url = decodeURIComponent(
         paramParser(req, "websiteUrl") || paramParser(req, "url")
       );

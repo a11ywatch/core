@@ -81,7 +81,7 @@ export const getWebsiteReport = async (req: Request, res: Response) => {
   } catch (_) {}
 
   let data: Website;
-  let query = initUrl(decodeURIComponent(slug + ""));
+  const query = initUrl(decodeURIComponent(slug + ""));
 
   try {
     const report = await getReport(query, userId);

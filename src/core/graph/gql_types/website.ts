@@ -6,6 +6,11 @@ export const website = gql`
     value: String
   }
 
+  type PageActions {
+    path: String
+    events: [String]
+  }
+
   type Website {
     _id: ID
     url: String
@@ -34,5 +39,6 @@ export const website = gql`
     standard: String
     ua: String
     crawlDuration: Float
+    actions: [PageActions]
   }
 `;

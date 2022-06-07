@@ -11,7 +11,7 @@ export const crawlStreamLazy = async (req: Request, res: Response) => {
       res
     );
 
-    if (!!userNext) {
+    if (userNext) {
       const url = decodeURIComponent(req.body?.websiteUrl || req.body?.url);
       res.writeHead(200, {
         "Content-Type": "application/json",
