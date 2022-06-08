@@ -27,6 +27,7 @@ export const addWebsite = async ({
   ua,
   standard,
   actions,
+  robots = true,
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -81,6 +82,7 @@ export const addWebsite = async ({
     ua,
     standard: wcagStandard,
     actionsEnabled,
+    robots,
   });
 
   try {
@@ -129,6 +131,7 @@ export const addWebsite = async ({
         urlMap: url,
         userId,
         scan: true,
+        robots,
       });
     }
   });

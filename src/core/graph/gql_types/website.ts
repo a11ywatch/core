@@ -52,5 +52,6 @@ export const website = gql`
     crawlDuration: Float
     actions(limit: Int = 0, offset: Int = 0): [PageActions]
     actionsEnabled: Boolean
+    robots: Boolean
   }
 `;

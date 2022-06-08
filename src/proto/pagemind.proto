@@ -26,6 +26,7 @@ message ScanParams {
    string ua = 9; // User agent to use for request.
    string standard = 10; // The WCAG standard to use WCAG2A, WCAG2AA, or WCAG2AAA.
    string hideElements = 11; // CSS selector to hide elements from testing, selectors can be comma separated.
+   bool cv = 12; // can perform with Computer Vision
 }
 
 // upsert script params

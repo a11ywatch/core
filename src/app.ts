@@ -481,6 +481,7 @@ function initServer(): HttpServer[] {
     const ua = paramParser(req, "ua");
     const standard = paramParser(req, "standard");
     const actions = paramParser(req, "actions");
+    const robots = paramParser(req, "robots");
 
     const { website } = await addWebsite({
       userId,
@@ -492,6 +493,7 @@ function initServer(): HttpServer[] {
       standard,
       canScan: false,
       actions,
+      robots,
     });
 
     return res.json({

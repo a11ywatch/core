@@ -12,6 +12,7 @@ export const updateWebsite = async ({
   standard,
   ua,
   actions,
+  robots = true,
 }) => {
   let website;
   let collection;
@@ -36,6 +37,7 @@ export const updateWebsite = async ({
     standard: website.standard ? website.standard : undefined,
     ua: website.ua ? website.ua : undefined,
     actionsEnabled,
+    robots,
   };
 
   // if page headers are sent add them

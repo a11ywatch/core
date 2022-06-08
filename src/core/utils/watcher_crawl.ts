@@ -6,6 +6,7 @@ interface CrawlParams {
   url?: string;
   scan?: boolean; // determine scan or crawl method
   userId?: number;
+  robots?: boolean; // respect robots txt file
 }
 // run request to `crawler` and either scan or crawl website. Scan is real time while crawl is delayed.
 export const watcherCrawl = async ({
@@ -13,6 +14,7 @@ export const watcherCrawl = async ({
   url: urlTarget,
   userId,
   scan = false,
+  robots = true,
 }: CrawlParams) => {
   const target = urlMap || urlTarget;
   const url = String(initUrl(target, true));
@@ -24,11 +26,13 @@ export const watcherCrawl = async ({
       data = await controller.crawlerScan({
         url,
         id: userId,
+        norobots: !robots,
       });
     } else {
       data = await controller.crawlerCrawl({
         url,
         id: userId,
+        norobots: !robots,
       });
     }
   } catch (e) {

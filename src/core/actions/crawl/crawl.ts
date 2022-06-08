@@ -103,6 +103,7 @@ export const crawlPage = async (
       ua: website?.ua,
       standard: website?.standard,
       actions,
+      cv: SUPER_MODE || userData?.role === 2,
     });
 
     const trackerProccess = (data?: any) => {

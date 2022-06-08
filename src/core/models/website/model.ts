@@ -33,6 +33,7 @@ const WebsiteModel = {
   mobile: false, // mobile first view port
   standard: "WCAG2AA", // standard for testing WCAG
   actionsEnabled: false,
+  robots: true,
 };
 
 const makeWebsite = (
