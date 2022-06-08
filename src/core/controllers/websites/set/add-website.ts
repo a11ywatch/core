@@ -69,6 +69,8 @@ export const addWebsite = async ({
     wcagStandard = standard;
   }
 
+  const actionsEnabled = actions && Array.isArray(actions) && actions.length;
+
   const website = makeWebsite({
     userId,
     url,
@@ -78,6 +80,7 @@ export const addWebsite = async ({
     mobile,
     ua,
     standard: wcagStandard,
+    actionsEnabled,
   });
 
   try {
@@ -88,22 +91,31 @@ export const addWebsite = async ({
 
   setImmediate(async () => {
     // store into actions collection
-    if (actions && Array.isArray(actions) && actions.length) {
+    if (actionsEnabled) {
       const [actionsCollection] = await connect("PageActions");
 
       actions.forEach(async (action) => {
         try {
-          await actionsCollection.findOneAndUpdate(
-            {
-              userId,
-              domain,
-              path: action.path,
-            },
-            {
+          const update = {
+            $set: {
               ...action,
               userId,
               domain,
-            }
+            },
+          };
+          const path =
+            action.path && action.path[0] === "/"
+              ? action.path
+              : `/${action.path}`;
+
+          await actionsCollection.updateOne(
+            {
+              userId,
+              domain,
+              path,
+            },
+            update,
+            { upsert: true }
           );
         } catch (e) {
           console.error(e);
@@ -122,7 +134,10 @@ export const addWebsite = async ({
   });
 
   return {
-    website,
+    website: {
+      ...website,
+      actions,
+    },
     code: 200,
     success: !!canScan,
     message: canScan

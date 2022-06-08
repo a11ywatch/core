@@ -16,7 +16,7 @@ export const website = gql`
     _id: ID
     path: String
     domain: String
-    events: String
+    events: [String]
   }
 
   """
@@ -50,6 +50,7 @@ export const website = gql`
     standard: String
     ua: String
     crawlDuration: Float
-    actions: PageActions
+    actions: [PageActions]
+    actionsEnabled: Boolean
   }
 `;

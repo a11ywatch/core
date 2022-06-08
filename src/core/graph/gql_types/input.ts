@@ -13,6 +13,6 @@ export const input = gql`
 
   input PageActionsInput {
     path: String
-    events: String
+    events: [String]
   }
 `;

@@ -439,6 +439,7 @@ function initServer(): HttpServer[] {
     const pageInsights = paramParser(req, "pageInsights");
     const ua = paramParser(req, "ua");
     const standard = paramParser(req, "standard");
+    const actions = paramParser(req, "actions");
 
     const { website } = await updateWebsite({
       userId,
@@ -448,6 +449,7 @@ function initServer(): HttpServer[] {
       pageInsights,
       ua,
       standard,
+      actions,
     });
 
     return res.json({

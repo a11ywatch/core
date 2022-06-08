@@ -18,6 +18,7 @@ import { SUPER_MODE } from "@app/config/config";
 import type { Website } from "@app/types";
 import type { Issue } from "../../../schema";
 import type { Struct } from "pb-util";
+import { connect } from "@app/database";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -75,6 +76,23 @@ export const crawlPage = async (
       }
     }
 
+    let actions;
+
+    try {
+      const [actionsCollection] = await connect("PageActions");
+
+      const action = await actionsCollection.findOne({
+        path: pathname,
+        userId,
+      });
+
+      if (action) {
+        actions = action.events;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     const dataSource = await fetchPageIssues({
       pageHeaders: website?.pageHeaders,
       url: urlMap,
@@ -84,6 +102,7 @@ export const crawlPage = async (
       mobile: website?.mobile,
       ua: website?.ua,
       standard: website?.standard,
+      actions,
     });
 
     const trackerProccess = (data?: any) => {

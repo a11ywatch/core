@@ -11,6 +11,7 @@ interface Params {
   mobile?: boolean; // is the testing done in mobile view port
   standard?: string; // is the testing done in mobile view port
   ua?: string; // is the testing done in mobile view port
+  actions?: string[]; // perform actions before testing
 }
 
 // gRPC call to scan from pagemind
