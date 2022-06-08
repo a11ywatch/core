@@ -58,11 +58,11 @@ export const Website = {
       domain,
     });
   },
-  actions: async ({ userId, url, domain }) => {
+  actions: async ({ userId, domain }, params) => {
     return await getPageActionsPaging({
       userId,
-      url,
       domain,
+      ...params,
     });
   },
 };

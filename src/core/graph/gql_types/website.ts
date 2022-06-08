@@ -50,7 +50,7 @@ export const website = gql`
     standard: String
     ua: String
     crawlDuration: Float
-    actions: [PageActions]
+    actions(limit: Int = 0, offset: Int = 0): [PageActions]
     actionsEnabled: Boolean
   }
 `;

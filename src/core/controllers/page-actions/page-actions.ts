@@ -7,7 +7,7 @@ export const getPageActionsPaging = async (
     userId,
     domain,
     url,
-    limit = 100,
+    limit = 20,
     offset = 0,
   }: {
     userId?: number;
