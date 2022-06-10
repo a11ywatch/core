@@ -44,6 +44,11 @@ const GRAPHQL_PORT = Number(
 // if ran from the CLI prevent rate-limits and usage limits [TODO]
 export const SUPER_MODE = process.env.SUPER_MODE === "true";
 
+const defaultWebPort = process.env.WEB_PORT || 3000;
+const defaultWebURL = DEV
+  ? `http://localhost:${defaultWebPort}`
+  : "https://a11ywatch.com";
+
 export const config = {
   DEV,
   DB_URL: process.env.MONGO_URL || process.env.DB_URL,
@@ -51,7 +56,7 @@ export const config = {
   CLIENT_URL: replaceDockerNetwork(process.env.CLIENT_URL),
   GRAPHQL_PORT,
   ROOT_URL: process.env.ROOT_URL || "http://localhost:3280",
-  DOMAIN: process.env.DOMAIN || "https://a11ywatch.com",
+  DOMAIN: process.env.DOMAIN ? process.env.DOMAIN : defaultWebURL,
   // EMAIL
   EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL,
   EMAIL_CLIENT_ID: process.env.EMAIL_CLIENT_ID,

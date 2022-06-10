@@ -3,8 +3,60 @@ import cors from "cors";
 import { createUser } from "@app/core/controllers/users/set";
 import { verifyUser } from "@app/core/controllers/users/update";
 import { getUserFromToken } from "@app/core/utils";
-import { cookieConfigs } from "@app/config";
+import { config, cookieConfigs } from "@app/config";
 import { getUser } from "@app/core/controllers/users";
+import { request } from "https";
+
+const clientID = process.env.GITHUB_CLIENT_ID;
+const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+// Authenticate with github @param requestToken string
+const oAuthGithub = (requestToken: string): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({
+      client_id: clientID,
+      client_secret: clientSecret,
+      code: requestToken,
+    });
+
+    const req = request(
+      {
+        method: "POST",
+        hostname: "github.com",
+        port: 443,
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": data.length,
+        },
+        path: `/login/oauth/access_token`,
+      },
+      (res) => {
+        let data = "";
+        console.log("Status Code:", res.statusCode);
+
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        res.on("end", () => {
+          try {
+            data = JSON.parse(data);
+          } catch (_) {}
+          resolve(data);
+        });
+      }
+    );
+
+    req.write(data);
+
+    req.on("error", (err) => {
+      console.log("Error: ", err.message);
+      reject(err);
+    });
+
+    req.end();
+  });
+};
 
 export const setAuthRoutes = (app: Application) => {
   app.post("/api/register", cors(), async (req, res) => {
@@ -69,5 +121,22 @@ export const setAuthRoutes = (app: Application) => {
       // un-authed user
       res.send(true);
     }
+  });
+
+  app.get("/github/callback", async (req, res) => {
+    const requestToken = req.query.code + "";
+    let authentication;
+
+    try {
+      authentication = await oAuthGithub(requestToken);
+    } catch (e) {
+      console.error(e);
+    }
+
+    res.redirect(
+      authentication
+        ? `${config.DOMAIN}/auth-redirect?${authentication}`
+        : `${config.DOMAIN}`
+    );
   });
 };

@@ -126,7 +126,10 @@ export const getUserFromApiScan = async (
     return;
   }
 
-  const [user, collection] = await retreiveUserByToken(token);
+  const [user, collection] = await retreiveUserByToken(token).catch((e) => {
+    console.error(e);
+    return [null, null];
+  });
 
   // if SUPER mode allow request reguardless of scans
   if (config.SUPER_MODE) {
