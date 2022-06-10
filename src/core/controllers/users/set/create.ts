@@ -5,17 +5,32 @@ import { getNextSequenceValue } from "../../counters";
 import { getUser } from "../find";
 import { confirmEmail } from "../update/confirm-email";
 
+interface UserInput {
+  email: string;
+  password?: string;
+  googleId?: string;
+  githubId?: number;
+  role?: number;
+}
+
 // move googleID to SSR usage for spoof protection.
-export const createUser = async ({ email, password, googleId, role = 0 }) => {
+export const createUser = async ({
+  email,
+  password,
+  googleId,
+  githubId,
+  role = 0,
+}: Partial<UserInput>) => {
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
   const [user, collection] = await getUser({ email });
   const googleAuthed = user && (user.googleId || googleId);
+  const githubAuthed = user && (user.githubId || githubId);
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
 
-  const shouldValidatePassword = user?.password && !googleId;
+  const shouldValidatePassword = user?.password && !googleId && !githubId;
 
   if (shouldValidatePassword && passwordMatch === false) {
     throw new Error(
@@ -23,14 +38,14 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     );
   }
 
-  if (!googleId && !password) {
+  if (!googleId && !githubId && !password) {
     throw new Error("Password of atleast 6 chars required to register.");
   }
 
   if (user) {
-    if (!googleId && !user?.password) {
+    if (!googleId && !githubId && !user?.password) {
       throw new Error(
-        user.googleId
+        user.googleId || user.githubId
           ? "Password not found, try using your google login or reset the password."
           : "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
       );
@@ -38,10 +53,17 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     if (googleId && user?.googleId && user?.googleId !== googleId) {
       throw new Error("GoogleID is not tied to any user.");
     }
+    if (
+      typeof githubId !== "undefined" &&
+      user?.githubId &&
+      user?.githubId !== githubId
+    ) {
+      throw new Error("GithubId is not tied to any user.");
+    }
   }
 
-  if ((user && user?.salt) || googleAuthed) {
-    if (passwordMatch || googleId) {
+  if ((user && user?.salt) || googleAuthed || githubAuthed) {
+    if (passwordMatch || googleId || githubId) {
       let keyid = user?.id;
       let updateCollectionProps = {};
 
@@ -71,10 +93,22 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
         user.emailConfirmed = true;
       }
 
+      if (githubId) {
+        updateCollectionProps = {
+          ...updateCollectionProps,
+          githubId,
+          emailConfirmed: true,
+        };
+        user.emailConfirmed = true;
+      }
+
       await collection.updateOne(
         { email },
         {
           $set: updateCollectionProps,
+        },
+        {
+          upsert: true,
         }
       );
 
@@ -84,6 +118,9 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
     }
   } else {
     const id = await getNextSequenceValue("Users");
+
+    const needsEmailConfirmation = !googleAuthed && !githubAuthed;
+
     const userObject = makeUser({
       email,
       password: salthash?.passwordHash,
@@ -92,10 +129,15 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
       jwt: signJwt({ email, role, keyid: id }),
       role,
       googleId,
+      githubId,
+      emailConfirmed: !needsEmailConfirmation,
     });
 
     await collection.insertOne(userObject);
-    await confirmEmail({ keyid: id });
+
+    if (!googleAuthed && !githubAuthed) {
+      await confirmEmail({ keyid: id });
+    }
 
     return userObject;
   }

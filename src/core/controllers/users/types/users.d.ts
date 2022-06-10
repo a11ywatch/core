@@ -2,7 +2,8 @@ import { User } from "@app/types";
 
 export interface AuthParams {
   userId?: number;
-  googleId?: number;
+  googleId?: string;
+  githubId?: number;
   password?: string;
   email?: string;
   newPassword?: string;

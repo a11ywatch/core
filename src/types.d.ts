@@ -7,6 +7,7 @@ export interface AppResponse extends Response {
 
 export interface User extends UserGql {
   googleId?: string;
+  githubId?: number;
 }
 
 export type { Analytic, History, Website, SubDomain, Issue } from "./schema";

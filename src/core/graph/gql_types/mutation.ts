@@ -2,9 +2,19 @@ import gql from "graphql-tag";
 
 export const mutation = gql`
   type Mutation {
-    register(email: String!, password: String, googleId: String): User
+    register(
+      email: String!
+      password: String
+      googleId: String
+      githubId: Int
+    ): User
 
-    login(email: String!, password: String, googleId: String): User
+    login(
+      email: String!
+      password: String
+      googleId: String
+      githubId: Int
+    ): User
 
     logout: BasicMutationResponse
 

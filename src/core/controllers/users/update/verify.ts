@@ -2,12 +2,18 @@ import { EMAIL_ERROR } from "../../../strings";
 import { saltHashPassword, signJwt } from "../../../utils";
 import { getNextSequenceValue } from "../../counters";
 import { getUser } from "../find";
+import { AuthParams } from "../types";
 
-const verifyUser = async ({ password, email, googleId }) => {
+const verifyUser = async ({
+  password,
+  email,
+  googleId,
+  githubId,
+}: AuthParams) => {
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
-  if (email && !password && !googleId) {
+  if (email && !password && !googleId && !githubId) {
     throw new Error("A password is required to login.");
   }
 
@@ -31,13 +37,14 @@ const verifyUser = async ({ password, email, googleId }) => {
 
   if (shouldValidatePassword && passwordMatch === false) {
     throw new Error(EMAIL_ERROR);
-  } else if (
-    user?.googleId &&
-    !shouldValidatePassword &&
-    user.googleId !== googleId
-  ) {
-    // TODO: RAISE AWARENESS MISUSE HOW CLIENT IS TRYING TO LOGIN?
-    throw new Error("GoogleID is not tied to any user.");
+  }
+
+  if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
+    throw new Error("GoogleID is not tied to user.");
+  }
+
+  if (user?.githubId && !shouldValidatePassword && user.githubId !== githubId) {
+    throw new Error("GithubId is not tied to user.");
   }
 
   let id = user?.id;
@@ -64,7 +71,12 @@ const verifyUser = async ({ password, email, googleId }) => {
     updateCollectionProps = { ...updateCollectionProps, googleId };
   }
 
+  if (githubId) {
+    updateCollectionProps = { ...updateCollectionProps, githubId };
+  }
+
   await collection.updateOne({ email }, { $set: updateCollectionProps });
+
   return {
     ...user,
     jwt,

@@ -22,6 +22,7 @@ const UserModel = {
     usageLimit: 3,
   },
   websiteLimit: 1, // limit of websites a user can have
+  githubId: null,
 };
 
 // add defaults from user model and set the lastLoginDate to the current date

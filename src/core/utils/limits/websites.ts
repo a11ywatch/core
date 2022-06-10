@@ -11,17 +11,22 @@ export const blockWebsiteAdd = ({
     return false;
   }
 
+  // 1 website allowed
   if (!audience && collectionCount >= 1) {
     return true;
   }
-  if (audience === 1 && collectionCount >= 4) {
-    return true;
-  }
-  if (audience === 2 && collectionCount >= 10) {
+
+  // 3 website allowed
+  if (audience === 1 && collectionCount >= 3) {
     return true;
   }
 
-  const maxLimit = limit > 10 ? limit : 10;
+  // 8 website allowed
+  if (audience === 2 && collectionCount >= 8) {
+    return true;
+  }
+
+  const maxLimit = limit > 8 ? limit : 8;
 
   if (audience === 3 && collectionCount >= maxLimit) {
     return true;

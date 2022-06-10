@@ -75,9 +75,9 @@ export const setAuthRoutes = (app: Application) => {
     }
   });
   app.post("/api/login", cors(), async (req, res) => {
-    const { email, password, googleId } = req.body;
+    const { email, password, googleId, githubId } = req.body;
     try {
-      const auth = await verifyUser({ email, password, googleId });
+      const auth = await verifyUser({ email, password, googleId, githubId });
 
       res.cookie("jwt", auth.jwt, cookieConfigs);
 

@@ -138,12 +138,14 @@ export type MutationRegisterArgs = {
   email: Scalars["String"];
   password?: Maybe<Scalars["String"]>;
   googleId?: Maybe<Scalars["String"]>;
+  githubId?: Maybe<Scalars["Int"]>;
 };
 
 export type MutationLoginArgs = {
   email: Scalars["String"];
   password?: Maybe<Scalars["String"]>;
   googleId?: Maybe<Scalars["String"]>;
+  githubId?: Maybe<Scalars["Int"]>;
 };
 
 export type MutationUpdateUserArgs = {

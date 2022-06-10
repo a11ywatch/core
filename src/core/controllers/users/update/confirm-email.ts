@@ -31,7 +31,7 @@ export const confirmEmail = async ({ keyid: id }) => {
             <h1>Click on this link to confirm your email for A11yWatch.</h1>
             <p>Confirmation code will expire in 30 minutes or you have to get a new link.</p>
             <div style="padding-top: 20px; padding-bottom: 40px">
-              <a href="${confirmLink}" aria-label="Confirm your email for A11yWatch" style="margin-top: 8px; margin-bottom: 4px; color:#3f3d56; padding: 8px 15px; border: 1px solid rgba(63, 61, 86, 0.5); text-decoration: none; border-radius: 2px">CONFIRM EMAIL</a>
+              <a href="${confirmLink}" aria-label="Confirm your email for A11yWatch" style="margin-top: 8px; margin-bottom: 4px; color: #3f3d56; padding: 8px 15px; border: 1px solid rgba(63, 61, 86, 0.5); text-decoration: none; border-radius: 2px">CONFIRM EMAIL</a>
             </div>
             <p style="font-size: 12px; margin-top: 20px">Please do not reply back to this email, it will not be read</p>
             `,
