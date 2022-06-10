@@ -63,7 +63,12 @@ export const createUser = async ({ email, password, googleId, role = 0 }) => {
       };
 
       if (googleId) {
-        updateCollectionProps = { ...updateCollectionProps, googleId };
+        updateCollectionProps = {
+          ...updateCollectionProps,
+          googleId,
+          emailConfirmed: true,
+        };
+        user.emailConfirmed = true;
       }
 
       await collection.updateOne(
