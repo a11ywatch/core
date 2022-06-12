@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@a11ywatch/website-source-builder": "^0.0.30",
-    "@graphql-tools/schema": "^8.3.2",
+    "@graphql-tools/schema": "^8.3.13",
     "@grpc/grpc-js": "1.6.2",
     "@grpc/proto-loader": "0.6.9",
     "apollo-server": "^2.3.1",
