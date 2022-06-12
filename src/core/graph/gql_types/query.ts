@@ -5,7 +5,7 @@ export const query = gql`
     features: [Feature]
     websites: [Website]
     website(url: String): Website
-    subDomains(filter: String): [SubDomain]
+    pages(filter: String): [Pages]
     issues(filter: String, limit: Int = 0, offset: Int = 0): [Issue]
     history(filter: String): [History]
     analytics(filter: String): [Analytic]

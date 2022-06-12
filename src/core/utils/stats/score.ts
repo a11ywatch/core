@@ -1,4 +1,4 @@
-import { generateWebsiteScore } from "@app/core/controllers/subdomains/update";
+import { generateWebsiteScore } from "@app/core/controllers/pages/update";
 import { getWebsite } from "@app/core/controllers/websites";
 import { CRAWL_COMPLETE } from "@app/core/static";
 import { pubsub } from "@app/database/pubsub";

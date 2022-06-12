@@ -9,7 +9,7 @@ export const history = gql`
     url: String
     user: User
     issues(filter: String): [Issue]
-    subDomains: [SubDomain]
+    pages: [Pages]
     userId: Int
     domain: String
     cdnConnected: Boolean

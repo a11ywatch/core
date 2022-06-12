@@ -1,6 +1,6 @@
 import { IssuesController } from "../controllers/issues";
 
-export const SubDomain = {
+export const Pages = {
   issues: async ({ userId, url }) => {
     const issueItem = await IssuesController().getIssue({
       id: userId,

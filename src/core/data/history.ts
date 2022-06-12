@@ -1,5 +1,5 @@
 import { IssuesController } from "../controllers/issues";
-import { SubDomainController } from "../controllers/subdomains";
+import { PagesController } from "../controllers/pages";
 
 export const History = {
   issues: async ({ userId, url }, { filter }) => {
@@ -20,8 +20,8 @@ export const History = {
     }
     return issues;
   },
-  subDomains: async ({ userId, url, domain }) => {
-    return await SubDomainController().getDomains({
+  pages: async ({ userId, url, domain }) => {
+    return await PagesController().getDomains({
       userId,
       url,
       domain,

@@ -1,6 +1,6 @@
 import { UsersController } from "../controllers/users";
 import { IssuesController } from "../controllers/issues";
-import { SubDomainController } from "../controllers/subdomains";
+import { PagesController } from "../controllers/pages";
 import { ScriptsController } from "../controllers/scripts";
 import { AnalyticsController } from "../controllers";
 import { getPageActionsPaging } from "../controllers/page-actions/page-actions";
@@ -51,8 +51,8 @@ export const Website = {
     });
   },
   // TODO rename
-  subDomains: async ({ userId, url, domain }) => {
-    return await SubDomainController().getDomains({
+  pages: async ({ userId, url, domain }) => {
+    return await PagesController().getDomains({
       userId,
       url,
       domain,

@@ -3,7 +3,7 @@ import { BYPASS_AUTH } from "./config";
 import { getUserFromToken, parseCookie } from "./core/utils";
 import { createScheme } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
-import { SubDomainController } from "./core/controllers/subdomains";
+import { PagesController } from "./core/controllers/pages";
 import { ScriptsController } from "./core/controllers/scripts";
 import { HistoryController } from "./core/controllers/history";
 import { WebsitesController } from "./core/controllers/websites";
@@ -60,7 +60,7 @@ const getServerConfig = (): ApolloServerExpressConfig => {
           Website: WebsitesController({ user }),
           Issue: IssuesController({ user }),
           Features: FeaturesController({ user }),
-          SubDomain: SubDomainController({ user }),
+          Pages: PagesController({ user }),
           History: HistoryController({ user }),
           Analytics: AnalyticsController({ user }),
           Scripts: ScriptsController({ user }),

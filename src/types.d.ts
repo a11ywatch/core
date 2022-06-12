@@ -10,4 +10,4 @@ export interface User extends UserGql {
   githubId?: number;
 }
 
-export type { Analytic, History, Website, SubDomain, Issue } from "./schema";
+export type { Analytic, History, Website, Pages, Issue } from "./schema";

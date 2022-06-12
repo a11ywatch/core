@@ -60,7 +60,7 @@ import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
-import { getPagesPaging } from "./core/controllers/subdomains/find/domains";
+import { getPagesPaging } from "./core/controllers/pages/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
 import { getAnalyticsPaging } from "./core/controllers/analytics";
 import expressPlayground from "graphql-playground-middleware-express";
@@ -605,7 +605,7 @@ const startServer = async () => {
     console.error(e);
   }
 
-  // Fix Incorrect collections until v1 a11ywatch suite and not just core
+  // Fix Incorrect collections until v1 a11ywatch suite and not just core [Remove at v1]
   try {
     const [subDomainCollection] = await connect("SubDomains");
     await subDomainCollection.rename("Pages");

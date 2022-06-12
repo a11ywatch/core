@@ -34,7 +34,7 @@ export const website = gql`
     analytics: [Analytic]
     issues(filter: String): [Issue]
     issue: [PageIssue]
-    subDomains: [SubDomain]
+    pages: [Pages]
     scripts: [Script]
     issuesInfo: IssueInfo
     script: Script

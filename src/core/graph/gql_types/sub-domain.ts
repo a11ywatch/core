@@ -4,7 +4,7 @@ export const subdomain = gql`
   """
   Pages that have issues [Schema invalid name].
   """
-  type SubDomain {
+  type Pages {
     _id: ID
     url: String
     user: User

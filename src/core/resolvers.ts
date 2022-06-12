@@ -7,7 +7,7 @@ import {
   Website,
   Issue,
   Feature,
-  SubDomain,
+  Pages,
   Analytic,
   Script,
 } from "./data";
@@ -23,6 +23,6 @@ export const resolvers = {
   Website,
   Issue,
   Feature,
-  SubDomain,
+  Pages,
   History,
 };
