@@ -5,8 +5,8 @@ export const getHostName = (url: string) => {
   if (!url) {
     return "";
   }
+  let q = decodeURIComponent(url);
   try {
-    let q = decodeURIComponent(url);
     if (!/^(http|https)/.test(q)) {
       if (q.startsWith("://")) {
         q = `https${q}`;
@@ -15,10 +15,10 @@ export const getHostName = (url: string) => {
       }
     }
 
-    const { hostname } = new URL(url);
+    const { hostname } = new URL(q);
 
     return hostname;
   } catch (e) {
-    console.error(`invalid url ${url} \n ${e}`);
+    console.error(`invalid url ${q} \n ${e}`);
   }
 };
