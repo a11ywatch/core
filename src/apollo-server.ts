@@ -42,14 +42,10 @@ const getServerConfig = (): ApolloServerExpressConfig => {
       if (
         process.env.NODE_ENV !== "test" &&
         !user &&
-        !BYPASS_AUTH.includes(req?.body?.operationName)
+        !BYPASS_AUTH.includes(req?.body?.operationName) &&
+        req?.body?.operationName
       ) {
-        // generating gql schema initially
-        if (!req?.body?.operationName) {
-          console.log("Generating Graphql Schema");
-        } else {
-          throw new Error(AUTH_ERROR);
-        }
+        throw new Error(AUTH_ERROR);
       }
 
       return {

@@ -9,7 +9,6 @@ import { CronJob } from "cron";
 import {
   corsOptions,
   config,
-  cdnBase,
   logServerInit,
   PRIVATE_KEY,
   PUBLIC_KEY,
@@ -47,7 +46,7 @@ import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
-import { getUserFromToken, httpGet } from "./core/utils";
+import { getUserFromToken } from "./core/utils";
 import { retreiveUserByToken } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
@@ -397,26 +396,6 @@ function initServer(): HttpServer[] {
 
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
-
-  // END of ACTIONS
-
-  // TODO: remove script downloading
-  app.get("/scripts/:domain/:cdnPath", async (req, res) => {
-    try {
-      const data = await httpGet(
-        `${cdnBase}/${req.params.domain}/${req.params.cdnPath}`
-      );
-
-      res.setHeader(
-        "Content-disposition",
-        "attachment; filename=" + `${req.params.cdnPath}`
-      );
-
-      return res.send(data);
-    } catch (error) {
-      console.error(error);
-    }
-  });
 
   /*
    * Update website configuration.

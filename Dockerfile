@@ -24,7 +24,8 @@ FROM node:17.8-alpine3.14
 
 WORKDIR /usr/src/app
 
-RUN apk add openssl curl && \
+RUN apk upgrade --update-cache --available && \
+	apk add openssl curl && \
 	rm -rf /var/cache/apk/*
 
 COPY --from=installer /usr/src/app/private.key .

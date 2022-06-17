@@ -25,8 +25,13 @@ export const createUser = async ({
     throw new Error(EMAIL_ERROR);
   }
   const [user, collection] = await getUser({ email });
+
+  // prev auth methods or coming in as new
   const googleAuthed = user && (user.googleId || googleId);
   const githubAuthed = user && (user.githubId || githubId);
+
+  const emailConfirmed = googleId || githubId;
+
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
 
@@ -119,8 +124,6 @@ export const createUser = async ({
   } else {
     const id = await getNextSequenceValue("Users");
 
-    const needsEmailConfirmation = !googleAuthed && !githubAuthed;
-
     const userObject = makeUser({
       email,
       password: salthash?.passwordHash,
@@ -130,12 +133,12 @@ export const createUser = async ({
       role,
       googleId,
       githubId,
-      emailConfirmed: !needsEmailConfirmation,
+      emailConfirmed,
     });
 
     await collection.insertOne(userObject);
 
-    if (!googleAuthed && !githubAuthed) {
+    if (!emailConfirmed) {
       await confirmEmail({ keyid: id });
     }
 

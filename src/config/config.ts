@@ -87,10 +87,4 @@ if (DEV) {
   };
 }
 
-export const cdnBase =
-  process.env.SCRIPTS_CDN_URL_HOST &&
-  process.env.SCRIPTS_CDN_URL_HOST.includes("127.0.0.1")
-    ? process.env.SCRIPTS_CDN_URL_HOST
-    : "http://cdn-server:8090/cdn";
-
 export { cookieConfigs, DEV, TEST_ENV, PRIVATE_KEY, PUBLIC_KEY };

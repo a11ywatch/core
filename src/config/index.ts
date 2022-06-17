@@ -2,7 +2,6 @@ export {
   config,
   TEST_ENV,
   DEV,
-  cdnBase,
   PRIVATE_KEY,
   PUBLIC_KEY,
   cookieConfigs,
