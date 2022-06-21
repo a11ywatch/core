@@ -62,7 +62,7 @@ import { establishCrawlTracking } from "./event";
 import { getPagesPaging } from "./core/controllers/pages/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
 import { getAnalyticsPaging } from "./core/controllers/analytics";
-import expressPlayground from "graphql-playground-middleware-express";
+import { graphqlPlayground } from "./html";
 
 const { GRAPHQL_PORT } = config;
 
@@ -133,7 +133,10 @@ function initServer(): HttpServer[] {
 
   app.get("/status/:domain", cors(), statusBadge);
 
-  app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
+  // TODO: remove and move to client side.
+  app.get("/playground", (_req, res) => {
+    res.send(graphqlPlayground());
+  });
 
   /*
    * Create an iframe based off a url and reverse engineer the content for CORS.
