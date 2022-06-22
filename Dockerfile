@@ -44,6 +44,6 @@ COPY --from=installer /usr/src/app/private.key .
 COPY --from=installer /usr/src/app/public.key .
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=generator /usr/src/app/doc ./protodoc
+COPY --from=generator /usr/src/app/doc ./public/protodoc
 
 CMD [ "node", "./dist/server.js" ]

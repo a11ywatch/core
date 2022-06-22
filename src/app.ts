@@ -120,6 +120,8 @@ function initServer(): HttpServer[] {
     app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
   }
 
+  app.use(express.static(path.resolve("public")));
+
   app.use(createIframe);
   app.options(CONFIRM_EMAIL, cors());
   app.options(UNSUBSCRIBE_EMAILS, cors());
@@ -131,8 +133,8 @@ function initServer(): HttpServer[] {
   app.get("/playground", (_req, res) => {
     res.send(graphqlPlayground());
   });
-  app.get("/grpc-docs", (_req, res) => {
-    res.sendFile(path.resolve("protodoc/index.html"));
+  app.get("/grpc-docs", cors(), (_req, res) => {
+    res.sendFile(path.resolve("public/protodoc/index.html"));
   });
 
   /*

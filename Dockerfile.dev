@@ -24,6 +24,6 @@ RUN ./bootstrap.sh
 RUN npm ci
 
 COPY . .
-COPY --from=generator /usr/src/app/doc ./protodoc
+COPY --from=generator /usr/src/app/doc ./public/protodoc
 
 CMD [ "npm", "run", "dev" ]

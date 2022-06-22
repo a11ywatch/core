@@ -7,7 +7,6 @@ const apiUrls = String(CLIENT_URL).split(",");
 export const whitelist: string[] = [
   ...apiUrls,
   ...apiUrls.map((url) => url.replace("http", "https")),
-  "a11ywatch.vercel.app",
 ].filter(Boolean);
 
 const corsOptions: { origin: string[] | boolean; credentials: boolean } = {
