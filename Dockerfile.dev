@@ -1,3 +1,15 @@
+FROM pseudomuto/protoc-gen-doc AS generator
+
+WORKDIR /usr/src/app
+
+RUN apk add npm
+
+RUN npm i @a11ywatch/protos
+
+RUN mkdir ./doc
+
+RUN protoc --doc_out=./doc --doc_opt=html,index.html ./node_modules/@a11ywatch/protos/*.proto
+
 FROM node:16-alpine3.14
 
 WORKDIR /usr/src/app
@@ -12,5 +24,6 @@ RUN ./bootstrap.sh
 RUN npm ci
 
 COPY . .
+COPY --from=generator /usr/src/app/doc ./protodoc
 
 CMD [ "npm", "run", "dev" ]

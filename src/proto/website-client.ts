@@ -27,8 +27,8 @@ const createClient = async () => {
 
 const createPageMindClient = async () => {
   try {
-    const { WebsiteService } = await getProto("pagemind.proto");
-    pageMindClient = new WebsiteService(
+    const { Pagemind } = await getProto("pagemind.proto");
+    pageMindClient = new Pagemind(
       GRPC_HOST_PAGEMIND,
       credentials.createInsecure()
     );
@@ -41,7 +41,7 @@ const createCrawlerClient = async () => {
   try {
     const { crawler } = await getProto("crawler.proto");
 
-    crawlerClient = new crawler.Greeter(
+    crawlerClient = new crawler.Crawler(
       GRPC_HOST_CRAWLER,
       credentials.createInsecure()
     );
@@ -52,8 +52,8 @@ const createCrawlerClient = async () => {
 
 const createMavClient = async () => {
   try {
-    const { WebsiteService } = await getProto("pagemind.proto");
-    mavClient = new WebsiteService(GRPC_HOST_MAV, credentials.createInsecure());
+    const { Mav } = await getProto("mav.proto");
+    mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
   } catch (e) {
     console.error(e);
   }
