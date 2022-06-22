@@ -4,11 +4,11 @@ WORKDIR /usr/src/app
 
 RUN apk add npm
 
-RUN npm i @a11ywatch/protos
+RUN npm i @a11ywatch/protos@0.1.5
 
-RUN mkdir ./doc
+RUN mkdir ./doc && cp -R node_modules/@a11ywatch/protos proto
 
-RUN protoc --doc_out=./doc --doc_opt=html,index.html ./node_modules/@a11ywatch/protos/*.proto
+RUN protoc --doc_out=./doc --doc_opt=html,index.html proto/*.proto
 
 FROM node:16-alpine3.14
 

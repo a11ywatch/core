@@ -7,7 +7,6 @@ export const options = {
 };
 
 let pubsub: RedisPubSub;
-let sub: Redis.Redis;
 
 // PUB/SUB GQL
 function createPubSub() {
@@ -21,26 +20,4 @@ function createPubSub() {
   }
 }
 
-// used as primary redis sub
-function createSub() {
-  new Promise((resolve) => {
-    try {
-      sub = new Redis(options);
-      resolve(sub);
-    } catch (e) {
-      console.error(e);
-    }
-  });
-}
-
-// used as primary redis sub
-async function closeSub() {
-  try {
-    await pubsub?.close();
-    sub?.disconnect();
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-export { pubsub, sub, createPubSub, createSub, closeSub };
+export { pubsub, createPubSub };

@@ -41,7 +41,7 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
     if (role === 2 && scanInfo?.scanAttempts >= 100) {
       return false;
     }
-    // default to max if none set for entreprise
+    // default to max if none set for enterprise
     if (
       role === 3 &&
       scanInfo?.scanAttempts >= (user?.scanInfo?.usageLimit || 100)

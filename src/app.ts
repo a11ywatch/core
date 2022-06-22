@@ -31,7 +31,6 @@ import {
   closeDbConnection,
   createPubSub,
   initRedisConnection,
-  closeSub,
   closeRedisConnection,
   connect,
 } from "./database";
@@ -42,7 +41,6 @@ import { scanSimple } from "./rest/routes/scan";
 import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
 import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
 import { setAuthRoutes } from "./rest/routes_groups/auth";
-import { createSub } from "./database/pubsub";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
@@ -63,6 +61,7 @@ import { getPagesPaging } from "./core/controllers/pages/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
 import { getAnalyticsPaging } from "./core/controllers/analytics";
 import { graphqlPlayground } from "./html";
+import path from "path";
 
 const { GRAPHQL_PORT } = config;
 
@@ -79,11 +78,6 @@ const connectClients = async () => {
   }
   try {
     await initRedisConnection(); // redis client
-  } catch (e) {
-    console.error(e);
-  }
-  try {
-    await createSub(); // pub sub
   } catch (e) {
     console.error(e);
   }
@@ -114,6 +108,7 @@ function initServer(): HttpServer[] {
   if (!config.SUPER_MODE) {
     app.use("/iframe", limiter);
     app.use("/playground", limiter);
+    app.use("/grpc-docs", limiter);
     app.use("/api/iframe", limiter);
     app.use("/api/get-website", limiter);
     app.use("/api/register", limiter);
@@ -133,9 +128,11 @@ function initServer(): HttpServer[] {
 
   app.get("/status/:domain", cors(), statusBadge);
 
-  // TODO: remove and move to client side.
   app.get("/playground", (_req, res) => {
     res.send(graphqlPlayground());
+  });
+  app.get("/grpc-docs", (_req, res) => {
+    res.sendFile(path.resolve("protodoc/index.html"));
   });
 
   /*
@@ -614,7 +611,6 @@ const killServer = async () => {
     await Promise.all([
       coreServer?.close(),
       closeDbConnection(),
-      closeSub(),
       closeRedisConnection(),
       killGrpcServer(),
     ]);

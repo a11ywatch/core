@@ -27,7 +27,7 @@ The following roles are indicated below.
 free = 0
 basic = 1
 premium = 2
-entreprise = 3
+enterprise = 3
 ```
 
 ### Emailing

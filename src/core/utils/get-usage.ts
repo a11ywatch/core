@@ -1,4 +1,4 @@
-const DEFAULT_MAX_LIMIT = 500; // default max for paid accs not entreprise.
+const DEFAULT_MAX_LIMIT = 500; // default max for paid accs not enterprise.
 
 // return truthy if api usage exceeds the limit.
 export const usageExceededThreshold = ({
