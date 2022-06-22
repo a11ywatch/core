@@ -1,6 +1,6 @@
 {
-  "name": "a11ywatch-core",
-  "version": "1.0.1",
+  "name": "@a11ywatch/core",
+  "version": "0.1.0",
   "description": "a11ywatch central api",
   "main": "./dist/server.js",
   "scripts": {
@@ -8,11 +8,12 @@
     "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "jest",
     "lint": "eslint .",
-    "build": "tsc && tsc-alias && cp -R src/proto/*.proto dist/proto/",
+    "build": "tsc && tsc-alias",
     "start": "NODE_ENV=production node dist/server.js",
     "generate": "graphql-codegen"
   },
   "dependencies": {
+    "@a11ywatch/protos": "^0.1.4",
     "@a11ywatch/website-source-builder": "^0.0.30",
     "@graphql-tools/schema": "^8.3.2",
     "@grpc/grpc-js": "1.6.2",
