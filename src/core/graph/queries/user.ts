@@ -27,7 +27,7 @@ export const user = async (_, { id, password }, context) => {
       keyid: userId,
       activeSubscription: user?.paymentSubscription?.status === "active",
       loggedIn: !!ctx.user,
-      accountType: audience ?? "",
+      accountType: audience + "" || "",
       passwordRequired: !user?.password && !googleId && !githubId, // password not found [TODO: change to simply check not password]
     };
   }

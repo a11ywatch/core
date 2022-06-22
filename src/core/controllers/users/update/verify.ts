@@ -23,14 +23,6 @@ const verifyUser = async ({
     throw new Error(EMAIL_ERROR);
   }
 
-  if (!googleId && !user?.password) {
-    throw new Error(
-      user.googleId
-        ? "Password not found, try using your google login or reset the password."
-        : "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
-    );
-  }
-
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
   const shouldValidatePassword = user?.password && !googleId;
@@ -39,11 +31,19 @@ const verifyUser = async ({
     throw new Error(EMAIL_ERROR);
   }
 
-  if (user?.googleId && !shouldValidatePassword && user.googleId !== googleId) {
+  if (
+    typeof googleId !== "undefined" &&
+    !shouldValidatePassword &&
+    user?.googleId !== googleId
+  ) {
     throw new Error("GoogleID is not tied to user.");
   }
 
-  if (user?.githubId && !shouldValidatePassword && user.githubId !== githubId) {
+  if (
+    typeof githubId !== "undefined" &&
+    !shouldValidatePassword &&
+    user?.githubId !== githubId
+  ) {
     throw new Error("GithubId is not tied to user.");
   }
 
