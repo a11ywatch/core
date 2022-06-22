@@ -60,9 +60,8 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
 
 export const setAuthRoutes = (app: Application) => {
   app.post("/api/register", cors(), async (req, res) => {
-    const { email, password, googleId } = req.body;
     try {
-      const auth = await createUser({ email, password, googleId });
+      const auth = await createUser(req.body);
 
       res.cookie("jwt", auth.jwt, cookieConfigs);
 
@@ -75,9 +74,8 @@ export const setAuthRoutes = (app: Application) => {
     }
   });
   app.post("/api/login", cors(), async (req, res) => {
-    const { email, password, googleId, githubId } = req.body;
     try {
-      const auth = await verifyUser({ email, password, googleId, githubId });
+      const auth = await verifyUser(req.body);
 
       res.cookie("jwt", auth.jwt, cookieConfigs);
 

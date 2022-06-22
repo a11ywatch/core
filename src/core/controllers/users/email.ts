@@ -12,7 +12,7 @@ export const usersEmail = async (subject: string, html: string) => {
   for (const item of users) {
     const userId = item?.userId;
     const email = item?.email;
-    const emailConfirmed = item?.emailConfirmed;
+    const emailConfirmed = !!item?.emailConfirmed;
 
     if (email) {
       await emailMessager.sendFollowupEmail({

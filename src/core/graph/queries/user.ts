@@ -18,13 +18,17 @@ export const user = async (_, { id, password }, context) => {
       console.error(e);
     }
 
+    // remove non gql types
+    const { googleId, githubId, emailConfirmed, ...props } = user;
+
     return {
-      ...user,
+      ...props,
+      emailConfirmed: !!emailConfirmed, // temp fix
       keyid: userId,
       activeSubscription: user?.paymentSubscription?.status === "active",
       loggedIn: !!ctx.user,
       accountType: audience ?? "",
-      passwordRequired: !user?.password && !user?.googleId,
+      passwordRequired: !user?.password && !googleId && !githubId, // password not found [TODO: change to simply check not password]
     };
   }
 

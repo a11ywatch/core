@@ -18,7 +18,7 @@ export const createUser = async ({
   email,
   password,
   googleId,
-  githubId,
+  githubId: ghID,
   role = 0,
 }: Partial<UserInput>) => {
   if (!email) {
@@ -26,11 +26,14 @@ export const createUser = async ({
   }
   const [user, collection] = await getUser({ email });
 
+  // force number type
+  const githubId = typeof ghID !== "undefined" ? Number(ghID) : null;
+
   // prev auth methods or coming in as new
   const googleAuthed = user && (user.googleId || googleId);
   const githubAuthed = user && (user.githubId || githubId);
 
-  const emailConfirmed = googleId || githubId;
+  const emailConfirmed = !!googleId || !!githubId;
 
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
@@ -48,6 +51,8 @@ export const createUser = async ({
   }
 
   if (user) {
+    user.emailConfirmed = emailConfirmed;
+
     if (!googleId && !githubId && !user?.password) {
       throw new Error(
         user.googleId || user.githubId
@@ -93,18 +98,16 @@ export const createUser = async ({
         updateCollectionProps = {
           ...updateCollectionProps,
           googleId,
-          emailConfirmed: true,
+          emailConfirmed,
         };
-        user.emailConfirmed = true;
       }
 
       if (githubId) {
         updateCollectionProps = {
           ...updateCollectionProps,
           githubId,
-          emailConfirmed: true,
+          emailConfirmed,
         };
-        user.emailConfirmed = true;
       }
 
       await collection.updateOne(
