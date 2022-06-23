@@ -36,7 +36,7 @@
     "ioredis": "^4.28.5",
     "jsonwebtoken": "8.5.1",
     "mongodb": "3.7.3",
-    "node-iframe": "^1.7.1",
+    "node-iframe": "^1.7.2",
     "nodemailer": "6.7.2",
     "pb-util": "^1.0.3",
     "rate-limit-redis": "^3.0.1",

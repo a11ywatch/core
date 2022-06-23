@@ -32,7 +32,6 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
       },
       (res) => {
         let data = "";
-        console.log("Status Code:", res.statusCode);
 
         res.on("data", (chunk) => {
           data += chunk;

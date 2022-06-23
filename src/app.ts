@@ -12,6 +12,7 @@ import {
   logServerInit,
   PRIVATE_KEY,
   PUBLIC_KEY,
+  whitelist,
 } from "./config";
 import {
   addWebsite,
@@ -92,6 +93,8 @@ const connectClients = async () => {
   server = new ApolloServer(getServerConfig());
 };
 
+const allowDocDomains = [...whitelist, "vercel.com"]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
+
 function initServer(): HttpServer[] {
   const app = express();
 
@@ -133,7 +136,13 @@ function initServer(): HttpServer[] {
   app.get("/playground", (_req, res) => {
     res.send(graphqlPlayground());
   });
-  app.get("/grpc-docs", cors(), (_req, res) => {
+  app.get("/grpc-docs", cors(), (req, res) => {
+    const origin = req.get("origin");
+
+    if (allowDocDomains.includes(origin)) {
+      res.set("Access-Control-Allow-Origin", origin);
+    }
+
     res.sendFile(path.resolve("public/protodoc/index.html"));
   });
 

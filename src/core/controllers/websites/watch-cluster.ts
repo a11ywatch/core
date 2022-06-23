@@ -11,14 +11,29 @@ export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
 
   // get all users async and run website scans.
   const getUsersUntil = async (page = 0) => {
+    let pages;
     try {
       const [allWebPages] = await getWebsitesPaginated(20, userFilter, page);
-      if (allWebPages?.length) {
-        await websiteWatch(allWebPages);
-        await getUsersUntil(page + 1);
-      }
+      pages = allWebPages;
     } catch (e) {
       console.error(e);
+    }
+
+    const hasPages = pages && pages?.length;
+
+    if (hasPages) {
+      try {
+        await websiteWatch(pages);
+      } catch (e) {
+        console.error(e);
+      }
+
+      try {
+        console.log(`getting next page for job page: ${page}`);
+        return await getUsersUntil(page + 1);
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 

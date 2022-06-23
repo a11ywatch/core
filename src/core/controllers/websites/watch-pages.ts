@@ -1,7 +1,6 @@
 import { crawlPage } from "../../actions";
 import { getUser } from "../../controllers/users";
 import { watcherCrawl } from "../../utils/watcher_crawl";
-import { getEmailAllowedForDay } from "../../utils/filters";
 import type { Website } from "../../../schema";
 
 type Page = {
@@ -16,6 +15,7 @@ export async function websiteWatch(
   if (pages && Array.isArray(!pages)) {
     return Promise.resolve(null);
   }
+  console.log(`watcher job count ${pages.length}`);
 
   for (const website of pages) {
     const { userId, url } = website;
@@ -27,11 +27,14 @@ export async function websiteWatch(
       console.error(e);
     }
 
+    console.log(
+      `current url of job ${url}. Email enabled ${user.alertEnabled}`
+    );
+
     if (!user) {
       continue;
     }
 
-    // TODO: move to queue
     if (user.role === 0) {
       try {
         await crawlPage(
@@ -40,8 +43,10 @@ export async function websiteWatch(
             userId,
             pageInsights: false,
             sendSub: false,
+            user,
           },
-          getEmailAllowedForDay(user)
+          user.alertEnabled,
+          true
         );
       } catch (e) {
         console.error(e);

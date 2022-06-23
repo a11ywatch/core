@@ -32,6 +32,6 @@ export const getEmailAllowedForDay = (user: User) => {
 
   // TODO: LOOK AT DAY DETECTION FOR USER EMAILS
   return emailAvailable
-    ? !emailFilteredDates.includes(getDay(subHours(new Date(), 12)))
+    ? !emailFilteredDates.includes(getDay(subHours(new Date(), 11)))
     : true;
 };

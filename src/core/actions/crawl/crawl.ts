@@ -15,7 +15,7 @@ import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { SUPER_MODE } from "@app/config/config";
-import type { Website } from "@app/types";
+import type { User, Website } from "@app/types";
 import type { Issue } from "../../../schema";
 import type { Struct } from "pb-util";
 import { connect } from "@app/database";
@@ -25,6 +25,7 @@ export type CrawlConfig = {
   url: string; // the target url to crawl
   pageInsights?: boolean; // use page insights to get info
   sendSub?: boolean; // use pub sub
+  user?: User; // optional pass user
 };
 
 // filter errors from issues
@@ -41,19 +42,31 @@ const filterCb = (iss: Issue) => iss?.type === "error";
  */
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
-  sendEmail?: boolean // determine if email should be sent based on results
+  sendEmail?: boolean, // determine if email should be sent based on results
+  blockEvent?: boolean // block event from rest
 ): Promise<ResponseModel> => {
   const {
     userId,
     url: urlMap,
     pageInsights = false,
     sendSub = true,
+    user: usr,
   } = crawlConfig ?? {};
+
+  let userData = usr;
+  // get user for request
+  if (!userData) {
+    try {
+      const [d] = await UsersController().getUser({ id: userId });
+      userData = d;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return new Promise(async (resolve) => {
     const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
-    const [userData] = await UsersController().getUser({ id: userId });
     // WEBSITE COLLECTION
     const [website, websiteCollection] = await getWebsite({
       domain,
@@ -86,7 +99,7 @@ export const crawlPage = async (
         userId,
       });
 
-      if (action) {
+      if (action && action.events) {
         actions = action.events;
       }
     } catch (e) {
@@ -118,7 +131,7 @@ export const crawlPage = async (
 
     // TODO: SET PAGE OFFLINE DB
     if (!dataSource || !dataSource?.webPage) {
-      trackerProccess();
+      !blockEvent && trackerProccess();
 
       return resolve(
         responseModel({
@@ -150,7 +163,7 @@ export const crawlPage = async (
     } = extractPageData(dataSource);
 
     // PAGE COLLECTION
-    const [newSite, subDomainCollection] = await getDomain(
+    const [newSite, pagesCollection] = await getDomain(
       {
         userId,
         url: pageUrl,
@@ -184,13 +197,17 @@ export const crawlPage = async (
       // send email if issues of type error exist for the page.
       if (sendEmail && subIssues.some(filterCb)) {
         const errorIssues = subIssues.filter(filterCb);
-        // TODO: queue email
-        await emailMessager.sendMail({
-          userId,
-          data: { ...pageIssues, issues: errorIssues },
-          confirmedOnly: true,
-          sendEmail: errorIssues?.length,
-        });
+
+        await emailMessager
+          .sendMail({
+            userId,
+            data: { ...pageIssues, issues: errorIssues },
+            confirmedOnly: true,
+            sendEmail: errorIssues?.length,
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       }
     }
 
@@ -264,11 +281,11 @@ export const crawlPage = async (
       if ((!newSite && shouldUpsertCollections) || newSite) {
         await collectionUpsert(
           updateWebsiteProps,
-          [subDomainCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
+          [pagesCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
           {
             searchProps: { url: pageUrl, userId },
           }
-        ); // pages - sub domains needs rename
+        );
       }
 
       // every page gets a script ATM. TODO conditional scripts.
@@ -284,7 +301,7 @@ export const crawlPage = async (
       }),
     };
 
-    trackerProccess(responseData);
+    !blockEvent && trackerProccess(responseData);
 
     return resolve(responseModel(responseData));
   });
