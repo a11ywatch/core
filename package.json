@@ -13,11 +13,11 @@
     "generate": "graphql-codegen"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.1.5",
+    "@a11ywatch/protos": "^0.1.6",
     "@a11ywatch/website-source-builder": "^0.0.30",
     "@graphql-tools/schema": "^8.3.2",
-    "@grpc/grpc-js": "1.6.2",
-    "@grpc/proto-loader": "0.6.9",
+    "@grpc/grpc-js": "1.6.7",
+    "@grpc/proto-loader": "0.6.12",
     "apollo-server": "^2.3.1",
     "apollo-server-express": "^2.3.1",
     "cookie-parser": "^1.4.6",

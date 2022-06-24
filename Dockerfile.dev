@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 RUN apk add npm
 
-RUN npm i @a11ywatch/protos@0.1.5
+RUN npm i @a11ywatch/protos@0.1.6
 
 RUN mkdir ./doc && cp -R node_modules/@a11ywatch/protos proto
 
