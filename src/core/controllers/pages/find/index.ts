@@ -1,1 +1,1 @@
-export { getDomains, getDomain, getAllPages } from "./domains";
+export { getDomains, getPage, getAllPages } from "./domains";

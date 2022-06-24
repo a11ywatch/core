@@ -13,9 +13,10 @@ import { makeWebsite } from "@app/core/models/website";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
-import { watcherCrawl } from "@app/core/utils/watcher_crawl";
+import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
 import { connect } from "@app/database";
 
+// used on mutations performs a website created following a multi-site scan if enabled
 export const addWebsite = async ({
   userId,
   url: urlMap,
@@ -28,6 +29,8 @@ export const addWebsite = async ({
   standard,
   actions,
   robots = true,
+  subdomains = false,
+  tld = false,
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -38,6 +41,7 @@ export const addWebsite = async ({
     throw new Error(WEBSITE_URL_ERROR);
   }
 
+  // TODO: check for tld|subdomains if enabled prevent website addition.
   const [siteExist, collection] = await getWebsite({ userId, url });
 
   if (siteExist) {
@@ -83,6 +87,8 @@ export const addWebsite = async ({
     standard: wcagStandard,
     actionsEnabled,
     robots,
+    subdomains,
+    tld,
   });
 
   try {
@@ -132,6 +138,8 @@ export const addWebsite = async ({
         userId,
         scan: true,
         robots,
+        subdomains: subdomains && user.role >= 1,
+        tld: tld && user.role >= 2,
       });
     }
   });

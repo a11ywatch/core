@@ -26,6 +26,8 @@ export const crawlStreamLazy = async (req: Request, res: Response) => {
           url,
           userId: userNext.id,
           scan: false,
+          subdomains: userNext?.role >= 1,
+          tld: userNext?.role >= 2,
         },
         res
       );

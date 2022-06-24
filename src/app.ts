@@ -472,6 +472,8 @@ function initServer(): HttpServer[] {
     const standard = paramParser(req, "standard");
     const actions = paramParser(req, "actions");
     const robots = paramParser(req, "robots");
+    const subdomains = paramParser(req, "subdomains");
+    const tld = paramParser(req, "tld");
 
     const { website } = await addWebsite({
       userId,
@@ -484,12 +486,16 @@ function initServer(): HttpServer[] {
       canScan: false,
       actions,
       robots,
+      subdomains,
+      tld,
     });
 
     return res.json({
       data: website,
       message:
-        "This endpoint is a WIP. It will be used to update your website configuration",
+        subdomains || tld
+          ? `Website added with crawl - subdomains:${subdomains} & tld:${tld}`
+          : "Website added!",
     });
   });
 

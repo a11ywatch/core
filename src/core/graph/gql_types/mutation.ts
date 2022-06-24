@@ -72,6 +72,8 @@ export const mutation = gql`
       ua: String
       actions: [PageActionsInput]
       robots: Boolean
+      subdomains: Boolean
+      tld: Boolean
     ): UpdateWebSiteMutationResponse
 
     filterEmailDates(emailFilteredDates: [Int], morning: Boolean): User

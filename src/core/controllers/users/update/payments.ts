@@ -34,7 +34,22 @@ export const addPaymentSubscription = async ({
   const email = user?.email ?? emailP;
 
   if (user && stripeToken) {
-    const parsedToken = JSON.parse(stripeToken);
+    let parsedToken;
+
+    try {
+      parsedToken = JSON.parse(stripeToken);
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (!parsedToken) {
+      return {
+        user,
+        code: 400,
+        success: false,
+        message: "Error invalid stripe token.",
+      };
+    }
 
     let customer = !user.stripeID
       ? await stripe.customers.create({
@@ -58,12 +73,12 @@ export const addPaymentSubscription = async ({
 
     if (customer) {
       const stripeCustomer = await stripe.customers.createSource(customer.id, {
-        source: parsedToken.id,
+        source: parsedToken?.id,
       });
 
       let plan = yearly ? STRIPE_BASIC_PLAN_YEARLY : STRIPE_BASIC_PLAN;
 
-      if (parsedToken.plan === 1) {
+      if (parsedToken?.plan === 1) {
         plan = yearly ? STRIPE_PREMIUM_PLAN_YEARLY : STRIPE_PREMIUM_PLAN;
       }
 

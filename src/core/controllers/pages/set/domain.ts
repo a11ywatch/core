@@ -1,9 +1,9 @@
 import { WEBSITE_EXIST_ERROR, SUCCESS } from "@app/core/strings";
 import { getLastItemInCollection } from "@app/core/utils";
-import { getDomain } from "../find";
+import { getPage } from "../find";
 
 export const addDomain = async ({ userId, url }) => {
-  const [siteExist, collection] = await getDomain({ userId, url }, true);
+  const [siteExist, collection] = await getPage({ userId, url }, true);
 
   if (siteExist) {
     throw new Error(WEBSITE_EXIST_ERROR);

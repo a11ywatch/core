@@ -1,5 +1,5 @@
 import { SUPER_MODE } from "@app/config/config";
-import { watcherCrawl } from "@app/core/utils/watcher_crawl";
+import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
 import { crawlEmitter } from "@app/event";
 
 interface CrawlMultiSite {
@@ -11,12 +11,18 @@ interface CrawlMultiSite {
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlMultiSiteWithEvent = (props): Promise<CrawlMultiSite> => {
   return new Promise(async (resolve) => {
-    const { url, userId } = props;
+    const { url, userId, subdomains, tld } = props;
 
     try {
       // start site-wide crawls
       setImmediate(async () => {
-        await watcherCrawl({ url, scan: false, userId });
+        await watcherCrawl({
+          url,
+          scan: false,
+          userId,
+          subdomains: !!subdomains,
+          tld: !!tld,
+        });
       });
     } catch (e) {
       console.error(e);

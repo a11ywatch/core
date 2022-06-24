@@ -2,13 +2,14 @@ import { getHostName } from "@a11ywatch/website-source-builder";
 import { qWebsiteWorker } from "@app/queues/crawl";
 import { crawlTrackingEmitter } from "./emitters/crawl";
 import { performance } from "perf_hooks";
+import { domainName } from "@app/core/utils";
 
 const extractHostname = (domain?: string, pages?: string[]) => {
   if (pages && pages.length === 1) {
-    return getHostName(pages[0]);
+    return domainName(getHostName(pages[0]));
   }
   if (domain) {
-    return getHostName(domain);
+    return domainName(getHostName(domain));
   }
   return "";
 };

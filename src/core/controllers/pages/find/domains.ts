@@ -1,5 +1,9 @@
 import { connect } from "@app/database";
-import { getHostName, websiteSearchParams } from "@app/core/utils";
+import {
+  domainNameFind,
+  getHostName,
+  websiteSearchParams,
+} from "@app/core/utils";
 
 export const getDomains = async (
   { domain, userId, url }: { domain?: string; userId?: number; url?: string },
@@ -25,8 +29,8 @@ export const getDomains = async (
 };
 
 // Get the page from the collection
-// @example await getDomain({userID: 2}) // returns Pages collection and not Website
-export const getDomain = async (
+// @example await getPage({userID: 2}) // returns Pages collection and not Website
+export const getPage = async (
   { userId, url }: { userId?: number; url?: string },
   chain?: boolean
 ) => {
@@ -74,7 +78,7 @@ export const getPagesPaging = async (
       params = { userId };
     }
     if (typeof domain !== "undefined" && domain) {
-      params = { ...params, domain };
+      params = domainNameFind(params, domain);
     }
 
     const pages = await collection

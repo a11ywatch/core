@@ -11,6 +11,8 @@ export const addWebsite = async (
     standard,
     actions,
     robots,
+    subdomains,
+    tld,
     ...props
   },
   context
@@ -40,5 +42,7 @@ export const addWebsite = async (
     standard,
     actions,
     robots,
+    subdomains,
+    tld,
   });
 };

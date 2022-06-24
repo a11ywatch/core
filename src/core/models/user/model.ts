@@ -1,13 +1,15 @@
+import { SUPER_MODE } from "@app/config/config";
+import { User } from "@app/schema";
+
 const UserModel = {
   email: "",
   password: "",
   salt: "",
   id: -1, // [DEPRECATED DEFAULT]: was set to 1 to inc between as old counter
   jwt: "",
-  role: process.env.SUPER_MODE ? 1 : 0,
+  role: process.env.SUPER_MODE ? 2 : 0,
   alertEnabled: true,
   emailConfirmed: false,
-  googleId: "",
   profileVisible: false,
   lastLoginDate: "",
   passwordRequired: false,
@@ -22,7 +24,9 @@ const UserModel = {
     usageLimit: 3,
   },
   websiteLimit: 1, // limit of websites a user can have
+  googleId: "",
   githubId: null,
+  resetCode: null,
 };
 
 // add defaults from user model and set the lastLoginDate to the current date
@@ -37,4 +41,16 @@ const makeUser = (extra: any = {}): typeof UserModel => {
   );
 };
 
-export { UserModel, makeUser };
+// wrap user with extensions based on the runtime
+const extendUser = (user: User) => {
+  if (!user) {
+    return null;
+  }
+  let role = user.role;
+  if (SUPER_MODE) {
+    role = 3;
+  }
+  return { ...user, role };
+};
+
+export { UserModel, makeUser, extendUser };

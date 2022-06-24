@@ -1,4 +1,4 @@
-import { watcherCrawl } from "@app/core/utils/watcher_crawl";
+import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { getKey } from "@app/event/crawl-tracking";
 import { Response } from "express";
@@ -6,11 +6,17 @@ import { getHostName } from "./get-host";
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlHttpStream = (props, res: Response): Promise<boolean> => {
-  const { url, userId } = props;
+  const { url, userId, subdomains, tld } = props;
   try {
     // start site-wide crawls
     setImmediate(async () => {
-      await watcherCrawl({ url, scan: true, userId });
+      await watcherCrawl({
+        url,
+        scan: true,
+        userId,
+        subdomains: !!subdomains,
+        tld: !!tld,
+      });
     });
   } catch (e) {
     console.error(e);

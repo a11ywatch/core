@@ -34,6 +34,8 @@ const WebsiteModel = {
   standard: "WCAG2AA", // standard for testing WCAG
   actionsEnabled: false,
   robots: true,
+  subdomains: false, // allow subdomains to joinscope
+  tld: false, // allow tld to join scope
 };
 
 const makeWebsite = (

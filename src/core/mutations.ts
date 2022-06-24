@@ -9,7 +9,7 @@ import {
   register,
   logout,
 } from "./graph/mutations";
-import { watcherCrawl } from "./utils/watcher_crawl";
+import { watcherCrawl } from "./actions/crawl/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { gqlRateLimiter } from "@app/rest/limiters/scan";
 import { frontendClientOrigin } from "./utils/is-client";
@@ -79,7 +79,13 @@ export const Mutation = {
       })
     ) {
       setImmediate(async () => {
-        await watcherCrawl({ urlMap: url, userId: keyid, scan: true });
+        await watcherCrawl({
+          urlMap: url,
+          userId: keyid,
+          scan: true,
+          subdomains: keyid >= 1,
+          tld: keyid >= 2,
+        });
       });
       return {
         website: null,

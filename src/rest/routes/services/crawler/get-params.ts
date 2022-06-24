@@ -1,3 +1,4 @@
+// get the params from the active crawl
 export const getParams = (data) => {
   const props =
     data && typeof data == "string"

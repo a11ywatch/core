@@ -3,10 +3,10 @@ import {
   SUCCESS_DELETED_ALL,
   WEBSITE_NOT_FOUND,
 } from "@app/core/strings";
-import { getDomain } from "../find";
+import { getPage } from "../find";
 
 export const removeDomain = async ({ userId, url, deleteMany = false }) => {
-  const [siteExist, collection] = await getDomain({ userId, url }, true);
+  const [siteExist, collection] = await getPage({ userId, url }, true);
 
   if (deleteMany) {
     await collection.deleteMany({ userId });

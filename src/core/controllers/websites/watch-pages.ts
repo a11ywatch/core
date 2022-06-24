@@ -1,6 +1,6 @@
 import { crawlPage } from "../../actions";
 import { getUser } from "../../controllers/users";
-import { watcherCrawl } from "../../utils/watcher_crawl";
+import { watcherCrawl } from "../../actions/crawl/watcher_crawl";
 import type { Website } from "../../../schema";
 
 type Page = {
@@ -53,7 +53,13 @@ export async function websiteWatch(
       }
     } else {
       setImmediate(async () => {
-        await watcherCrawl({ urlMap: url, userId, scan: false });
+        await watcherCrawl({
+          urlMap: url,
+          userId,
+          scan: false,
+          subdomains: user.role >= 1,
+          tld: user.role >= 2,
+        });
       });
     }
   }

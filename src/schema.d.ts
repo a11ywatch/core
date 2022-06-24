@@ -444,6 +444,8 @@ export type User = {
   lastAlertSent?: Maybe<Scalars["Int"]>;
   lastAlertDateStamp?: Maybe<Scalars["Int"]>;
   stripeToken?: Maybe<Scalars["String"]>;
+  googleId?: Maybe<Scalars["String"]>;
+  githubId?: Maybe<Scalars["Int"]>;
   role?: Maybe<Scalars["Int"]>;
   activeSubscription?: Maybe<Scalars["Boolean"]>;
   emailConfirmed?: Maybe<Scalars["Boolean"]>;

@@ -53,5 +53,7 @@ export const website = gql`
     actions(limit: Int = 0, offset: Int = 0): [PageActions]
     actionsEnabled: Boolean
     robots: Boolean
+    subdomains: Boolean
+    tld: Boolean
   }
 `;

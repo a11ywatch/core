@@ -43,6 +43,9 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     true
   );
 
+  // TODO: check if website is a MAIN website to perform regx remove of sub-domains and tlds
+  // when enabled website acts as a name registry without TLD or subdomains.
+
   await scriptsCollection.deleteMany(deleteQuery);
   await analyticsCollection.deleteMany(deleteQuery);
   await pagesCollection.deleteMany(deleteQuery);

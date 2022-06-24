@@ -8,7 +8,7 @@ import { IssuesController } from "@app/core/controllers/issues";
 import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
-import { getDomain } from "@app/core/controllers/pages/find";
+import { getPage } from "@app/core/controllers/pages/find";
 import { UsersController } from "@app/core/controllers/users";
 import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
@@ -163,7 +163,7 @@ export const crawlPage = async (
     } = extractPageData(dataSource);
 
     // PAGE COLLECTION
-    const [newSite, pagesCollection] = await getDomain(
+    const [newSite, pagesCollection] = await getPage(
       {
         userId,
         url: pageUrl,

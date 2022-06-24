@@ -1,3 +1,5 @@
+import { domainNameFind } from "../domain-name";
+
 export function websiteSearchParams({
   userId,
   url,
@@ -24,7 +26,7 @@ export function websiteSearchParams({
     searchProps = { ...searchProps, pageUrl };
   }
   if (typeof domain !== "undefined" && domain) {
-    searchProps = { ...searchProps, domain };
+    searchProps = domainNameFind(searchProps, domain);
   }
 
   return searchProps;

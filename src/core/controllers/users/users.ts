@@ -69,8 +69,9 @@ export const UsersController: UserControllerType = (
   // TODO: Should be renamed update user password
   updateUser: async ({ password, email, newPassword, stripeToken }) => {
     const [user, collection] = await getUser({ email });
+
     const salthash = saltHashPassword(password, user?.salt);
-    const authless = !user?.password && !user.googleId;
+    const authless = !user?.password && !user?.googleId;
 
     // TODO: SEPERATE PASSWORD RESETTING
     if (

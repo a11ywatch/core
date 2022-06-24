@@ -1,31 +1,7 @@
-import type { Request, Response } from "express";
-import { pubsub } from "@app/database/pubsub";
-import { Channels } from "@app/database/config";
 import { getUserFromApiScan } from "@app/core/utils/get-user-data";
 import { crawlMultiSiteWithEvent } from "@app/core/utils";
 import { responseModel } from "@app/core/models";
 import { paramParser } from "../extracter";
-
-// TODO: remove pub sub
-export const crawlQueue = async (data) => {
-  if (data) {
-    try {
-      const source = typeof data === "string" ? data : JSON.stringify(data);
-      await pubsub.publish(Channels.crawl_scan_queue, source);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-};
-
-// Send website to crawler queue
-const websiteCrawl = async (req: Request, res: Response) => {
-  const { data } = req.body;
-  if (data) {
-    await crawlQueue(data);
-  }
-  res.send(true);
-};
 
 // perform a website crawl coming from express
 export const crawlRest = async (req, res) => {
@@ -45,6 +21,8 @@ export const crawlRest = async (req, res) => {
         url,
         userId: userNext.id,
         scan: false,
+        subdomains: userNext?.role >= 1,
+        tld: userNext?.role >= 2,
       });
 
       res.json(
@@ -58,5 +36,3 @@ export const crawlRest = async (req, res) => {
     console.error(e);
   }
 };
-
-export { websiteCrawl };

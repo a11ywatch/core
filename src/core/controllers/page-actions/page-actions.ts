@@ -1,3 +1,4 @@
+import { domainNameFind } from "@app/core/utils";
 import { connect } from "@app/database";
 import { URL } from "url";
 
@@ -27,7 +28,7 @@ export const getPageActionsPaging = async (
       params = { userId };
     }
     if (typeof domain !== "undefined" && domain) {
-      params = { ...params, domain };
+      params = domainNameFind(params, domain);
     }
     if (typeof url !== "undefined" && url) {
       let path;
