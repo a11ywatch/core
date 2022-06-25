@@ -1,6 +1,6 @@
 import { ApolloServerExpressConfig } from "apollo-server-express";
 import { BYPASS_AUTH } from "./config";
-import { getUserFromToken, parseCookie } from "./core/utils";
+import { getUserFromToken } from "./core/utils";
 import { createScheme } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
 import { PagesController } from "./core/controllers/pages";
@@ -11,30 +11,17 @@ import { UsersController } from "./core/controllers/users";
 import { IssuesController } from "./core/controllers/issues";
 import { FeaturesController } from "./core/controllers/features";
 import { AnalyticsController } from "./core/controllers/analytics";
-import { ApolloServerPluginUsageReportingDisabled } from "apollo-server-core";
 
-const getServerConfig = (): ApolloServerExpressConfig => {
+const getServerConfig = (
+  extra?: ApolloServerExpressConfig
+): ApolloServerExpressConfig => {
   const schema = createScheme();
-  return {
-    introspection: true,
-    playground: true,
-    schema,
-    subscriptions: {
-      onConnect: (_cnxnParams, webSocket, _cnxnContext) => {
-        // @ts-ignore
-        const cookie = webSocket?.upgradeReq?.headers?.cookie;
-        const parsedCookie = parseCookie(cookie);
-        const user = getUserFromToken(parsedCookie?.jwt || "");
 
-        return {
-          userId: user ? user?.payload?.keyid : undefined,
-        };
-      },
-    },
-    context: ({ req, res, connection }) => {
-      if (connection) {
-        return connection.context;
-      }
+  return {
+    ...extra,
+    introspection: true,
+    schema,
+    context: ({ req, res }) => {
       const authentication = req?.cookies?.jwt || req?.headers?.authorization;
       const user = getUserFromToken(authentication);
 
@@ -63,7 +50,6 @@ const getServerConfig = (): ApolloServerExpressConfig => {
         },
       };
     },
-    plugins: [ApolloServerPluginUsageReportingDisabled()],
   };
 };
 

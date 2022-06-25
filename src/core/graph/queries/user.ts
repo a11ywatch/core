@@ -1,5 +1,4 @@
 import { getPayLoad } from "../../utils/query-payload";
-import { ApolloError } from "apollo-server-errors";
 
 export const user = async (_, { id, password }, context) => {
   const { models, ...ctx } = context;
@@ -32,8 +31,7 @@ export const user = async (_, { id, password }, context) => {
     };
   }
 
-  throw new ApolloError(
-    "Authorization token not found. Please add your authorization header and try again.",
-    "404"
+  throw new Error(
+    "Authorization token not found. Please add your authorization header and try again."
   );
 };

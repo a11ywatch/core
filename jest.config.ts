@@ -12,4 +12,5 @@ export default {
   verbose: true,
   coverageDirectory: "./coverage/",
   collectCoverage: true,
+  coverageProvider: "v8",
 };

@@ -45,7 +45,7 @@ import { setAuthRoutes } from "./rest/routes_groups/auth";
 import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
-import { getUserFromToken } from "./core/utils";
+import { getUserFromToken, parseCookie } from "./core/utils";
 import { retreiveUserByToken } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
 import { ApolloServer } from "apollo-server-express";
@@ -63,6 +63,8 @@ import { updateWebsite } from "./core/controllers/websites/update";
 import { getAnalyticsPaging } from "./core/controllers/analytics";
 import { graphqlPlayground } from "./html";
 import path from "path";
+import { SubscriptionServer } from "subscriptions-transport-ws";
+import { execute, subscribe } from "graphql";
 
 const { GRAPHQL_PORT } = config;
 
@@ -89,8 +91,6 @@ const connectClients = async () => {
   } catch (e) {
     console.error(e);
   }
-
-  server = new ApolloServer(getServerConfig());
 };
 
 const allowDocDomains = [...whitelist, "vercel.com"]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
@@ -552,9 +552,25 @@ function initServer(): HttpServer[] {
     res.json({ error: err });
   });
 
-  server.applyMiddleware({ app, cors: corsOptions });
-
   let httpServer: HttpServer;
+
+  let subscriptionServer;
+
+  server = new ApolloServer(
+    getServerConfig({
+      plugins: [
+        {
+          async serverWillStart() {
+            return {
+              async drainServer() {
+                subscriptionServer?.close();
+              },
+            };
+          },
+        },
+      ],
+    })
+  );
 
   if (process.env.ENABLE_SSL === "true") {
     httpServer = https.createServer(
@@ -568,21 +584,46 @@ function initServer(): HttpServer[] {
     httpServer = http.createServer(app);
   }
 
-  server.installSubscriptionHandlers(httpServer);
-
   const listener = httpServer.listen(GRAPHQL_PORT);
 
-  logServerInit((listener.address() as AddressInfo).port, {
-    subscriptionsPath: server.subscriptionsPath,
-    graphqlPath: server.graphqlPath,
-  });
+  const { schema } = getServerConfig();
 
-  if (process.env.NODE_ENV !== "test") {
-    // compatability with heroku dynos if deployed.
-    if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-      new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+  subscriptionServer = SubscriptionServer.create(
+    {
+      schema,
+      execute,
+      subscribe,
+      async onConnect(_cnxnParams, webSocket, _cnxnContext) {
+        const cookie = webSocket?.upgradeReq?.headers?.cookie;
+        const parsedCookie = parseCookie(cookie);
+        const user = getUserFromToken(parsedCookie?.jwt || "");
+
+        return {
+          userId: user ? user?.payload?.keyid : undefined,
+        };
+      },
+    },
+    {
+      server: httpServer,
+      path: server.graphqlPath,
     }
-  }
+  );
+
+  server.start().then(() => {
+    server.applyMiddleware({ app, cors: corsOptions });
+
+    logServerInit((listener.address() as AddressInfo).port, {
+      subscriptionsPath: server.subscriptionsPath,
+      graphqlPath: server.graphqlPath,
+    });
+
+    if (process.env.NODE_ENV !== "test") {
+      // compatability with heroku dynos if deployed.
+      if (process.env.DYNO === "web.1" || !process.env.DYNO) {
+        new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+      }
+    }
+  });
 
   return [listener];
 }
