@@ -504,6 +504,8 @@ export type Website = {
   mobile?: Maybe<Scalars["Boolean"]>;
   standard?: Maybe<Scalars["String"]>;
   ua?: Maybe<Scalars["String"]>;
+  subdomains?: Maybe<Scalars["Boolean"]>;
+  tld?: Maybe<Scalars["Boolean"]>;
 };
 
 export type WebsiteIssuesArgs = {

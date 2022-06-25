@@ -6,7 +6,9 @@ import {
 } from "@app/core/strings";
 import { getWebsite } from "../find";
 import { HistoryController } from "../../history";
+import { domainNameFind } from "@app/core/utils";
 
+// remove a website or all website and related data.
 export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
   if (typeof userId === "undefined") {
     throw new Error(WEBSITE_NOT_FOUND);
@@ -36,15 +38,18 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     throw new Error(WEBSITE_NOT_FOUND);
   }
 
-  const deleteQuery = { domain: siteExist?.domain, userId };
+  const removeRelative = siteExist.subdomains || siteExist.tld;
+
+  const baseRemoveQuery = { domain: siteExist?.domain, userId };
+
+  const deleteQuery = removeRelative
+    ? domainNameFind({ userId }, siteExist.domain)
+    : baseRemoveQuery;
 
   const [history, historyCollection] = await HistoryController().getHistoryItem(
-    deleteQuery,
+    baseRemoveQuery,
     true
   );
-
-  // TODO: check if website is a MAIN website to perform regx remove of sub-domains and tlds
-  // when enabled website acts as a name registry without TLD or subdomains.
 
   await scriptsCollection.deleteMany(deleteQuery);
   await analyticsCollection.deleteMany(deleteQuery);
