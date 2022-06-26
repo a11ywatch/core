@@ -1,6 +1,5 @@
 import { redisClient } from "@app/database";
 import { getParams } from "./get-params";
-import { hashString } from "@app/core/utils";
 import { getHostName } from "@app/core/utils";
 import { qWebsiteWorker } from "@app/queues/crawl";
 
@@ -13,13 +12,6 @@ export const crawlTrackerComplete = async (data?: any) => {
 
   if (dm && redisClient) {
     const domain = getHostName(dm);
-
-    try {
-      const hostHash = hashString(domain);
-      await redisClient.hdel(hostHash, userId + "");
-    } catch (e) {
-      console.error(e);
-    }
 
     // if a full scan was performed allow performing website averaging.
     if (full) {

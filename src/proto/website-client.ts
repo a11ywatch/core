@@ -1,29 +1,14 @@
 import { credentials } from "@grpc/grpc-js";
 import {
-  GRPC_HOST,
   GRPC_HOST_PAGEMIND,
   GRPC_HOST_CRAWLER,
   GRPC_HOST_MAV,
 } from "@app/config/rpc";
 import { Service, getProto } from "./website";
 
-let client: Service["WebsiteService"]["service"]; // app rpc server
 let pageMindClient: Service["WebsiteService"]["service"];
 let crawlerClient: Service["WebsiteService"]["service"];
 let mavClient: Service["WebsiteService"]["service"];
-
-// create gRPC client for central application (TESTING purposes)
-const createClient = async () => {
-  try {
-    const { website } = (await getProto()) as any;
-    client = new website.WebsiteService(
-      GRPC_HOST,
-      credentials.createInsecure()
-    );
-  } catch (e) {
-    console.error(e);
-  }
-};
 
 const createPageMindClient = async () => {
   try {
@@ -60,18 +45,15 @@ const createMavClient = async () => {
 };
 
 export const killClient = () => {
-  client?.close();
   pageMindClient?.close();
   crawlerClient?.close();
   mavClient?.close();
 };
 
 export {
-  client,
   pageMindClient,
   crawlerClient,
   mavClient,
-  createClient,
   createPageMindClient,
   createCrawlerClient,
   createMavClient,

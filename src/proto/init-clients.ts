@@ -10,8 +10,8 @@ export const startClientsGRPC = async (retry?: boolean) => {
     if (process.env.NODE_ENV !== "test") {
       setTimeout(async () => {
         try {
-          await createPageMindClient();
           await createCrawlerClient();
+          await createPageMindClient();
           await createMavClient();
           console.log("gRPC clients connected - pagemind, crawler, and mav.");
         } catch (e) {

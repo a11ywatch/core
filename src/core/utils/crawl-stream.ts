@@ -2,6 +2,7 @@ import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { getKey } from "@app/event/crawl-tracking";
 import { Response } from "express";
+import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
@@ -25,9 +26,9 @@ export const crawlHttpStream = (props, res: Response): Promise<boolean> => {
   return new Promise((resolve) => {
     const domain = getHostName(url);
 
-    crawlEmitter.on(`crawl-${domain}-${userId || 0}`, (source) => {
+    crawlEmitter.on(`crawl-${domainName(domain)}-${userId || 0}`, (source) => {
       const data = source?.data;
-      const issuesFound = data.issues?.length;
+      const issuesFound = data?.issues?.length;
 
       res.write(
         `${JSON.stringify({

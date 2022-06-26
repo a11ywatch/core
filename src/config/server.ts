@@ -42,7 +42,9 @@ const source = DEV ? "localhost" : ROOT_URL;
 
 export const logServerInit = (port, { graphqlPath, subscriptionsPath }) => {
   console.log(
-    `Server ready at ${source}:${port}${graphqlPath}\nSubscriptions ready at ws://${source}:${port}${subscriptionsPath}`
+    `Server ready at ${source}:${port}${graphqlPath}\nSubscriptions ready at ws://${source}:${port}${
+      subscriptionsPath || "/graphql"
+    }`
   );
 };
 

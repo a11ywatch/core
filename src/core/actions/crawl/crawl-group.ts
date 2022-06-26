@@ -1,6 +1,5 @@
 import { getHostName } from "@app/core/utils";
 import { ApiResponse, responseModel } from "@app/core/models";
-import { getActiveUsersCrawling } from "@app/core/utils/query";
 import { crawlPage } from "./crawl";
 
 /*  Crawl the website for issues gRPC from Pagemind.
@@ -15,12 +14,10 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
     return responseModel({ msgType: ApiResponse.NotFound });
   }
 
-  // Todo: remove layer
-  const usersPool = await getActiveUsersCrawling({ userId, urlMap });
-
-  for (const id of usersPool) {
-    await crawlPage({ ...params, url: urlMap, userId: Number(id) }, sendEmail);
-  }
+  await crawlPage(
+    { ...params, url: urlMap, userId: Number(userId) },
+    sendEmail
+  );
 
   return responseModel({ msgType: ApiResponse.Success });
 };

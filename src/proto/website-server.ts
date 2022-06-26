@@ -2,7 +2,6 @@ import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
 import { crawlMultiSite } from "@app/core/actions";
 import { crawlEnqueue } from "@app/queues/crawl/crawl";
-import { crawlTrackerInit } from "@app/rest/routes/services/crawler/start-crawl";
 import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
@@ -21,12 +20,6 @@ export const createServer = async () => {
     {
       // async scan website page start track user [TODO: move to stream]
       scanStart: async (call, callback) => {
-        try {
-          await crawlTrackerInit(call.request);
-        } catch (e) {
-          console.error(e);
-        }
-
         crawlTrackingEmitter.emit("crawl-start", call.request);
 
         callback(null, {});

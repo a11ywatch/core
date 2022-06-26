@@ -33,7 +33,6 @@ import {
   createPubSub,
   initRedisConnection,
   closeRedisConnection,
-  connect,
 } from "./database";
 import { confirmEmail, detectImage, root, unSubEmails } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
@@ -641,12 +640,6 @@ const startServer = async () => {
   } catch (e) {
     console.error(e);
   }
-
-  // Fix Incorrect collections until v1 a11ywatch suite and not just core [Remove at v1]
-  try {
-    const [subDomainCollection] = await connect("SubDomains");
-    await subDomainCollection.rename("Pages");
-  } catch (_) {}
 
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");

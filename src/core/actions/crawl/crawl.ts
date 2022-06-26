@@ -3,7 +3,7 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { pubsub } from "@app/database/pubsub";
 import { ISSUE_ADDED } from "@app/core/static";
 import { responseModel } from "@app/core/models";
-import { collectionUpsert, jsonParse } from "@app/core/utils";
+import { collectionUpsert, domainName, jsonParse } from "@app/core/utils";
 import { IssuesController } from "@app/core/controllers/issues";
 import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
@@ -129,7 +129,7 @@ export const crawlPage = async (
         pages: [urlMap],
       });
 
-      crawlEmitter.emit(`crawl-${domain}-${userId || 0}`, data);
+      crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
     };
 
     // TODO: SET PAGE OFFLINE DB
