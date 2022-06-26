@@ -21,7 +21,7 @@ RUN apk upgrade --update-cache --available && \
 COPY package*.json bootstrap.sh ./
 RUN ./bootstrap.sh && npm ci
 
-FROM --platform=$BUILDPLATFORM node:18.4-alpine AS builder
+FROM node:18.4-alpine AS builder
 
 WORKDIR /usr/src/app
 
