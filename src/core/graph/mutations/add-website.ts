@@ -24,12 +24,6 @@ export const addWebsite = async (
     userId: userId,
   });
 
-  if (!canScan) {
-    throw new Error(
-      "You hit your scan limit for the day, please try again tomorrow to add your website."
-    );
-  }
-
   return await context.models.Website.addWebsite({
     userId,
     url,

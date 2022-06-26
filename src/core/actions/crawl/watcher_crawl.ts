@@ -31,26 +31,21 @@ export const watcherCrawl = async ({
 }: CrawlParams) => {
   const target = urlMap || urlTarget;
   const url = String(initUrl(target, true));
+  const crawlParams = {
+    url,
+    id: userId,
+    norobots: !robots,
+    subdomains: subdomains,
+    tld: tld,
+  };
 
   let data;
 
   try {
     if (scan) {
-      data = await controller.crawlerScan({
-        url,
-        id: userId,
-        norobots: !robots,
-        subdomains: subdomains,
-        tld: tld,
-      });
+      data = await controller.crawlerScan(crawlParams);
     } else {
-      data = await controller.crawlerCrawl({
-        url,
-        id: userId,
-        norobots: !robots,
-        subdomains: subdomains,
-        tld: tld,
-      });
+      data = await controller.crawlerCrawl(crawlParams);
     }
   } catch (e) {
     console.error(e);

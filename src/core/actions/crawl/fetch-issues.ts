@@ -13,6 +13,7 @@ interface Params {
   ua?: string; // is the testing done in mobile view port
   actions?: string[]; // perform actions before testing
   cv?: boolean; // can use computer vision
+  pageSpeedApiKey?: string; // the PageSpeed api key to use for request
 }
 
 // gRPC call to scan from pagemind

@@ -49,5 +49,6 @@ export const user = gql`
     resetCode: String
     stripeID: String
     invoice: Invoice
+    pageSpeedApiKey: String
   }
 `;

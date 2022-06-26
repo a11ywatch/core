@@ -76,6 +76,9 @@ export const addWebsite = async ({
 
   const actionsEnabled = actions && Array.isArray(actions) && actions.length;
 
+  const subdomainsEnabled = subdomains && user.role >= 1;
+  const tldEnabled = tld && user.role >= 2;
+
   const website = makeWebsite({
     userId,
     url,
@@ -87,8 +90,8 @@ export const addWebsite = async ({
     standard: wcagStandard,
     actionsEnabled,
     robots,
-    subdomains,
-    tld,
+    subdomains: subdomainsEnabled,
+    tld: tldEnabled,
   });
 
   try {
@@ -138,8 +141,8 @@ export const addWebsite = async ({
         userId,
         scan: true,
         robots,
-        subdomains: subdomains && user.role >= 1,
-        tld: tld && user.role >= 2,
+        subdomains: subdomainsEnabled,
+        tld: tldEnabled,
       });
     }
   });

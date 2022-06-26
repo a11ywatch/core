@@ -6,6 +6,8 @@ import type { Website } from "../../../schema";
 type Page = {
   userId?: number;
   url: string;
+  subdomains?: boolean;
+  tld?: boolean;
 };
 
 // run a set of websites and get issues [DAILY CRON]
@@ -18,7 +20,7 @@ export async function websiteWatch(
   console.log(`watcher job count ${pages.length}`);
 
   for (const website of pages) {
-    const { userId, url } = website;
+    const { userId, url, subdomains, tld } = website;
 
     let user;
     try {
@@ -57,8 +59,8 @@ export async function websiteWatch(
           urlMap: url,
           userId,
           scan: false,
-          subdomains: user.role >= 1,
-          tld: user.role >= 2,
+          subdomains,
+          tld,
         });
       });
     }

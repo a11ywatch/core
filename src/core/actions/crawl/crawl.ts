@@ -82,7 +82,9 @@ export const crawlPage = async (
 
     if (website?.pageInsights || pageInsights) {
       // only premium and above get lighthouse on all pages.
-      if (insightsLocked) {
+      if (userData?.pageSpeedApiKey) {
+        insightsEnabled = true;
+      } else if (insightsLocked) {
         insightsEnabled = rootPage;
       } else {
         insightsEnabled = pageInsights || website?.pageInsights;
@@ -117,6 +119,7 @@ export const crawlPage = async (
       standard: website?.standard,
       actions,
       cv: SUPER_MODE || userData?.role === 2,
+      pageSpeedApiKey: userData?.pageSpeedApiKey,
     });
 
     const trackerProccess = (data?: any) => {

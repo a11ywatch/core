@@ -48,16 +48,36 @@ export const mutation = gql`
       newScript: String
     ): UpdateScriptMutationResponse
 
+    """
+    Multi-page or site crawl for issues.
+    """
     crawlWebsite(url: String): UpdateWebSiteMutationResponse
 
+    """
+    Scan a single page for issues.
+    """
     scanWebsite(url: String): UpdateWebSiteMutationResponse
 
     forgotPassword(email: String): User
 
+    """
+    Determine website order when receiving results.
+    """
     sortWebsites(order: [String]): BasicMutationResponse
 
+    """
+    Validate user email address is attached to user.
+    """
     confirmEmail(email: String): UpdateUserMutationResponse
 
+    """
+    Set the PageSpeed API key for a user to speed up scans.
+    """
+    setPageSpeedKey(pageSpeedApiKey: String): UpdateUserMutationResponse
+
+    """
+    Reset the current user password by email.
+    """
     resetPassword(email: String, resetCode: String, jwt: String): User
 
     """

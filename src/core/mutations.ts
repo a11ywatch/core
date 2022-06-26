@@ -13,6 +13,7 @@ import { watcherCrawl } from "./actions/crawl/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { gqlRateLimiter } from "@app/rest/limiters/scan";
 import { frontendClientOrigin } from "./utils/is-client";
+import { getWebsite } from "./controllers/websites";
 
 const defaultPayload = {
   keyid: undefined,
@@ -78,13 +79,22 @@ export const Mutation = {
         userId: keyid,
       })
     ) {
+      let website;
+
+      try {
+        [website] = await getWebsite({ userId: keyid, url });
+      } catch (e) {
+        console.error(e);
+      }
+
       setImmediate(async () => {
+        // TODO: get website stats
         await watcherCrawl({
           urlMap: url,
           userId: keyid,
           scan: true,
-          subdomains: keyid >= 1,
-          tld: keyid >= 2,
+          subdomains: website?.subdomains,
+          tld: website?.tld,
         });
       });
       return {
@@ -259,6 +269,12 @@ export const Mutation = {
     return await context.models.Website.sortWebsites({
       userId: keyid,
       order,
+    });
+  },
+  setPageSpeedKey: async (_, { pageSpeedApiKey }, context) => {
+    return await context.models.User.setPageSpeedKey({
+      id: context.user?.payload?.keyid,
+      pageSpeedApiKey,
     });
   },
   addPaymentSubscription,

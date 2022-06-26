@@ -12,12 +12,13 @@
     "start": "NODE_ENV=production node dist/server.js"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.1.6",
+    "@a11ywatch/protos": "^0.1.7",
     "@a11ywatch/website-source-builder": "^0.0.30",
     "@graphql-tools/schema": "^8.3.2",
     "@grpc/grpc-js": "1.6.7",
     "@grpc/proto-loader": "0.6.13",
     "apollo-server": "3.9.0",
+    "apollo-server-core": "3.9.0",
     "apollo-server-express": "3.9.0",
     "cookie-parser": "^1.4.6",
     "cors": "2.8.5",
@@ -41,6 +42,7 @@
     "pb-util": "^1.0.3",
     "rate-limit-redis": "^3.0.1",
     "stripe": "7.14.0",
+    "subscriptions-transport-ws": "^0.11.0",
     "universal-analytics": "^0.4.23"
   },
   "devDependencies": {

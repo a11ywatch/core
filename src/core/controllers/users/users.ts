@@ -204,4 +204,29 @@ export const UsersController: UserControllerType = (
       return false;
     }
   },
+  setPageSpeedKey: async ({ id, pageSpeedApiKey }) => {
+    const [user, collection] = await getUser({ id });
+
+    if (user) {
+      await collection.updateOne(
+        { id },
+        {
+          $set: {
+            pageSpeedApiKey,
+          },
+        }
+      );
+
+      user.pageSpeedApiKey = pageSpeedApiKey;
+
+      return {
+        user,
+        code: 200,
+        success: true,
+        message: SUCCESS,
+      };
+    }
+
+    throw new Error(GENERAL_ERROR);
+  },
 });
