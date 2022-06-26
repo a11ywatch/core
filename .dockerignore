@@ -4,8 +4,8 @@ Dockerfile.dev
 sample.env
 README.md
 .eslintrc
-!public.key
-!private.key
+public.key
+private.key
 dist
 coverage
 .env
