@@ -8,7 +8,7 @@ import {
   sendMailCallback,
   pluralize,
 } from "../utils";
-import { issuesFoundTemplate } from "../email_templates";
+import { issuesResultsTemplate } from "../email_templates";
 import { getUser } from "../controllers/users";
 import { Issue, Website } from "@app/schema";
 import { DEV } from "@app/config";
@@ -22,6 +22,7 @@ interface VerifySend {
 
 // filter errors from issues
 const filterCb = (iss: Issue) => iss?.type === "error";
+const filterWarningsCb = (iss: Issue) => iss?.type === "warning";
 
 // determine when a user last got alerted.
 const updateLastAlertDate = async (userId, userCollection) => {
@@ -96,6 +97,28 @@ const sendMail = async ({
     }
 
     const issueCount = data?.issues?.length;
+    let totalIssues = 0;
+    let totalWarnings = 0;
+    let total = 0;
+
+    if (issueCount) {
+      const errorIssues = data.issues.filter(filterCb);
+      const warningIssues = data.issues.filter(filterWarningsCb);
+      totalIssues = errorIssues.length;
+      totalWarnings = warningIssues.length;
+      total = totalIssues + totalWarnings;
+    }
+
+    const issuesTable = `${issuesResultsTemplate(
+      {
+        totalIssues,
+        totalWarnings,
+        total,
+        pageUrl: data.url || data.pageUrl,
+      },
+      "h2",
+      true
+    )}`;
 
     try {
       await transporter.sendMail(
@@ -105,7 +128,7 @@ const sendMail = async ({
             issueCount,
             "issue"
           )} found with ${data?.pageUrl || data?.domain}.`,
-          html: `${issuesFoundTemplate(data)}<br />${footer.marketing({
+          html: `${issuesTable}<br />${footer.marketing({
             userId,
             email: findUser?.email,
           })}`,
@@ -143,32 +166,41 @@ const sendMailMultiPage = async ({
       console.error(e);
     }
 
+    let total = 0;
+    let totalWarnings = 0;
     let totalIssues = 0;
+    // let totalNotices = 0;
     let issuesTable = "";
 
+    let pageUrl = "";
     for (const page of data) {
       const issues = page?.issues ?? [];
       const issueCount = issues?.length;
 
-      if (issues.some(filterCb)) {
-        const errorIssues = issues.filter(filterCb);
+      if (!domain) {
+        pageUrl = page.url;
+      }
+      const errorIssues = issues.filter(filterCb);
+      const warningIssues = issues.filter(filterWarningsCb);
 
-        if (issueCount) {
-          totalIssues = totalIssues + errorIssues.length;
-        }
-
-        issuesTable =
-          issuesTable +
-          `<br />${issuesFoundTemplate(
-            {
-              issues: errorIssues,
-              pageUrl: page.url,
-            },
-            "h3",
-            true
-          )}`;
+      if (issueCount) {
+        totalIssues = totalIssues + errorIssues.length;
+        totalWarnings = totalWarnings + warningIssues.length;
       }
     }
+
+    total = totalWarnings + totalIssues;
+
+    issuesTable = `<br />${issuesResultsTemplate(
+      {
+        totalIssues,
+        totalWarnings,
+        total,
+        pageUrl,
+      },
+      "h3",
+      true
+    )}`;
 
     // if errors exist send email
     if (Number(totalIssues) >= 1) {
@@ -181,13 +213,7 @@ const sendMailMultiPage = async ({
               "issue"
             )} found with ${domain}.`,
             html: `
-            <head>
-              <style>
-                tr:nth-child(even){background-color: #f2f2f2;}
-                tr:hover {background-color: #ddd;}
-              </style>
-            </head>
-            <div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>
+            <div style="margin-bottom: 12px; margin-top: 8px;">Login to see the full report.</div>
             ${issuesTable}<br />${footer.marketing({
               userId,
               email: user?.email,

@@ -197,7 +197,7 @@ export const crawlPage = async (
         await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
       }
 
-      // send email if issues of type error exist for the page.
+      // send email if issues of type error exist for the page. TODO: remove from layer.
       if (sendEmail && subIssues.some(filterCb)) {
         const errorIssues = subIssues.filter(filterCb);
 
