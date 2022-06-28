@@ -1,15 +1,17 @@
-import * as find from "./find";
-import * as set from "./set";
-import * as remove from "./remove";
-import * as update from "./update";
+import { getDomains, getPage, getAllPages } from "./find";
+import { addDomain } from "./set";
+import { removeDomain } from "./remove";
+import { generateWebsiteScore } from "./update";
 
-// TODO: RENAME PAGES
+// Page outside the main website
 const PagesController = ({ user } = { user: null }) => {
   return {
-    ...find,
-    ...set,
-    ...remove,
-    ...update,
+    getDomains,
+    getPage,
+    getAllPages,
+    addDomain,
+    removeDomain,
+    generateWebsiteScore,
   };
 };
 

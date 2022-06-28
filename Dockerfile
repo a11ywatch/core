@@ -18,7 +18,7 @@ RUN apk upgrade --update-cache --available && \
 	apk add openssl python3 make g++ && \
 	rm -rf /var/cache/apk/*
 
-COPY package*.json bootstrap.sh ./
+COPY . .
 RUN ./bootstrap.sh && npm ci
 
 FROM node:18.4-alpine AS builder
@@ -46,4 +46,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=generator /usr/src/app/doc ./public/protodoc
 
-CMD [ "node", "./dist/server.js" ]
+CMD [ "node", "--no-experimental-fetch", "./dist/server.js" ]

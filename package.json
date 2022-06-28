@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.1.1",
+  "version": "0.1.11",
   "description": "a11ywatch central api",
   "main": "./dist/server.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "test": "jest",
     "lint": "eslint .",
     "build": "tsc && tsc-alias",
-    "start": "NODE_ENV=production node dist/server.js"
+    "start": "NODE_ENV=production node dist/server.js",
+    "prepublishOnly": "tsc && tsc-alias"
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.1.7",
@@ -47,7 +48,7 @@
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "2.2.2",
-    "@swc/core": "^1.2.205",
+    "@swc/core": "^1.2.207",
     "@swc/jest": "^0.2.21",
     "@types/express-rate-limit": "^6.0.0",
     "@types/ioredis": "^4.28.8",
@@ -69,7 +70,7 @@
     "ts-node-dev": "^1.1.6",
     "tsc-alias": "1.6.4",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.2.4",
+    "typescript": "4.2.4",
     "typescript-eslint": "0.0.1-alpha.0"
   },
   "keywords": [
@@ -79,5 +80,12 @@
   ],
   "cacheDirectories": [
     "./node_modules/.cache/mongodb-memory-server/mongodb-binaries"
+  ],
+  "files": [
+    "package.json",
+    "package-lock.json",
+    "dist",
+    "LICENSE",
+    "README.md"
   ]
 }

@@ -20,17 +20,13 @@ let EMAIL_CLIENT_KEY =
 if (!PRIVATE_KEY) {
   try {
     PRIVATE_KEY = fs.readFileSync("./private.key", "utf8");
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (_) {}
 }
 
 if (!PUBLIC_KEY) {
   try {
     PUBLIC_KEY = fs.readFileSync("./public.key", "utf8");
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (_) {}
 }
 
 if (!EMAIL_CLIENT_KEY && PRIVATE_KEY) {
@@ -38,7 +34,7 @@ if (!EMAIL_CLIENT_KEY && PRIVATE_KEY) {
 }
 
 const GRAPHQL_PORT = Number(
-  TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 0
+  TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 8080
 );
 
 // if ran from the CLI prevent rate-limits and usage limits [TODO]

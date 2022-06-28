@@ -24,7 +24,7 @@ const initDbConnection = async () => {
     client = createClient();
     client = await client?.connect();
   } catch (e) {
-    console.error(e);
+    console.error("MongoDB not connected:", e);
   }
 };
 
