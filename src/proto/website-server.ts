@@ -7,6 +7,7 @@ import { emailMessager } from "@app/core/messagers";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 
 import { loadProto } from "./website";
+import { domainName } from "@app/core/utils";
 
 let server: Server;
 
@@ -61,7 +62,7 @@ export const createServer = async () => {
         // a full site wide-scan performed. Send scan event including email.
         if (full) {
           const sendEmail = crawlEmitter.emit(
-            `crawl-${domain}-${userId || 0}`,
+            `crawl-${domainName(domain)}-${userId || 0}`,
             domain,
             data
           );
