@@ -14,6 +14,7 @@ export const HistoryController = ({ user } = { user: null }) => ({
       return chain ? [history, collection] : history;
     } catch (e) {
       console.error(e);
+      return [null, null];
     }
   },
   getHistory: async ({ userId }) => {
@@ -22,6 +23,7 @@ export const HistoryController = ({ user } = { user: null }) => ({
       return await collection.find({ userId }).limit(100).toArray();
     } catch (e) {
       console.error(e);
+      return [null];
     }
   },
 });

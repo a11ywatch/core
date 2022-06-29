@@ -34,6 +34,7 @@ export const getIssue = async (
     return chain ? [issue, collection] : issue;
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };
 
@@ -54,6 +55,7 @@ export const getIssues = async ({ userId, domain, pageUrl }: any) => {
       .toArray();
   } catch (e) {
     console.error(e);
+    return [];
   }
 };
 
@@ -80,5 +82,6 @@ export const getIssuesPaging = async (
     return chain ? [websites, collection] : websites;
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };

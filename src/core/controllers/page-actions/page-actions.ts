@@ -51,5 +51,6 @@ export const getPageActionsPaging = async (
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };

@@ -42,6 +42,7 @@ export const getPage = async (
     return chain ? [website, collection] : website;
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };
 
@@ -56,6 +57,7 @@ export const getAllPages = async () => {
     return [websites, collection];
   } catch (e) {
     console.error(e);
+    return [null];
   }
 };
 
@@ -90,5 +92,7 @@ export const getPagesPaging = async (
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
+
+    return [null, null];
   }
 };

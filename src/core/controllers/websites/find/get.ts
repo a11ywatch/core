@@ -110,6 +110,7 @@ export const getWebsitesPaging = async (
     return chain ? [websites, collection] : websites;
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };
 
@@ -122,5 +123,6 @@ export const getWebsites = async ({ userId }, chain?: boolean) => {
     return chain ? [websites, collection] : websites;
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };

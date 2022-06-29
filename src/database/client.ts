@@ -1,30 +1,50 @@
 import { MongoClient, Collection } from "mongodb";
 import { config } from "../config/config";
 
-const createClient = (): MongoClient => {
+const connectionConfigs = {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+};
+
+// create a mongodb client.
+const createClient = (dbconnection?: string): MongoClient => {
+  let client;
   try {
-    return new MongoClient(config.DB_URL, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
+    client = new MongoClient(dbconnection || config.DB_URL, connectionConfigs);
   } catch (e) {
     console.error(e);
   }
+
+  // retry with mem db
+  if (!client && !dbconnection) {
+    try {
+      client = new MongoClient(process.env.MONGO_URL, connectionConfigs);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  return client;
 };
 
 let client: MongoClient; // shared client across application
 
-const initDbConnection = async () => {
+const initDbConnection = async (dbconnection?: string) => {
   try {
     await closeDbConnection(); // reset db connections
   } catch (e) {
     console.error(e);
   }
   try {
-    client = createClient();
+    client = createClient(dbconnection);
     client = await client?.connect();
   } catch (e) {
     console.error("MongoDB not connected:", e);
+  }
+
+  // connect in memory storage
+  if (!client) {
+    console.log("Mongodb not connect attempt to create a memory client.");
   }
 };
 

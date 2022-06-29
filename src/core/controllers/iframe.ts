@@ -23,6 +23,7 @@ const createIframe = (req: Request, res: AppResponse) => {
     });
   } catch (e) {
     console.error(e);
+    res.send(false);
   }
 };
 
