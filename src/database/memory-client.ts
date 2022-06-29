@@ -4,6 +4,8 @@ let redisClient: Redis.Redis;
 
 const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 
+let redisConnected = true;
+
 const options = {
   host: process.env.REDIS_HOST || "127.0.0.1",
   port: 6379,
@@ -27,10 +29,13 @@ const options = {
 const initRedisConnection = async () => {
   try {
     redisClient = new Redis(options);
-    redisClient?.on(
-      "error",
-      (error) => redisLogEnabled && console.error("redis error", error)
-    );
+    redisClient?.on("error", (error) => {
+      redisLogEnabled && console.error("redis error", error);
+      redisConnected = false;
+    });
+    redisClient?.on("connect", () => {
+      redisConnected = true;
+    });
   } catch (e) {
     console.error(e);
   }
@@ -45,4 +50,9 @@ const closeRedisConnection = () => {
   }
 };
 
-export { redisClient, initRedisConnection, closeRedisConnection };
+export {
+  redisClient,
+  initRedisConnection,
+  closeRedisConnection,
+  redisConnected,
+};

@@ -33,6 +33,8 @@ export const scanWebsite = async ({
   const pageUrl = removeTrailingSlash(url);
   const domain = getHostName(pageUrl);
 
+  // redis pubsub not connected
+
   if (!domain) {
     return responseModel({ msgType: ApiResponse.NotFound });
   }

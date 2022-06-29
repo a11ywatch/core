@@ -19,6 +19,7 @@ import type { User, Website } from "@app/types";
 import type { Issue } from "../../../schema";
 import type { Struct } from "pb-util";
 import { connect } from "@app/database";
+import { redisConnected } from "@app/database/memory-client";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -49,9 +50,11 @@ export const crawlPage = async (
     userId,
     url: urlMap,
     pageInsights = false,
-    sendSub = true,
     user: usr,
   } = crawlConfig ?? {};
+
+  // detect if redis is connected to send subs
+  const sendSub: boolean = redisConnected && (crawlConfig?.sendSub || true);
 
   let userData = usr;
   // get user for request

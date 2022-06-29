@@ -1,6 +1,8 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
 import Redis from "ioredis";
 
+let redisSubConnected = true;
+
 export const options = {
   host: process.env.REDIS_HOST || "127.0.0.1",
   port: 6379,
@@ -21,12 +23,13 @@ export const options = {
 };
 
 let pubsub: RedisPubSub;
+
 const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 
 // PUB/SUB GQL
 function createPubSub() {
-  let publisher;
-  let subscriber;
+  let publisher: Redis.Redis;
+  let subscriber: Redis.Redis;
   try {
     publisher = new Redis(options);
   } catch (e) {
@@ -37,10 +40,10 @@ function createPubSub() {
   } catch (e) {
     console.error(e);
   }
-  subscriber?.on(
-    "error",
-    (error) => redisLogEnabled && console.error("redis error", error)
-  );
+  subscriber?.on("error", (error) => {
+    redisLogEnabled && console.error("redis error", error);
+    redisSubConnected = false;
+  });
   try {
     pubsub = new RedisPubSub({
       publisher,
@@ -51,4 +54,4 @@ function createPubSub() {
   }
 }
 
-export { pubsub, createPubSub };
+export { pubsub, createPubSub, redisSubConnected };
