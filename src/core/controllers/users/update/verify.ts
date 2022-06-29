@@ -13,7 +13,8 @@ const verifyUser = async ({
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
-  if (email && !password && !googleId && !githubId) {
+  // plain email sent
+  if (!password && !googleId && !githubId) {
     throw new Error("A password is required to login.");
   }
 
@@ -23,29 +24,37 @@ const verifyUser = async ({
     throw new Error(EMAIL_ERROR);
   }
 
+  // password validation
   const salthash = password && saltHashPassword(password, user?.salt);
   const passwordMatch = user?.password === salthash?.passwordHash;
-  const shouldValidatePassword = user?.password && !googleId;
+  const shouldValidatePassword = !passwordMatch && !googleId && !githubId;
 
-  if (shouldValidatePassword && passwordMatch === false) {
+  // password incorrect
+  if (shouldValidatePassword) {
     throw new Error(EMAIL_ERROR);
   }
 
-  if (
-    typeof googleId !== "undefined" &&
-    !shouldValidatePassword &&
-    user?.googleId !== googleId
-  ) {
-    throw new Error("GoogleID is not tied to user.");
+  const googleLoginAttempt = typeof googleId !== "undefined";
+  const githubLoginAttempt = typeof githubId !== "undefined";
+
+  if (googleLoginAttempt) {
+    const isGoogleMatch = user?.googleId == googleId;
+
+    if (!isGoogleMatch) {
+      throw new Error("Google ID is not tied to user.");
+    }
   }
 
-  if (
-    typeof githubId !== "undefined" &&
-    !shouldValidatePassword &&
-    user?.githubId !== githubId
-  ) {
-    throw new Error("GithubId is not tied to user.");
+  if (githubLoginAttempt) {
+    // github id is a number but safely check between strings future proof conversions.
+    const isGithubMatch = user?.githubId == githubId;
+
+    if (!isGithubMatch) {
+      throw new Error("Github ID is not tied to user.");
+    }
   }
+
+  // user verification succeeded.
 
   let id = user?.id;
   let updateCollectionProps = {};
@@ -67,11 +76,11 @@ const verifyUser = async ({
     lastLoginDate: new Date(),
   };
 
-  if (googleId) {
+  if (googleLoginAttempt) {
     updateCollectionProps = { ...updateCollectionProps, googleId };
   }
 
-  if (githubId) {
+  if (githubLoginAttempt) {
     updateCollectionProps = { ...updateCollectionProps, githubId };
   }
 

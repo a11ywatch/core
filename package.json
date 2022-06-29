@@ -1,8 +1,8 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.1.12",
+  "version": "0.3.2",
   "description": "a11ywatch central api",
-  "main": "./dist/server.js",
+  "main": "./server.js",
   "scripts": {
     "bootstrap": "bash ./bootstrap.sh",
     "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "build": "tsc && tsc-alias",
     "start": "NODE_ENV=production node dist/server.js",
-    "prepublishOnly": "tsc && tsc-alias"
+    "pub": "tsc && tsc-alias && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.1.7",
@@ -80,12 +80,5 @@
   ],
   "cacheDirectories": [
     "./node_modules/.cache/mongodb-memory-server/mongodb-binaries"
-  ],
-  "files": [
-    "package.json",
-    "package-lock.json",
-    "dist",
-    "LICENSE",
-    "README.md"
   ]
 }

@@ -151,7 +151,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
         : `<div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>`
     }
     <div style="display:inline-block">
-      <div style="overflow:auto; padding-top: 8px; padding-bottom:8px; border: 1px solid #ccc; border-radius: 1px; width:49%; display: inline-block; height: 150px">
+      <div style="overflow:auto; padding-top: 8px; padding-bottom:8px; border: 1px solid #ccc; border-radius: 1px; width:47%; display: inline-block; height: 150px">
         <div class="a11y-view" style="font-family: system-ui, Arial; background:#fff; padding-left:16px; padding-right:16px">
           <h3 style="margin-bottom: 6px; font-weight: 800">Health</h3>
           <h4 style="margin-bottom: 6px; font-weight: 800">${score}</h4>
@@ -160,7 +160,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
           </p>
         </div>
       </div>
-      <div style="overflow:auto; padding-top: 8px;padding-bottom:8px; border: 1px solid #ccc; border-radius: 1px; width:49%; display: inline-block; height: 150px">
+      <div style="overflow:auto; padding-top: 8px;padding-bottom:8px; border: 1px solid #ccc; border-radius: 1px; width:47%; display: inline-block; height: 150px">
         <div class="a11y-view" style="font-family: system-ui, Arial; background:#fff; padding-left:16px; padding-right:16px">
           <h3 style="margin-bottom: 6px; font-weight: 800">Issues</h3>
           <table style="padding-top: 24px; border-collapse:separate; border-spacing:0; width:100%">
