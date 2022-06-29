@@ -27,6 +27,7 @@ const UserModel = {
   googleId: "",
   githubId: null,
   resetCode: null,
+  pageSpeedApiKey: "",
 };
 
 // add defaults from user model and set the lastLoginDate to the current date
@@ -50,7 +51,7 @@ const extendUser = (user: User) => {
   if (SUPER_MODE) {
     role = 3;
   }
-  return { ...user, role };
+  return { ...user, pageSpeedApiKey: user?.pageSpeedApiKey ?? "", role };
 };
 
 export { UserModel, makeUser, extendUser };

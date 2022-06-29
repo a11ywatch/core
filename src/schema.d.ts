@@ -464,6 +464,7 @@ export type User = {
   emailExpDate?: Maybe<Scalars["String"]>;
   resetCode?: Maybe<Scalars["String"]>;
   stripeID?: Maybe<Scalars["String"]>;
+  pageSpeedApiKey?: Maybe<Scalars["String"]>;
 };
 
 export type UserAnalyticsArgs = {
