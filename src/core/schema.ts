@@ -21,7 +21,6 @@ import {
 import { getGqlRateLimitDirective } from "@app/rest/limiters";
 import gql from "graphql-tag";
 import { applyMiddleware } from "graphql-middleware";
-import { ApolloServerPluginUsageReportingDisabled } from "apollo-server-core";
 
 const typeDefs = gql`
   directive @rateLimit(
@@ -59,8 +58,6 @@ const createScheme = () => {
     schemaDirectives: {
       rateLimit,
     },
-    cache: "bounded",
-    plugins: [ApolloServerPluginUsageReportingDisabled()],
   };
 
   return applyMiddleware(makeExecutableSchema(scheme as any));

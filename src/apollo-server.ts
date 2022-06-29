@@ -11,6 +11,7 @@ import { UsersController } from "./core/controllers/users";
 import { IssuesController } from "./core/controllers/issues";
 import { FeaturesController } from "./core/controllers/features";
 import { AnalyticsController } from "./core/controllers/analytics";
+// import { ApolloServerPluginUsageReportingDisabled } from "apollo-server-core";
 
 const getServerConfig = (
   extra?: ApolloServerExpressConfig
@@ -21,6 +22,8 @@ const getServerConfig = (
     ...extra,
     introspection: true,
     schema,
+    cache: "bounded",
+    // plugins: [ApolloServerPluginUsageReportingDisabled()],
     context: ({ req, res }) => {
       const authentication = req?.cookies?.jwt || req?.headers?.authorization;
       const user = getUserFromToken(authentication);
