@@ -117,7 +117,8 @@ const sendMail = async ({
         pageUrl: data.url || data.pageUrl,
       },
       "h2",
-      true
+      true,
+      !findUser?.role
     )}`;
 
     try {
@@ -199,7 +200,8 @@ const sendMailMultiPage = async ({
         pageUrl,
       },
       "h3",
-      true
+      true,
+      !user?.role
     )}`;
 
     // if errors exist send email
