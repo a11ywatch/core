@@ -33,7 +33,6 @@ export const BYPASS_AUTH = [
   "getScript",
   "getWebsites",
   "getIssue",
-  "getUser",
 ];
 
 export const cronTimer = DEV ? "0 1 * * *" : "0 16 * * *";

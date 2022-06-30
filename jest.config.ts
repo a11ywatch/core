@@ -13,4 +13,5 @@ export default {
   coverageDirectory: "./coverage/",
   collectCoverage: true,
   coverageProvider: "v8",
+  testPathIgnorePatterns: ["dist"],
 };

@@ -30,7 +30,6 @@ const getServerConfig = (
 
       // authentication error
       if (
-        process.env.NODE_ENV !== "test" &&
         !user &&
         !BYPASS_AUTH.includes(req?.body?.operationName) &&
         req?.body?.operationName
