@@ -1,3 +1,4 @@
+import { UsersController } from "../../controllers";
 import { EMAIL_ERROR } from "../../strings";
 import { getPayLoad } from "../../utils/query-payload";
 
@@ -8,7 +9,7 @@ export const updateUser = async (
   context
 ) => {
   const { subject } = getPayLoad(context);
-  const loginUser = await context.models.User.updateUser({
+  const loginUser = await UsersController().updateUser({
     email: subject || email,
     password,
     newPassword,

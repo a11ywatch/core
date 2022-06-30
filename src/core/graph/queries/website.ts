@@ -1,9 +1,10 @@
+import { WebsitesController } from "../../controllers";
 import { getPayLoad } from "../../utils/query-payload";
 
 export const website = async (_, { url, ...props }, context) => {
   const userId = getPayLoad(context, props)?.userId;
 
-  const [website] = await context.models.Website.getWebsite({
+  const [website] = await WebsitesController().getWebsite({
     userId,
     url: decodeURIComponent(url),
   });
@@ -14,7 +15,7 @@ export const website = async (_, { url, ...props }, context) => {
 export const websites = async (_, props, context) => {
   const userId = getPayLoad(context, props)?.userId;
 
-  return await context.models.Website.getWebsites({
+  return await WebsitesController().getWebsites({
     userId: userId,
   });
 };

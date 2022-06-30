@@ -1,3 +1,4 @@
+import { UsersController, WebsitesController } from "../../controllers";
 import { getPayLoad } from "../../utils/query-payload";
 
 export const addWebsite = async (
@@ -17,17 +18,16 @@ export const addWebsite = async (
   },
   context
 ) => {
-  const { audience, userId } = getPayLoad(context, props);
+  const { userId } = getPayLoad(context, props);
 
-  // TODO: MOVE TO API ENTRY FOR GQL AND REST
-  const canScan = await context.models.User.updateScanAttempt({
+  // TODO: centralize scan attempt via events.
+  const canScan = await UsersController().updateScanAttempt({
     userId: userId,
   });
 
-  return await context.models.Website.addWebsite({
+  return await WebsitesController().addWebsite({
     userId,
     url,
-    audience,
     customHeaders,
     canScan,
     pageInsights,

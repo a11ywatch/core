@@ -1,5 +1,6 @@
-import { EMAIL_ERROR } from "@app/core/strings";
-import { cookieConfigs } from "@app/config";
+import { EMAIL_ERROR } from "../../../strings";
+import { UsersController } from "../../../controllers";
+import { cookieConfigs } from "../../../../config";
 
 // gql mutation function
 export async function register(
@@ -7,7 +8,7 @@ export async function register(
   { email, password, googleId, githubId },
   context
 ) {
-  const loginUser = await context.models.User.createUser({
+  const loginUser = await UsersController().createUser({
     email,
     password,
     googleId,

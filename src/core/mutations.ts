@@ -13,8 +13,9 @@ import { watcherCrawl } from "./actions/crawl/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { gqlRateLimiter } from "@app/rest/limiters/scan";
 import { frontendClientOrigin } from "./utils/is-client";
-import { getWebsite } from "./controllers/websites";
+import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
+import { ScriptsController, UsersController } from "./controllers";
 
 const defaultPayload = {
   keyid: undefined,
@@ -46,7 +47,7 @@ export const Mutation = {
     }
 
     if (
-      await context.models.User.updateScanAttempt({
+      await UsersController().updateScanAttempt({
         userId: keyid,
       })
     ) {
@@ -100,7 +101,7 @@ export const Mutation = {
 
     // if the request did not come from the server update api usage
     if (!isClient && !unauth) {
-      const [_, __, canScan] = await context.models.User.updateApiUsage({
+      const [_, __, canScan] = await UsersController().updateApiUsage({
         userId: keyid,
       });
       if (!canScan) {
@@ -147,19 +148,18 @@ export const Mutation = {
     return websiteFormatter(data);
   },
   removeWebsite: async (_, { url, deleteMany = false }, context) => {
-    const { keyid, audience } = context.user?.payload || defaultPayload;
+    const { keyid } = context.user?.payload || defaultPayload;
 
-    const websiteRemoved = await context.models.Website.removeWebsite({
+    const websiteRemoved = await WebsitesController().removeWebsite({
       userId: keyid,
       url,
       deleteMany,
-      audience,
     });
 
     if (websiteRemoved && deleteMany) {
       return {
         ...websiteRemoved,
-        url: `Success ${websiteRemoved.count} items deleted`,
+        url: `Success all websites and related items deleted.`,
         id: 0,
       };
     }
@@ -173,7 +173,7 @@ export const Mutation = {
   ) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
-    return await context.models.Website.updateWebsite({
+    return await WebsitesController().updateWebsite({
       userId: userId || keyid,
       url,
       pageHeaders: customHeaders,
@@ -184,36 +184,35 @@ export const Mutation = {
       robots,
     });
   },
-  forgotPassword: async (_, { email }, context) => {
-    return await context.models.User.forgotPassword({
+  forgotPassword: async (_, { email }, _context) => {
+    return await UsersController().forgotPassword({
       email,
     });
   },
   confirmEmail: async (_, { email }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
-    return await context.models.User.confirmEmail({
+    return await UsersController().confirmEmail({
       email,
       keyid,
     });
   },
   resetPassword: async (_, { email, resetCode }, context) => {
-    return await context.models.User.resetPassword({
+    return await UsersController().resetPassword({
       email,
       resetCode,
     });
   },
   toggleAlert: async (_, { alertEnabled }, context) => {
-    const { keyid, audience } = context.user?.payload || defaultPayload;
+    const { keyid } = context.user?.payload || defaultPayload;
 
-    return await context.models.User.toggleAlert({
+    return await UsersController().toggleAlert({
       keyid,
-      audience,
       alertEnabled,
     });
   },
   toggleProfile: async (_, { profileVisible }, context) => {
-    return await context.models.User.toggleProfile({
+    return await UsersController().toggleProfile({
       keyid: context.user?.payload?.keyid,
       profileVisible,
     });
@@ -223,11 +222,10 @@ export const Mutation = {
     { url, scriptMeta, editScript, newScript },
     context
   ) => {
-    const { keyid, audience } = context.user?.payload || defaultPayload;
+    const { keyid } = context.user?.payload || defaultPayload;
 
-    return await context.models.Scripts.updateScript({
+    return await ScriptsController().updateScript({
       userId: keyid,
-      audience,
       scriptMeta,
       pageUrl: url,
       editScript,
@@ -237,13 +235,13 @@ export const Mutation = {
   sortWebsites: async (_, { order }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
-    return await context.models.Website.sortWebsites({
+    return await WebsitesController().sortWebsites({
       userId: keyid,
       order,
     });
   },
   setPageSpeedKey: async (_, { pageSpeedApiKey }, context) => {
-    return await context.models.User.setPageSpeedKey({
+    return await UsersController().setPageSpeedKey({
       id: context.user?.payload?.keyid,
       pageSpeedApiKey,
     });

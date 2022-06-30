@@ -10,12 +10,12 @@ import {
 } from "./graph/queries";
 
 export const Query = {
-  website,
   issue,
   issues,
-  websites,
+  history,
   scripts,
   pages,
-  history,
+  website,
+  websites,
   user,
 };

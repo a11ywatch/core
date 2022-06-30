@@ -138,7 +138,7 @@ export const getUserFromApiScan = async (
 
   const canScan = await UsersController({
     user,
-  }).updateScanAttempt({ id: user.id, user: user, collection }, true);
+  }).updateScanAttempt({ id: user.id, user: user, collection });
 
   if (!config.SUPER_MODE && !canScan) {
     res.json({

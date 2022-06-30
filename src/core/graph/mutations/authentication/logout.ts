@@ -1,4 +1,4 @@
-import { cookieConfigs } from "@app/config";
+import { cookieConfigs } from "../../../../config";
 
 // gql mutation function
 export function logout(_, __, context) {
@@ -9,6 +9,6 @@ export function logout(_, __, context) {
   return {
     code: 200,
     success: true,
-    message: "Logged out success",
+    message: "Sign out success!",
   };
 }

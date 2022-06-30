@@ -1,13 +1,14 @@
-import { EMAIL_ERROR } from "@app/core/strings";
-import { cookieConfigs } from "@app/config";
+import { EMAIL_ERROR } from "../../../strings";
+import { UsersController } from "../../../controllers";
+import { cookieConfigs } from "../../../../config";
 
-// gql mutation function
+// login user via mutation
 export async function login(
   _,
   { email, password, googleId, githubId },
   context
 ) {
-  const loginUser = await context.models.User.verifyUser({
+  const loginUser = await UsersController().verifyUser({
     email,
     password,
     googleId,

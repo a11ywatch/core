@@ -1,3 +1,4 @@
+import { UsersController } from "../../controllers";
 import { getPayLoad } from "../../utils/query-payload";
 
 export const user = async (_, { id, password }, context) => {
@@ -10,7 +11,7 @@ export const user = async (_, { id, password }, context) => {
   if (typeof userId !== undefined && userId !== null) {
     let user;
     try {
-      [user] = await models.User.getUser({
+      [user] = await UsersController().getUser({
         id: userId,
       });
     } catch (e) {

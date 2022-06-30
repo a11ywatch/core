@@ -1,3 +1,4 @@
+import { UsersController } from "../../controllers";
 import { EMAIL_ERROR } from "../../strings";
 import { getPayLoad } from "../../utils/query-payload";
 
@@ -6,10 +7,9 @@ export const filterEmailDates = async (
   { emailFilteredDates, morning, ...props },
   context
 ) => {
-  const { audience, userId } = getPayLoad(context, props);
+  const { userId } = getPayLoad(context, props);
 
-  const loginUser = await context.models.User.updateFilterEmailDates({
-    audience,
+  const loginUser = await UsersController().updateFilterEmailDates({
     id: userId,
     emailFilteredDates,
     morning,

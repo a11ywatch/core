@@ -1,19 +1,20 @@
+import { UsersController } from "../../controllers";
 import { cookieConfigs } from "../../../config";
 import { getPayLoad } from "../../utils/query-payload";
 
+// add a payment subscription for a plan
 export const addPaymentSubscription = async (
   _,
   { stripeToken, yearly },
   context
 ) => {
-  const { userId: keyid, audience } = getPayLoad(context);
+  const { userId: keyid } = getPayLoad(context);
 
   let response;
 
   try {
-    response = await context.models.User.addPaymentSubscription({
+    response = await UsersController().addPaymentSubscription({
       keyid,
-      audience,
       stripeToken,
       yearly,
     });
@@ -28,14 +29,13 @@ export const addPaymentSubscription = async (
   return response;
 };
 export const cancelSubscription = async (_, { email }, context) => {
-  const { userId: keyid, audience } = getPayLoad(context);
+  const { userId: keyid } = getPayLoad(context);
 
   let response;
 
   try {
-    response = await context.models.User.cancelSubscription({
+    response = await UsersController().cancelSubscription({
       keyid,
-      audience,
       email,
     });
 

@@ -149,7 +149,7 @@ export const cancelSubscription = async ({ keyid }) => {
     throw new Error(EMAIL_ERROR);
   }
 
-  if (user && user.stripeID) {
+  if (user?.stripeID) {
     const customer = await stripe.customers.retrieve(user.stripeID);
     if (
       customer &&

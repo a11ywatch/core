@@ -11,7 +11,7 @@ export const updateWebsite = async ({
   mobile,
   standard,
   ua,
-  actions,
+  actions = null,
   robots = true,
 }) => {
   let website;
@@ -75,7 +75,7 @@ export const updateWebsite = async ({
   }
 
   // store into actions collection TODO: validate actions
-  if (actionsEnabled) {
+  if (actionsEnabled && actions) {
     const [actionsCollection] = await connect("PageActions");
     const domain = website.domain;
 
