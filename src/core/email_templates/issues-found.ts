@@ -196,7 +196,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
       freeAcount
         ? `
     <div style="padding-top: 6px; padding-bottom: 6px">
-      <a href={"https://a11ywatch.com/payments"} style="color: rgb(37, 99, 235); padding: 0.2em">Upgrade your account</a> to get site-wide monitoring and much more.
+      <a href="https://a11ywatch.com/payments" style="color: rgb(37, 99, 235); padding: 0.2em">Upgrade your account</a> to get site-wide monitoring and much more.
     </div>
     `
         : ""
