@@ -2,7 +2,7 @@ import { EMAIL_ERROR } from "../../../strings";
 import { UsersController } from "../../../controllers";
 import { cookieConfigs } from "../../../../config";
 
-// gql mutation function
+// register a user account via mutation
 export async function register(
   _,
   { email, password, googleId, githubId },

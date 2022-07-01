@@ -160,7 +160,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
           <p>
            ${
              freeAcount
-               ? `Health Score reflects the errors on the current url, <a href={"https://a11ywatch.com/payments"}>upgrade</a> your account to get site-wide monitoring and much more.`
+               ? `Health Score reflects the errors on the current url.`
                : `Health Score reflects the proportion of URLs that don't have errors.`
            }
           </p>
@@ -191,6 +191,16 @@ export const issuesResultsTemplate: IssuesResultsFound = (
         </div>
       </div>
     </div>
+
+    ${
+      freeAcount
+        ? `
+    <div style="padding-top: 6px; padding-bottom: 6px">
+      <a href={"https://a11ywatch.com/payments"} style="color: rgb(37, 99, 235); padding: 0.2em">Upgrade your account</a> to get site-wide monitoring and much more.
+    </div>
+    `
+        : ""
+    }
     <div style="padding-top: 12px; padding-bottom: 12px">
       <div style="padding-top: 12px; padding-bottom: 12px; border: 1px solid #ccc; margin-bottom: 6px; border-radius: 2px">
         <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; padding: 8px; text-align: center; text-decoration: none">View Full Details</a>

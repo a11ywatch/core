@@ -28,4 +28,41 @@ const websiteFormatter = (source: any) => {
   };
 };
 
-export { websiteFormatter };
+/*
+ * Return data formatted for consumption.
+ * Reshapes and makes sure issues are flat.
+ */
+const websiteShape = (source: any) => {
+  let website;
+
+  if ("website" in source) {
+    website = source?.website;
+  }
+
+  if (!website && "data" in source) {
+    if (source?.data?.website) {
+      website = source?.data?.website;
+    } else {
+      website = source?.data;
+    }
+  }
+
+  // pluck issues from respone [TODO: shape gql issues]
+  const { issues, ...websiteData } = website;
+
+  if (websiteData) {
+    // remap to issue to prevent gql resolver gql 'issues'
+    if ("issues" in issues) {
+      websiteData.issues = issues.issues;
+    } else {
+      websiteData.issues = issues;
+    }
+  }
+
+  return {
+    ...source,
+    website: websiteData,
+  };
+};
+
+export { websiteFormatter, websiteShape };
