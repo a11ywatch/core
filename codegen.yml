@@ -1,4 +1,4 @@
-schema: http://localhost:8080/graphql
+schema: http://localhost:3280/graphql
 generates:
   ./src/schema.d.ts:
     plugins:

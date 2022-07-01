@@ -34,7 +34,7 @@ if (!EMAIL_CLIENT_KEY && PRIVATE_KEY) {
 }
 
 const GRAPHQL_PORT = Number(
-  TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 8080
+  TEST_ENV ? 0 : process.env.PORT || process.env.GRAPHQL_PORT || 3280
 );
 
 // if ran from the CLI prevent rate-limits and usage limits [TODO]
