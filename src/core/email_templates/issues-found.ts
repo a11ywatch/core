@@ -160,8 +160,8 @@ export const issuesResultsTemplate: IssuesResultsFound = (
           <p>
            ${
              freeAcount
-               ? `Health Score reflects the errors on the current url.`
-               : `Health Score reflects the proportion of URLs that don't have errors.`
+               ? `Health reflects errors on root.`
+               : `Health reflects the proportion of URLs that don't have errors.`
            }
           </p>
         </div>
