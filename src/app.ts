@@ -108,7 +108,6 @@ function initServer(): HttpServer[] {
 
   // rate limits on expensive endpoints
   if (!config.SUPER_MODE) {
-    app.use("/iframe", limiter);
     app.use("/playground", limiter);
     app.use("/grpc-docs", limiter);
     app.use("/api/iframe", limiter);
@@ -149,7 +148,6 @@ function initServer(): HttpServer[] {
    * Create an iframe based off a url and reverse engineer the content for CORS.
    * Uses node-iframe package to handle iframes.
    */
-  app.get("/iframe", cors(), createIframeEvent);
   app.get("/api/iframe", cors(), createIframeEvent);
   // get a previus run report @query {q: string}
   app.get("/api/report", cors(), getWebsiteReport);

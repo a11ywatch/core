@@ -19,7 +19,7 @@ RUN apk upgrade --update-cache --available && \
 	rm -rf /var/cache/apk/*
 
 COPY . .
-RUN ./bootstrap.sh && npm ci
+RUN npm ci
 
 FROM node:18.4-alpine AS builder
 
@@ -40,8 +40,7 @@ RUN apk upgrade --update-cache --available && \
 	apk add openssl curl && \
 	rm -rf /var/cache/apk/*
 
-COPY --from=installer /usr/src/app/private.key .
-COPY --from=installer /usr/src/app/public.key .
+# generic keys
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=generator /usr/src/app/doc ./public/protodoc

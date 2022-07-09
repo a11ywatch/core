@@ -4,7 +4,9 @@ orbs:
 jobs:
   api:
     docker:
-      - image: cimg/node:17.8.0
+      - image: cimg/node:18.4.0
+    environment:
+      - NODE_OPTIONS: --no-experimental-fetch
     steps:
       - checkout
       - restore_cache:
@@ -13,7 +15,7 @@ jobs:
             - node-v1-{{ .Branch }}-
             - node-v1-
       - run:
-          command: npm ci && bash ./bootstrap.sh && npm test
+          command: npm ci && npm test
       - save_cache:
           paths:
             - ~/usr/local/lib/node_modules

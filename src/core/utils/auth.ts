@@ -3,13 +3,24 @@ import { PRIVATE_KEY, PUBLIC_KEY } from "@app/config/config";
 
 const issuer = "AUTH/RESOURCE";
 const expiresIn = "365 days";
-const algorithm = "RS256";
+let algorithm = "RS256";
 
 const subject = "user@.com";
 const audience = "http://adahelpalerts.com";
 const keyid = "";
 
-const signOptions = {
+let defaultKey;
+
+interface SignOnOptions {
+  issuer: string;
+  subject: string;
+  audience: string;
+  expiresIn: string;
+  algorithm?: string;
+  keyid?: string;
+}
+
+let signOptions: SignOnOptions = {
   issuer,
   subject,
   audience,
@@ -18,8 +29,19 @@ const signOptions = {
   keyid,
 };
 
-const privateKey = String(PRIVATE_KEY).trim();
-const publicKey = String(PUBLIC_KEY).trim();
+if (!PRIVATE_KEY && !PUBLIC_KEY) {
+  defaultKey = Buffer.from("secret", "base64");
+  signOptions = {
+    issuer,
+    subject,
+    audience,
+    expiresIn,
+    keyid,
+  };
+}
+
+const privateKey = String(PRIVATE_KEY || defaultKey).trim();
+const publicKey = String(PUBLIC_KEY || defaultKey).trim();
 
 export function signJwt({ email, role, keyid }, options = {}) {
   return jwt.sign(
