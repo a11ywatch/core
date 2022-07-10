@@ -1,16 +1,20 @@
 import { domainNameFind } from "../domain-name";
 
+interface SearchProps {
+  userId?: any;
+  url?: string;
+  pageUrl?: string;
+  domain?: string;
+  all?: boolean; // query subdomains and tlds into one.
+}
+
 export function websiteSearchParams({
   userId,
   url,
   pageUrl,
   domain,
-}: {
-  userId?: any;
-  url?: string;
-  pageUrl?: string;
-  domain?: string;
-}) {
+  all = true,
+}: SearchProps): SearchProps {
   let searchProps = {};
 
   if (typeof userId !== "undefined") {
@@ -26,7 +30,11 @@ export function websiteSearchParams({
     searchProps = { ...searchProps, pageUrl };
   }
   if (typeof domain !== "undefined" && domain) {
-    searchProps = domainNameFind(searchProps, domain);
+    if (all) {
+      searchProps = domainNameFind(searchProps, domain);
+    } else {
+      searchProps = { ...searchProps, domain };
+    }
   }
 
   return searchProps;

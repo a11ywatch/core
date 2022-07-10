@@ -55,7 +55,7 @@ export const getWebsitesWithUsers = async (
 };
 
 /*
- * Get all the current users of the application with pagination. Returns partial results for the website.
+ * Paginated list of websites by authentiated users.
  * @param [limit] a limit of users count: number
  * @param [filter] query params
  * @param [page] the page in the collection: number

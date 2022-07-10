@@ -51,7 +51,7 @@ export const getIssues = async ({ userId, domain, pageUrl }: any) => {
     return await collection
       .find(searchProps)
       .sort({ pageUrl: 1 })
-      .limit(20000)
+      .limit(2000)
       .toArray();
   } catch (e) {
     console.error(e);
@@ -60,21 +60,26 @@ export const getIssues = async ({ userId, domain, pageUrl }: any) => {
 };
 
 // get issues for a user with pagination offsets.
-export const getIssuesPaging = async (
-  { userId, domain, pageUrl, limit = 100, offset = 0 },
-  chain?: boolean
-) => {
+export const getIssuesPaging = async (params, chain?: boolean) => {
   try {
     const [collection] = await connect("Issues");
-
-    const searchProps = websiteSearchParams({
-      domain: domain || getHostName(pageUrl),
-      pageUrl,
+    const {
       userId,
+      domain,
+      pageUrl,
+      limit = 20,
+      offset = 0,
+      all,
+    } = params ?? {};
+
+    const searchParams = websiteSearchParams({
+      domain: domain || getHostName(pageUrl),
+      userId,
+      all,
     });
 
     const websites = await collection
-      .find(searchProps)
+      .find(searchParams)
       .skip(offset)
       .limit(limit)
       .toArray();

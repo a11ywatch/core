@@ -11,19 +11,21 @@ export const Website = {
 
     return user;
   },
-  issues: async ({ userId, url, pageUrl }, { filter }) => {
-    const issues = await IssuesController().getIssues({
+  issues: async ({ userId, url, pageUrl }, params) => {
+    const { filter, ...pagination } = params;
+
+    const issues = await IssuesController().getIssuesPaging({
       userId,
       pageUrl: decodeURIComponent(url || pageUrl),
-      filter,
+      ...pagination,
     });
 
+    // TODO: move to DB.
     if (filter && issues && ["error", "notice", "warning"].includes(filter)) {
       return issues.filter((item) => {
         if (item?.issues) {
           item.issues = item?.issues?.filter((issue) => issue?.type === filter);
         }
-
         return item?.issues?.length ? item : null;
       });
     }
@@ -44,18 +46,17 @@ export const Website = {
     });
   },
   analytics: async ({ userId, domain }) => {
-    // get analytics for one website
     return await AnalyticsController().getWebsiteAnalytics({
       userId,
       domain,
     });
   },
-  // TODO rename
-  pages: async ({ userId, url, domain }) => {
-    return await PagesController().getDomains({
+  pages: async ({ userId, url, domain }, params) => {
+    return await PagesController().getPagesPaging({
       userId,
       url,
       domain,
+      ...params,
     });
   },
   actions: async ({ userId, domain }, params) => {

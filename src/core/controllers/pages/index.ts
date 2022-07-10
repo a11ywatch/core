@@ -1,4 +1,4 @@
-import { getDomains, getPage, getAllPages } from "./find";
+import { getDomains, getPage, getAllPages, getPagesPaging } from "./find";
 import { addDomain } from "./set";
 import { removeDomain } from "./remove";
 import { generateWebsiteScore } from "./update";
@@ -12,6 +12,7 @@ const PagesController = ({ user } = { user: null }) => {
     addDomain,
     removeDomain,
     generateWebsiteScore,
+    getPagesPaging,
   };
 };
 

@@ -17,6 +17,7 @@ export async function websiteWatch(
   if (pages && Array.isArray(!pages)) {
     return Promise.resolve(null);
   }
+
   console.log(`watcher job count ${pages.length}`);
 
   for (const website of pages) {
@@ -29,9 +30,9 @@ export async function websiteWatch(
       console.error(e);
     }
 
-    console.log(
-      `current url of job ${url}. Email enabled ${user.alertEnabled}`
-    );
+    // console.log(
+    //   `current url of job ${url}. Email enabled ${user.alertEnabled}`
+    // );
 
     if (!user) {
       continue;

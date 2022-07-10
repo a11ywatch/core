@@ -31,17 +31,11 @@ export const website = gql`
     adaScoreAverage: Float
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
-    analytics: [Analytic]
-    issues(filter: String): [Issue]
-    issue: [PageIssue]
-    pages: [Pages]
-    scripts: [Script]
     issuesInfo: IssueInfo
     script: Script
     lastScanDate: String
     documentTitle: String
     cdn: String
-    pageHeaders: [PageHeaders]
     online: Boolean
     timestamp: String
     pageInsights: Boolean
@@ -49,11 +43,22 @@ export const website = gql`
     mobile: Boolean
     standard: String
     ua: String
-    crawlDuration: Float
-    actions(limit: Int = 0, offset: Int = 0): [PageActions]
     actionsEnabled: Boolean
     robots: Boolean
     subdomains: Boolean
     tld: Boolean
+    crawlDuration: Float
+    issue: [PageIssue]
+    analytics: [Analytic]
+    scripts: [Script]
+    pageHeaders: [PageHeaders]
+    issues(
+      filter: String
+      limit: Int = 0
+      offset: Int = 0
+      all: Boolean = false
+    ): [Issue]
+    pages(limit: Int = 0, offset: Int = 0): [Pages]
+    actions(limit: Int = 0, offset: Int = 0): [PageActions]
   }
 `;
