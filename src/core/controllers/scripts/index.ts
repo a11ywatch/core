@@ -1,5 +1,5 @@
 import { connect } from "@app/database";
-import { websiteSearchParams } from "@app/core/utils";
+import { domainNameFind, websiteSearchParams } from "@app/core/utils";
 import { controller } from "@app/proto/actions/calls";
 
 const DEFAULT_RESPONSE = {
@@ -9,7 +9,52 @@ const DEFAULT_RESPONSE = {
   message: "Script updated",
 };
 
+// TODO: convert to generic params
+interface Params {
+  userId?: number;
+  domain?: string;
+  limit: number;
+  offset: number;
+  all?: boolean; // all subdomains and tlds
+}
+
+// get scripts for a website offsets.
+export const getScriptsPaging = async (
+  { userId, domain, limit = 5, offset = 0, all = false }: Params,
+  chain?: boolean
+) => {
+  try {
+    const [collection] = await connect("Scripts");
+
+    let params = {};
+
+    if (typeof userId !== "undefined") {
+      params = { userId };
+    }
+    if (typeof domain !== "undefined" && domain) {
+      if (all) {
+        params = domainNameFind(params, domain);
+      } else {
+        params = { ...params, domain };
+      }
+    }
+
+    const pages = await collection
+      .find(params)
+      .skip(offset)
+      .limit(limit)
+      .toArray();
+
+    return chain ? [pages, collection] : pages;
+  } catch (e) {
+    console.error(e);
+
+    return [null, null];
+  }
+};
+
 export const ScriptsController = ({ user } = { user: null }) => ({
+  getScriptsPaging,
   getScript: async function (
     {
       pageUrl,

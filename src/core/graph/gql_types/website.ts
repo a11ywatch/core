@@ -50,7 +50,12 @@ export const website = gql`
     crawlDuration: Float
     issue: [PageIssue]
     analytics: [Analytic]
-    scripts: [Script]
+    scripts(
+      limit: Int = 0
+      offset: Int = 0
+      offset: Int = 0
+      all: Boolean = false
+    ): [Script]
     pageHeaders: [PageHeaders]
     issues(
       filter: String
@@ -58,7 +63,7 @@ export const website = gql`
       offset: Int = 0
       all: Boolean = false
     ): [Issue]
-    pages(limit: Int = 0, offset: Int = 0): [Pages]
+    pages(limit: Int = 0, offset: Int = 0, offset: Int = 0): [Pages]
     actions(limit: Int = 0, offset: Int = 0): [PageActions]
   }
 `;

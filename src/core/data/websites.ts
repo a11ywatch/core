@@ -39,10 +39,11 @@ export const Website = {
       false
     );
   },
-  scripts: async ({ userId, domain }) => {
-    return await ScriptsController().getWebsiteScripts({
+  scripts: async ({ userId, domain }, params) => {
+    return await ScriptsController().getScriptsPaging({
       userId: userId,
       domain,
+      ...params,
     });
   },
   analytics: async ({ userId, domain }) => {

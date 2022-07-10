@@ -64,6 +64,7 @@ import { graphqlPlayground } from "./html";
 import path from "path";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
+import { getScriptsPaging } from "./core/controllers/scripts";
 
 const { GRAPHQL_PORT } = config;
 
@@ -340,6 +341,40 @@ function initServer(): HttpServer[] {
     );
   });
 
+  // paginated retreive scripts from the database. Limit default is set to 20.
+  app.get("/api/list/scripts", cors(), async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    let data;
+    let code = 200;
+    let message = "";
+    const uid = usr?.payload?.keyid;
+
+    if (typeof uid !== "undefined") {
+      const domain = paramParser(req, "domain");
+
+      try {
+        data = await getScriptsPaging({
+          userId: uid,
+          limit: 5,
+          offset: Number(req.query.offset) || 0,
+          domain,
+        });
+        message = "Successfully retrieved scripts.";
+      } catch (e) {
+        code = 400;
+        message = `Failed to retrieved scripts - ${e}`;
+      }
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+
   const pagingIssues = async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization);
 
@@ -379,8 +414,6 @@ function initServer(): HttpServer[] {
     );
   };
 
-  // paginated retreive issues from the database.
-  app.get("/api/list/issue", cors(), pagingIssues);
   // add friendly handling for incorrect API name
   app.get("/api/list/issues", cors(), pagingIssues);
 
