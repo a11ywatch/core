@@ -14,13 +14,12 @@ FROM node:18.4-alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json bootstrap.sh ./
+COPY package*.json ./
 
 RUN apk upgrade --update-cache --available && \
 	apk add openssl && \
 	rm -rf /var/cache/apk/*
 
-RUN ./bootstrap.sh
 RUN npm ci
 
 COPY . .
