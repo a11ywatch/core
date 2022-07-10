@@ -19,17 +19,6 @@ npm i
 npm run dev
 ```
 
-### User
-
-The following roles are indicated below.
-
-```
-free = 0
-basic = 1
-premium = 2
-enterprise = 3
-```
-
 ### Emailing
 
 To get the emailer working add the following env variables to the project.
@@ -42,11 +31,7 @@ EMAIL_CLIENT_KEY=
 
 ## Queue
 
-Set the limit to number of test in parrallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.
-
-## TODO
-
-conditionally use redis and mongodb.
+Set the limit to number of test in parallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.
 
 ## LICENSE
 

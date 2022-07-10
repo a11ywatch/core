@@ -49,14 +49,14 @@ export const website = gql`
     tld: Boolean
     crawlDuration: Float
     issue: [PageIssue]
-    analytics: [Analytic]
+    pageHeaders: [PageHeaders]
+    analytics(limit: Int = 0, offset: Int = 0, all: Boolean = false): [Analytic]
     scripts(
       limit: Int = 0
       offset: Int = 0
       offset: Int = 0
       all: Boolean = false
     ): [Script]
-    pageHeaders: [PageHeaders]
     issues(
       filter: String
       limit: Int = 0

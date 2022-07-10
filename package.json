@@ -1,10 +1,9 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.3.12",
+  "version": "0.3.13",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
-    "bootstrap": "bash ./bootstrap.sh",
     "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "jest",
     "lint": "eslint .",

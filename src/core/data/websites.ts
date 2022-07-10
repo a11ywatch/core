@@ -46,10 +46,11 @@ export const Website = {
       ...params,
     });
   },
-  analytics: async ({ userId, domain }) => {
-    return await AnalyticsController().getWebsiteAnalytics({
+  analytics: async ({ userId, domain }, params) => {
+    return await AnalyticsController().getAnalyticsPaging({
       userId,
       domain,
+      ...params,
     });
   },
   pages: async ({ userId, url, domain }, params) => {

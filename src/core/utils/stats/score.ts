@@ -24,10 +24,13 @@ export async function setWebsiteScore({ domain, userId, duration }) {
     console.error(e);
   }
 
+  const all = website?.subdomains || website?.tld;
+
   try {
     const data = await generateWebsiteScore({
-      domain,
+      domain: website?.domain || domain,
       userId,
+      all,
     });
 
     const issuesInfo = data?.issuesInfo;

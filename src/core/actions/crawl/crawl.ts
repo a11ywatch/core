@@ -76,8 +76,8 @@ export const crawlPage = async (
       userId,
     });
 
-    const freeAccount = !userData?.role; // free account
-    const scriptsEnabled = !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+    const freeAccount = !userData?.role || userData?.role == 0; // free account
+    const scriptsEnabled = SUPER_MODE || !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
     const rootPage = pathname === "/"; // the url is the base domain index.
     const insightsLocked = !SUPER_MODE && (freeAccount || userData?.role === 1);
 

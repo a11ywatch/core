@@ -5,6 +5,7 @@ interface ScoreProps {
   domain?: string;
   perfectScore?: boolean;
   userId?: number;
+  all?: boolean; // subdomains and tld to get all pages
 }
 
 const defaultIssuesInfo = {
@@ -27,10 +28,12 @@ interface IssuesInfo {
   pageCount: number;
 }
 
+// recursive analytics to process in chunks
 export const getRecursiveResults = async ({
   domain,
   perfectScore,
   userId,
+  all,
 }: ScoreProps): Promise<{ issuesInfo: IssuesInfo }> => {
   return new Promise(async (resolve) => {
     const getDataUntil = async (
@@ -46,6 +49,7 @@ export const getRecursiveResults = async ({
             userId,
             limit: 10,
             offset,
+            all,
           },
           false
         );

@@ -3,15 +3,9 @@ import { domainNameFind, websiteSearchParams } from "@app/core/utils";
 import { logPage } from "./ga";
 
 // get analytics by domain for a user with pagination offsets.
-export const getAnalyticsPaging = async (
-  {
-    userId,
-    domain,
-    limit = 20,
-    offset = 0,
-  }: { userId?: number; domain?: string; limit?: number; offset?: number },
-  chain?: boolean
-) => {
+export const getAnalyticsPaging = async (params, chain?: boolean) => {
+  const { userId, domain, limit = 20, offset = 0, all = false } = params ?? {};
+
   try {
     const [collection] = await connect("Analytics");
 
@@ -20,8 +14,13 @@ export const getAnalyticsPaging = async (
     if (typeof userId !== "undefined") {
       params = { userId };
     }
+
     if (typeof domain !== "undefined" && domain) {
-      params = domainNameFind(params, domain);
+      if (all) {
+        params = domainNameFind(params, domain);
+      } else {
+        params = { ...params, domain };
+      }
     }
 
     const items = await collection
