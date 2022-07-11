@@ -25,10 +25,11 @@ export async function setWebsiteScore({ domain, userId, duration }) {
   }
 
   const all = website?.subdomains || website?.tld;
+  const targetDomain = website?.domain || domain;
 
   try {
     const data = await generateWebsiteScore({
-      domain: website?.domain || domain,
+      domain: targetDomain,
       userId,
       all,
     });
@@ -45,7 +46,7 @@ export async function setWebsiteScore({ domain, userId, duration }) {
         [websiteCollection, !!website],
         {
           searchProps: {
-            domain,
+            domain: website?.domain,
             userId,
           },
         }
@@ -56,7 +57,7 @@ export async function setWebsiteScore({ domain, userId, duration }) {
     await pubsub.publish(CRAWL_COMPLETE, {
       crawlComplete: {
         userId,
-        domain,
+        domain: website?.domain,
         adaScoreAverage: issuesInfo?.adaScoreAverage,
       },
     });
