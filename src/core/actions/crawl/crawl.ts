@@ -202,14 +202,16 @@ export const crawlPage = async (
 
       // send email if issues of type error exist for the page. TODO: remove from layer.
       if (sendEmail && subIssues.some(filterCb)) {
-        const errorIssues = subIssues.filter(filterCb);
-
         await emailMessager
           .sendMail({
             userId,
-            data: { ...pageIssues, issues: errorIssues },
+            data: {
+              ...pageIssues,
+              issues: subIssues,
+              issuesInfo,
+            },
             confirmedOnly: true,
-            sendEmail: errorIssues?.length,
+            sendEmail: true,
           })
           .catch((e) => {
             console.error(e);

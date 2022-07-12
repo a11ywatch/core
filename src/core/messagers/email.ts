@@ -75,11 +75,7 @@ const verifyUserSend = async ({
 // refactor to generic email sending [this is for single page scans]
 const sendMail = async ({
   userId,
-  data = {
-    pageUrl: "",
-    issues: [],
-    domain: "",
-  },
+  data,
   confirmedOnly = false,
   sendEmail,
 }: any) => {
@@ -96,17 +92,27 @@ const sendMail = async ({
       console.error(e);
     }
 
-    const issueCount = data?.issues?.length;
-    let totalIssues = 0;
+    const { pageUrl, domain, issues = [], issuesInfo } = data;
+
+    let totalIssues = 0; // errors
     let totalWarnings = 0;
     let total = 0;
 
-    if (issueCount) {
-      const errorIssues = data.issues.filter(filterCb);
-      const warningIssues = data.issues.filter(filterWarningsCb);
-      totalIssues = errorIssues.length;
-      totalWarnings = warningIssues.length;
-      total = totalIssues + totalWarnings;
+    // if issues object exist, use direct value.
+    if (issuesInfo) {
+      totalIssues = issuesInfo.errorCount;
+      totalWarnings = issuesInfo.warningCount;
+      total = issuesInfo.totalIssues;
+    } else {
+      const issueCount = issues?.length;
+      // TODO: remove back compat support
+      if (issueCount) {
+        const errorIssues = issues.filter(filterCb);
+        const warningIssues = issues.filter(filterWarningsCb);
+        totalIssues = errorIssues.length;
+        totalWarnings = warningIssues.length;
+        total = totalIssues + totalWarnings;
+      }
     }
 
     const issuesTable = `${issuesResultsTemplate(
@@ -114,7 +120,7 @@ const sendMail = async ({
         totalIssues,
         totalWarnings,
         total,
-        pageUrl: data.url || data.pageUrl,
+        pageUrl,
       },
       "h2",
       true,
@@ -125,13 +131,13 @@ const sendMail = async ({
       await transporter.sendMail(
         Object.assign({}, mailOptions, {
           to: findUser.email,
-          subject: `[Report] ${issueCount} ${pluralize(
-            issueCount,
+          subject: `[Report] ${totalIssues} ${pluralize(
+            totalIssues,
             "issue"
-          )} found with ${data?.pageUrl || data?.domain}.`,
+          )} found with ${pageUrl || domain}.`,
           html: `${issuesTable}<br />${footer.marketing({
             userId,
-            email: findUser?.email,
+            email: findUser.email,
           })}`,
         }),
         sendMailCallback
@@ -174,6 +180,7 @@ const sendMailMultiPage = async ({
     let issuesTable = "";
 
     let pageUrl = "";
+
     for (const page of data) {
       const issues = page?.issues ?? [];
       const issueCount = issues?.length;
