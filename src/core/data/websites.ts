@@ -4,6 +4,7 @@ import { PagesController } from "../controllers/pages";
 import { ScriptsController } from "../controllers/scripts";
 import { AnalyticsController } from "../controllers";
 import { getPageActionsPaging } from "../controllers/page-actions/page-actions";
+import { PageSpeedController } from "../controllers/page-speed/main";
 
 export const Website = {
   user: async ({ userId }) => {
@@ -58,6 +59,7 @@ export const Website = {
       userId,
       url,
       domain,
+      insights: true,
       ...params,
     });
   },
@@ -67,5 +69,13 @@ export const Website = {
       domain,
       ...params,
     });
+  },
+  insight: async ({ userId, domain }, _params) => {
+    const pageInsights = await PageSpeedController().getWebsitePageSpeed({
+      userId,
+      domain,
+    });
+
+    return pageInsights;
   },
 };

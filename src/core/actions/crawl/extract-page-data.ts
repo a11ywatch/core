@@ -1,3 +1,6 @@
+import { jsonParse } from "@app/core/utils";
+import { Struct } from "pb-util/build";
+
 export const extractPageData = (
   dataSource: any = { script: null, issues: null, webPage: null }
 ) => {
@@ -6,7 +9,11 @@ export const extractPageData = (
   let noticeCount;
   let adaScore;
   let issuesInfo;
+  let lighthouseData;
+
   let { script, issues, webPage, userId } = dataSource;
+
+  const { insight } = webPage ?? {};
 
   if (webPage) {
     issuesInfo = webPage.issuesInfo;
@@ -18,10 +25,19 @@ export const extractPageData = (
     }
 
     // TODO: move Lighthouse into its own collection since it impacts search lookups
-    if (webPage?.insight) {
-      webPage.insight = {
-        json: JSON.stringify(webPage?.insight),
-      };
+    if (insight) {
+      try {
+        // extract data to valid JSON
+        const parsedInsight = jsonParse(insight as Struct) ?? undefined;
+        lighthouseData = {
+          userId,
+          domain: webPage.domain,
+          pageUrl: webPage.pageUrl || webPage.url,
+          json: JSON.stringify(parsedInsight),
+        };
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 
@@ -35,5 +51,6 @@ export const extractPageData = (
     issues,
     webPage,
     issuesInfo,
+    lighthouseData,
   };
 };

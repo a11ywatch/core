@@ -1,6 +1,7 @@
 import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
 import type { Website } from "@app/types";
+import { PageSpeedController } from "../../page-speed/main";
 
 // get a website from the database
 export const getWebsite = async ({
@@ -94,20 +95,34 @@ export const getWebsitesPaginated = async (
 
 // get websites for a user with pagination offsets.
 export const getWebsitesPaging = async (
-  { userId, limit = 3, offset = 0 },
+  { userId, limit = 3, offset = 0, insights = false },
   chain?: boolean
 ) => {
   try {
     const [collection] = await connect("Websites");
 
-    const websites = await collection
+    const webPages = await collection
       .find({ userId })
       .sort({ order: 1 })
       .skip(offset)
       .limit(limit)
       .toArray();
 
-    return chain ? [websites, collection] : websites;
+    // run with insight relationship
+    if (insights) {
+      for (let i = 0; i < webPages.length; i++) {
+        const { json } =
+          (await PageSpeedController().getWebsite({
+            userId,
+            ...webPages[i],
+          })) ?? {};
+        if (json) {
+          webPages[i].insight = { json };
+        }
+      }
+    }
+
+    return chain ? [webPages, collection] : webPages;
   } catch (e) {
     console.error(e);
     return [null, null];

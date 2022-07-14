@@ -35,10 +35,13 @@ export const User = {
     });
   },
   websites: async ({ id, keyid }, params) => {
-    return await getWebsitesPaging({
+    const webpages = await getWebsitesPaging({
+      insights: true,
       userId: id || keyid,
       ...params,
     });
+
+    return webpages ?? [];
   },
   // view upcoming invoice
   invoice: async ({ id, keyid }, params) => {

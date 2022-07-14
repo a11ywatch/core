@@ -33,6 +33,7 @@ import {
   createPubSub,
   initRedisConnection,
   closeRedisConnection,
+  connect,
 } from "./database";
 import { confirmEmail, detectImage, root, unSubEmails } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
@@ -53,7 +54,10 @@ import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStreamLazy } from "./core/streams/crawl";
 import { crawlRest } from "./rest/routes/crawl";
-import { getWebsitesPaging } from "./core/controllers/websites/find/get";
+import {
+  getWebsitesPaginated,
+  getWebsitesPaging,
+} from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
@@ -255,6 +259,7 @@ function initServer(): HttpServer[] {
           userId: uid,
           limit: 5,
           offset: Number(req.query.offset) || 0,
+          insights: true,
         });
         message = "Successfully retrieved websites.";
       } catch (e) {
@@ -322,6 +327,7 @@ function initServer(): HttpServer[] {
           limit: 5,
           offset: Number(req.query.offset) || 0,
           domain: domain || undefined,
+          insights: true,
         });
         if (data) {
           message = "Successfully retrieved pages.";
@@ -675,6 +681,29 @@ const startServer = async () => {
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");
   }
+
+  // get all websites and pages and migrate props
+  const [pages, websiteCollection] = await getWebsitesPaginated(1000);
+
+  const [pageSpeedCollection] = await connect("PageSpeed");
+  const [pagesCollection] = await connect("Pages");
+
+  pages.forEach(async (element) => {
+    const query = {
+      domain: element.domain,
+      pageUrl: element.url,
+      userId: element.userId,
+    };
+    await pageSpeedCollection.updateOne(query, {
+      $set: {
+        ...query,
+        insight: element.insight,
+      },
+    });
+  });
+
+  await websiteCollection.updateMany({}, { $unset: { insight: "" } });
+  await pagesCollection.updateMany({}, { $unset: { insight: "" } });
 
   return new Promise(async (resolve, reject) => {
     try {

@@ -4,6 +4,7 @@ import {
   getHostName,
   websiteSearchParams,
 } from "@app/core/utils";
+import { PageSpeedController } from "../../page-speed/main";
 
 export const getDomains = async (
   { domain, userId, url }: { domain?: string; userId?: number; url?: string },
@@ -68,7 +69,14 @@ export const getPagesPaging = async (
     domain,
     limit = 5,
     offset = 0,
-  }: { userId?: number; domain?: string; limit: number; offset: number },
+    insights = false,
+  }: {
+    userId?: number;
+    domain?: string;
+    limit: number;
+    offset: number;
+    insights?: boolean;
+  },
   chain?: boolean
 ) => {
   try {
@@ -88,6 +96,20 @@ export const getPagesPaging = async (
       .skip(offset)
       .limit(limit)
       .toArray();
+
+    // run with insight relationship
+    if (insights) {
+      for (let i = 0; i < pages.length; i++) {
+        const { json } =
+          (await PageSpeedController().getWebsite({
+            userId,
+            ...pages[i],
+          })) ?? {};
+        if (json) {
+          pages[i].insight = { json };
+        }
+      }
+    }
 
     return chain ? [pages, collection] : pages;
   } catch (e) {

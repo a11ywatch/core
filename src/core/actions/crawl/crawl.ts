@@ -3,7 +3,7 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { pubsub } from "@app/database/pubsub";
 import { ISSUE_ADDED } from "@app/core/static";
 import { responseModel } from "@app/core/models";
-import { collectionUpsert, domainName, jsonParse } from "@app/core/utils";
+import { collectionUpsert, domainName } from "@app/core/utils";
 import { IssuesController } from "@app/core/controllers/issues";
 import { ScriptsController } from "@app/core/controllers/scripts";
 import { getWebsite } from "@app/core/controllers/websites";
@@ -17,9 +17,9 @@ import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { SUPER_MODE } from "@app/config/config";
 import type { User, Website } from "@app/types";
 import type { Issue } from "../../../schema";
-import type { Struct } from "pb-util";
 import { redisConnected } from "@app/database/memory-client";
 import { findPageActionsByPath } from "@app/core/controllers/page-actions/find";
+import { PageSpeedController } from "@app/core/controllers/page-speed/main";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -135,16 +135,6 @@ export const crawlPage = async (
       );
     }
 
-    if (dataSource?.webPage?.insight) {
-      try {
-        // extract data to valid JSON
-        dataSource.webPage.insight =
-          jsonParse(dataSource.webPage.insight as Struct) ?? undefined;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     // TODO: MOVE TO QUEUE
     let {
       script,
@@ -152,6 +142,7 @@ export const crawlPage = async (
       webPage,
       adaScore,
       issuesInfo,
+      lighthouseData, // page insights
     } = extractPageData(dataSource);
 
     // PAGE COLLECTION
@@ -170,6 +161,9 @@ export const crawlPage = async (
 
     const [analytics, analyticsCollection] =
       await AnalyticsController().getWebsite({ pageUrl, userId }, true);
+
+    const [pageSpeed, pageSpeedCollection] =
+      await PageSpeedController().getWebsite({ pageUrl, userId }, true);
 
     const newIssue = Object.assign({}, pageIssues, {
       domain,
@@ -227,6 +221,11 @@ export const crawlPage = async (
 
       // Add to Issues collection if page contains issues or if record should update/delete.
       if (shouldUpsertCollections) {
+        await collectionUpsert(lighthouseData, [
+          pageSpeedCollection,
+          pageSpeed,
+        ]); // PageInsights
+
         const { issueMeta, ...analyticsProps } = issuesInfo;
         await collectionUpsert(
           {
