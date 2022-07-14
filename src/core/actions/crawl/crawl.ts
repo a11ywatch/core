@@ -18,8 +18,8 @@ import { SUPER_MODE } from "@app/config/config";
 import type { User, Website } from "@app/types";
 import type { Issue } from "../../../schema";
 import type { Struct } from "pb-util";
-import { connect } from "@app/database";
 import { redisConnected } from "@app/database/memory-client";
+import { findPageActionsByPath } from "@app/core/controllers/page-actions/find";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -27,6 +27,17 @@ export type CrawlConfig = {
   pageInsights?: boolean; // use page insights to get info
   sendSub?: boolean; // use pub sub
   user?: User; // optional pass user
+};
+
+// track the crawl events between crawls [TODO: remove duel emit]
+const trackerProccess = (data: any, { domain, urlMap, userId }: any) => {
+  crawlTrackingEmitter.emit("crawl-processed", {
+    user_id: userId,
+    domain,
+    pages: [urlMap],
+  });
+
+  crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
 };
 
 // filter errors from issues
@@ -94,22 +105,7 @@ export const crawlPage = async (
       }
     }
 
-    let actions;
-
-    try {
-      const [actionsCollection] = await connect("PageActions");
-
-      const action = await actionsCollection.findOne({
-        path: pathname,
-        userId,
-      });
-
-      if (action && action.events) {
-        actions = action.events;
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    const actions = await findPageActionsByPath({ userId, path: pathname });
 
     const dataSource = await fetchPageIssues({
       pageHeaders: website?.pageHeaders,
@@ -125,19 +121,9 @@ export const crawlPage = async (
       pageSpeedApiKey: userData?.pageSpeedApiKey,
     });
 
-    const trackerProccess = (data?: any) => {
-      crawlTrackingEmitter.emit("crawl-processed", {
-        user_id: userId,
-        domain,
-        pages: [urlMap],
-      });
-
-      crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
-    };
-
     // TODO: SET PAGE OFFLINE DB
     if (!dataSource || !dataSource?.webPage) {
-      !blockEvent && trackerProccess();
+      !blockEvent && trackerProccess(undefined, { domain, urlMap, userId });
 
       return resolve(
         responseModel({
@@ -195,30 +181,6 @@ export const crawlPage = async (
     const subIssues: Issue[] = pageIssues?.issues ?? [];
     const pageConstainsIssues = subIssues?.length;
 
-    if (pageConstainsIssues) {
-      if (sendSub) {
-        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-      }
-
-      // send email if issues of type error exist for the page. TODO: remove from layer.
-      if (sendEmail && subIssues.some(filterCb)) {
-        await emailMessager
-          .sendMail({
-            userId,
-            data: {
-              ...pageIssues,
-              issues: subIssues,
-              issuesInfo,
-            },
-            confirmedOnly: true,
-            sendEmail: true,
-          })
-          .catch((e) => {
-            console.error(e);
-          });
-      }
-    }
-
     // // TODO: MERGE ISSUES FROM ALL PAGES
     const updateWebsiteProps: Website = Object.assign({}, webPage, {
       online: true,
@@ -228,25 +190,7 @@ export const crawlPage = async (
     let scripts;
     let scriptsCollection;
 
-    // if scripts enabled get collection
-    if (scriptsEnabled) {
-      [scripts, scriptsCollection] = await ScriptsController().getScript(
-        { pageUrl, userId, noRetries: true },
-        true
-      );
-
-      if (script) {
-        script.userId = userId;
-        // TODO: look into auto meta reason
-        if (!scripts?.scriptMeta) {
-          script.scriptMeta = {
-            skipContentEnabled: true,
-          };
-        }
-      }
-    }
-
-    // if website record exist update data the entegrity of the data.
+    // if website record exist update integrity of the data.
     if (website) {
       // if ROOT domain for scan update Website Collection.
       if (rootPage) {
@@ -259,6 +203,24 @@ export const crawlPage = async (
             searchProps: { url: pageUrl, userId },
           }
         );
+      }
+
+      // if scripts enabled get collection
+      if (scriptsEnabled) {
+        [scripts, scriptsCollection] = await ScriptsController().getScript(
+          { pageUrl, userId, noRetries: true },
+          true
+        );
+
+        if (script) {
+          script.userId = userId;
+          // TODO: look into auto meta reason
+          if (!scripts?.scriptMeta) {
+            script.scriptMeta = {
+              skipContentEnabled: true,
+            };
+          }
+        }
       }
 
       const shouldUpsertCollections = pageConstainsIssues || issueExist;
@@ -309,7 +271,31 @@ export const crawlPage = async (
       }),
     };
 
-    !blockEvent && trackerProccess(responseData);
+    !blockEvent && trackerProccess(responseData, { domain, urlMap, userId });
+
+    if (pageConstainsIssues) {
+      if (sendSub) {
+        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+      }
+
+      // send email if issues of type error exist for the page. TODO: remove from layer.
+      if (sendEmail && subIssues.some(filterCb)) {
+        await emailMessager
+          .sendMail({
+            userId,
+            data: {
+              ...pageIssues,
+              issues: subIssues,
+              issuesInfo,
+            },
+            confirmedOnly: true,
+            sendEmail: true,
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      }
+    }
 
     return resolve(responseModel(responseData));
   });

@@ -132,7 +132,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
   } = data;
 
   const targetUrl = encodeURIComponent(target);
-  const issueCount = total;
+
   const tcellBase = `color: #333; font-size:14px; line-height:18px; font-family: system-ui,Helvetica,Arial,san-serif;`;
   const tcellStyle = `style="${tcellBase}; padding-left:4px; padding-right:4px; height:14px; padding:0"`;
   const tcellStyleImg = `style="${tcellBase}; height:14px; width:14px; padding:0; display: inline"`;
@@ -141,6 +141,9 @@ export const issuesResultsTemplate: IssuesResultsFound = (
 
   // TODO: use warnings that are impacted.
   const score = hs ?? 100 - totalIssues * 2;
+
+  // total issues for the page
+  const issueCount = total;
 
   return `
     <${headingElement || "h1"}>${issueCount} ${pluralize(
@@ -169,9 +172,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
       <div style="overflow:auto; padding-top: 8px;padding-bottom:8px; border: 1px solid #ccc; border-radius: 1px; width:47.5%; display: inline-block; min-height: 185px">
         <div class="a11y-view" style="font-family: system-ui, Arial; background:#fff; padding-left:16px; padding-right:16px">
           <h3 style="margin-bottom: 6px; font-weight: 800">Issues</h3>
-          <h4 style="margin-bottom: 6px; font-weight: 800">${
-            totalIssues + totalWarnings + totalNotices
-          }</h4>
+          <h4 style="margin-bottom: 6px; font-weight: 800">${total}</h4>
           <table style="padding-top: 24px; border-collapse:separate; border-spacing:0; width:100%">
             <tbody>
               <tr ${thStyles}>

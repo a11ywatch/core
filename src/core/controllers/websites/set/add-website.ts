@@ -67,10 +67,7 @@ export const addWebsite = async ({
 
   let wcagStandard: string | undefined = undefined;
 
-  if (
-    wcagStandard &&
-    ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(wcagStandard)
-  ) {
+  if (standard && ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(standard)) {
     wcagStandard = standard;
   }
 
