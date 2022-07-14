@@ -15,13 +15,12 @@ export const sortWebsites = async ({ userId, order = [] }) => {
   }
 
   if (order && order.length) {
-    let i = 0;
-    order.forEach(async (item) => {
+    for (let i = 0; i < order.length; i++) {
+      const item = order[i];
       const query = { userId, domain: item };
-      i = i + 1;
-      const update = { $set: { order: i - 1 } };
+      const update = { $set: { order: i } };
       await collection.updateOne(query, update);
-    });
+    }
   }
 
   return {

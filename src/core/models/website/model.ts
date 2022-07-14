@@ -36,6 +36,7 @@ const WebsiteModel = {
   robots: true,
   subdomains: false, // allow subdomains to joinscope
   tld: false, // allow tld to join scope
+  order: 0, // the sort order
 };
 
 const makeWebsite = (

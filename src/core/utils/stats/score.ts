@@ -37,11 +37,12 @@ export async function setWebsiteScore({ domain, userId, duration }) {
     const issuesInfo = data?.issuesInfo;
 
     if (issuesInfo && website) {
+      const dur = Number(Number.parseFloat(duration).toFixed(2));
       await collectionUpsert(
         {
           ...website,
           issuesInfo,
-          crawlDuration: duration, // time it took to crawl the entire website in ms
+          crawlDuration: typeof dur === "number" ? dur : 0, // time it took to crawl the entire website in ms
         },
         [websiteCollection, !!website],
         {
