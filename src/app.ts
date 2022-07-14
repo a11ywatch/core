@@ -33,7 +33,6 @@ import {
   createPubSub,
   initRedisConnection,
   closeRedisConnection,
-  connect,
 } from "./database";
 import { confirmEmail, detectImage, root, unSubEmails } from "./rest/routes";
 import { logPage } from "./core/controllers/analytics/ga";
@@ -54,10 +53,7 @@ import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStreamLazy } from "./core/streams/crawl";
 import { crawlRest } from "./rest/routes/crawl";
-import {
-  getWebsitesPaginated,
-  getWebsitesPaging,
-} from "./core/controllers/websites/find/get";
+import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
@@ -65,10 +61,10 @@ import { getPagesPaging } from "./core/controllers/pages/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
 import { getAnalyticsPaging } from "./core/controllers/analytics";
 import { graphqlPlayground } from "./html";
-import path from "path";
 import { SubscriptionServer } from "subscriptions-transport-ws";
-import { execute, subscribe } from "graphql";
 import { getScriptsPaging } from "./core/controllers/scripts";
+import { execute, subscribe } from "graphql";
+import path from "path";
 
 const { GRAPHQL_PORT } = config;
 
@@ -250,7 +246,7 @@ function initServer(): HttpServer[] {
     const usr = getUserFromToken(req.headers.authorization);
     let data;
     let code = 200;
-    let message = "Failed to retrieved websites.";
+    let message = "";
     const uid = usr?.payload?.keyid;
 
     if (typeof uid !== "undefined") {
@@ -264,7 +260,7 @@ function initServer(): HttpServer[] {
         message = "Successfully retrieved websites.";
       } catch (e) {
         code = 400;
-        message = `${message} - ${e}`;
+        message = `Failed to retrieved websites - ${e}`;
       }
     }
 
@@ -282,7 +278,7 @@ function initServer(): HttpServer[] {
     const usr = getUserFromToken(req.headers.authorization);
     let data;
     let code = 200;
-    let message = "Failed to retrieved analytics.";
+    let message = "";
     const uid = usr?.payload?.keyid;
 
     if (typeof uid !== "undefined") {
@@ -298,7 +294,7 @@ function initServer(): HttpServer[] {
         message = "Successfully retrieved analytics.";
       } catch (e) {
         code = 400;
-        message = `${message} - ${e}`;
+        message = `Failed to retrieved analytics - ${e}`;
       }
     }
 
@@ -316,7 +312,7 @@ function initServer(): HttpServer[] {
     const usr = getUserFromToken(req.headers.authorization);
     let data;
     let code = 200;
-    let message = "Failed to retrieved pages.";
+    let message = "";
     const uid = usr?.payload?.keyid;
     const domain = paramParser(req, "domain");
 
@@ -334,7 +330,7 @@ function initServer(): HttpServer[] {
         }
       } catch (e) {
         code = 400;
-        message = `${message} - ${e}`;
+        message = `Failed to retrieved pages - ${e}`;
       }
     }
 
@@ -681,29 +677,6 @@ const startServer = async () => {
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");
   }
-
-  // get all websites and pages and migrate props
-  const [pages, websiteCollection] = await getWebsitesPaginated(1000);
-
-  const [pageSpeedCollection] = await connect("PageSpeed");
-  const [pagesCollection] = await connect("Pages");
-
-  pages.forEach(async (element) => {
-    const query = {
-      domain: element.domain,
-      pageUrl: element.url,
-      userId: element.userId,
-    };
-    await pageSpeedCollection.updateOne(query, {
-      $set: {
-        ...query,
-        insight: element.insight,
-      },
-    });
-  });
-
-  await websiteCollection.updateMany({}, { $unset: { insight: "" } });
-  await pagesCollection.updateMany({}, { $unset: { insight: "" } });
 
   return new Promise(async (resolve, reject) => {
     try {

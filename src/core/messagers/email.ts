@@ -102,6 +102,7 @@ const sendMail = async ({
     if (issuesInfo) {
       totalIssues = issuesInfo.errorCount;
       totalWarnings = issuesInfo.warningCount;
+
       total = issuesInfo.totalIssues;
     } else {
       const issueCount = issues?.length;
@@ -109,17 +110,25 @@ const sendMail = async ({
       if (issueCount) {
         const errorIssues = issues.filter(filterCb);
         const warningIssues = issues.filter(filterWarningsCb);
+
         totalIssues = errorIssues.length;
         totalWarnings = warningIssues.length;
+
         total = totalIssues + totalWarnings;
       }
     }
 
+    // issuesInfo not returning count
+    console.debug(
+      `IssueInfo from cron with errors: ${totalIssues} and warnings: ${totalWarnings}`,
+      issuesInfo
+    );
+
     const issuesTable = `${issuesResultsTemplate(
       {
+        total,
         totalIssues,
         totalWarnings,
-        total,
         pageUrl,
       },
       "h2",
@@ -128,7 +137,7 @@ const sendMail = async ({
     )}`;
 
     try {
-      await transporter.sendMail(
+      await transporter?.sendMail(
         Object.assign({}, mailOptions, {
           to: findUser.email,
           subject: `[Report] ${totalIssues} ${pluralize(
