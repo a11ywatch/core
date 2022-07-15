@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { Issue } from "@app/types";
+import type { Issue } from "@app/types/types";
 import excel from "exceljs";
 
 const downloadToExcel = async (

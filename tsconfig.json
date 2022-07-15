@@ -21,7 +21,12 @@
     "baseUrl": ".",
     "paths": {
       "@app/*": ["./src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "transform": "typescript-json/lib/transform"
+      }
+    ]
   },
   "include": ["src", "*.proto"],
   "exclude": ["node_modules"]

@@ -6,7 +6,7 @@ export const extractTokenKey = (bearerToken: string) =>
 
 // veryify jwt and decode
 export const getUserFromToken = (
-  bearerToken: string
+  bearerToken?: string
 ): null | (Jwt & { payload: Partial<Jwt["payload"] & { keyid: number }> }) => {
   const token = extractTokenKey(bearerToken);
 
@@ -19,4 +19,6 @@ export const getUserFromToken = (
       console.error(e);
     }
   }
+
+  return null;
 };

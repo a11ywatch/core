@@ -1,5 +1,5 @@
 import { Request } from "express";
-import type { AppResponse } from "@app/types";
+import type { AppResponse } from "@app/types/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
 
 const createIframe = (req: Request, res: AppResponse) => {

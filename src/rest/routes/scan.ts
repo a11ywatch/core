@@ -10,7 +10,11 @@ import { paramParser } from "../extracter";
 export const scanSimple = async (req: Request, res: Response) => {
   try {
     // returns truthy if can continue
-    const userNext = await getUserFromApi(req.headers.authorization, req, res);
+    const userNext = await getUserFromApi(
+      req?.headers?.authorization,
+      req,
+      res
+    );
 
     if (userNext) {
       const url = decodeURIComponent(

@@ -1,4 +1,4 @@
-import type { User } from "@app/schema";
+import type { User } from "@app/types/schema";
 import { Request, Response } from "express";
 import { UsersController } from "../controllers";
 import { RATE_EXCEEDED_ERROR } from "../strings";
@@ -110,7 +110,7 @@ export const getUserFromApi = async (
  * A user id is required to target the website.
  */
 export const getUserFromApiScan = async (
-  token: string,
+  token: string = "",
   _req: Request,
   res: Response
 ): Promise<User> => {

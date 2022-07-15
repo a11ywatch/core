@@ -1,5 +1,5 @@
 import { controller } from "../../../proto/actions/calls";
-import type { PageMindScanResponse } from "../../../schema";
+import type { PageMindScanResponse } from "../../../types/schema";
 
 interface Params {
   url: string;

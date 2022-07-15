@@ -56,8 +56,6 @@ export const PageSpeedController = ({ user } = { user: null }) => ({
       all,
     });
 
-    console.log(searchProps);
-
     let insights;
 
     if (Object.keys(searchProps).length) {
@@ -67,8 +65,6 @@ export const PageSpeedController = ({ user } = { user: null }) => ({
         console.error(e);
       }
     }
-
-    console.log(insights);
 
     return chain ? [insights, collection] : insights;
   },

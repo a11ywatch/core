@@ -1,4 +1,4 @@
-import type { Issue } from "@app/types";
+import type { Issue } from "@app/types/types";
 import { issueSort } from "@app/core/utils";
 
 // limit the issue records

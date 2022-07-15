@@ -8,7 +8,7 @@ import { getUserFromApiScan } from "../utils/get-user-data";
 export const crawlStreamLazy = async (req: Request, res: Response) => {
   try {
     const userNext = await getUserFromApiScan(
-      req.headers.authorization,
+      req?.headers?.authorization,
       req,
       res
     );
@@ -42,8 +42,8 @@ export const crawlStreamLazy = async (req: Request, res: Response) => {
       }
 
       if (!SUPER_MODE) {
-        subdomainsEnabled = subdomainsEnabled && userNext.role >= 1;
-        tldEnabled = tldEnabled && userNext.role >= 2;
+        subdomainsEnabled = subdomainsEnabled && userNext?.role >= 1;
+        tldEnabled = tldEnabled && userNext?.role >= 2;
       }
 
       // TODO: pass in res and allow emitter of page when processed.

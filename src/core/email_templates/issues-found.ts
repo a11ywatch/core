@@ -1,5 +1,5 @@
 import { getHostName } from "@a11ywatch/website-source-builder";
-import type { Issue } from "@app/types";
+import type { Issue } from "@app/types/types";
 import { pluralize } from "../utils";
 
 export interface Data {
@@ -10,84 +10,6 @@ export interface Data {
 export interface IssuesFound {
   (data: Data, headingElement?: string, hideFooter?: boolean): string;
 }
-
-// return issues as in table form
-const issuesFoundTemplate: IssuesFound = (
-  data = { issues: [], pageUrl: "" },
-  headingElement = "h1",
-  hideFooter = false
-) => {
-  let listData = "";
-  const tdStyles = `style="border: 1px solid #ddd; padding: 6px;"`;
-  const errorIssues = data?.issues || []; // display with limits for email generation
-
-  if (errorIssues?.length) {
-    // loop until
-    errorIssues.some((item: Issue, i: number) => {
-      if (i === 10) {
-        return true;
-      }
-      listData = `${listData}<tr><td ${tdStyles}><code>${
-        item?.context ?? "N/A"
-      }</code></td><td ${tdStyles}>${item?.message ?? "N/A"}</td></tr>`;
-      return false;
-    });
-  }
-
-  const page = data?.pageUrl;
-  const thStyles = `style="border: 1px solid #ddd; padding: 6px; padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #444c56; color: white;"`;
-
-  const target = page; // TODO: use domain only
-  let hostName;
-
-  try {
-    hostName = getHostName(target);
-  } catch (e) {
-    console.error(e);
-  }
-
-  const targetUrl = encodeURIComponent(target);
-  const issueCount = data?.issues?.length;
-
-  return `
-    ${
-      hideFooter
-        ? `<head>
-      <style>
-        tr:nth-child(even){background-color: #f2f2f2;}
-        tr:hover {background-color: #ddd;}
-      </style>
-    </head>`
-        : ""
-    }
-    <${headingElement || "h1"}>${issueCount} ${pluralize(
-    issueCount,
-    "issue"
-  )} found for ${page}</${headingElement || "h1"}>
-    ${
-      hideFooter
-        ? ""
-        : `<div style="margin-bottom: 12px; margin-top: 8px;">Login to see full report.</div>`
-    }
-    <div style="overflow:auto;">
-      <table class="a11y-view" style="font-family: system-ui, Arial; border-collapse: collapse; table-layout: auto; width: 100%;">
-        <tr>
-          <th ${thStyles}>Element</th>
-          <th ${thStyles}>Recommendation</th>
-        </tr>
-        ${listData}
-      </table>
-    </div>
-    <a href="https://a11ywatch.com" style="font-weight: 800; font-size: 1.8em; display: block; background: #5c6bc0; padding: 8px; color: white; text-align: center; text-decoration: none;">View Full Details</a>
-    <a href="https://a11ywatch.com/reports/${targetUrl}" style="font-weight: 800; font-size: 1.8em; display: block; background: #111; padding: 8px; color: #fff; text-align: center; text-decoration: none;">View Report</a>
-    <a href="https://api.a11ywatch.com/api/get-website?q=${hostName}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; background: #fff; padding: 8px; color: #000; text-align: center; text-decoration: none;">Download Report</a>
-    ${
-      hideFooter
-        ? ""
-        : `<p style="margin-top:10px; margin-bottom: 10px;">If you want to stop receiving emails toggle the alert setting to off on the dashboard</p>`
-    }
-`.trim();
-};
 
 export interface IssuesResultsFound {
   (
@@ -101,7 +23,7 @@ export interface IssuesResultsFound {
     },
     headingElement?: string,
     hideFooter?: boolean,
-    freeAcount?: boolean
+    freeAccount?: boolean
   ): string;
 }
 
@@ -110,28 +32,26 @@ export const issuesResultsTemplate: IssuesResultsFound = (
   data,
   headingElement = "h1",
   hideFooter = false,
-  freeAcount = true
+  freeAccount = true
 ) => {
-  const page = data?.pageUrl;
-
-  const target = page; // TODO: use domain only
-  let hostName;
-
-  try {
-    hostName = getHostName(target);
-  } catch (e) {
-    console.error(e);
-  }
-
   const {
     total,
     totalIssues,
     totalWarnings,
     totalNotices = 0,
     score: hs,
+    pageUrl,
   } = data;
 
-  const targetUrl = encodeURIComponent(target);
+  let hostName;
+
+  try {
+    hostName = getHostName(pageUrl);
+  } catch (e) {
+    console.error(e);
+  }
+
+  const targetUrl = encodeURIComponent(pageUrl);
 
   const tcellBase = `color: #333; font-size:14px; line-height:18px; font-family: system-ui,Helvetica,Arial,san-serif;`;
   const tcellStyle = `style="${tcellBase}; padding-left:4px; padding-right:4px; height:14px; padding:0"`;
@@ -142,14 +62,11 @@ export const issuesResultsTemplate: IssuesResultsFound = (
   // TODO: use warnings that are impacted.
   const score = hs ?? 100 - totalIssues * 2;
 
-  // total issues for the page
-  const issueCount = total;
-
   return `
-    <${headingElement || "h1"}>${issueCount} ${pluralize(
-    issueCount,
+    <${headingElement || "h1"}>${total} ${pluralize(
+    total,
     "issue"
-  )} found for ${page}</${headingElement || "h1"}>
+  )} found for ${pageUrl}</${headingElement || "h1"}>
     ${
       hideFooter
         ? ""
@@ -162,7 +79,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
           <h4 style="margin-bottom: 6px; font-weight: 800">${score}</h4>
           <p>
            ${
-             freeAcount
+             freeAccount
                ? `Health score reflects the errors on the current url.`
                : `Health score reflects the proportion of URLs that don't have errors.`
            }
@@ -197,7 +114,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
     </div>
 
     ${
-      freeAcount
+      freeAccount
         ? `
     <div style="padding-top: 6px; padding-bottom: 6px">
       <a href="https://a11ywatch.com/payments" style="color: rgb(37, 99, 235); padding: 0.2em">Upgrade your account</a> to get site-wide monitoring and much more.
@@ -223,5 +140,3 @@ export const issuesResultsTemplate: IssuesResultsFound = (
     }
 `.trim();
 };
-
-export { issuesFoundTemplate };

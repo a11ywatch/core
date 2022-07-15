@@ -1,7 +1,7 @@
 import { extendUser } from "@app/core/models/user/model";
 import { userParams } from "@app/core/utils/controller-filter";
 import { connect } from "@app/database";
-import { User } from "@app/types";
+import { User } from "@app/types/types";
 
 export const getUsers = async (chain?: boolean, count: number = 20) => {
   try {

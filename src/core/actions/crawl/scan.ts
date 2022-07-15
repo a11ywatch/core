@@ -4,7 +4,7 @@ import { getHostName } from "@app/core/utils";
 import { fetchPageIssues } from "./fetch-issues";
 import { extractPageData } from "./extract-page-data";
 import { limitIssue } from "./limit-issue";
-import type { PageMindScanResponse } from "@app/schema";
+import type { PageMindScanResponse } from "@app/types/schema";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import { SUPER_MODE } from "@app/config/config";
 

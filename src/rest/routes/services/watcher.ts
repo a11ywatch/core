@@ -18,7 +18,7 @@ const detectImage = async (req: Request, res: Response) => {
   }
 
   // TODO: MOVE TO MIDDLEWARE
-  const user = getUserFromToken(req.headers?.authorization);
+  const user = getUserFromToken(req?.headers?.authorization);
 
   if (!user) {
     res.json({

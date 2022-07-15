@@ -13,6 +13,7 @@ const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 // Authenticate with github @param requestToken string
 const oAuthGithub = (requestToken: string): Promise<any> => {
   return new Promise((resolve, reject) => {
+    // TODO: shape with ttsc
     const data = JSON.stringify({
       client_id: clientID,
       client_secret: clientSecret,

@@ -1,6 +1,6 @@
 import { rawStatusBadge } from "@app/core/assets";
 import { AnalyticsController } from "@app/core/controllers";
-import { Analytic } from "@app/types";
+import { Analytic } from "@app/types/types";
 import type { Request, Response } from "express";
 
 // get the status badge for a domain

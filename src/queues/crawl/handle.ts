@@ -26,14 +26,12 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
 }
 
 // the async worker to use for completed crawl actions.
-async function asyncWorkerCrawlComplete(
-  arg: Task
-): Promise<ResponseModel | boolean> {
+async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
   const { userId, meta } = arg;
   const props = meta?.extra;
 
   try {
-    return await setWebsiteScore({
+    await setWebsiteScore({
       domain: props?.domain,
       userId: Number(userId),
       duration: props?.duration,

@@ -1,1 +1,1 @@
-export { issuesFoundTemplate, issuesResultsTemplate } from "./issues-found";
+export { issuesResultsTemplate } from "./issues-found";

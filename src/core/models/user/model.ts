@@ -1,5 +1,5 @@
 import { SUPER_MODE } from "@app/config/config";
-import { User } from "@app/schema";
+import { User } from "@app/types/schema";
 
 const UserModel = {
   email: "",

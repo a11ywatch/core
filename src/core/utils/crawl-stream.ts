@@ -30,6 +30,7 @@ export const crawlHttpStream = (props, res: Response): Promise<boolean> => {
       const data = source?.data;
       const issuesFound = data?.issues?.length;
 
+      // TODO: shape with ttsc
       res.write(
         `${JSON.stringify({
           data,

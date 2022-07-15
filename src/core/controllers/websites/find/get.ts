@@ -1,6 +1,6 @@
 import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
-import type { Website } from "@app/types";
+import type { Website } from "@app/types/types";
 import { PageSpeedController } from "../../page-speed/main";
 
 // get a website from the database

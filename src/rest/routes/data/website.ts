@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { getReport } from "@app/core/controllers/reports";
 import { downloadToExcel, getUserFromToken } from "@app/core/utils";
-import { Website } from "@app/types";
+import { Website } from "@app/types/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { retreiveUserByToken } from "@app/core/utils/get-user-data";
 import { paramParser } from "@app/rest/extracter";
@@ -80,8 +80,9 @@ export const getWebsiteReport = async (req: Request, res: Response) => {
     }
   } catch (_) {}
 
-  let data: Website;
   const query = initUrl(decodeURIComponent(slug + ""));
+
+  let data: Website = null;
 
   try {
     const report = await getReport(query, userId);

@@ -1,7 +1,7 @@
 import { crawlPage } from "../../actions";
 import { getUser } from "../../controllers/users";
 import { watcherCrawl } from "../../actions/crawl/watcher_crawl";
-import type { Website } from "../../../schema";
+import type { Website } from "../../../types/schema";
 
 type Page = {
   userId?: number;
@@ -22,38 +22,24 @@ export async function websiteWatch(
 
   for (const website of pages) {
     const { userId, url, subdomains, tld } = website;
-
-    let user;
-    try {
-      [user] = await getUser({ id: userId });
-    } catch (e) {
-      console.error(e);
-    }
-
-    // console.log(
-    //   `current url of job ${url}. Email enabled ${user.alertEnabled}`
-    // );
+    const [user] = await getUser({ id: userId });
 
     if (!user) {
       continue;
     }
 
     if (user.role === 0) {
-      try {
-        await crawlPage(
-          {
-            url,
-            userId,
-            pageInsights: false,
-            sendSub: false,
-            user,
-          },
-          user.alertEnabled,
-          true
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      await crawlPage(
+        {
+          url,
+          userId,
+          pageInsights: false,
+          sendSub: false,
+          user,
+        },
+        user.alertEnabled,
+        true
+      );
     } else {
       setImmediate(async () => {
         await watcherCrawl({

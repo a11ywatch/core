@@ -15,8 +15,8 @@ import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { SUPER_MODE } from "@app/config/config";
-import type { User, Website } from "@app/types";
-import type { Issue } from "../../../schema";
+import type { User, Website } from "@app/types/types";
+import type { Issue } from "../../../types/schema";
 import { redisConnected } from "@app/database/memory-client";
 import { findPageActionsByPath } from "@app/core/controllers/page-actions/find";
 import { PageSpeedController } from "@app/core/controllers/page-speed/main";
@@ -39,9 +39,6 @@ const trackerProccess = (data: any, { domain, urlMap, userId }: any) => {
 
   crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
 };
-
-// filter errors from issues
-const filterCb = (iss: Issue) => iss?.type === "error";
 
 /**
  * Send to gRPC pagemind request. Stores data upon return into database.
@@ -67,16 +64,10 @@ export const crawlPage = async (
   // detect if redis is connected to send subs
   const sendSub: boolean = redisConnected && (crawlConfig?.sendSub || true);
 
-  let userData = usr;
-  // get user for request
-  if (!userData) {
-    try {
-      const [d] = await UsersController().getUser({ id: userId });
-      userData = d;
-    } catch (e) {
-      console.error(e);
-    }
-  }
+  // user returns as array from getUser with
+  const [userData] = usr
+    ? [usr]
+    : await UsersController().getUser({ id: userId });
 
   return new Promise(async (resolve) => {
     const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
@@ -278,13 +269,12 @@ export const crawlPage = async (
       }
 
       // send email if issues of type error exist for the page. TODO: remove from layer.
-      if (sendEmail && subIssues.some(filterCb)) {
+      if (sendEmail && issuesInfo.errorCount) {
         await emailMessager
           .sendMail({
             userId,
             data: {
               ...pageIssues,
-              issues: subIssues,
               issuesInfo,
             },
             confirmedOnly: true,
