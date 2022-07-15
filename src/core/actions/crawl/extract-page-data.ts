@@ -14,10 +14,12 @@ export const extractPageData = (
 
   let { script, issues, webPage, userId } = dataSource;
 
-  const { insight } = webPage ?? {};
+  // pluck insight into its own collection
+  const { insight, ...website } = webPage ?? {};
 
-  if (webPage) {
-    issuesInfo = webPage.issuesInfo;
+  if (website) {
+    issuesInfo = website.issuesInfo;
+
     if (issuesInfo) {
       errorCount = issuesInfo.errorCount;
       warningCount = issuesInfo.warningCount;
@@ -27,20 +29,29 @@ export const extractPageData = (
 
     // TODO: move Lighthouse into its own collection since it impacts search lookups
     if (insight) {
+      let parsedInsight: Result;
       try {
         // extract data to valid JSON
-        const parsedInsight: Result = jsonParse(insight as Struct) ?? undefined;
-
-        const json = JSON.stringify(parsedInsight);
-
-        lighthouseData = {
-          userId,
-          domain: webPage.domain,
-          pageUrl: webPage.pageUrl || webPage.url,
-          json,
-        };
+        parsedInsight = jsonParse(insight as Struct) ?? undefined;
       } catch (e) {
         console.error(e);
+      }
+
+      if (parsedInsight) {
+        try {
+          const json = JSON.stringify(parsedInsight);
+
+          if (parsedInsight) {
+            lighthouseData = {
+              userId,
+              domain: website.domain,
+              pageUrl: website.pageUrl || website.url,
+              json,
+            };
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
   }
@@ -53,7 +64,7 @@ export const extractPageData = (
     adaScore,
     script,
     issues,
-    webPage,
+    webPage: website,
     issuesInfo,
     lighthouseData,
   };

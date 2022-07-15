@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.3.21",
+  "version": "0.3.30",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "@a11ywatch/website-source-builder": "^0.0.30",
     "@graphql-tools/schema": "^8.3.2",
     "@grpc/grpc-js": "1.6.7",
-    "@grpc/proto-loader": "0.6.13",
+    "@grpc/proto-loader": "0.7.0",
     "apollo-server": "3.9.0",
     "apollo-server-core": "3.9.0",
     "apollo-server-express": "3.9.0",

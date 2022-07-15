@@ -1,6 +1,6 @@
 import type { Server as HttpServer } from "http";
 import type { AddressInfo } from "net";
-import express from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 import https from "https";
 import cors from "cors";
@@ -20,7 +20,7 @@ import {
 } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import cookieParser from "cookie-parser";
-import { paramParser } from "./rest/extracter";
+import { getBaseParams, paramParser } from "./rest/extracter";
 import {
   CONFIRM_EMAIL,
   IMAGE_CHECK,
@@ -65,6 +65,10 @@ import { SubscriptionServer } from "subscriptions-transport-ws";
 import { getScriptsPaging } from "./core/controllers/scripts";
 import { execute, subscribe } from "graphql";
 import path from "path";
+import {
+  getPageSpeedPaging,
+  PageSpeedController,
+} from "./core/controllers/page-speed/main";
 
 const { GRAPHQL_PORT } = config;
 
@@ -135,6 +139,7 @@ function initServer(): HttpServer[] {
   app.get("/playground", (_req, res) => {
     res.send(graphqlPlayground());
   });
+
   app.get("/grpc-docs", cors(), (req, res) => {
     const origin = req.get("origin");
 
@@ -154,13 +159,7 @@ function initServer(): HttpServer[] {
   app.get("/api/report", cors(), getWebsiteReport);
   // retreive a user from the database.
   app.get("/api/user", cors(), async (req, res) => {
-    let data;
-    try {
-      const [user] = await retreiveUserByToken(req.headers.authorization);
-      if (user) {
-        data = user;
-      }
-    } catch (_) {}
+    const [data] = await retreiveUserByToken(req.headers.authorization);
 
     res.json(
       responseModel({
@@ -177,20 +176,18 @@ function initServer(): HttpServer[] {
     let code = 200;
     let message = "Failed to retrieved website.";
 
-    const usr = getUserFromToken(req.headers.authorization);
-    const dman = req.query.domain || req.body.domain;
-    const domain = dman ? decodeURIComponent(dman + "") : undefined;
+    const { userId, domain } = getBaseParams(req);
+
     // flexible params for url [backwards compat api support] TODO: remove
     const url1 = paramParser(req, "url");
     const url2 = paramParser(req, "websiteUrl");
     const url3 = paramParser(req, "pageUrl");
-
     const urlBase = url1 || url2 || url3;
     const url = urlBase ? decodeURIComponent(urlBase + "") : undefined;
 
     try {
       const [page] = await getWebsite({
-        userId: usr?.payload?.keyid,
+        userId,
         domain,
         url,
       });
@@ -209,27 +206,56 @@ function initServer(): HttpServer[] {
       })
     );
   });
+
   // retreive a page analytic from the database.
   app.get("/api/analytics", cors(), async (req, res) => {
+    const { userId, domain, pageUrl } = getBaseParams(req);
+
     let data;
     let code = 200;
-    let message = "Failed to retrieved analytic.";
+    let message = "";
 
-    const usr = getUserFromToken(req.headers.authorization);
-    const targetQuery = paramParser(req, "pageUrl");
-    const targetBody = paramParser(req, "url");
-    const targetUrl = targetQuery || targetBody;
-    const domain = paramParser(req, "domain");
     try {
       data = await AnalyticsController().getWebsite({
-        userId: usr?.payload?.keyid,
-        pageUrl: targetUrl ? decodeURIComponent(String(targetUrl)) : undefined,
-        domain: domain ? decodeURIComponent(domain) : undefined,
+        userId,
+        pageUrl: pageUrl ? pageUrl : undefined,
+        domain: domain ? domain : undefined,
       });
       message = "Successfully retrieved analytic for page.";
     } catch (e) {
       code = 400;
-      message = `${message} - ${e}`;
+      message = `Failed to retrieved analytic - ${e}`;
+    }
+
+    res.json(
+      responseModel({
+        code,
+        data: data ? data : null,
+        message,
+      })
+    );
+  });
+
+  // TODO: GET SINGLE ISSUE, SCRIPT OpenAPi
+
+  // retreive a page analytic from the database.
+  app.get("/api/pagespeed", cors(), async (req, res) => {
+    const { userId, domain, pageUrl } = getBaseParams(req);
+
+    let data;
+    let code = 200;
+    let message = "";
+
+    try {
+      data = await PageSpeedController().getWebsite({
+        userId,
+        pageUrl: pageUrl ? pageUrl : undefined,
+        domain: domain ? domain : undefined,
+      });
+      message = "Successfully retrieved pagespeed for website.";
+    } catch (e) {
+      code = 400;
+      message = `Failed to retrieve pagespeed - ${e}`;
     }
 
     res.json(
@@ -243,16 +269,15 @@ function initServer(): HttpServer[] {
 
   // paginated retreive websites from the database.
   app.get("/api/list/website", cors(), async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+    const { userId } = getBaseParams(req);
     let data;
     let code = 200;
     let message = "";
-    const uid = usr?.payload?.keyid;
 
-    if (typeof uid !== "undefined") {
+    if (typeof userId !== "undefined") {
       try {
         data = await getWebsitesPaging({
-          userId: uid,
+          userId,
           limit: 5,
           offset: Number(req.query.offset) || 0,
           insights: true,
@@ -275,18 +300,15 @@ function initServer(): HttpServer[] {
 
   // paginated retreive analytics from the database. Limit default is set to 20.
   app.get("/api/list/analytics", cors(), async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+    const { userId, domain } = getBaseParams(req);
     let data;
     let code = 200;
     let message = "";
-    const uid = usr?.payload?.keyid;
 
-    if (typeof uid !== "undefined") {
-      const domain = paramParser(req, "domain");
-
+    if (typeof userId !== "undefined") {
       try {
         data = await getAnalyticsPaging({
-          userId: uid,
+          userId,
           limit: 5,
           offset: Number(req.query.offset) || 0,
           domain,
@@ -308,18 +330,16 @@ function initServer(): HttpServer[] {
   });
 
   // paginated retreive pages from the database.
-  app.get("/api/list/pages", cors(), async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+  app.get("/api/list/pages", cors(), async (req: Request, res: Response) => {
+    const { userId, domain } = getBaseParams(req);
     let data;
     let code = 200;
     let message = "";
-    const uid = usr?.payload?.keyid;
-    const domain = paramParser(req, "domain");
 
-    if (typeof uid !== "undefined") {
+    if (typeof userId !== "undefined") {
       try {
         data = await getPagesPaging({
-          userId: uid,
+          userId,
           limit: 5,
           offset: Number(req.query.offset) || 0,
           domain: domain || undefined,
@@ -344,19 +364,17 @@ function initServer(): HttpServer[] {
   });
 
   // paginated retreive scripts from the database. Limit default is set to 20.
-  app.get("/api/list/scripts", cors(), async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+  app.get("/api/list/scripts", cors(), async (req: Request, res: Response) => {
+    const { userId, domain } = getBaseParams(req);
+
     let data;
     let code = 200;
     let message = "";
-    const uid = usr?.payload?.keyid;
 
-    if (typeof uid !== "undefined") {
-      const domain = paramParser(req, "domain");
-
+    if (typeof userId !== "undefined") {
       try {
         data = await getScriptsPaging({
-          userId: uid,
+          userId,
           limit: 5,
           offset: Number(req.query.offset) || 0,
           domain,
@@ -377,25 +395,18 @@ function initServer(): HttpServer[] {
     );
   });
 
-  const pagingIssues = async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+  // list of issues
+  app.get("/api/list/issue", cors(), async (req: Request, res: Response) => {
+    const { userId, domain, pageUrl } = getBaseParams(req);
 
     let data;
     let code = 200;
-    let message = "Failed to retrieved issues.";
+    let message = "";
 
-    const dman = paramParser(req, "domain");
-    const purl = paramParser(req, "pageUrl");
-    const url = paramParser(req, "url");
-    const domain = dman ? encodeURIComponent(dman + "") : undefined;
-    const pageUrl = purl || url ? encodeURIComponent(purl || url) : undefined;
-
-    const uid = usr?.payload?.keyid;
-
-    if (typeof uid !== "undefined") {
+    if (typeof userId !== "undefined") {
       try {
         data = await getIssuesPaging({
-          userId: uid,
+          userId,
           limit: 5,
           domain,
           pageUrl,
@@ -403,7 +414,7 @@ function initServer(): HttpServer[] {
         message = "Successfully retrieved issues.";
       } catch (e) {
         code = 400;
-        message = `${message} - ${e}`;
+        message = `Failed to retrieve issues - ${e}`;
       }
     }
 
@@ -414,10 +425,44 @@ function initServer(): HttpServer[] {
         message,
       })
     );
-  };
+  });
 
-  // add friendly handling for incorrect API name
-  app.get("/api/list/issues", cors(), pagingIssues);
+  // list of pagespeed collections
+  app.get(
+    "/api/list/pagespeed",
+    cors(),
+    async (req: Request, res: Response) => {
+      const { userId, domain, pageUrl } = getBaseParams(req);
+
+      let data;
+      let code = 200;
+      let message = "";
+
+      if (typeof userId !== "undefined") {
+        try {
+          data = await getPageSpeedPaging({
+            userId,
+            limit: 5,
+            domain,
+            pageUrl,
+            all: false,
+          });
+          message = "Successfully retrieved pagespeed.";
+        } catch (e) {
+          code = 400;
+          message = `Failed to retrieve pagespeed - ${e}`;
+        }
+      }
+
+      res.json(
+        responseModel({
+          code,
+          data: data ? data : null,
+          message,
+        })
+      );
+    }
+  );
 
   /*
    * Single page scan

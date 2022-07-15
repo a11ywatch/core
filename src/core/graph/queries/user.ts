@@ -18,8 +18,12 @@ export const user = async (_, { id, password }, context) => {
       console.error(e);
     }
 
+    if (!user) {
+      return null;
+    }
+
     // remove non gql types
-    const { googleId, githubId, emailConfirmed, ...props } = user;
+    const { googleId, githubId, emailConfirmed, ...props } = user ?? {};
 
     return {
       ...props,

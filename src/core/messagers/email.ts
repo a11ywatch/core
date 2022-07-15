@@ -55,12 +55,6 @@ const sendMail = async ({
     const totalWarnings = Number(warningCount);
     const total = Number(tot);
 
-    // issuesInfo not returning count
-    console.debug(
-      `IssueInfo from cron with errors: ${totalIssues} and warnings: ${totalWarnings}`,
-      issuesInfo
-    );
-
     const issuesTable = `${issuesResultsTemplate(
       {
         total,
