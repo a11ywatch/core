@@ -85,9 +85,10 @@ export const createServer = async () => {
       },
       // scan website for issues that pushes task into queues.
       scanStream: async (call) => {
-        call.write({});
+        call.write({ message: "" });
         call.end();
 
+        // pass in call to determine if crawl needs to stop
         crawlTrackingEmitter.emit("crawl-processing", call.request);
 
         try {

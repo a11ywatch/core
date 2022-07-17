@@ -708,19 +708,25 @@ function initServer(): HttpServer[] {
 let coreServer: HttpServer;
 
 const startServer = async () => {
+  if (config.SUPER_MODE) {
+    console.log("Application started in SUPER mode. All restrictions removed.");
+  }
+
   // tracking event emitter
   establishCrawlTracking();
 
-  await connectClients(); // START ALL EXTERNAL CLIENTS LIKE REDIS ETC.
-
   try {
-    await startGRPC();
+    // connect all clients gRPC
+    await connectClients();
   } catch (e) {
     console.error(e);
   }
 
-  if (config.SUPER_MODE) {
-    console.log("Application started in SUPER mode. All restrictions removed.");
+  try {
+    // start the gRPC server
+    await startGRPC();
+  } catch (e) {
+    console.error(e);
   }
 
   return new Promise(async (resolve, reject) => {

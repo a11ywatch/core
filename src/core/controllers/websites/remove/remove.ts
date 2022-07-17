@@ -19,6 +19,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
   const [pagesCollection] = await connect("Pages");
   const [issuesCollection] = await connect("Issues");
   const [actionsCollection] = await connect("PageActions");
+  const [pageSpeedCollection] = await connect("PageSpeed");
 
   if (deleteMany) {
     const [webcollection] = await connect("Websites");
@@ -28,6 +29,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
     await pagesCollection.deleteMany({ userId });
     await issuesCollection.deleteMany({ userId });
     await actionsCollection.deleteMany({ userId });
+    await pageSpeedCollection.deleteMany({ userId });
 
     return { code: 200, success: true, message: SUCCESS_DELETED_ALL };
   }
@@ -57,6 +59,7 @@ export const removeWebsite = async ({ userId, url, deleteMany = false }) => {
   await issuesCollection.deleteMany(deleteQuery);
   await collection.findOneAndDelete(deleteQuery);
   await actionsCollection.deleteMany(deleteQuery);
+  await pageSpeedCollection.deleteMany(deleteQuery);
 
   // PREVENT DUPLICATE ITEMS IN HISTORY
   if (!history) {
