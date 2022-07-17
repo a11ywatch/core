@@ -48,6 +48,7 @@ export const website = gql`
     subdomains: Boolean
     tld: Boolean
     crawlDuration: Float
+    shutdown: Boolean
     issue: [PageIssue]
     pageHeaders: [PageHeaders]
     analytics(limit: Int = 0, offset: Int = 0, all: Boolean = false): [Analytic]

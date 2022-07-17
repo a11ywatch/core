@@ -44,3 +44,41 @@ export const collectionUpsert = async (
     console.error(e);
   }
 };
+
+/*
+ * Increment a collection value
+ * @param source: target updating
+ * @param [collection, shouldUpdate]: handle the updating of collection - deleting requires update + delete
+ * @param config: Object. set the key [searchProps]: search the db with the keys and values set
+ */
+export const collectionIncrement = async (
+  source: any,
+  [collection]: [any],
+  config?: any
+) => {
+  if (typeof source === "undefined") {
+    return Promise.resolve();
+  }
+  try {
+    const userId = config?.searchProps?.userId || source?.userId;
+    const duration = config?.searchProps?.duration || source?.duration;
+
+    let queryParams = {};
+
+    if (typeof userId !== "undefined") {
+      queryParams = { userId };
+    }
+
+    return await collection.updateOne(
+      queryParams,
+      {
+        $inc: {
+          "scanInfo.totalUptime": duration,
+        },
+      },
+      { upsert: true }
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};

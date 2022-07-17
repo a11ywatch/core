@@ -5,7 +5,7 @@ export const user = gql`
   Site wide scan info.
   """
   type ScanInformation {
-    scanAttempts: Int
+    totalUptime: Float
     usageLimit: Int
     lastScanDate: String
   }

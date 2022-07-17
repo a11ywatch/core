@@ -19,13 +19,13 @@ export const createServer = async () => {
   server.addService(
     websiteProto["website.WebsiteService"] as ServiceDefinition,
     {
-      // async scan website page start track user [TODO: move to stream]
+      // async scan website page start track user
       scanStart: async (call, callback) => {
         crawlTrackingEmitter.emit("crawl-start", call.request);
 
         callback(null, {});
       },
-      // remove user from crawl and generate average scores. [TODO: move to stream]
+      // remove user from crawl and generate average scores.
       scanEnd: async (call, callback) => {
         try {
           await crawlTrackerComplete(call.request);
@@ -37,7 +37,7 @@ export const createServer = async () => {
 
         callback(null, {});
       },
-      // scan website for issues - syncs with crawl finished. [TODO: move to stream client streaming START, PROCESS, END ]
+      // scan website for issues - syncs with crawl finished. [Used for CRON jobs]
       scan: async (call, callback) => {
         const {
           pages = [],
@@ -85,11 +85,8 @@ export const createServer = async () => {
       },
       // scan website for issues that pushes task into queues.
       scanStream: async (call) => {
-        call.write({ message: "" });
-        call.end();
-
         // pass in call to determine if crawl needs to stop
-        crawlTrackingEmitter.emit("crawl-processing", call.request);
+        crawlTrackingEmitter.emit("crawl-processing", call);
 
         try {
           // user queue to control cors output.

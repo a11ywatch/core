@@ -20,6 +20,9 @@ import type { Issue } from "../../../types/schema";
 import { redisConnected } from "@app/database/memory-client";
 import { findPageActionsByPath } from "@app/core/controllers/page-actions/find";
 import { PageSpeedController } from "@app/core/controllers/page-speed/main";
+import { validateScanEnabled } from "@app/core/controllers/users/update/scan-attempt";
+import { RATE_EXCEEDED_ERROR } from "@app/core/strings";
+import { collectionIncrement } from "@app/core/utils/collection-upsert";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -30,11 +33,15 @@ export type CrawlConfig = {
 };
 
 // track the crawl events between crawls [TODO: remove duel emit]
-const trackerProccess = (data: any, { domain, urlMap, userId }: any) => {
+const trackerProccess = (
+  data: any,
+  { domain, urlMap, userId, shutdown = false }: any
+) => {
   crawlTrackingEmitter.emit("crawl-processed", {
     user_id: userId,
     domain,
     pages: [urlMap],
+    shutdown,
   });
 
   crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
@@ -64,14 +71,35 @@ export const crawlPage = async (
   // detect if redis is connected to send subs
   const sendSub: boolean = redisConnected && (crawlConfig?.sendSub || true);
 
-  // user returns as array from getUser with
-  const [userData] = usr
-    ? [usr]
-    : await UsersController().getUser({ id: userId });
+  let uid;
+
+  if (typeof usr !== "undefined") {
+    uid = usr.id;
+  } else {
+    uid = userId;
+  }
+
+  const [userData, userCollection] = await UsersController().getUser({
+    id: uid,
+  });
+
+  const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
+
+  // block scans from running
+  if (validateScanEnabled({ user: userData }) === false) {
+    if (!blockEvent) {
+      trackerProccess(undefined, { domain, urlMap, userId, shutdown: true });
+    }
+
+    return responseModel({
+      data: null,
+      code: 300,
+      success: false,
+      message: RATE_EXCEEDED_ERROR,
+    });
+  }
 
   return new Promise(async (resolve) => {
-    const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
-
     // WEBSITE COLLECTION
     const [website, websiteCollection] = await getWebsite({
       domain,
@@ -112,9 +140,34 @@ export const crawlPage = async (
       pageSpeedApiKey: userData?.pageSpeedApiKey,
     });
 
+    // TODO: prevent typecasting and return float
+    const totalUptime = isNaN(dataSource.webPage?.pageLoadTime?.duration)
+      ? 0
+      : dataSource.webPage.pageLoadTime.duration;
+
+    const pastUptime = isNaN(userData?.scanInfo?.totalUptime)
+      ? 0
+      : userData.scanInfo.totalUptime;
+
+    const updatedUser = {
+      ...userData,
+      scanInfo: {
+        ...userData?.scanInfo,
+        totalUptime: totalUptime + pastUptime,
+      },
+    };
+
+    const shutdown = validateScanEnabled({ user: updatedUser }) === false;
+
+    await collectionIncrement({ duration: totalUptime }, [userCollection], {
+      searchProps: { userId },
+    }); // User COLLECTION
+
     // TODO: SET PAGE OFFLINE DB
     if (!dataSource || !dataSource?.webPage) {
-      !blockEvent && trackerProccess(undefined, { domain, urlMap, userId });
+      if (!blockEvent) {
+        trackerProccess(undefined, { domain, urlMap, userId, shutdown });
+      }
 
       return resolve(
         responseModel({
@@ -261,31 +314,36 @@ export const crawlPage = async (
       }),
     };
 
-    !blockEvent && trackerProccess(responseData, { domain, urlMap, userId });
-
     if (pageConstainsIssues) {
       if (sendSub) {
         await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
       }
 
       // send email if issues of type error exist for the page. TODO: remove from layer.
-      if (sendEmail) {
-        if (issuesInfo?.errorCount) {
-          await emailMessager
-            .sendMail({
-              userId,
-              data: {
-                ...pageIssues,
-                issuesInfo,
-              },
-              confirmedOnly: true,
-              sendEmail: true,
-            })
-            .catch((e) => {
-              console.error(e);
-            });
-        }
+      if (sendEmail && issuesInfo?.errorCount) {
+        await emailMessager
+          .sendMail({
+            userId,
+            data: {
+              ...pageIssues,
+              issuesInfo,
+            },
+            confirmedOnly: true,
+            sendEmail: true,
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       }
+    }
+
+    if (!blockEvent) {
+      trackerProccess(responseData, {
+        domain,
+        urlMap,
+        userId,
+        shutdown,
+      });
     }
 
     return resolve(responseModel(responseData));

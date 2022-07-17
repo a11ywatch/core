@@ -2,7 +2,7 @@ import { getUser } from "../find";
 import { isSameDay } from "date-fns";
 import { SUPER_MODE } from "@app/config/config";
 
-// Determine if user can perform multi-site scan
+// Determine if user can perform web accessibility scanning
 export const updateScanAttempt = async ({ userId, user, collection }) => {
   // if SUPER_MODE always return truthy
   if (SUPER_MODE) {
@@ -10,7 +10,7 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
   }
 
   // get collection if does not exist
-  if (!user && !collection && typeof userId !== "undefined") {
+  if (!collection && typeof userId !== "undefined") {
     try {
       [user, collection] = await getUser({ id: userId });
     } catch (e) {
@@ -21,52 +21,57 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
   if (user) {
     const scanInfo = user?.scanInfo ?? {
       lastScanDate: undefined as Date,
-      scanAttempts: 0,
+      totalUptime: 0,
       usageLimit: 0,
     };
 
-    const role = user?.role;
     const currentDate = new Date();
 
     if (!isSameDay(scanInfo?.lastScanDate, currentDate)) {
-      scanInfo.scanAttempts = 0;
+      scanInfo.totalUptime = 0;
     }
 
-    if (!role && scanInfo?.scanAttempts >= 3) {
-      return false;
-    }
-    if (role === 1 && scanInfo?.scanAttempts >= 10) {
-      return false;
-    }
-    if (role === 2 && scanInfo?.scanAttempts >= 100) {
-      return false;
-    }
-    // default to max if none set for enterprise
-    if (
-      role === 3 &&
-      scanInfo?.scanAttempts >= (user?.scanInfo?.usageLimit || 100)
-    ) {
-      return false;
+    const canScan = validateScanEnabled({ user });
+
+    if (canScan) {
+      scanInfo.lastScanDate = currentDate;
+      try {
+        await collection.findOneAndUpdate(
+          { id: user.id },
+          { $set: { scanInfo } }
+        );
+      } catch (e) {
+        console.error(e);
+      }
     }
 
-    // increment scan attempt
-    scanInfo.scanAttempts = scanInfo.scanAttempts + 1;
-    scanInfo.lastScanDate = currentDate;
-
-    try {
-      await collection.findOneAndUpdate(
-        { id: user.id },
-        { $set: { scanInfo } }
-      );
-    } catch (e) {
-      console.error(e);
-    }
-
-    // succeeded can scan
-    return true;
+    return canScan;
   }
 
   return false;
+};
+
+/*
+ * @param {user: User}
+ * determine if user can do any scans
+ */
+export const validateScanEnabled = ({ user }) => {
+  const totalUptime = user?.scanInfo?.totalUptime ?? 0;
+  const role = user?.role; // users role
+
+  const base = 60000; // 60 seconds
+
+  if (
+    !user ||
+    (role === 0 && totalUptime >= base) ||
+    (role === 1 && totalUptime >= base * 5) ||
+    (role === 2 && totalUptime >= base * 10) ||
+    (role == 3 && totalUptime >= (user?.scanInfo?.usageLimit || 10) * base)
+  ) {
+    return false;
+  }
+
+  return true;
 };
 
 /*
@@ -76,18 +81,5 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
 export const getScanEnabled = async ({ userId }) => {
   const [user] = await getUser({ id: userId });
 
-  const scanAttempts = user?.scanInfo?.scanAttempts ?? 0;
-  const role = user?.role; // users role
-
-  if (
-    !user ||
-    (role === 0 && scanAttempts >= 3) ||
-    (role === 1 && scanAttempts >= 10) ||
-    (role === 2 && scanAttempts >= 100) ||
-    (role == 3 && scanAttempts >= (user?.scanInfo?.usageLimit || 100))
-  ) {
-    return false;
-  }
-
-  return true;
+  return validateScanEnabled({ user });
 };

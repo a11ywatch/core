@@ -20,8 +20,7 @@ const UserModel = {
   },
   scanInfo: {
     lastScanDate: null,
-    scanAttempts: 0,
-    usageLimit: 3,
+    totalUptime: 0, // total scan uptime
   },
   websiteLimit: 1, // limit of websites a user can have
   googleId: "",

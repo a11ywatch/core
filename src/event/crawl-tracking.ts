@@ -41,18 +41,49 @@ export const establishCrawlTracking = () => {
         current: 0,
         crawling: true,
         duration: performance.now(),
+        shutdown: false,
       };
     }
   });
 
-  // track total amount of pages in a website.
-  crawlTrackingEmitter.on("crawl-processing", (target) => {
+  // track total amount of pages in a website via gRPC.
+  crawlTrackingEmitter.on("crawl-processing", (call) => {
+    const target = call.request;
     // process a new item tracking count
     const key = getKey(target.domain, target.pages, target.user_id);
 
-    if (crawlingSet[key] && crawlingSet[key].crawling) {
-      crawlingSet[key].total = crawlingSet[key].total + 1;
+    if (crawlingSet[key]) {
+      if (crawlingSet[key].crawling) {
+        crawlingSet[key].total = crawlingSet[key].total + 1;
+      }
+
+      // shutdown the events
+      if (crawlingSet[key].shutdown) {
+        call.write({ message: "shutdown" });
+        crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
+
+        qWebsiteWorker
+          .push({
+            userId: target.user_id,
+            meta: {
+              extra: {
+                domain: extractHostname(target.domain),
+                duration: performance.now() - crawlingSet[key].duration,
+                shutdown: true,
+              },
+            },
+          })
+          .catch((err) => console.error(err));
+
+        crawlingSet = removeKey(key, crawlingSet);
+      } else {
+        call.write({ message: "" });
+      }
+    } else {
+      call.write({ message: "" });
     }
+
+    call.end();
   });
 
   // track the amount of pages the website should have and determine if complete.
@@ -63,13 +94,17 @@ export const establishCrawlTracking = () => {
 
     if (crawlingSet[key]) {
       crawlingSet[key].current = crawlingSet[key].current + 1;
+
+      // shutdown the events
+      if (target.shutdown) {
+        crawlingSet[key].shutdown = true;
+        crawlingSet[key].crawling = false;
+      }
+
       if (
         crawlingSet[key].current === crawlingSet[key].total &&
         !crawlingSet[key].crawling
       ) {
-        crawlingSet[key].duration =
-          performance.now() - crawlingSet[key].duration;
-
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
 
         qWebsiteWorker
@@ -78,7 +113,8 @@ export const establishCrawlTracking = () => {
             meta: {
               extra: {
                 domain: extractHostname(target.domain),
-                duration: crawlingSet[key].duration,
+                duration: performance.now() - crawlingSet[key].duration,
+                shutdown: crawlingSet[key].shutdown,
               },
             },
           })
@@ -99,8 +135,6 @@ export const establishCrawlTracking = () => {
       crawlingSet[key].crawling = false;
 
       if (crawlingSet[key].current === crawlingSet[key].total) {
-        crawlingSet[key].duration =
-          performance.now() - crawlingSet[key].duration;
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
 
         qWebsiteWorker
@@ -109,7 +143,8 @@ export const establishCrawlTracking = () => {
             meta: {
               extra: {
                 domain: extractHostname(target.domain),
-                duration: crawlingSet[key].duration,
+                duration: performance.now() - crawlingSet[key].duration,
+                shutdown: crawlingSet[key].shutdown,
               },
             },
           })

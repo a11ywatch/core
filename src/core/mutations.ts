@@ -12,10 +12,10 @@ import {
 import { watcherCrawl } from "./actions/crawl/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { gqlRateLimiter } from "@app/rest/limiters/scan";
-import { frontendClientOrigin } from "./utils/is-client";
 import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";
+import { SUPER_MODE } from "@app/config/config";
 
 const defaultPayload = {
   keyid: undefined,
@@ -35,22 +35,22 @@ export const Mutation = {
   logout,
   addWebsite,
   crawlWebsite: async (_, { url }, context) => {
-    const { keyid } = context.user?.payload || defaultPayload;
-
     if (!url) {
       return {
         website: null,
         code: 404,
         success: true,
-        message: CRAWLER_FINISHED,
+        message: "A valid Url is required.",
       };
     }
 
-    if (
-      await UsersController().updateScanAttempt({
-        userId: keyid,
-      })
-    ) {
+    const { keyid } = context.user?.payload || defaultPayload;
+
+    const canScan = await UsersController().updateScanAttempt({
+      userId: keyid,
+    });
+
+    if (canScan) {
       let website;
 
       try {
@@ -76,9 +76,7 @@ export const Mutation = {
         message: CRAWLER_FINISHED,
       };
     } else {
-      throw new Error(
-        "You hit your scan limit for the day, please try again tomorrow."
-      );
+      throw new Error(RATE_EXCEEDED_ERROR);
     }
   },
   // run scans to the pagemind -> browser -> mav -> api
@@ -86,9 +84,6 @@ export const Mutation = {
     const { url } = args;
     const { keyid } = context.user?.payload || defaultPayload;
     const unauth = typeof keyid === "undefined";
-
-    // coming from frontend origin
-    const isClient = frontendClientOrigin(context?.res?.req?.headers?.origin);
 
     const rateLimitConfig = !unauth
       ? {
@@ -99,18 +94,17 @@ export const Mutation = {
 
     let errorMessage;
 
+    const canScan = await UsersController().updateScanAttempt({
+      userId: keyid,
+    });
+
     // if the request did not come from the server update api usage
-    if (!isClient && !unauth) {
-      const [_, __, canScan] = await UsersController().updateApiUsage({
-        userId: keyid,
-      });
-      if (!canScan) {
-        errorMessage = RATE_EXCEEDED_ERROR;
-      }
+    if (!canScan) {
+      errorMessage = RATE_EXCEEDED_ERROR;
     }
 
     // check rate limits for request. TODO: adjust r
-    if (!errorMessage) {
+    if (!errorMessage && !SUPER_MODE) {
       // apply rate limit on un-auth.
       errorMessage = await gqlRateLimiter(
         {

@@ -35,6 +35,7 @@ async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
       domain: props?.domain,
       userId: Number(userId),
       duration: props?.duration,
+      shutdown: !!props?.shutdown,
     });
   } catch (e) {
     console.error(e);

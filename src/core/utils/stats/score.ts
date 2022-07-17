@@ -8,10 +8,16 @@ export function setWebsiteScore(props: {
   domain: string;
   userId: number;
   duration: number;
+  shutdown?: boolean; // crawl was shutdown and not completed
 }): Promise<boolean>;
 
 // set website score and send complete subcription
-export async function setWebsiteScore({ domain, userId, duration }) {
+export async function setWebsiteScore({
+  domain,
+  userId,
+  duration,
+  shutdown = false,
+}) {
   let website;
   let websiteCollection;
 
@@ -43,6 +49,7 @@ export async function setWebsiteScore({ domain, userId, duration }) {
           ...website,
           issuesInfo,
           crawlDuration: typeof dur === "number" ? dur : 0, // time it took to crawl the entire website in ms
+          shutdown, // crawl did not complete - plan needs to be higher
         },
         [websiteCollection, !!website],
         {
@@ -60,6 +67,7 @@ export async function setWebsiteScore({ domain, userId, duration }) {
         userId,
         domain: website?.domain,
         adaScoreAverage: issuesInfo?.adaScoreAverage,
+        shutdown,
       },
     });
 
