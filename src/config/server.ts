@@ -40,13 +40,13 @@ export const cronTimer = DEV ? "0 1 * * *" : "0 16 * * *";
 const source = DEV ? "localhost" : ROOT_URL;
 
 export const logServerInit = (port, { graphqlPath, subscriptionsPath }) => {
-  console.log([
-    `Server ready at ${source}:${port}`,
-    `GraphQl Server ready at ${source}:${port}${graphqlPath}`,
+  console.log(`Server ready at ${source}:${port}`);
+  console.log(`GraphQl Server ready at ${source}:${port}${graphqlPath}`);
+  console.log(
     `Subscriptions ready at ws://${source}:${port}${
       subscriptionsPath || "/graphql"
-    }`,
-  ]);
+    }`
+  );
 };
 
 export { corsOptions };

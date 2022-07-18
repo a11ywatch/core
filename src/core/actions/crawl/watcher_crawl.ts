@@ -21,18 +21,15 @@ interface CrawlParams {
  *     await crawlPage({ url: "https://a11ywatch.com", userId: 122, robots: true }); // run request and respect robots
  */
 export const watcherCrawl = async ({
-  urlMap,
-  url: urlTarget,
+  url,
   userId,
   scan = false,
   robots = true,
   subdomains = false,
   tld = false,
 }: CrawlParams) => {
-  const target = urlMap || urlTarget;
-  const url = String(initUrl(target, true));
   const crawlParams = {
-    url,
+    url: String(initUrl(url, true)),
     id: userId,
     norobots: !robots,
     subdomains: subdomains,

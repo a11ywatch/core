@@ -43,7 +43,7 @@ export async function websiteWatch(
     } else {
       setImmediate(async () => {
         await watcherCrawl({
-          urlMap: url,
+          url: url,
           userId,
           scan: false,
           subdomains,

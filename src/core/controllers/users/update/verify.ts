@@ -38,7 +38,7 @@ const verifyUser = async ({
   const githubLoginAttempt = typeof githubId !== "undefined";
 
   if (googleLoginAttempt) {
-    const isGoogleMatch = user?.googleId == googleId;
+    const isGoogleMatch = user?.googleId == googleId || !user?.googleId;
 
     if (!isGoogleMatch) {
       throw new Error("Google ID is not tied to user.");
@@ -47,7 +47,7 @@ const verifyUser = async ({
 
   if (githubLoginAttempt) {
     // github id is a number but safely check between strings future proof conversions.
-    const isGithubMatch = user?.githubId == githubId;
+    const isGithubMatch = user?.githubId == githubId || !user?.githubId;
 
     if (!isGithubMatch) {
       throw new Error("Github ID is not tied to user.");
@@ -84,7 +84,11 @@ const verifyUser = async ({
     updateCollectionProps = { ...updateCollectionProps, githubId };
   }
 
-  await collection.updateOne({ email }, { $set: updateCollectionProps });
+  await collection.updateOne(
+    { email },
+    { $set: updateCollectionProps },
+    { upsert: true }
+  );
 
   return {
     ...user,

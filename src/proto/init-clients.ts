@@ -23,7 +23,7 @@ export const startClientsGRPC = async (retry?: boolean) => {
         }
 
         resolve(true);
-      }, 60);
+      }, 35);
     } else {
       resolve(true);
     }

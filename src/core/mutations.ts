@@ -62,7 +62,7 @@ export const Mutation = {
       setImmediate(async () => {
         // TODO: get website stats
         await watcherCrawl({
-          urlMap: url,
+          url: url,
           userId: keyid,
           scan: true,
           subdomains: website?.subdomains,

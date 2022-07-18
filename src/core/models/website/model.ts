@@ -5,9 +5,7 @@ const WebsiteModel = {
   cdnConnected: false,
   pageInsights: false,
   pageHeaders: [],
-  insight: {
-    json: "",
-  },
+  // insight: null, insight from pageSpeed
   pageLoadTime: {
     duration: 0,
     durationFormated: "",

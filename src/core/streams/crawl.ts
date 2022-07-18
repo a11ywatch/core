@@ -5,7 +5,7 @@ import { crawlHttpStream } from "../utils/crawl-stream";
 import { getUserFromApiScan } from "../utils/get-user-data";
 
 // Crawl stream with events.
-export const crawlStreamLazy = async (req: Request, res: Response) => {
+export const crawlStream = async (req: Request, res: Response) => {
   try {
     const userNext = await getUserFromApiScan(
       req?.headers?.authorization,
@@ -50,7 +50,7 @@ export const crawlStreamLazy = async (req: Request, res: Response) => {
       await crawlHttpStream(
         {
           url,
-          userId: userNext.id,
+          userId: userNext?.id,
           scan: false,
           subdomains: subdomainsEnabled,
           tld: tldEnabled,

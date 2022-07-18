@@ -51,7 +51,7 @@ import { ApolloServer } from "apollo-server-express";
 import { getWebsiteAPI, getWebsiteReport } from "./rest/routes/data/website";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
-import { crawlStreamLazy } from "./core/streams/crawl";
+import { crawlStream } from "./core/streams/crawl";
 import { crawlRest } from "./rest/routes/crawl";
 import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
@@ -470,17 +470,15 @@ function initServer(): HttpServer[] {
   app.post("/api/scan-simple", cors(), scanSimple);
   /*
    * Site wide scan.
-   * Uses Event based handling to get pages max timeout 30s.
+   * Uses Event based handling to get pages max timeout 15mins.
    */
   app.post("/api/crawl", cors(), crawlRest);
 
   /*
    * Site wide scan handles via stream.
-   * Uses Event based handling to get pages max timeout 30s.
-   * Sends a scan in progress response every 500ms.
-   * TODO: use real time crawl API for response feedback on crawl.
+   * Uses Event based handling to extract pages.
    */
-  app.post("/api/crawl-stream", cors(), crawlStreamLazy);
+  app.post("/api/crawl-stream", cors(), crawlStream);
 
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);
@@ -741,6 +739,7 @@ const startServer = async () => {
   });
 };
 
+// shutdown the server
 const killServer = async () => {
   try {
     await Promise.all([
@@ -750,7 +749,7 @@ const killServer = async () => {
       killGrpcServer(),
     ]);
   } catch (e) {
-    console.error("failed to kill server", e);
+    console.error("failed to shutdown server", e);
   }
 };
 

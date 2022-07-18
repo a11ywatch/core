@@ -134,7 +134,7 @@ export const addWebsite = async ({
     // perform extra scan on mutation. [TODO: add optional input field]
     if (canScan) {
       await watcherCrawl({
-        urlMap: url,
+        url: url,
         userId,
         scan: true,
         robots,
