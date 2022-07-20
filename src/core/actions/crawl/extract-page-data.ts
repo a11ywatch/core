@@ -27,7 +27,6 @@ export const extractPageData = (
       noticeCount = issuesInfo.noticeCount;
     }
 
-    // TODO: move Lighthouse into its own collection since it impacts search lookups
     if (insight) {
       let parsedInsight: Result;
       try {
