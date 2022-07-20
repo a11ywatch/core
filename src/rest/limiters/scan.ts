@@ -24,6 +24,8 @@ const connectLimiters = () => {
       standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
       legacyHeaders: false,
       store,
+      keyGenerator: (request, _response) =>
+        request.header["x-forwarded-for"] || request.ip,
     });
 
     scanLimiter = rateLimit({

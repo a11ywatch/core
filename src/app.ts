@@ -104,7 +104,7 @@ function initServer(): HttpServer[] {
 
   app.disable("x-powered-by");
 
-  app.set("trust proxy", 1);
+  app.set("trust proxy", true);
   // mw parsers
   app.use(cookieParser());
   app.use(cors(corsOptions));

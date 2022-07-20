@@ -3,6 +3,11 @@ import type { AppResponse } from "@app/types/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
 
 const createIframe = (req: Request, res: AppResponse) => {
+  const origin = req.get("origin");
+
+  res.set("Access-Control-Allow-Origin", origin);
+  res.setHeader("Content-Type", "text/html");
+
   try {
     const baseUrl = String(req.query.url || req.query.websiteUrl);
 
@@ -11,7 +16,6 @@ const createIframe = (req: Request, res: AppResponse) => {
     }
 
     const url = initUrl(decodeURIComponent(baseUrl));
-    // TODO: REMOVE replace
 
     if (url.includes(".pdf")) {
       res.redirect(url);

@@ -56,25 +56,19 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
  * determine if user can do any scans
  */
 export const validateScanEnabled = ({ user }) => {
-  if (SUPER_MODE) {
-    return true;
-  }
+  if (!SUPER_MODE) {
+    const totalUptime = user?.scanInfo?.totalUptime ?? 0;
+    const role = user?.role; // users role
 
-  const totalUptime = user?.scanInfo?.totalUptime ?? 0;
-  const role = user?.role; // users role
-
-  const base = 30000; // 30 seconds
-
-  const planBase = base * 2;
-
-  if (
-    !user ||
-    (role === 0 && totalUptime >= base) ||
-    (role === 1 && totalUptime >= planBase * 5) ||
-    (role === 2 && totalUptime >= planBase * 10) ||
-    (role == 3 && totalUptime >= (user?.scanInfo?.usageLimit || 10) * planBase)
-  ) {
-    return false;
+    if (
+      !user ||
+      (role === 0 && totalUptime >= 30000) || // 30 seconds
+      (role === 1 && totalUptime >= 300000) || // base uptime 5 mins x10
+      (role === 2 && totalUptime >= 800000) || // premium 13 mins
+      (role == 3 && totalUptime >= (user?.scanInfo?.usageLimit || 13) * 60000)
+    ) {
+      return false;
+    }
   }
 
   return true;

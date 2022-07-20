@@ -46,35 +46,24 @@ export const collectionUpsert = async (
 };
 
 /*
- * Increment a collection value
- * @param source: target updating
- * @param [collection, shouldUpdate]: handle the updating of collection - deleting requires update + delete
- * @param config: Object. set the key [searchProps]: search the db with the keys and values set
+ * Increment a collection property value
+ * @param source: target updating the key of the property with the new number to increment by
+ * @param collection: handle the updating of collection - deleting requires update + delete
+ * @param searchProps: The object to find in the collection by
  */
 export const collectionIncrement = async (
   source: any,
-  [collection]: [any],
-  config?: any
+  collection: any,
+  searchProps: Record<any, any>
 ) => {
   if (typeof source === "undefined") {
     return Promise.resolve();
   }
   try {
-    const userId = config?.searchProps?.userId || source?.userId;
-    const duration = config?.searchProps?.duration || source?.duration;
-
-    let queryParams = {};
-
-    if (typeof userId !== "undefined") {
-      queryParams = { userId };
-    }
-
     return await collection.updateOne(
-      queryParams,
+      searchProps,
       {
-        $inc: {
-          "scanInfo.totalUptime": duration,
-        },
+        $inc: source,
       },
       { upsert: true }
     );

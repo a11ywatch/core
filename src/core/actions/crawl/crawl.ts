@@ -140,28 +140,36 @@ export const crawlPage = async (
       pageSpeedApiKey: userData?.pageSpeedApiKey,
     });
 
-    // TODO: prevent typecasting and return float
-    const ttime = dataSource.webPage.pageLoadTime.duration || 0;
-    const pastUptime = userData.scanInfo.totalUptime || 0;
+    let shutdown = false;
 
-    const totalUptime = ttime + pastUptime;
+    if (!SUPER_MODE) {
+      // TODO: add tracking wasting resources that do not exist
+      const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
+      const pastUptime = userData?.scanInfo?.totalUptime || 0;
 
-    const updatedUser = {
-      ...userData,
-      scanInfo: {
-        ...userData?.scanInfo,
-        totalUptime,
-      },
-    };
+      const totalUptime = ttime + pastUptime;
 
-    const shutdown = validateScanEnabled({ user: updatedUser }) === false;
+      const updatedUser = {
+        ...userData,
+        scanInfo: {
+          ...userData?.scanInfo,
+          totalUptime,
+        },
+      };
 
-    await collectionIncrement({ duration: totalUptime }, [userCollection], {
-      searchProps: { userId },
-    }); // User COLLECTION
+      shutdown = validateScanEnabled({ user: updatedUser }) === false;
+
+      await collectionIncrement(
+        {
+          "scanInfo.totalUptime": totalUptime,
+        },
+        userCollection,
+        { id: userId }
+      ); // User COLLECTION
+    }
 
     // TODO: SET PAGE OFFLINE DB
-    if (!dataSource || !dataSource?.webPage || shutdown) {
+    if (!dataSource || !dataSource?.webPage) {
       if (!blockEvent) {
         trackerProccess(undefined, { domain, urlMap, userId, shutdown });
       }
