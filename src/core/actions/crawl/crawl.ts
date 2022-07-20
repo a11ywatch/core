@@ -141,19 +141,16 @@ export const crawlPage = async (
     });
 
     // TODO: prevent typecasting and return float
-    const totalUptime = isNaN(dataSource.webPage?.pageLoadTime?.duration)
-      ? 0
-      : dataSource.webPage.pageLoadTime.duration;
+    const ttime = dataSource.webPage.pageLoadTime.duration || 0;
+    const pastUptime = userData.scanInfo.totalUptime || 0;
 
-    const pastUptime = isNaN(userData?.scanInfo?.totalUptime)
-      ? 0
-      : userData.scanInfo.totalUptime;
+    const totalUptime = ttime + pastUptime;
 
     const updatedUser = {
       ...userData,
       scanInfo: {
         ...userData?.scanInfo,
-        totalUptime: totalUptime + pastUptime,
+        totalUptime,
       },
     };
 
@@ -164,7 +161,7 @@ export const crawlPage = async (
     }); // User COLLECTION
 
     // TODO: SET PAGE OFFLINE DB
-    if (!dataSource || !dataSource?.webPage) {
+    if (!dataSource || !dataSource?.webPage || shutdown) {
       if (!blockEvent) {
         trackerProccess(undefined, { domain, urlMap, userId, shutdown });
       }
@@ -174,7 +171,7 @@ export const crawlPage = async (
           data: null,
           code: 300,
           success: false,
-          message: "Web site had issues during scan and may be offline.",
+          message: "Web scan did not complete.",
         })
       );
     }
