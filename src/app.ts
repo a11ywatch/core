@@ -705,7 +705,15 @@ function initServer(): HttpServer[] {
 
 let coreServer: HttpServer;
 
+// determine if the server started
+let serverInited = false;
+let serverReady = false;
+
+// start the http, graphl, events, subs, and gRPC server
 const startServer = async () => {
+  // do not wait for express api and rely on hc
+  serverInited = true;
+
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");
   }
@@ -731,6 +739,8 @@ const startServer = async () => {
     try {
       [coreServer] = initServer();
 
+      serverReady = true;
+
       resolve([coreServer]);
     } catch (e) {
       console.error(["SERVER FAILED TO START", e]);
@@ -739,7 +749,22 @@ const startServer = async () => {
   });
 };
 
-// shutdown the server
+// determine if the server is completly ready
+const isReady = async () => {
+  return new Promise((resolve) => {
+    if (serverInited) {
+      const serverInterval = setInterval(() => {
+        if (serverReady) {
+          clearInterval(serverInterval);
+          resolve(true);
+        }
+      }, 5);
+    }
+    resolve(serverReady);
+  });
+};
+
+// shutdown the everything
 const killServer = async () => {
   try {
     await Promise.all([
@@ -753,4 +778,4 @@ const killServer = async () => {
   }
 };
 
-export { coreServer, killServer, initServer, startServer };
+export { coreServer, isReady, killServer, initServer, startServer };
