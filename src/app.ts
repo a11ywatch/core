@@ -722,7 +722,7 @@ const startServer = async () => {
   establishCrawlTracking();
 
   try {
-    // connect all clients gRPC
+    // connect all clients
     await connectClients();
   } catch (e) {
     console.error(e);
@@ -752,15 +752,27 @@ const startServer = async () => {
 // determine if the server is completly ready
 const isReady = async () => {
   return new Promise((resolve) => {
-    if (serverInited) {
+    if (serverReady) {
+      resolve(true);
+    } else {
       const serverInterval = setInterval(() => {
         if (serverReady) {
           clearInterval(serverInterval);
+          // add slight delay for chrome connecting [TODO: pagemind chrome handle before gRPC pagemind connect with retry]
           resolve(true);
         }
-      }, 5);
+      }, 8);
+
+      // give 100 ms to wait for server to start before clearing out
+      if (!serverInited) {
+        setTimeout(() => {
+          if (!serverInited) {
+            clearInterval(serverInterval);
+            resolve(serverReady);
+          }
+        }, 50);
+      }
     }
-    resolve(serverReady);
   });
 };
 

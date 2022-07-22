@@ -1,21 +1,21 @@
 import { WEBSITE_NOT_FOUND } from "@app/core/strings";
 import { getIssue } from "../find";
 
-interface Props {
+type RemoveProps = {
   userId?: number;
   url?: string;
   deleteMany?: boolean;
-}
+};
 
 export const removeIssue = async ({
   userId,
   url,
   deleteMany = false,
-}: Props) => {
+}: RemoveProps) => {
   const [siteExist, collection] = await getIssue({ userId, url }, true);
 
   let deleteMethod = "findOneAndDelete";
-  let searchMethod: Props = { url };
+  let searchMethod: RemoveProps = { url, userId };
 
   if (deleteMany) {
     deleteMethod = "deleteMany";

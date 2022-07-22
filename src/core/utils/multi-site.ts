@@ -3,11 +3,12 @@ import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
 import { crawlEmitter } from "@app/event";
 import { domainName } from "./domain-name";
 
-interface CrawlMultiSite {
+// multi page website crawl gather all results via events
+type CrawlMultiSite = {
   data?: any[];
   message: string;
   success?: boolean;
-}
+};
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlMultiSiteWithEvent = (props): Promise<CrawlMultiSite> => {

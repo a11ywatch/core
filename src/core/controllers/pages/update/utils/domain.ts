@@ -1,13 +1,6 @@
 import { getAnalyticsPaging } from "@app/core/controllers/analytics";
 import { arrayAverage } from "@app/core/utils";
 
-interface ScoreProps {
-  domain?: string;
-  perfectScore?: boolean;
-  userId?: number;
-  all?: boolean; // subdomains and tld to get all pages
-}
-
 const defaultIssuesInfo = {
   warningCount: 0,
   errorCount: 0,
@@ -17,7 +10,16 @@ const defaultIssuesInfo = {
   possibleIssuesFixedByCdn: 0,
 };
 
-interface IssuesInfo {
+// the score generated
+type ScoreProps = {
+  domain?: string;
+  perfectScore?: boolean;
+  userId?: number;
+  all?: boolean; // subdomains and tld to get all pages
+};
+
+// standard issue type [TODO centralize]
+type IssuesInfo = {
   adaScoreAverage: number;
   possibleIssuesFixedByCdn: any;
   totalIssues: any;
@@ -26,7 +28,7 @@ interface IssuesInfo {
   warningCount: any;
   noticeCount: any;
   pageCount: number;
-}
+};
 
 // recursive analytics to process in chunks
 export const getRecursiveResults = async ({

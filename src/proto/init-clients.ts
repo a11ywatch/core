@@ -7,25 +7,21 @@ import {
 export const startClientsGRPC = async (retry?: boolean) => {
   // prevent outside startup for now
   return new Promise(async (resolve) => {
-    if (process.env.NODE_ENV !== "test") {
-      setTimeout(async () => {
-        try {
-          await createCrawlerClient();
-          await createPageMindClient();
-          await createMavClient();
-          console.log("gRPC clients connected - pagemind, crawler, and mav.");
-        } catch (e) {
-          console.error(e);
-          // try connection assume clients are all connected. TODO: remove HTTP health checks for gRPC.
-          if (!retry) {
-            return await startClientsGRPC(true);
-          }
+    setTimeout(async () => {
+      try {
+        await createCrawlerClient();
+        await createPageMindClient();
+        await createMavClient();
+        console.log("gRPC clients connected - pagemind, crawler, and mav.");
+      } catch (e) {
+        console.error(e);
+        // try connection assume clients are all connected. TODO: remove HTTP health checks for gRPC.
+        if (!retry) {
+          return await startClientsGRPC(true);
         }
+      }
 
-        resolve(true);
-      }, 35);
-    } else {
       resolve(true);
-    }
+    }, 35);
   });
 };
