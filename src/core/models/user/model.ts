@@ -7,7 +7,7 @@ const UserModel = {
   salt: "",
   id: -1, // [DEPRECATED DEFAULT]: was set to 1 to inc between as old counter
   jwt: "",
-  role: process.env.SUPER_MODE ? 2 : 0,
+  role: SUPER_MODE ? 2 : 0,
   alertEnabled: true,
   emailConfirmed: false,
   profileVisible: false,
