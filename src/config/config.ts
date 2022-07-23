@@ -37,8 +37,8 @@ const GRAPHQL_PORT = Number(
   process.env.PORT || process.env.GRAPHQL_PORT || 3280
 );
 
-// if ran from the CLI prevent rate-limits and usage limits [TODO]
-export const SUPER_MODE = process.env.SUPER_MODE === "true";
+// default SUPER mode to true
+export const SUPER_MODE = process.env.SUPER_MODE === "false" ? false : true;
 
 const defaultWebPort = process.env.WEB_PORT || 3000;
 const defaultWebURL = DEV
