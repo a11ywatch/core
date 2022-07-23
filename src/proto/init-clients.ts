@@ -5,23 +5,23 @@ import {
 } from "./website-client";
 
 export const startClientsGRPC = async (retry?: boolean) => {
-  // prevent outside startup for now
   return new Promise(async (resolve) => {
     setTimeout(async () => {
       try {
         await createCrawlerClient();
-        await createPageMindClient();
         await createMavClient();
+        await createPageMindClient();
         console.log("gRPC clients connected - pagemind, crawler, and mav.");
       } catch (e) {
         console.error(e);
         // try connection assume clients are all connected. TODO: remove HTTP health checks for gRPC.
         if (!retry) {
+          console.log("retrying gRPC client connections");
           return await startClientsGRPC(true);
         }
       }
 
       resolve(true);
-    }, 35);
+    }, 0);
   });
 };
