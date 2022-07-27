@@ -100,10 +100,12 @@ export const getPagesPaging = async (
     // run with insight relationship
     if (insights) {
       for (let i = 0; i < pages.length; i++) {
+        const cp = pages[i];
+
         const { json } =
           (await PageSpeedController().getWebsite({
             userId,
-            ...pages[i],
+            pageUrl: cp.url,
           })) ?? {};
         if (json) {
           pages[i].insight = { json };

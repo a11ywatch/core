@@ -71,11 +71,9 @@ export const Website = {
     });
   },
   insight: async ({ userId, domain }, _params) => {
-    const pageInsights = await PageSpeedController().getWebsitePageSpeed({
+    return await PageSpeedController().getWebsitePageSpeed({
       userId,
       domain,
     });
-
-    return pageInsights;
   },
 };
