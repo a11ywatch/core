@@ -59,7 +59,7 @@ const trackerProccess = (
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean, // determine if email should be sent based on results
-  blockEvent?: boolean // block event from rest
+  blockEvent?: boolean // block event from emitting
 ): Promise<ResponseModel> => {
   const {
     userId,
@@ -86,10 +86,8 @@ export const crawlPage = async (
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
   // block scans from running
-  if (validateScanEnabled({ user: userData }) === false) {
-    if (!blockEvent) {
-      trackerProccess(undefined, { domain, urlMap, userId, shutdown: true });
-    }
+  if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
+    trackerProccess(undefined, { domain, urlMap, userId, shutdown: true });
 
     return responseModel({
       data: null,

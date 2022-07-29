@@ -4,6 +4,7 @@ import ua from "universal-analytics";
 
 const { DEV, DOMAIN } = config;
 
+// get the origin of the request
 const getOrigin = (origin: string, nextJSMiddleware?: boolean) => {
   if (origin && origin.includes("api.")) {
     return origin.replace("api.", "");
@@ -17,9 +18,14 @@ const getOrigin = (origin: string, nextJSMiddleware?: boolean) => {
 };
 
 export const logPage = async (req: Request, res: Response) => {
+  // prevent dev or non ga logging
+  if (!process.env.GOOGLE_ANALYTIC_ID || DEV) {
+    return res.sendStatus(200);
+  }
+
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Cookies, Accept, User-Agent, Referer, DNT"
+    "Origin, X-Requested-With, X-Forwarded-For, X-Forwarded-Path, X-Forwarded-ID, Content-Type, Cookies, Accept, User-Agent, Referer, DNT"
   );
   const agent = req.headers["user-agent"];
   const middleware = agent === "Next.js Middleware";
@@ -29,47 +35,39 @@ export const logPage = async (req: Request, res: Response) => {
     agent === "Next.js Middleware"
   );
 
-  // // IGNORE OPTIONS
-  if (DEV || !whitelist.includes(origin)) {
+  // IGNORE OPTIONS prevent outside domains
+  if (!whitelist.includes(origin)) {
     return res.sendStatus(200);
   }
 
-  const { page, ip, userID, screenResolution, documentReferrer, geo } =
-    req.body;
-
-  const dr = documentReferrer ?? req.headers["referer"];
+  const ip = req.headers["x-forwarded-for"] || req.ip;
+  const dr = req.headers["referer"];
+  const userID = req.headers["x-forwarded-id"] as any;
+  const page = req.headers["x-forwarded-path"] as any;
 
   try {
     const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, {
-      cid: userID || agent,
+      cid: origin,
       uid: userID,
       strictCidFormat: false,
     });
 
     if (req.headers["DNT"] !== "1") {
-      // TODO: any data future collection
+      // TODO: any data future collection convert to OSS analytics
     }
 
-    if (ip) {
-      visitor.set("uip", ip);
-    } else if (geo) {
-      const { country } = geo;
+    visitor.set("uip", ip);
 
-      if (country) {
-        visitor.set("geoid", country);
-      }
-    }
-
-    if (screenResolution) {
-      visitor.set("vp", Number(screenResolution));
-    }
+    // if (screenResolution) {
+    //   visitor.set("vp", Number(screenResolution));
+    // }
 
     if (dr) {
-      visitor.set("dr", encodeURI(dr));
+      visitor.set("dr", encodeURI(dr + ""));
     }
 
     if (!middleware && agent) {
-      visitor.set("ua", encodeURI(agent));
+      visitor.set("ua", encodeURI(agent + ""));
     }
 
     visitor.pageview(page ?? "/", origin).send();
