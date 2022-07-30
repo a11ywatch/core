@@ -47,7 +47,7 @@ import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken, parseCookie } from "./core/utils";
 import { retreiveUserByToken } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, ExpressContext } from "apollo-server-express";
 import { getWebsiteAPI, getWebsiteReport } from "./rest/routes/data/website";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
@@ -72,9 +72,8 @@ import {
 
 const { GRAPHQL_PORT } = config;
 
+// configure one app-wide setting for user agents on node-iframe request
 configureAgent();
-
-let server;
 
 // all the clients for external request
 const connectClients = async () => {
@@ -100,6 +99,8 @@ const connectClients = async () => {
 const allowDocDomains = [...whitelist, "vercel.com"]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
 
 function initServer(): HttpServer[] {
+  let server: ApolloServer<ExpressContext>;
+
   const app = express();
 
   app.disable("x-powered-by");
@@ -628,7 +629,6 @@ function initServer(): HttpServer[] {
   });
 
   let httpServer: HttpServer;
-
   let subscriptionServer;
 
   server = new ApolloServer(
@@ -688,7 +688,6 @@ function initServer(): HttpServer[] {
     server.applyMiddleware({ app, cors: corsOptions });
 
     logServerInit((listener.address() as AddressInfo).port, {
-      subscriptionsPath: server.subscriptionsPath,
       graphqlPath: server.graphqlPath,
     });
 
