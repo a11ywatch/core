@@ -147,6 +147,7 @@ export const crawlPage = async (
 
       const totalUptime = ttime + pastUptime;
 
+      // check if scan has shut down. TODO: remove
       const updatedUser = {
         ...userData,
         scanInfo: {
@@ -155,11 +156,12 @@ export const crawlPage = async (
         },
       };
 
+      // TODO: remove and use shutdown prior
       shutdown = validateScanEnabled({ user: updatedUser }) === false;
 
       await collectionIncrement(
         {
-          "scanInfo.totalUptime": totalUptime,
+          "scanInfo.totalUptime": ttime, // add new uptime to collection
         },
         userCollection,
         { id: userId }

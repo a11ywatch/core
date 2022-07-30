@@ -17,6 +17,7 @@ const getOrigin = (origin: string, nextJSMiddleware?: boolean) => {
   return origin || DOMAIN;
 };
 
+// log a page to GA
 export const logPage = async (req: Request, res: Response) => {
   // prevent dev or non ga logging
   if (!process.env.GOOGLE_ANALYTIC_ID || DEV) {
