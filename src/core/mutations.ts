@@ -11,7 +11,7 @@ import {
 } from "./graph/mutations";
 import { watcherCrawl } from "./actions/crawl/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
-import { gqlRateLimiter } from "@app/rest/limiters/scan";
+import { gqlRateLimiter } from "@app/web/limiters/scan";
 import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";

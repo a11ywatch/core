@@ -1,4 +1,3 @@
-import { extendUser } from "@app/core/models/user/model";
 import { userParams } from "@app/core/utils/controller-filter";
 import { connect } from "@app/database";
 import { User } from "@app/types/types";
@@ -40,7 +39,7 @@ async function getUser({
 
     // only perform find if keys exist
     if (Object.keys(params).length) {
-      user = extendUser(await collection.findOne(params));
+      user = await collection.findOne(params);
     }
 
     return [user, collection];

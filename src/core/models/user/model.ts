@@ -1,5 +1,4 @@
 import { SUPER_MODE } from "@app/config/config";
-import { User } from "@app/types/schema";
 
 const UserModel = {
   email: "",
@@ -41,16 +40,4 @@ const makeUser = (extra: any = {}): typeof UserModel => {
   );
 };
 
-// wrap user with extensions based on the runtime
-const extendUser = (user: User) => {
-  if (!user) {
-    return null;
-  }
-  let role = user.role;
-  if (SUPER_MODE) {
-    role = 3;
-  }
-  return { ...user, pageSpeedApiKey: user?.pageSpeedApiKey ?? "", role };
-};
-
-export { UserModel, makeUser, extendUser };
+export { UserModel, makeUser };

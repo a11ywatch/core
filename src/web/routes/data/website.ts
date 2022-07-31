@@ -4,7 +4,7 @@ import { downloadToExcel, getUserFromToken } from "@app/core/utils";
 import { Website } from "@app/types/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { retreiveUserByToken } from "@app/core/utils/get-user-data";
-import { paramParser } from "@app/rest/extracter";
+import { paramParser } from "@app/web/extracter";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage

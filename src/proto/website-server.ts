@@ -2,7 +2,7 @@ import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
 import { GRPC_HOST } from "@app/config/rpc";
 import { crawlMultiSite } from "@app/core/actions";
 import { crawlEnqueue } from "@app/queues/crawl/crawl";
-import { crawlTrackerComplete } from "@app/rest/routes/services/crawler/complete-crawl";
+import { crawlTrackerComplete } from "@app/web/routes/services/crawler/complete-crawl";
 import { emailMessager } from "@app/core/messagers";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 

@@ -24,7 +24,7 @@ export const updateApiUsage = async ({ id }) => {
     return [user, collection, SUPER_MODE];
   }
 
-  const { role, apiUsage } = user ?? { role: 0, apiUsage: {} };
+  const { role, apiUsage } = user;
 
   // current day or the next scan
   const lastScanDate = new Date();
@@ -40,7 +40,7 @@ export const updateApiUsage = async ({ id }) => {
   const blockScan = usageExceededThreshold({
     audience: role,
     usage: currentUsage,
-    usageLimit: apiUsage.usageLimit,
+    usageLimit: apiUsage?.usageLimit,
   });
 
   // current usage exceeds the max limit block request

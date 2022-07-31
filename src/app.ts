@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import http from "http";
 import https from "https";
 import cors from "cors";
-import createIframe, { configureAgent } from "node-iframe";
+import { configureAgent } from "node-iframe";
 import { CronJob } from "cron";
 import {
   corsOptions,
@@ -19,8 +19,7 @@ import {
   crawlAllAuthedWebsitesCluster,
 } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
-import cookieParser from "cookie-parser";
-import { getBaseParams, paramParser } from "./rest/extracter";
+import { getBaseParams, paramParser } from "./web/extracter";
 import {
   CONFIRM_EMAIL,
   IMAGE_CHECK,
@@ -34,25 +33,25 @@ import {
   initRedisConnection,
   closeRedisConnection,
 } from "./database";
-import { confirmEmail, detectImage, root, unSubEmails } from "./rest/routes";
+import { confirmEmail, detectImage, root, unSubEmails } from "./web/routes";
 import { logPage } from "./core/controllers/analytics/ga";
-import { statusBadge } from "./rest/routes/resources/badge";
-import { scanSimple } from "./rest/routes/scan";
-import { setGithubActionRoutes } from "./rest/routes_groups/github-actions";
-import { setAnnouncementsRoutes } from "./rest/routes_groups/announcements";
-import { setAuthRoutes } from "./rest/routes_groups/auth";
-import { limiter, scanLimiter, connectLimiters } from "./rest/limiters/scan";
+import { statusBadge } from "./web/routes/resources/badge";
+import { scanSimple } from "./web/routes/scan";
+import { setGithubActionRoutes } from "./web/routes_groups/github-actions";
+import { setAnnouncementsRoutes } from "./web/routes_groups/announcements";
+import { setAuthRoutes } from "./web/routes_groups/auth";
+import { connectLimiters } from "./web/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken, parseCookie } from "./core/utils";
 import { retreiveUserByToken } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
 import { ApolloServer, ExpressContext } from "apollo-server-express";
-import { getWebsiteAPI, getWebsiteReport } from "./rest/routes/data/website";
+import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
-import { crawlRest } from "./rest/routes/crawl";
+import { crawlRest } from "./web/routes/crawl";
 import { getWebsitesPaging } from "./core/controllers/websites/find/get";
 import { getIssuesPaging } from "./core/controllers/issues/find";
 import { getServerConfig } from "./apollo-server";
@@ -69,6 +68,7 @@ import {
   getPageSpeedPaging,
   PageSpeedController,
 } from "./core/controllers/page-speed/main";
+import { registerExpressApp } from "./web/register";
 
 const { GRAPHQL_PORT } = config;
 
@@ -96,42 +96,20 @@ const connectClients = async () => {
   }
 };
 
-const allowDocDomains = [...whitelist, "vercel.com"]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
+const allowDocDomains = [...whitelist]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
 
 function initServer(): HttpServer[] {
   let server: ApolloServer<ExpressContext>;
 
   const app = express();
 
-  app.disable("x-powered-by");
+  // setup all middlewares and app settings
+  registerExpressApp(app);
 
-  app.set("trust proxy", true);
-  // mw parsers
-  app.use(cookieParser());
-  app.use(cors(corsOptions));
-  app.use(express.urlencoded({ extended: true }));
-  app.use(express.json({ limit: "300mb" }));
-
-  // rate limits on expensive endpoints
-  if (!config.SUPER_MODE) {
-    app.use("/playground", limiter);
-    app.use("/grpc-docs", limiter);
-    app.use("/api/iframe", limiter);
-    app.use("/api/get-website", limiter);
-    app.use("/api/register", limiter);
-    app.use("/api/report", limiter);
-    app.use("/api/login", limiter);
-    app.use("/api/scan-simple", scanLimiter);
-    app.use("/api/crawl", scanLimiter);
-    app.use("/api/crawl-stream", scanLimiter);
-    app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
-  }
-
-  app.use(express.static(path.resolve("public")));
-
-  app.use(createIframe);
+  // email handling
   app.options(CONFIRM_EMAIL, cors());
   app.options(UNSUBSCRIBE_EMAILS, cors());
+
   // root
   app.get(ROOT, root);
 
@@ -141,6 +119,7 @@ function initServer(): HttpServer[] {
     res.send(graphqlPlayground());
   });
 
+  // TODO: move to client
   app.get("/grpc-docs", cors(), (req, res) => {
     const origin = req.get("origin");
 
@@ -173,11 +152,10 @@ function initServer(): HttpServer[] {
   });
   // retreive a website from the database.
   app.get("/api/website", cors(), async (req, res) => {
+    const { userId, domain } = getBaseParams(req);
     let data;
     let code = 200;
     let message = "Failed to retrieved website.";
-
-    const { userId, domain } = getBaseParams(req);
 
     // flexible params for url [backwards compat api support] TODO: remove
     const url1 = paramParser(req, "url");
@@ -702,6 +680,7 @@ function initServer(): HttpServer[] {
   return [listener];
 }
 
+// core http app server
 let coreServer: HttpServer;
 
 // determine if the server started
