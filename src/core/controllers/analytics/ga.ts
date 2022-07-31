@@ -17,7 +17,7 @@ const getOrigin = (origin: string, nextJSMiddleware?: boolean) => {
   return origin || DOMAIN;
 };
 
-// log a page to GA
+// log a page to GA without sending any tracking info
 export const logPage = async (req: Request, res: Response) => {
   // prevent dev or non ga logging
   if (!process.env.GOOGLE_ANALYTIC_ID || DEV) {
@@ -49,27 +49,12 @@ export const logPage = async (req: Request, res: Response) => {
   try {
     const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, {
       cid: origin,
-      uid: userID,
+      uid: userID || ip,
       strictCidFormat: false,
     });
 
-    if (req.headers["DNT"] !== "1") {
-      // TODO: any data future collection convert to OSS analytics
-    }
-
-    visitor.set("uip", ip);
-
-    // if (screenResolution) {
-    //   visitor.set("vp", Number(screenResolution));
-    // }
-
-    if (dr) {
-      visitor.set("dr", encodeURI(dr + ""));
-    }
-
-    if (!middleware && agent) {
-      visitor.set("ua", encodeURI(agent + ""));
-    }
+    dr && visitor.set("dr", encodeURI(dr + ""));
+    !middleware && agent && visitor.set("ua", encodeURI(agent + ""));
 
     visitor.pageview(page ?? "/", origin).send();
 
