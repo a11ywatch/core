@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.4.38",
+  "version": "0.4.39",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -37,7 +37,7 @@
     "ioredis": "^4.28.5",
     "jsonwebtoken": "8.5.1",
     "mongodb": "3.7.3",
-    "node-iframe": "^1.7.5",
+    "node-iframe": "^1.8.4",
     "nodemailer": "6.7.2",
     "pb-util": "^1.0.3",
     "rate-limit-redis": "^3.0.1",
