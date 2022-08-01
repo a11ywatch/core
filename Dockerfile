@@ -10,7 +10,7 @@ RUN mkdir ./doc && cp -R node_modules/@a11ywatch/protos proto
 
 RUN protoc --doc_out=./doc --doc_opt=html,index.html proto/*.proto
 
-FROM node:18.4-alpine AS installer
+FROM node:18-alpine AS installer
 
 WORKDIR /usr/src/app
 
@@ -21,7 +21,7 @@ RUN apk upgrade --update-cache --available && \
 COPY . .
 RUN npm ci
 
-FROM node:18.4-alpine AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -32,7 +32,7 @@ RUN npm run build
 RUN rm -R ./node_modules
 RUN npm install --production
 
-FROM node:18.4-alpine
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
