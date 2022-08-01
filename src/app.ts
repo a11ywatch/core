@@ -1,11 +1,13 @@
 import type { Server as HttpServer } from "http";
 import type { AddressInfo } from "net";
-import express, { Request, Response } from "express";
+import express from "express";
 import http from "http";
 import https from "https";
 import cors from "cors";
 import { configureAgent } from "node-iframe";
 import { CronJob } from "cron";
+import path from "path";
+
 import {
   corsOptions,
   config,
@@ -52,23 +54,15 @@ import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
 import { crawlRest } from "./web/routes/crawl";
-import { getWebsitesPaging } from "./core/controllers/websites/find/get";
-import { getIssuesPaging } from "./core/controllers/issues/find";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
-import { getPagesPaging } from "./core/controllers/pages/find/domains";
 import { updateWebsite } from "./core/controllers/websites/update";
-import { getAnalyticsPaging } from "./core/controllers/analytics";
 import { graphqlPlayground } from "./html";
 import { SubscriptionServer } from "subscriptions-transport-ws";
-import { getScriptsPaging } from "./core/controllers/scripts";
 import { execute, subscribe } from "graphql";
-import path from "path";
-import {
-  getPageSpeedPaging,
-  PageSpeedController,
-} from "./core/controllers/page-speed/main";
+import { PageSpeedController } from "./core/controllers/page-speed/main";
 import { registerExpressApp } from "./web/register";
+import { setListRoutes } from "./web/routes_groups/list";
 
 const { GRAPHQL_PORT } = config;
 
@@ -246,203 +240,6 @@ function initServer(): HttpServer[] {
     );
   });
 
-  // paginated retreive websites from the database.
-  app.get("/api/list/website", cors(), async (req, res) => {
-    const { userId } = getBaseParams(req);
-    let data;
-    let code = 200;
-    let message = "";
-
-    if (typeof userId !== "undefined") {
-      try {
-        data = await getWebsitesPaging({
-          userId,
-          limit: 5,
-          offset: Number(req.query.offset) || 0,
-          insights: true,
-        });
-        message = "Successfully retrieved websites.";
-      } catch (e) {
-        code = 400;
-        message = `Failed to retrieved websites - ${e}`;
-      }
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
-  });
-
-  // paginated retreive analytics from the database. Limit default is set to 20.
-  app.get("/api/list/analytics", cors(), async (req, res) => {
-    const { userId, domain } = getBaseParams(req);
-    let data;
-    let code = 200;
-    let message = "";
-
-    if (typeof userId !== "undefined") {
-      try {
-        data = await getAnalyticsPaging({
-          userId,
-          limit: 5,
-          offset: Number(req.query.offset) || 0,
-          domain,
-        });
-        message = "Successfully retrieved analytics.";
-      } catch (e) {
-        code = 400;
-        message = `Failed to retrieved analytics - ${e}`;
-      }
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
-  });
-
-  // paginated retreive pages from the database.
-  app.get("/api/list/pages", cors(), async (req: Request, res: Response) => {
-    const { userId, domain } = getBaseParams(req);
-    let data;
-    let code = 200;
-    let message = "";
-
-    if (typeof userId !== "undefined") {
-      try {
-        data = await getPagesPaging({
-          userId,
-          limit: 5,
-          offset: Number(req.query.offset) || 0,
-          domain: domain || undefined,
-          insights: true,
-        });
-        if (data) {
-          message = "Successfully retrieved pages.";
-        }
-      } catch (e) {
-        code = 400;
-        message = `Failed to retrieved pages - ${e}`;
-      }
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
-  });
-
-  // paginated retreive scripts from the database. Limit default is set to 20.
-  app.get("/api/list/scripts", cors(), async (req: Request, res: Response) => {
-    const { userId, domain } = getBaseParams(req);
-
-    let data;
-    let code = 200;
-    let message = "";
-
-    if (typeof userId !== "undefined") {
-      try {
-        data = await getScriptsPaging({
-          userId,
-          limit: 5,
-          offset: Number(req.query.offset) || 0,
-          domain,
-        });
-        message = "Successfully retrieved scripts.";
-      } catch (e) {
-        code = 400;
-        message = `Failed to retrieved scripts - ${e}`;
-      }
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
-  });
-
-  // list of issues
-  app.get("/api/list/issue", cors(), async (req: Request, res: Response) => {
-    const { userId, domain, pageUrl } = getBaseParams(req);
-
-    let data;
-    let code = 200;
-    let message = "";
-
-    if (typeof userId !== "undefined") {
-      try {
-        data = await getIssuesPaging({
-          userId,
-          limit: 5,
-          domain,
-          pageUrl,
-        });
-        message = "Successfully retrieved issues.";
-      } catch (e) {
-        code = 400;
-        message = `Failed to retrieve issues - ${e}`;
-      }
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
-  });
-
-  // list of pagespeed collections
-  app.get(
-    "/api/list/pagespeed",
-    cors(),
-    async (req: Request, res: Response) => {
-      const { userId, domain, pageUrl } = getBaseParams(req);
-
-      let data;
-      let code = 200;
-      let message = "";
-
-      if (typeof userId !== "undefined") {
-        try {
-          data = await getPageSpeedPaging({
-            userId,
-            limit: 5,
-            domain,
-            pageUrl,
-            all: false,
-          });
-          message = "Successfully retrieved pagespeed.";
-        } catch (e) {
-          code = 400;
-          message = `Failed to retrieve pagespeed - ${e}`;
-        }
-      }
-
-      res.json(
-        responseModel({
-          code,
-          data: data ? data : null,
-          message,
-        })
-      );
-    }
-  );
-
   /*
    * Single page scan
    */
@@ -556,6 +353,8 @@ function initServer(): HttpServer[] {
   // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
   app.get("/api/get-website", cors(), getWebsiteAPI);
 
+  // Paginated List Routes
+  setListRoutes(app);
   // AUTH ROUTES
   setAuthRoutes(app);
   // Announcements from the application (new features etc)
@@ -652,7 +451,7 @@ function initServer(): HttpServer[] {
         const user = getUserFromToken(parsedCookie?.jwt || "");
 
         return {
-          userId: user ? user?.payload?.keyid : undefined,
+          userId: user?.payload?.keyid,
         };
       },
     },

@@ -32,17 +32,17 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
         path: `/login/oauth/access_token`,
       },
       (res) => {
-        let data = "";
+        let resd = "";
 
         res.on("data", (chunk) => {
-          data += chunk;
+          resd += chunk;
         });
 
         res.on("end", () => {
           try {
-            data = JSON.parse(data);
+            resd = JSON.parse(resd);
           } catch (_) {}
-          resolve(data);
+          resolve(resd);
         });
       }
     );
@@ -50,7 +50,7 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
     req.write(data);
 
     req.on("error", (err) => {
-      console.log("Error: ", err.message);
+      console.error("Error: ", err.message);
       reject(err);
     });
 
@@ -58,6 +58,7 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
   });
 };
 
+// set all authentication routes
 export const setAuthRoutes = (app: Application) => {
   app.post("/api/register", cors(), async (req, res) => {
     try {
@@ -114,11 +115,9 @@ export const setAuthRoutes = (app: Application) => {
           }
         );
       }
-      res.send(true);
-    } else {
-      // un-authed user
-      res.send(true);
     }
+
+    res.sendStatus(200);
   });
 
   app.get("/github/callback", async (req, res) => {
@@ -134,7 +133,7 @@ export const setAuthRoutes = (app: Application) => {
     res.redirect(
       authentication
         ? `${config.DOMAIN}/auth-redirect?${authentication}`
-        : `${config.DOMAIN}`
+        : config.DOMAIN
     );
   });
 };

@@ -23,3 +23,23 @@ export const getBaseParams = (req: Request) => {
     pageUrl,
   };
 };
+
+// get the base params for a standard collection retrieval by userId, domain, and url, with pagination
+export const getBaseParamsList = (req: Request) => {
+  const { userId, domain, pageUrl } = getBaseParams(req);
+
+  let offset;
+
+  if (req.query.offset) {
+    const oset = Number(req.query.offset);
+    offset = isNaN(oset) ? 0 : oset;
+  }
+
+  return {
+    userId,
+    domain,
+    pageUrl,
+    offset,
+    limit: 5,
+  };
+};

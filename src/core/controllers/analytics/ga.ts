@@ -28,39 +28,35 @@ export const logPage = async (req: Request, res: Response) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, X-Forwarded-For, X-Forwarded-Path, X-Forwarded-ID, Content-Type, Cookies, Accept, User-Agent, Referer, DNT"
   );
-  const agent = req.headers["user-agent"];
-  const middleware = agent === "Next.js Middleware";
+  const agent = req.get("User-Agent");
 
-  const origin = getOrigin(
-    req.get("origin") || req.headers.origin,
-    agent === "Next.js Middleware"
-  );
+  const origin = getOrigin(req.get("Origin"), agent === "Next.js Middleware");
 
   // IGNORE OPTIONS prevent outside domains
   if (!whitelist.includes(origin)) {
     return res.sendStatus(200);
   }
 
-  const ip = req.headers["x-forwarded-for"] || req.ip;
-  const dr = req.headers["referer"];
-  const userID = req.headers["x-forwarded-id"] as any;
-  const page = req.headers["x-forwarded-path"] as any;
+  const ip = req.get("X-Forwarded-For");
+  const dr = req.get("Referer");
+  const userID = req.get("X-Forwarded-ID");
 
   try {
-    const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, {
+    const visitor = ua(process.env.GOOGLE_ANALYTIC_ID, origin, {
       cid: origin,
       uid: userID || ip,
       strictCidFormat: false,
+      headers: {
+        "X-Forwarded-For": ip,
+        "User-Agent": agent,
+        Referer: encodeURI(dr),
+      },
     });
 
-    dr && visitor.set("dr", encodeURI(dr + ""));
-    !middleware && agent && visitor.set("ua", encodeURI(agent + ""));
-
-    visitor.pageview(page ?? "/", origin).send();
-
-    res.sendStatus(204);
+    visitor.pageview(req.get("X-Forwarded-Path") || "/", origin).send();
   } catch (e) {
     console.error(e);
-    res.sendStatus(200);
   }
+
+  res.sendStatus(204);
 };
