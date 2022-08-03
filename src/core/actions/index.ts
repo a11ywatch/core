@@ -1,3 +1,3 @@
-export { crawlWebsite } from "./crawl/crawl-group";
-export { crawlPage, crawlMultiSite } from "./crawl/crawl";
-export { scanWebsite } from "./crawl/scan";
+export { crawlWebsite } from "./accessibility/crawl-group";
+export { crawlPage, crawlMultiSite } from "./accessibility/crawl";
+export { scanWebsite } from "./accessibility/scan";

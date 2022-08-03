@@ -14,7 +14,7 @@ import { extractPageData } from "./extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
-import { SUPER_MODE } from "@app/config/config";
+import { SUPER_MODE, SCRIPTS_ENABLED } from "@app/config/config";
 import type { User, Website } from "@app/types/types";
 import type { Issue } from "../../../types/schema";
 import { redisConnected } from "@app/database/memory-client";
@@ -32,19 +32,23 @@ export type CrawlConfig = {
   user?: User; // optional pass user
 };
 
-// track the crawl events between crawls [TODO: remove duel emit]
+// track the crawl events between crawls
 const trackerProccess = (
   data: any,
-  { domain, urlMap, userId, shutdown = false }: any
+  { domain, urlMap, userId, shutdown = false }: any,
+  blockEvent?: boolean
 ) => {
+  if (!blockEvent) {
+    crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
+  }
+
+  // determine crawl has been processed top level tracking
   crawlTrackingEmitter.emit("crawl-processed", {
     user_id: userId,
     domain,
     pages: [urlMap],
     shutdown,
   });
-
-  crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
 };
 
 /**
@@ -87,7 +91,11 @@ export const crawlPage = async (
 
   // block scans from running
   if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
-    trackerProccess(undefined, { domain, urlMap, userId, shutdown: true });
+    trackerProccess(
+      undefined,
+      { domain, urlMap, userId, shutdown: true },
+      blockEvent
+    );
 
     return responseModel({
       data: null,
@@ -105,7 +113,7 @@ export const crawlPage = async (
     });
 
     const freeAccount = !userData?.role || userData?.role == 0; // free account
-    const scriptsEnabled = SUPER_MODE || !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+    const scriptsEnabled = SUPER_MODE ? SCRIPTS_ENABLED : !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
     const rootPage = pathname === "/"; // the url is the base domain index.
     const insightsLocked = !SUPER_MODE && (freeAccount || userData?.role === 1);
 
@@ -171,7 +179,11 @@ export const crawlPage = async (
     // TODO: SET PAGE OFFLINE DB
     if (!dataSource || !dataSource?.webPage) {
       if (!blockEvent) {
-        trackerProccess(undefined, { domain, urlMap, userId, shutdown });
+        trackerProccess(
+          undefined,
+          { domain, urlMap, userId, shutdown },
+          blockEvent
+        );
       }
 
       return resolve(
@@ -343,12 +355,16 @@ export const crawlPage = async (
     }
 
     if (!blockEvent) {
-      trackerProccess(responseData, {
-        domain,
-        urlMap,
-        userId,
-        shutdown,
-      });
+      trackerProccess(
+        responseData,
+        {
+          domain,
+          urlMap,
+          userId,
+          shutdown,
+        },
+        blockEvent
+      );
     }
 
     return resolve(responseModel(responseData));

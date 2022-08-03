@@ -53,6 +53,7 @@ import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
 import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
+import { crawlStreamSlim } from "./core/streams/crawl-slim";
 import { crawlRest } from "./web/routes/crawl";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
@@ -255,6 +256,12 @@ function initServer(): HttpServer[] {
    * Uses Event based handling to extract pages.
    */
   app.post("/api/crawl-stream", cors(), crawlStream);
+
+  /*
+   * Site wide scan handles via stream slim data sized.
+   * Uses Event based handling to extract pages.
+   */
+  app.post("/api/crawl-stream-slim", cors(), crawlStreamSlim);
 
   // get base64 to image name
   app.post(IMAGE_CHECK, cors(), detectImage);

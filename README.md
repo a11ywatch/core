@@ -29,6 +29,14 @@ EMAIL_CLIENT_ID=
 EMAIL_CLIENT_KEY=
 ```
 
+### JS Scripts
+
+In order to store javascript locally to use you need to enable the following env vars:
+
+```
+SCRIPTS_ENABLED=true
+```
+
 ## Queue
 
 Set the limit to number of test in parallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.

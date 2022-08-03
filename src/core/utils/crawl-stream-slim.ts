@@ -4,19 +4,14 @@ import { getKey } from "@app/event/crawl-tracking";
 import { Response } from "express";
 import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
+import type { CrawlProps } from "./crawl-stream";
 
-export type CrawlProps = {
-  url: string;
-  userId?: number;
-  subdomains?: boolean;
-  tld?: boolean;
-};
-
-// crawl website and wait for finished emit event to continue @return Website[] use for testing.
-export const crawlHttpStream = (
+// crawl website slim and wait for finished emit event to continue @return Website[] use for testing.
+export const crawlHttpStreamSlim = (
   props: CrawlProps,
   res: Response,
-  client?: string
+  client?: string,
+  onlyData?: boolean // remove issues and other data from stream
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld } = props;
 
@@ -35,40 +30,25 @@ export const crawlHttpStream = (
 
     crawlEmitter.on(`crawl-${domainName(domain)}-${userId || 0}`, (source) => {
       const data = source?.data;
-      if (data) {
-        const issuesFound = data?.issues?.length;
 
-        // TODO: optional context,message, for pure
-        // TODO: shape with ttsc
-        res.write(
-          `${JSON.stringify({
-            data,
-            message: `${data?.url} has ${issuesFound} issue${
-              issuesFound === 1 ? "" : "s"
-            }`,
-            success: true,
-            code: 200,
-          })},`
-        );
+      if (data && onlyData) {
+        data.pageLoadTime = null;
+        data.issues = null;
+      }
+
+      if (data) {
+        res.write(`${JSON.stringify(data)},`);
       }
     });
 
     crawlTrackingEmitter.once(
       `crawl-complete-${getKey(domain, undefined, userId)}`,
       () => {
-        // send extra item for trailing comma handler
         if (client.includes("a11ywatch_cli/")) {
-          res.write(
-            `${JSON.stringify({
-              data: null,
-              message: `Crawl completed`,
-              success: true,
-              code: 200,
-            })}`,
-            () => {
-              resolve(true);
-            }
-          );
+          // send extra item for trailing comma handler
+          res.write(`${JSON.stringify({ url: "", domain: "" })}`, () => {
+            resolve(true);
+          });
         } else {
           resolve(true);
         }

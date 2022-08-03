@@ -1,6 +1,6 @@
 import { crawlPage } from "../../actions";
 import { getUser } from "../../controllers/users";
-import { watcherCrawl } from "../../actions/crawl/watcher_crawl";
+import { watcherCrawl } from "../../actions/accessibility/watcher_crawl";
 import type { Website } from "../../../types/schema";
 
 type Page = {

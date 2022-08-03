@@ -1,5 +1,5 @@
 import { SUPER_MODE } from "@app/config/config";
-import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
+import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
 import { crawlEmitter } from "@app/event";
 import { domainName } from "./domain-name";
 

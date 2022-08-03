@@ -9,7 +9,7 @@ import {
   register,
   logout,
 } from "./graph/mutations";
-import { watcherCrawl } from "./actions/crawl/watcher_crawl";
+import { watcherCrawl } from "./actions/accessibility/watcher_crawl";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { gqlRateLimiter } from "@app/web/limiters/scan";
 import { getWebsite, WebsitesController } from "./controllers/websites";

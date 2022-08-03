@@ -13,7 +13,7 @@ import { makeWebsite } from "@app/core/models/website";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
-import { watcherCrawl } from "@app/core/actions/crawl/watcher_crawl";
+import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
 import { connect } from "@app/database";
 
 // used on mutations performs a website created following a multi-site scan if enabled

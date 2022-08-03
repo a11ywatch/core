@@ -39,6 +39,9 @@ const GRAPHQL_PORT = Number(
 
 // default SUPER mode to true
 export const SUPER_MODE = process.env.SUPER_MODE === "false" ? false : true;
+// default SCRIPTS_ENABLED to false in SUPER mode.
+export const SCRIPTS_ENABLED =
+  process.env.SCRIPTS_ENABLED === "true" ? true : false;
 
 const defaultWebPort = process.env.WEB_PORT || 3000;
 const defaultWebURL = DEV
