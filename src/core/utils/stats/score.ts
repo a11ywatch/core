@@ -62,14 +62,18 @@ export async function setWebsiteScore({
     }
 
     // TODO: MOVE OUT OF METHOD
-    await pubsub.publish(CRAWL_COMPLETE, {
-      crawlComplete: {
-        userId,
-        domain: website?.domain,
-        adaScoreAverage: issuesInfo?.adaScoreAverage,
-        shutdown,
-      },
-    });
+    await pubsub
+      .publish(CRAWL_COMPLETE, {
+        crawlComplete: {
+          userId,
+          domain: website?.domain,
+          adaScoreAverage: issuesInfo?.adaScoreAverage,
+          shutdown,
+        },
+      })
+      .catch((e) => {
+        console.error(e);
+      });
 
     return Promise.resolve(true);
   } catch (e) {

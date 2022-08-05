@@ -1,4 +1,5 @@
 import fastq from "fastq";
+import { cpus } from "os";
 import { crawlWebsite as crawl } from "@app/core/actions";
 import { setWebsiteScore } from "@app/core/utils/stats/score";
 import { Method } from "@app/database/config";
@@ -18,35 +19,44 @@ type Task = {
 
 // the async worker to use for crawling pages
 async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
-  try {
-    return await crawl(arg);
-  } catch (e) {
-    console.error(e);
-  }
+  return await crawl(arg);
 }
 
-// the async worker to use for completed crawl actions.
+// the async worker to use for completed crawl actions. TODO: remove for collection appending raw value to score.
 async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
   const { userId, meta } = arg;
-  const props = meta?.extra;
+  const { domain, duration, shutdown } = meta?.extra ?? {};
 
-  try {
-    await setWebsiteScore({
-      domain: props?.domain,
-      userId: Number(userId),
-      duration: props?.duration,
-      shutdown: !!props?.shutdown,
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  await setWebsiteScore({
+    domain,
+    userId: Number(userId),
+    duration,
+    shutdown: !!shutdown,
+  });
 }
 
-// crawl queue [32gb 16, 16gb 8, 8gb 4, 4gb 2]
+// get soft queue limit based on CPUS and crawler limit
+// TODO: determine high cpu and control limit.
+const crawlQueueLimit = () => {
+  if (
+    process.env.CRAWL_QUEUE_LIMIT &&
+    !Number.isNaN(Number(process.env.CRAWL_QUEUE_LIMIT))
+  ) {
+    return Number(process.env.CRAWL_QUEUE_LIMIT);
+  } else {
+    const cors = cpus()?.length || 1;
+
+    return Math.max(3 * cors, 4);
+  }
+};
+
+// crawl queue handler
 export const q: queueAsPromised<Task> = fastq.promise(
   asyncWorker,
-  Number(process.env.CRAWL_QUEUE_LIMIT || 8)
+  crawlQueueLimit()
 );
+
+// determine when crawl completed.
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
   asyncWorkerCrawlComplete,
   20

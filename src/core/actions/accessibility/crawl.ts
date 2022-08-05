@@ -38,7 +38,7 @@ const trackerProccess = (
   { domain, urlMap, userId, shutdown = false }: any,
   blockEvent?: boolean
 ) => {
-  if (!blockEvent) {
+  if (!blockEvent && data) {
     crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
   }
 
@@ -178,13 +178,11 @@ export const crawlPage = async (
 
     // TODO: SET PAGE OFFLINE DB
     if (!dataSource || !dataSource?.webPage) {
-      if (!blockEvent) {
-        trackerProccess(
-          undefined,
-          { domain, urlMap, userId, shutdown },
-          blockEvent
-        );
-      }
+      trackerProccess(
+        undefined,
+        { domain, urlMap, userId, shutdown },
+        blockEvent
+      );
 
       return resolve(
         responseModel({

@@ -32,7 +32,7 @@ export const getBaseParamsList = (req: Request) => {
 
   if (req.query.offset) {
     const oset = Number(req.query.offset);
-    offset = isNaN(oset) ? 0 : oset;
+    offset = Number.isNaN(oset) ? 0 : oset;
   }
 
   return {

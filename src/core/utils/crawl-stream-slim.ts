@@ -31,12 +31,13 @@ export const crawlHttpStreamSlim = (
     crawlEmitter.on(`crawl-${domainName(domain)}-${userId || 0}`, (source) => {
       const data = source?.data;
 
-      if (data && onlyData) {
-        data.pageLoadTime = null;
-        data.issues = null;
-      }
-
+      // only send when true
       if (data) {
+        // trim data for sending minimally
+        if (onlyData) {
+          data.pageLoadTime = null;
+          data.issues = null;
+        }
         res.write(`${JSON.stringify(data)},`);
       }
     });
