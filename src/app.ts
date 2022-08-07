@@ -36,11 +36,9 @@ import {
   closeRedisConnection,
 } from "./database";
 import { confirmEmail, detectImage, root, unSubEmails } from "./web/routes";
-import { logPage } from "./core/controllers/analytics/ga";
 import { statusBadge } from "./web/routes/resources/badge";
 import { scanSimple } from "./web/routes/scan";
 import { setGithubActionRoutes } from "./web/routes_groups/github-actions";
-import { setAnnouncementsRoutes } from "./web/routes_groups/announcements";
 import { setAuthRoutes } from "./web/routes_groups/auth";
 import { connectLimiters } from "./web/limiters/scan";
 import { startGRPC } from "./proto/init";
@@ -364,8 +362,6 @@ function initServer(): HttpServer[] {
   setListRoutes(app);
   // AUTH ROUTES
   setAuthRoutes(app);
-  // Announcements from the application (new features etc)
-  setAnnouncementsRoutes(app);
   // GITHUB
   setGithubActionRoutes(app);
   // ADMIN ROUTES
@@ -395,8 +391,6 @@ function initServer(): HttpServer[] {
   // email confirmation route
   app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
 
-  /*  ANALYTICS */
-  app.post("/api/log/page", cors(), logPage);
   // INTERNAL
   app.get("/_internal_/healthcheck", async (_, res) => {
     res.send({
@@ -475,12 +469,8 @@ function initServer(): HttpServer[] {
       graphqlPath: server.graphqlPath,
     });
 
-    if (process.env.NODE_ENV !== "test") {
-      // compatability with heroku dynos if deployed.
-      if (process.env.DYNO === "web.1" || !process.env.DYNO) {
-        new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
-      }
-    }
+    new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+    // TODO: nightly cron to handle redis page hits into db
   });
 
   return [listener];
@@ -495,8 +485,7 @@ let serverReady = false;
 
 // start the http, graphl, events, subs, and gRPC server
 const startServer = async () => {
-  // do not wait for express api and rely on hc
-  serverInited = true;
+  serverInited = true; // do not wait for express and rely on health check
 
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");
@@ -505,19 +494,11 @@ const startServer = async () => {
   // tracking event emitter
   establishCrawlTracking();
 
-  try {
-    // connect all clients
-    await connectClients();
-  } catch (e) {
-    console.error(e);
-  }
+  // connect all clients
+  await connectClients();
 
-  try {
-    // start the gRPC server
-    await startGRPC();
-  } catch (e) {
-    console.error(e);
-  }
+  // start the gRPC server
+  await startGRPC();
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -539,22 +520,22 @@ const isReady = async () => {
     if (serverReady) {
       resolve(true);
     } else {
+      // TODO: listen for event emitt
       const serverInterval = setInterval(() => {
         if (serverReady) {
           clearInterval(serverInterval);
-          // add slight delay for chrome connecting [TODO: pagemind chrome handle before gRPC pagemind connect with retry]
           resolve(true);
         }
-      }, 8);
+      }, 5);
 
-      // give 100 ms to wait for server to start before clearing out
+      // give 75 ms to wait for server to start before clearing out if server has not inited
       if (!serverInited) {
         setTimeout(() => {
           if (!serverInited) {
             clearInterval(serverInterval);
             resolve(serverReady);
           }
-        }, 50);
+        }, 75);
       }
     }
   });

@@ -26,10 +26,10 @@ let pubsub: RedisPubSub;
 
 const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 
-// PUB/SUB GQL
+// PUB/SUB GQL Redis client
 function createPubSub() {
-  let publisher: Redis.Redis;
-  let subscriber: Redis.Redis;
+  let publisher: Redis;
+  let subscriber: Redis;
   try {
     publisher = new Redis(options);
   } catch (e) {

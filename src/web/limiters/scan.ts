@@ -13,15 +13,15 @@ let store; // redis store to use
 
 const connectLimiters = () => {
   store = new RedisStore({
-    // @ts-expect-error
+    // @ts-ignore
     sendCommand: (...args: string[]) => redisClient.call(...args),
   });
 
   try {
     limiter = rateLimit({
       windowMs: 1 * 60 * 1000, // 60 seconds
-      max: 30, // Limit each IP to 30 requests per `window` (here, per minute)
-      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      max: 30, // Limit each IP to 30 API requests per `window` (here, per minute)
+      standardHeaders: true,
       legacyHeaders: false,
       store,
       keyGenerator: (request, _response) =>
@@ -30,8 +30,8 @@ const connectLimiters = () => {
 
     scanLimiter = rateLimit({
       windowMs: 1 * 30 * 1000, // 30 seconds
-      max: 5, // Limit each IP to 5 requests per `window` (here, per 30 secs)
-      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      max: 4, // Limit each IP to 4 requests per `window` (here, per 30 secs)
+      standardHeaders: true,
       legacyHeaders: false,
       store,
     });

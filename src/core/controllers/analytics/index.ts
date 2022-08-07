@@ -1,6 +1,5 @@
 import { connect } from "@app/database";
 import { domainNameFind, websiteSearchParams } from "@app/core/utils";
-import { logPage } from "./ga";
 
 // get analytics by domain for a user with pagination offsets.
 export const getAnalyticsPaging = async (params, chain?: boolean) => {
@@ -37,8 +36,8 @@ export const getAnalyticsPaging = async (params, chain?: boolean) => {
   }
 };
 
+// Page analytics for simple error stats
 export const AnalyticsController = ({ user } = { user: null }) => ({
-  logPage,
   getWebsite: async (
     {
       pageUrl,

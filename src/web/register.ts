@@ -14,7 +14,8 @@ export const registerExpressApp = (app: Express) => {
   app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.urlencoded({ extended: true }));
-  app.use(express.json({ limit: "300mb" }));
+
+  app.use(express.json({ limit: "200mb" })); // data should not be larger than 200mb
 
   // rate limits on expensive endpoints
   if (!config.SUPER_MODE) {
@@ -22,9 +23,10 @@ export const registerExpressApp = (app: Express) => {
     app.use("/grpc-docs", limiter);
     app.use("/api/iframe", limiter);
     app.use("/api/get-website", limiter);
-    app.use("/api/register", limiter);
     app.use("/api/report", limiter);
-    app.use("/api/login", limiter);
+    // TODO: set custom auth limiters
+    app.use("/api/register", scanLimiter);
+    app.use("/api/login", scanLimiter);
     app.use("/api/scan-simple", scanLimiter);
     app.use("/api/crawl", scanLimiter);
     app.use("/api/crawl-stream", scanLimiter);

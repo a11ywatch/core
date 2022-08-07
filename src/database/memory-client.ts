@@ -1,10 +1,9 @@
 import Redis from "ioredis";
 
-let redisClient: Redis.Redis;
-
 const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 
 let redisConnected = true;
+let redisClient: Redis;
 
 const options = {
   host: process.env.REDIS_HOST || "127.0.0.1",
@@ -12,6 +11,7 @@ const options = {
   autoResubscribe: false,
   maxRetriesPerRequest: null,
   lazyConnect: true,
+  enableAutoPipelining: true,
   retryStrategy(times) {
     redisLogEnabled &&
       console.warn(`Retrying redis connection: attempt ${times}`);
