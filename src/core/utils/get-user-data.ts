@@ -7,7 +7,7 @@ import { config } from "@app/config/config";
 import { frontendClientOrigin } from "./is-client";
 
 // return a user from id
-const getUserFromId = async (user, keyid) => {
+export const getUserFromId = async (user, keyid) => {
   let userData;
   let collectionData;
 
