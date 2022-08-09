@@ -10,7 +10,7 @@ RUN mkdir ./doc && cp -R node_modules/@a11ywatch/protos proto
 
 RUN protoc --doc_out=./doc --doc_opt=html,index.html proto/*.proto
 
-FROM node:18.4-alpine
+FROM node:18.6.0-alpine
 
 WORKDIR /usr/src/app
 
