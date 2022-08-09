@@ -6,7 +6,7 @@ export const crawlTrackerComplete = async (data?: any) => {
   const {
     user_id: userId,
     domain: dm,
-    full,
+    full = false,
   } = typeof data === "string" ? getParams(data) : data;
 
   if (dm) {
