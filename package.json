@@ -18,7 +18,7 @@
     "@grpc/grpc-js": "1.6.7",
     "@grpc/proto-loader": "0.7.0",
     "apollo-server": "3.10.0",
-    "apollo-server-core": "3.10.0",
+    "apollo-server-core": "3.10.1",
     "apollo-server-express": "3.10.0",
     "cookie-parser": "^1.4.6",
     "cors": "2.8.5",
