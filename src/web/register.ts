@@ -6,6 +6,10 @@ import cookieParser from "cookie-parser";
 import { limiter, scanLimiter } from "./limiters/scan";
 import path from "path";
 
+/* express application setup middlewares
+@params app - express 
+@returns void
+*/
 export const registerExpressApp = (app: Express) => {
   app.disable("x-powered-by");
 
@@ -19,10 +23,9 @@ export const registerExpressApp = (app: Express) => {
 
   // rate limits on expensive endpoints
   if (!config.SUPER_MODE) {
+    // DOCS
     app.use("/playground", limiter);
     app.use("/grpc-docs", limiter);
-    app.use("/api/get-website", limiter);
-    app.use("/api/report", limiter);
     // TODO: set custom auth limiters
     app.use("/api/register", scanLimiter);
     app.use("/api/login", scanLimiter);

@@ -1,4 +1,4 @@
-import { SUCCESS } from "@app/core/strings";
+import { HttpMessage } from "@app/web/messages/message";
 import { ApiResponse, ResponseParamsModel, ResponseModel } from "./types";
 
 // response models
@@ -11,10 +11,6 @@ const responseModel = (
 ): ResponseModel => {
   let message = extra?.message;
   let code = extra?.code;
-
-  if (!message) {
-    message = SUCCESS;
-  }
 
   if (!code) {
     // for gQL
@@ -38,13 +34,17 @@ const responseModel = (
 
   const { data = null, ...n } = extra ?? {};
 
+  if (typeof message === "number") {
+    message = HttpMessage[message];
+  }
+
   // proper shape
   return {
+    ...n,
     data,
     success,
     code,
     message,
-    ...n,
   };
 };
 

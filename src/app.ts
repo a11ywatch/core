@@ -109,7 +109,7 @@ function initServer(): HttpServer[] {
   app.get("/status/:domain", cors(), statusBadge);
 
   app.get("/playground", (_req, res) => {
-    res.send(graphqlPlayground());
+    res.send(graphqlPlayground);
   });
 
   // TODO: move to client
@@ -130,7 +130,7 @@ function initServer(): HttpServer[] {
   app.get("/api/iframe", cors(), createIframeEvent);
   // get a previus run report @query {q: string}
   app.get("/api/report", cors(), getWebsiteReport);
-  // retreive a user from the database.
+  // retrieve a user from the database.
   app.get("/api/user", cors(), async (req, res) => {
     const [data] = await retreiveUserByToken(req.headers.authorization);
 
@@ -143,7 +143,7 @@ function initServer(): HttpServer[] {
       })
     );
   });
-  // retreive a website from the database.
+  // retrieve a website from the database.
   app.get("/api/website", cors(), async (req, res) => {
     const { userId, domain } = getBaseParams(req);
     let data;
@@ -179,7 +179,7 @@ function initServer(): HttpServer[] {
     );
   });
 
-  // retreive a page analytic from the database.
+  // retrieve a page analytic from the database.
   app.get("/api/analytics", cors(), async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
@@ -210,7 +210,7 @@ function initServer(): HttpServer[] {
 
   // TODO: GET SINGLE ISSUE, SCRIPT OpenAPi
 
-  // retreive a page analytic from the database.
+  // retrieve a page analytic from the database.
   app.get("/api/pagespeed", cors(), async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
@@ -397,6 +397,7 @@ function initServer(): HttpServer[] {
       status: "healthy",
     });
   });
+
   //An error handling middleware
   app.use(function (err, _req, res, next) {
     if (res.headersSent) {

@@ -12,7 +12,7 @@ import { getStatusCodes, HttpMessage } from "../messages/message";
 
 // set all routes that are handled via pagination - Requires a valid user reguardless of SUPER mode.
 export const setListRoutes = (app: Application) => {
-  // paginated retreive websites from the database.
+  // paginated retrieve websites from the database.
   app.get("/api/list/website", cors(), async (req, res) => {
     const { userId, offset, limit } = getBaseParamsList(req);
     let message = HttpMessage.Unauthorized;
@@ -45,7 +45,7 @@ export const setListRoutes = (app: Application) => {
     );
   });
 
-  // paginated retreive analytics from the database. Limit default is set to 20.
+  // paginated retrieve analytics from the database. Limit default is set to 20.
   app.get("/api/list/analytics", cors(), async (req, res) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
     let message = HttpMessage.Unauthorized;
@@ -78,7 +78,7 @@ export const setListRoutes = (app: Application) => {
     );
   });
 
-  // paginated retreive pages from the database.
+  // paginated retrieve pages from the database.
   app.get("/api/list/pages", cors(), async (req: Request, res: Response) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
     let message = HttpMessage.Unauthorized;
@@ -112,7 +112,7 @@ export const setListRoutes = (app: Application) => {
     );
   });
 
-  // paginated retreive scripts from the database. Limit default is set to 20.
+  // paginated retrieve scripts from the database. Limit default is set to 20.
   app.get("/api/list/scripts", cors(), async (req: Request, res: Response) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
     let message = HttpMessage.Unauthorized;

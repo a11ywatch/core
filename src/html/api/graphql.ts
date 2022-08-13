@@ -1,6 +1,6 @@
-export const graphqlPlayground = () => `
+// static grapgql playground html
+export const graphqlPlayground = `
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset='utf-8' />
@@ -9,14 +9,11 @@ export const graphqlPlayground = () => `
   <link rel="shortcut icon" href="//cdn.jsdelivr.net/npm/graphql-playground-react/build/favicon.png" />
   <script src="//cdn.jsdelivr.net/npm/graphql-playground-react/build/static/js/middleware.js"></script>
 </head>
-
 <body>
   <style type="text/css">
-
     #playground-root {
       height: 100%;
     }
-    
     body {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -29,35 +26,28 @@ export const graphqlPlayground = () => `
       background: #172a3a;
       overflow: hidden;
     }
-    
     html, body, p, a, h1, h2, h3, h4, ul, pre, code {
       font-family: system-ui, sans-serif;
       margin: 0;
       padding: 0;
       color: inherit;
     }
-    
     a:active, a:focus, button:focus, input:focus {
       outline: none;
     }
-    
     input, button, submit {
       border: none;
     }
-    
     input, button, pre {
       font-family: 'Open Sans', sans-serif;
     }
-    
     code {
       font-family: Consolas, monospace;
     }
-
     .playgroundIn {
       -webkit-animation: playgroundIn 0.5s ease-out forwards;
       animation: playgroundIn 0.5s ease-out forwards;
     }
-
     @-webkit-keyframes playgroundIn {
       from {
         opacity: 0;
@@ -72,7 +62,6 @@ export const graphqlPlayground = () => `
         transform: translateY(0);
       }
     }
-
     @keyframes playgroundIn {
       from {
         opacity: 0;
@@ -94,7 +83,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: fadeOut 0.5s ease-out forwards;
       animation: fadeOut 0.5s ease-out forwards;
     }
-
     @-webkit-keyframes fadeIn {
       from {
         opacity: 0;
@@ -109,7 +97,6 @@ export const graphqlPlayground = () => `
         transform: translateY(0);
       }
     }
-
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -124,7 +111,6 @@ export const graphqlPlayground = () => `
         transform: translateY(0);
       }
     }
-
     @-webkit-keyframes fadeOut {
       from {
         opacity: 1;
@@ -139,7 +125,6 @@ export const graphqlPlayground = () => `
         transform: translateY(-10px);
       }
     }
-
     @keyframes fadeOut {
       from {
         opacity: 1;
@@ -154,7 +139,6 @@ export const graphqlPlayground = () => `
         transform: translateY(-10px);
       }
     }
-
     @-webkit-keyframes appearIn {
       from {
         opacity: 0;
@@ -169,7 +153,6 @@ export const graphqlPlayground = () => `
         transform: translateY(0);
       }
     }
-
     @keyframes appearIn {
       from {
         opacity: 0;
@@ -184,7 +167,6 @@ export const graphqlPlayground = () => `
         transform: translateY(0);
       }
     }
-
     @-webkit-keyframes scaleIn {
       from {
         -webkit-transform: scale(0);
@@ -210,7 +192,6 @@ export const graphqlPlayground = () => `
         transform: scale(1);
       }
     }
-
     @-webkit-keyframes innerDrawIn {
       0% {
         stroke-dashoffset: 70;
@@ -222,7 +203,6 @@ export const graphqlPlayground = () => `
         stroke-dashoffset: 210;
       }
     }
-
     @keyframes innerDrawIn {
       0% {
         stroke-dashoffset: 70;
@@ -234,7 +214,6 @@ export const graphqlPlayground = () => `
         stroke-dashoffset: 210;
       }
     }
-
     @-webkit-keyframes outerDrawIn {
       0% {
         stroke-dashoffset: 76;
@@ -243,7 +222,6 @@ export const graphqlPlayground = () => `
         stroke-dashoffset: 152;
       }
     }
-
     @keyframes outerDrawIn {
       0% {
         stroke-dashoffset: 76;
@@ -252,7 +230,6 @@ export const graphqlPlayground = () => `
         stroke-dashoffset: 152;
       }
     }
-
     .hHWjkv {
       -webkit-transform-origin: 0px 0px;
       -ms-transform-origin: 0px 0px;
@@ -263,7 +240,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.2222222222222222s;
       animation: scaleIn 0.25s linear forwards 0.2222222222222222s;
     }
-
     .gCDOzd {
       -webkit-transform-origin: 0px 0px;
       -ms-transform-origin: 0px 0px;
@@ -274,7 +250,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.4222222222222222s;
       animation: scaleIn 0.25s linear forwards 0.4222222222222222s;
     }
-
     .hmCcxi {
       -webkit-transform-origin: 0px 0px;
       -ms-transform-origin: 0px 0px;
@@ -285,7 +260,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.6222222222222222s;
       animation: scaleIn 0.25s linear forwards 0.6222222222222222s;
     }
-
     .eHamQi {
       -webkit-transform-origin: 0px 0px;
       -ms-transform-origin: 0px 0px;
@@ -296,7 +270,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.8222222222222223s;
       animation: scaleIn 0.25s linear forwards 0.8222222222222223s;
     }
-
     .byhgGu {
       -webkit-transform-origin: 0px 0px;
       -ms-transform-origin: 0px 0px;
@@ -307,7 +280,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 1.0222222222222221s;
       animation: scaleIn 0.25s linear forwards 1.0222222222222221s;
     }
-
     .llAKP {
       -webkit-transform-origin: 0px 0px;
       -ms-transform-origin: 0px 0px;
@@ -318,7 +290,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 1.2222222222222223s;
       animation: scaleIn 0.25s linear forwards 1.2222222222222223s;
     }
-
     .bglIGM {
       -webkit-transform-origin: 64px 28px;
       -ms-transform-origin: 64px 28px;
@@ -329,7 +300,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.2222222222222222s;
       animation: scaleIn 0.25s linear forwards 0.2222222222222222s;
     }
-
     .ksxRII {
       -webkit-transform-origin: 95.98500061035156px 46.510000228881836px;
       -ms-transform-origin: 95.98500061035156px 46.510000228881836px;
@@ -340,7 +310,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.4222222222222222s;
       animation: scaleIn 0.25s linear forwards 0.4222222222222222s;
     }
-
     .cWrBmb {
       -webkit-transform-origin: 95.97162628173828px 83.4900016784668px;
       -ms-transform-origin: 95.97162628173828px 83.4900016784668px;
@@ -351,7 +320,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.6222222222222222s;
       animation: scaleIn 0.25s linear forwards 0.6222222222222222s;
     }
-
     .Wnusb {
       -webkit-transform-origin: 64px 101.97999572753906px;
       -ms-transform-origin: 64px 101.97999572753906px;
@@ -362,7 +330,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 0.8222222222222223s;
       animation: scaleIn 0.25s linear forwards 0.8222222222222223s;
     }
-
     .bfPqf {
       -webkit-transform-origin: 32.03982162475586px 83.4900016784668px;
       -ms-transform-origin: 32.03982162475586px 83.4900016784668px;
@@ -373,7 +340,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 1.0222222222222221s;
       animation: scaleIn 0.25s linear forwards 1.0222222222222221s;
     }
-
     .edRCTN {
       -webkit-transform-origin: 32.033552169799805px 46.510000228881836px;
       -ms-transform-origin: 32.033552169799805px 46.510000228881836px;
@@ -384,7 +350,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: scaleIn 0.25s linear forwards 1.2222222222222223s;
       animation: scaleIn 0.25s linear forwards 1.2222222222222223s;
     }
-
     .iEGVWn {
       opacity: 0;
       stroke-dasharray: 76;
@@ -393,7 +358,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: 1, 1;
       animation-iteration-count: 1, 1;
     }
-
     .bsocdx {
       opacity: 0;
       stroke-dasharray: 76;
@@ -402,7 +366,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: 1, 1;
       animation-iteration-count: 1, 1;
     }
-
     .jAZXmP {
       opacity: 0;
       stroke-dasharray: 76;
@@ -411,7 +374,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: 1, 1;
       animation-iteration-count: 1, 1;
     }
-
     .hSeArx {
       opacity: 0;
       stroke-dasharray: 76;
@@ -420,7 +382,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: 1, 1;
       animation-iteration-count: 1, 1;
     }
-
     .bVgqGk {
       opacity: 0;
       stroke-dasharray: 76;
@@ -429,7 +390,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: 1, 1;
       animation-iteration-count: 1, 1;
     }
-
     .hEFqBt {
       opacity: 0;
       stroke-dasharray: 76;
@@ -438,7 +398,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: 1, 1;
       animation-iteration-count: 1, 1;
     }
-
     .dzEKCM {
       opacity: 0;
       stroke-dasharray: 70;
@@ -447,7 +406,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: infinite, 1;
       animation-iteration-count: infinite, 1;
     }
-
     .DYnPx {
       opacity: 0;
       stroke-dasharray: 70;
@@ -456,7 +414,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: infinite, 1;
       animation-iteration-count: infinite, 1;
     }
-
     .hjPEAQ {
       opacity: 0;
       stroke-dasharray: 70;
@@ -465,7 +422,6 @@ export const graphqlPlayground = () => `
       -webkit-animation-iteration-count: infinite, 1;
       animation-iteration-count: infinite, 1;
     }
-
     #loading-wrapper {
       position: absolute;
       width: 100vw;
@@ -486,7 +442,6 @@ export const graphqlPlayground = () => `
       -ms-flex-direction: column;
       flex-direction: column;
     }
-
     .logo {
       width: 75px;
       height: 75px;
@@ -495,7 +450,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: fadeIn 0.5s ease-out forwards;
       animation: fadeIn 0.5s ease-out forwards;
     }
-
     .text {
       font-size: 32px;
       font-weight: 200;
@@ -505,7 +459,6 @@ export const graphqlPlayground = () => `
       -webkit-animation: fadeIn 0.5s ease-out forwards;
       animation: fadeIn 0.5s ease-out forwards;
     }
-
     .dGfHfc {
       font-weight: 400;
     }
