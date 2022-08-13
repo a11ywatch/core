@@ -1,7 +1,7 @@
 import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
+import type { Response } from "express";
 import { getKey } from "@app/event/crawl-tracking";
-import { Response } from "express";
 import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
 

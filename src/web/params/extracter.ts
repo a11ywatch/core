@@ -10,10 +10,10 @@ export const getBaseParams = (req: Request) => {
   const usr = getUserFromToken(req.headers.authorization);
 
   const dman = paramParser(req, "domain");
-  const purl = paramParser(req, "pageUrl");
-  const url = paramParser(req, "url");
-  const domain = dman ? decodeURIComponent(dman + "") : undefined;
-  const pageUrl = purl || url ? decodeURIComponent(purl || url) : undefined;
+  const url = paramParser(req, "url" || paramParser(req, "pageUrl"));
+
+  const domain = dman ? decodeURIComponent(dman) : undefined;
+  const pageUrl = url ? decodeURIComponent(url) : undefined;
 
   const userId = usr?.payload?.keyid;
 

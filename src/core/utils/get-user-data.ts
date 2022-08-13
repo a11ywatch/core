@@ -5,20 +5,19 @@ import { RATE_EXCEEDED_ERROR } from "../strings";
 import { getUserFromToken, extractTokenKey } from "./get-user";
 import { config } from "@app/config/config";
 import { frontendClientOrigin } from "./is-client";
+import { StatusCode } from "@app/web/messages/message";
 
 // return a user from id
 export const getUserFromId = async (user, keyid) => {
   let userData;
   let collectionData;
 
-  if (typeof keyid !== "undefined") {
-    const [data, collection] = await UsersController({
-      user,
-    }).getUser({ id: keyid });
+  const [data, collection] = await UsersController({
+    user,
+  }).getUser({ id: keyid });
 
-    userData = data;
-    collectionData = collection;
-  }
+  userData = data;
+  collectionData = collection;
 
   return [userData, collectionData];
 };
@@ -108,6 +107,8 @@ export const getUserFromApi = async (
  * Get user from token and db if allowed to perform request otherwise exit
  * Updates multi-site scan attempt counter.
  * A user id is required to target the website.
+ * This method returns void and response status if un-authed
+ * @returns Promise<User> | void
  */
 export const getUserFromApiScan = async (
   token: string = "",
@@ -116,7 +117,7 @@ export const getUserFromApiScan = async (
 ): Promise<User> => {
   // auth required unless SUPER MODE
   if (!token && !config.SUPER_MODE) {
-    res.status(401);
+    res.status(StatusCode.Unauthorized);
     res.json({
       data: null,
       message:
@@ -163,18 +164,20 @@ export const retreiveUserByToken = async (
   const user = getUserFromToken(jwt);
   // the user id from the token
   const { keyid } = user?.payload ?? {};
-  // api key is set [ may not be valid ]
-  const authenticated = typeof keyid !== "undefined";
 
   try {
-    const [u, c] = authenticated
-      ? await getUserFromId(user, keyid)
-      : [null, null];
+    const [u, c] = await getUserFromId(user, keyid);
 
     return [u, c];
   } catch (e) {
     console.error(e);
-
     return [null, null];
   }
+};
+
+// wrapper to get data
+export const retreiveUserByTokenWrapper = async (token) => {
+  const [user] = await retreiveUserByToken(token);
+
+  return user;
 };

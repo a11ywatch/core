@@ -38,7 +38,7 @@ export const getPageSpeedPaging = async (params, chain?: boolean) => {
 
 // PageSpeed insights by lighthouse
 // returns stringified json results if found.
-export const PageSpeedController = ({ user } = { user: null }) => ({
+export const PageSpeedController = () => ({
   getWebsite: async (
     {
       pageUrl,

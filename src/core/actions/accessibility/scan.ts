@@ -9,6 +9,7 @@ import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import { SUPER_MODE } from "@app/config/config";
 import { WEBSITE_NOT_FOUND } from "@app/core/strings";
 import { StatusCode } from "@app/web/messages/message";
+import { SCAN_TIMEOUT } from "@app/core/strings/errors";
 
 type ScanParams = {
   userId?: number;
@@ -65,19 +66,13 @@ export const scanWebsite = async ({
     console.error(e);
   }
 
-  // an issue occured with the request in general.
-  if (!dataSource) {
-    return responseModel();
-  }
-
   // handled successful but, page did not exist or rendered to slow.
   if (!dataSource?.webPage) {
     return responseModel({
       data: null,
       code: StatusCode.BadRequest,
       success: false,
-      message:
-        "Website timeout, rendered too slow over 25000 ms or not at all. Check your url and try again.",
+      message: SCAN_TIMEOUT,
     });
   }
 

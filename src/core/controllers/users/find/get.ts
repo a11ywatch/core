@@ -2,46 +2,23 @@ import { userParams } from "@app/core/utils/controller-filter";
 import { connect } from "@app/database";
 import { User } from "@app/types/types";
 
-export const getUsers = async (chain?: boolean, count: number = 20) => {
-  try {
-    const [collection] = await connect("Users");
-    const users = await collection.find().limit(count).toArray();
-    return chain ? [users, collection] : users;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-export const getAllUsers = async (chain?: boolean) => {
-  try {
-    return await getUsers(chain, 10000);
-  } catch (e) {
-    console.error(e);
-  }
-};
-
 type GetUserParams = {
   email?: string;
   id?: number;
   emailConfirmCode?: string;
 };
 
+// get a user from the database by email, id, or emailConfirmCode
 async function getUser({
   email,
   id,
   emailConfirmCode,
-}: GetUserParams): Promise<[User, any]> {
+}: GetUserParams): Promise<[User | null, any]> {
+  const [collection] = await connect("Users");
   const params = userParams({ email, id, emailConfirmCode });
-  let user;
 
   try {
-    const [collection] = await connect("Users");
-
-    // only perform find if keys exist
-    if (Object.keys(params).length) {
-      user = await collection.findOne(params);
-    }
-
+    const user = await collection.findOne(params);
     return [user, collection];
   } catch (e) {
     console.error(e);

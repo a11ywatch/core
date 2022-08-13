@@ -1,7 +1,7 @@
 import { getUserFromApi } from "@app/core/utils";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import type { Request, Response } from "express";
-import { paramParser } from "../extracter";
+import { paramParser } from "../params/extracter";
 import { WEBSITE_URL_ERROR } from "@app/core/strings";
 import { responseModel } from "@app/core/models";
 import { StatusCode } from "../messages/message";

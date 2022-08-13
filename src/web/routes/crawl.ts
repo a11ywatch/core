@@ -1,7 +1,7 @@
 import { getUserFromApiScan } from "@app/core/utils/get-user-data";
 import { crawlMultiSiteWithEvent } from "@app/core/utils";
 import { responseModel } from "@app/core/models";
-import { paramParser } from "../extracter";
+import { paramParser } from "../params/extracter";
 import { WEBSITE_URL_ERROR } from "@app/core/strings";
 import { StatusCode } from "../messages/message";
 
@@ -11,7 +11,7 @@ export const crawlRest = async (req, res) => {
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
 
   if (!url) {
-    res.status(400);
+    res.status(StatusCode.BadRequest);
     res.json(
       responseModel({
         code: StatusCode.BadRequest,
@@ -29,7 +29,7 @@ export const crawlRest = async (req, res) => {
       res
     );
 
-    if (!!userNext) {
+    if (userNext) {
       const { data, message } = await crawlMultiSiteWithEvent({
         url,
         userId: userNext.id,
@@ -40,6 +40,7 @@ export const crawlRest = async (req, res) => {
 
       res.json(
         responseModel({
+          code: StatusCode.Ok,
           data,
           message,
         })

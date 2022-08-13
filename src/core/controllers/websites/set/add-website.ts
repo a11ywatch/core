@@ -51,8 +51,9 @@ export const addWebsite = async ({
   const collectionCount = await collection.countDocuments({ userId });
   const [user] = await getUser({ id: userId });
 
+  // user required to add a website
   if (!user) {
-    throw new Error("Error user not found");
+    throw new Error("User required to add website.");
   }
 
   if (
@@ -91,43 +92,36 @@ export const addWebsite = async ({
     tld: tldEnabled,
   });
 
-  try {
-    await collection.insertOne(website);
-  } catch (e) {
-    console.error(e);
-  }
+  await collection.insertOne(website);
 
   setImmediate(async () => {
     // store into actions collection
     if (actionsEnabled) {
       const [actionsCollection] = await connect("PageActions");
 
+      // add actions to collection
       actions.forEach(async (action) => {
-        try {
-          const update = {
-            $set: {
-              ...action,
-              userId,
-              domain,
-            },
-          };
-          const path =
-            action.path && action.path[0] === "/"
-              ? action.path
-              : `/${action.path}`;
+        const update = {
+          $set: {
+            ...action,
+            userId,
+            domain,
+          },
+        };
+        const path =
+          action.path && action.path[0] === "/"
+            ? action.path
+            : `/${action.path}`;
 
-          await actionsCollection.updateOne(
-            {
-              userId,
-              domain,
-              path,
-            },
-            update,
-            { upsert: true }
-          );
-        } catch (e) {
-          console.error(e);
-        }
+        await actionsCollection.updateOne(
+          {
+            userId,
+            domain,
+            path,
+          },
+          update,
+          { upsert: true }
+        );
       });
     }
 
@@ -155,4 +149,15 @@ export const addWebsite = async ({
       ? SUCCESS
       : "Scan limit reached for the day. Upgrade your account or wait until your limit resets tomorrow.",
   };
+};
+
+// wrapper to add website and get results
+export const addWebsiteWrapper = async (params) => {
+  const { website } = await addWebsite(params);
+
+  if (website) {
+    return website;
+  }
+
+  return null;
 };

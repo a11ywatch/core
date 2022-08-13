@@ -41,7 +41,9 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
         res.on("end", () => {
           try {
             resd = JSON.parse(resd);
-          } catch (_) {}
+          } catch (e) {
+            console.error(e);
+          }
           resolve(resd);
         });
       }

@@ -1,5 +1,5 @@
 import { UsersController } from "@app/core/controllers";
-import { paramParser } from "../extracter";
+import { paramParser } from "../params/extracter";
 
 const confirmEmail = async (req, res) => {
   const code = paramParser(req, "code") + "";

@@ -1,19 +1,21 @@
 // the types of messages to send generically
 export enum HttpMessage {
   Ok,
-  Unauthorized,
-  Error,
-  RateExceeded,
+  NoContent,
   BadRequest,
+  Unauthorized,
+  ToManyRequest,
+  Error,
 }
 
 // valid status codes
 export enum StatusCode {
   Ok = 200,
-  Unauthorized = 401,
-  Error = 500,
-  RateLimit = 403,
+  NoContent = 203,
   BadRequest = 400,
+  Unauthorized = 401,
+  ToManyRequest = 429,
+  Error = 500,
 }
 
 // get the status code for the message

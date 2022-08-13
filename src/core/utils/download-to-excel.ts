@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { Issue } from "@app/types/types";
 import excel from "exceljs";
+import { StatusCode } from "@app/web/messages/message";
 
 const downloadToExcel = async (
   _req: Request,
@@ -11,7 +12,7 @@ const downloadToExcel = async (
   const source = data?.website ? data?.website : data;
 
   if (!source) {
-    res.status(200).end();
+    res.status(StatusCode.Ok).end();
     return;
   }
 

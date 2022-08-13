@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.4.62",
+  "version": "0.4.70",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -80,5 +80,27 @@
   ],
   "cacheDirectories": [
     "./node_modules/.cache/mongodb-memory-server/mongodb-binaries"
-  ]
+  ],
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": [
+        "./tsconfig.json"
+      ]
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "ignorePatterns": [
+      "src/**/*.test.ts",
+      "dist",
+      "coverage",
+      "node_modules"
+    ]
+  }
 }

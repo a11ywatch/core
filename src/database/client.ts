@@ -34,12 +34,7 @@ const initDbConnection = async (dbconnection?: string) => {
     client = createClient(dbconnection);
     client = await client?.connect();
   } catch (e) {
-    console.error("MongoDB not connected:", e);
-  }
-
-  // connect in memory storage
-  if (!client) {
-    console.log("Mongodb not connect attempt to create a memory client.");
+    console.error("MongoDB not connected.");
   }
 };
 

@@ -9,28 +9,7 @@ import { domainName } from "@app/core/utils/domain-name";
 import { getHostName } from "@app/core/utils/get-host";
 import type { CrawlProps } from "@app/core/utils/crawl-stream";
 
-// core single page scan with results
-export const coreCrawl = async (call) => {
-  const { authorization, url, subdomains, tld } = call.request;
-
-  const userNext = await getUserFromApi(authorization); // get current user
-
-  if (userNext) {
-    const crawlProps = await getCrawlConfig({
-      id: userNext.id,
-      url,
-      role: userNext.role,
-      subdomains,
-      tld,
-    });
-
-    await crawlStreaming(crawlProps, call);
-  }
-
-  call?.end();
-};
-
-// crawl website slim and wait for finished emit event to continue @return Website[] use for testing.
+// crawl website slim and wait for finished emit event to continue @return Website[].
 export const crawlStreaming = (
   props: CrawlProps,
   res: Response
@@ -67,4 +46,25 @@ export const crawlStreaming = (
       resolve
     );
   });
+};
+
+// core multi page streaming gRPC scanning
+export const coreCrawl = async (call) => {
+  const { authorization, url, subdomains, tld } = call.request;
+
+  const userNext = await getUserFromApi(authorization); // get current user
+
+  if (userNext) {
+    const crawlProps = await getCrawlConfig({
+      id: userNext.id,
+      url,
+      role: userNext.role,
+      subdomains,
+      tld,
+    });
+
+    await crawlStreaming(crawlProps, call);
+  }
+
+  call?.end();
 };

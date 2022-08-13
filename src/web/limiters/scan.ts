@@ -1,5 +1,4 @@
 import rateLimit from "express-rate-limit";
-import RedisStore from "rate-limit-redis";
 import { redisClient } from "@app/database/memory-client";
 import {
   createRateLimitDirective,
@@ -7,10 +6,21 @@ import {
   getGraphQLRateLimiter,
 } from "graphql-rate-limit";
 
+let RedisStore;
 let limiter; // generic limiter
 let scanLimiter; // website scans for new reports and crawls
 let store; // redis store to use
 let gqlRateLimiter; // graphql rate limit
+
+(async () => {
+  if (!RedisStore) {
+    try {
+      RedisStore = (await import("rate-limit-redis")).default;
+    } catch (e) {
+      console.error(`Redis disabled. Node v13 and above is required`);
+    }
+  }
+})();
 
 const connectLimiters = () => {
   try {

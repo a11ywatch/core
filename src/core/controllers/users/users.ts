@@ -9,7 +9,7 @@ import {
   sendMailCallback,
 } from "../../utils";
 import { getWebsite } from "../websites";
-import { getUsers, getUser, getAllUsers } from "./find";
+import { getUser } from "./find";
 import {
   updateApiUsage,
   updateScanAttempt,
@@ -30,8 +30,6 @@ import type { UserControllerType } from "./types";
 export const UsersController: UserControllerType = (
   { user: _user } = { user: null }
 ) => ({
-  getUsers,
-  getAllUsers,
   getUser,
   updateApiUsage,
   verifyUser,

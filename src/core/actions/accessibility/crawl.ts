@@ -23,6 +23,8 @@ import { PageSpeedController } from "@app/core/controllers/page-speed/main";
 import { validateScanEnabled } from "@app/core/controllers/users/update/scan-attempt";
 import { RATE_EXCEEDED_ERROR } from "@app/core/strings";
 import { collectionIncrement } from "@app/core/utils/collection-upsert";
+import { SCAN_TIMEOUT } from "@app/core/strings/errors";
+import { StatusCode } from "@app/web/messages/message";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -187,9 +189,9 @@ export const crawlPage = async (
       return resolve(
         responseModel({
           data: null,
-          code: 300,
+          code: StatusCode.BadRequest,
           success: false,
-          message: "Web scan did not complete.",
+          message: SCAN_TIMEOUT,
         })
       );
     }

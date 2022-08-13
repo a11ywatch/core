@@ -18,6 +18,7 @@ export const getCrawlConfig = async ({ id, role, url, tld, subdomains }) => {
     }
   }
 
+  // bypass configurations
   if (!SUPER_MODE) {
     subdomainsEnabled = subdomainsEnabled && role >= 1;
     tldEnabled = tldEnabled && role >= 2;

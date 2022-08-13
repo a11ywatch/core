@@ -1,3 +1,4 @@
+import { StatusCode } from "@app/web/messages/message";
 import type { NextFunction, Request, Response } from "express";
 
 import { crawlHttpStream } from "../utils/crawl-stream";
@@ -17,7 +18,7 @@ export const crawlStream = async (
   const url = baseUrl && decodeURIComponent(baseUrl);
 
   if (!url) {
-    res.status(400);
+    res.status(StatusCode.BadRequest);
     res.json([]);
     return;
   }
@@ -30,7 +31,7 @@ export const crawlStream = async (
   );
 
   if (userNext) {
-    res.writeHead(200, {
+    res.writeHead(StatusCode.Ok, {
       "Content-Type": "application/json",
       "Transfer-Encoding": "chunked",
     });

@@ -1,7 +1,7 @@
 import { Request, Response, Application } from "express";
 import cors from "cors";
 
-import { getBaseParamsList } from "../extracter";
+import { getBaseParamsList } from "../params/extracter";
 import { getWebsitesPaging } from "../../core/controllers/websites/find/get";
 import { getIssuesPaging } from "../../core/controllers/issues/find";
 import { getPagesPaging } from "../../core/controllers/pages/find/domains";
@@ -54,7 +54,7 @@ export const setListRoutes = (app: Application) => {
           userId,
           limit,
           offset,
-          domain: domain || undefined,
+          domain,
           insights: true,
         }),
       userId,

@@ -2,14 +2,13 @@ import { HttpMessage, StatusCode } from "@app/web/messages/message";
 import { ResponseParamsModel, ResponseModel } from "./types";
 
 // response model for HTTP request
-// TODO: refactor and filter code from body on OpenAPI
-const responseModel = (
-  { success = true, ...extra }: ResponseParamsModel = {
-    success: true,
-  }
-): ResponseModel => {
-  let message = extra?.message;
-  let code = extra?.code ?? StatusCode.Ok;
+const responseModel = (params?: ResponseParamsModel): ResponseModel => {
+  let {
+    success = true,
+    message,
+    code = StatusCode.Ok,
+    ...extra
+  } = params ?? {};
 
   // determine success on code
   if (code >= StatusCode.BadRequest) {

@@ -1,1 +1,1 @@
-export { getUser, getUsers, getAllUsers } from "./get";
+export { getUser } from "./get";

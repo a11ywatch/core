@@ -16,12 +16,9 @@ import {
   PUBLIC_KEY,
   whitelist,
 } from "./config";
-import {
-  addWebsite,
-  crawlAllAuthedWebsitesCluster,
-} from "./core/controllers/websites";
+import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
-import { getBaseParams, paramParser } from "./web/extracter";
+import { getBaseParams, paramParser } from "./web/params/extracter";
 import {
   CONFIRM_EMAIL,
   IMAGE_CHECK,
@@ -44,11 +41,10 @@ import { connectLimiters } from "./web/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken, parseCookie } from "./core/utils";
-import { retreiveUserByToken } from "./core/utils/get-user-data";
+import { retreiveUserByTokenWrapper } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
 import { ApolloServer, ExpressContext } from "apollo-server-express";
 import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
-import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
 import { crawlStreamSlim } from "./core/streams/crawl-slim";
@@ -64,6 +60,9 @@ import { registerExpressApp } from "./web/register";
 import { setListRoutes } from "./web/routes_groups/list";
 import { StatusCode } from "./web/messages/message";
 import { responseWrap } from "./web/response";
+import { getWebParams } from "./web/params/web";
+import { addWebsiteWrapper } from "./core/controllers/websites/set/add-website";
+import { getWebsiteWrapper } from "./core/controllers/websites/find/get";
 
 const { GRAPHQL_PORT } = config;
 
@@ -82,9 +81,8 @@ const connectClients = async () => {
 const allowDocDomains = [...whitelist]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
 
 function initServer(): HttpServer[] {
-  let server: ApolloServer<ExpressContext>;
-
   const app = express();
+  let server: ApolloServer<ExpressContext>;
 
   // setup all middlewares and app settings
   registerExpressApp(app);
@@ -122,52 +120,27 @@ function initServer(): HttpServer[] {
   app.get("/api/report", cors(), getWebsiteReport);
   // retrieve a user from the database.
   app.get("/api/user", cors(), async (req, res) => {
-    const [data] = await retreiveUserByToken(req.headers.authorization);
+    const auth = req.headers.authorization;
 
-    res.json(
-      responseModel({
-        data,
-        message: data
-          ? "Successfully retrieved user."
-          : "Failed to retrieved user.",
-      })
-    );
+    await responseWrap(res, {
+      callback: () => retreiveUserByTokenWrapper(auth),
+      auth,
+    });
   });
 
   // retrieve a website from the database. TODO: cleanup
   app.get("/api/website", cors(), async (req, res) => {
-    const { userId, domain } = getBaseParams(req);
-    let data;
-    let code = 200;
-    let message = "Failed to retrieved website.";
+    const { userId, domain, pageUrl } = getBaseParams(req);
 
-    // flexible params for url [backwards compat api support] TODO: remove
-    const url1 = paramParser(req, "url");
-    const url2 = paramParser(req, "websiteUrl");
-    const url3 = paramParser(req, "pageUrl");
-    const urlBase = url1 || url2 || url3;
-    const url = urlBase ? decodeURIComponent(urlBase + "") : undefined;
-
-    try {
-      const [page] = await getWebsite({
-        userId,
-        domain,
-        url,
-      });
-      data = page;
-      message = "Successfully retrieved website.";
-    } catch (e) {
-      code = 400;
-      message = `${message} - ${e}`;
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
+    await responseWrap(res, {
+      callback: () =>
+        getWebsiteWrapper({
+          userId,
+          domain,
+          url: pageUrl,
+        }),
+      userId,
+    });
   });
 
   // retrieve a page analytic from the database.
@@ -234,6 +207,8 @@ function initServer(): HttpServer[] {
     const userId = usr?.payload?.keyid;
 
     if (typeof userId === "undefined") {
+      res.status(StatusCode.Unauthorized);
+
       return res.json({
         data: null,
         message: "Authentication required",
@@ -273,45 +248,15 @@ function initServer(): HttpServer[] {
     const usr = getUserFromToken(req.headers.authorization);
     const userId = usr?.payload?.keyid;
 
-    if (typeof userId === "undefined") {
-      return res.json({
-        data: null,
-        message: "Authentication required",
-      });
-    }
-
-    const url = paramParser(req, "url");
-    const customHeaders = paramParser(req, "customHeaders");
-    const mobile = paramParser(req, "mobile");
-    const pageInsights = paramParser(req, "pageInsights");
-    const ua = paramParser(req, "ua");
-    const standard = paramParser(req, "standard");
-    const actions = paramParser(req, "actions");
-    const robots = paramParser(req, "robots");
-    const subdomains = paramParser(req, "subdomains");
-    const tld = paramParser(req, "tld");
-
-    const { website } = await addWebsite({
+    await responseWrap(res, {
+      callback: () =>
+        addWebsiteWrapper({
+          userId,
+          canScan: false,
+          // configuration
+          ...getWebParams(req),
+        }),
       userId,
-      url,
-      customHeaders,
-      mobile,
-      pageInsights,
-      ua,
-      standard,
-      canScan: false,
-      actions,
-      robots,
-      subdomains,
-      tld,
-    });
-
-    return res.json({
-      data: website,
-      message:
-        subdomains || tld
-          ? `Website added with crawl - subdomains:${subdomains} & tld:${tld}`
-          : "Website added!",
     });
   });
 
@@ -358,7 +303,13 @@ function initServer(): HttpServer[] {
       return next(err);
     }
     res.status(StatusCode.Error);
-    res.json(responseModel({ code: StatusCode.Error, success: false }));
+    res.json(
+      responseModel({
+        code: StatusCode.Error,
+        success: false,
+        message: err,
+      })
+    );
   });
 
   let httpServer: HttpServer;
@@ -481,7 +432,7 @@ const isReady = async () => {
           clearInterval(serverInterval);
           resolve(true);
         }
-      }, 5);
+      }, 3);
 
       // give 75 ms to wait for server to start before clearing out if server has not inited
       if (!serverInited) {

@@ -2,7 +2,7 @@ import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
 import type { Website } from "@app/types/types";
 import { PageSpeedController } from "../../page-speed/main";
-import { validateUID } from "@app/web/extracter";
+import { validateUID } from "@app/web/params/extracter";
 
 /*
  * get a website from the database
@@ -34,6 +34,14 @@ export const getWebsite = async ({
 
     return [null, null];
   }
+};
+
+// wrapper for data
+
+export const getWebsiteWrapper = async (params) => {
+  const [website] = await getWebsite(params);
+
+  return website;
 };
 
 /*

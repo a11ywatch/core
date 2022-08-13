@@ -3,15 +3,17 @@ import { getUserFromToken } from "@app/core/utils";
 import { imageDetect } from "@app/core/external";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
 import type { Request, Response } from "express";
+import { StatusCode } from "@app/web/messages/message";
+import { responseModel } from "@app/core/models";
 
 const detectImage = async (req: Request, res: Response) => {
   const img = req.body?.imageBase64;
 
   if (!img) {
+    res.status(StatusCode.BadRequest);
     res.json({
       data: null,
-      status: 400,
-      message: "IMAGE NOT FOUND",
+      message: "Request body property 'imageBase64' expected",
       success: false,
     });
     return;
@@ -21,9 +23,10 @@ const detectImage = async (req: Request, res: Response) => {
   const user = getUserFromToken(req?.headers?.authorization);
 
   if (!user) {
+    res.status(StatusCode.Unauthorized);
+
     res.json({
       data: null,
-      status: 400,
       message: req.headers?.authorization
         ? TOKEN_EXPIRED_ERROR
         : "USER NOT FOUND",
@@ -41,7 +44,6 @@ const detectImage = async (req: Request, res: Response) => {
   if (!canScan) {
     res.json({
       data: null,
-      status: 17,
       message: RATE_EXCEEDED_ERROR,
       success: false,
     });
@@ -56,7 +58,7 @@ const detectImage = async (req: Request, res: Response) => {
     console.error(e);
   }
 
-  res.json(data);
+  res.json(responseModel({ code: StatusCode.Ok, data }));
 };
 
 export { detectImage };

@@ -1,27 +1,36 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { getReport } from "@app/core/controllers/reports";
 import { downloadToExcel, getUserFromToken } from "@app/core/utils";
 import { Website } from "@app/types/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { retreiveUserByToken } from "@app/core/utils/get-user-data";
-import { paramParser } from "@app/web/extracter";
+import { paramParser } from "@app/web/params/extracter";
+import { StatusCode } from "@app/web/messages/message";
+import { responseModel } from "@app/core/models";
+import { URL_NOT_FOUND } from "@app/core/strings/errors";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage
 export const getWebsiteAPI = async (
   req: Request,
   res: Response,
-  next?: any
+  next?: NextFunction
 ) => {
-  const q = paramParser(req, "q");
-  const url = paramParser(req, "url");
-  const pageUrl = paramParser(req, "pageUrl");
   const download = paramParser(req, "download");
-  const slug = q || url || pageUrl;
+  const slug =
+    paramParser(req, "q") ||
+    paramParser(req, "url") ||
+    paramParser(req, "pageUrl");
 
   if (!slug) {
-    res.status(404);
-    res.send(false);
+    res.status(StatusCode.BadRequest);
+    res.send(
+      responseModel({
+        success: false,
+        code: StatusCode.BadRequest,
+        message: URL_NOT_FOUND,
+      })
+    );
     return;
   }
 

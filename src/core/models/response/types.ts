@@ -3,6 +3,7 @@ interface ResponseParamsModel {
   statusCode?: number; // enum map
   code?: number; // actual status code to use
   success?: boolean;
+  message?: string | number; // the raw message of the request or generic enum assignment
   [extra: string]: any;
 }
 
