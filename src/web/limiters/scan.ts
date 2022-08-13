@@ -7,40 +7,46 @@ import {
   getGraphQLRateLimiter,
 } from "graphql-rate-limit";
 
-let limiter;
-let scanLimiter;
+let limiter; // generic limiter
+let scanLimiter; // website scans for new reports and crawls
 let store; // redis store to use
+let gqlRateLimiter; // graphql rate limit
 
 const connectLimiters = () => {
-  store = new RedisStore({
-    // @ts-ignore
-    sendCommand: (...args: string[]) => redisClient.call(...args),
-  });
-
   try {
-    limiter = rateLimit({
-      windowMs: 1 * 60 * 1000, // 60 seconds
-      max: 30, // Limit each IP to 30 API requests per `window` (here, per minute)
-      standardHeaders: true,
-      legacyHeaders: false,
-      store,
-      keyGenerator: (request, _response) =>
-        request.header["x-forwarded-for"] || request.ip,
-    });
-
-    scanLimiter = rateLimit({
-      windowMs: 1 * 30 * 1000, // 30 seconds
-      max: 3, // Limit each IP to 3 requests per `window` (here, per 30 secs)
-      standardHeaders: true,
-      legacyHeaders: false,
-      store,
+    store = new RedisStore({
+      // @ts-ignore
+      sendCommand: (...args: string[]) => redisClient.call(...args),
     });
   } catch (e) {
     console.error(e);
   }
-};
 
-let gqlRateLimiter;
+  // setup rate limits
+  if (store) {
+    try {
+      limiter = rateLimit({
+        windowMs: 1 * 60 * 1000, // 60 seconds
+        max: 30, // Limit each IP to 30 API requests per `window` (here, per minute)
+        standardHeaders: true,
+        legacyHeaders: false,
+        store,
+        keyGenerator: (request, _response) =>
+          request.header["x-forwarded-for"] || request.ip,
+      });
+
+      scanLimiter = rateLimit({
+        windowMs: 1 * 30 * 1000, // 30 seconds
+        max: 3, // Limit each IP to 3 requests per `window` (here, per 30 secs)
+        standardHeaders: true,
+        legacyHeaders: false,
+        store,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+};
 
 const getGqlRateLimitDirective = () => {
   try {

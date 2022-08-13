@@ -15,11 +15,4 @@ interface ResponseModel {
   [extra: string]: any;
 }
 
-// Generic API response for GQL
-enum ApiResponse {
-  Success,
-  NotFound,
-  BadRequest,
-}
-
-export { ApiResponse, ResponseParamsModel, ResponseModel };
+export { ResponseParamsModel, ResponseModel };

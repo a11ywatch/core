@@ -6,7 +6,7 @@ import { getUserFromApiScan } from "../utils/get-user-data";
 import { getCrawlConfig } from "./crawl-config";
 
 // Crawl stream with events.
-// returns an array of reports
+// returns an array of reports for performance
 export const crawlStream = async (
   req: Request,
   res: Response,

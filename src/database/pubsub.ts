@@ -30,20 +30,27 @@ const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 function createPubSub() {
   let publisher: Redis;
   let subscriber: Redis;
+
   try {
     publisher = new Redis(options);
   } catch (e) {
     console.error(e);
   }
+
   try {
     subscriber = new Redis(options);
   } catch (e) {
     console.error(e);
   }
-  subscriber?.on("error", (error) => {
-    redisLogEnabled && console.error("redis error", error);
-    redisSubConnected = false;
-  });
+
+  // setup sub events
+  if (subscriber) {
+    subscriber.on("error", (error) => {
+      redisLogEnabled && console.error("redis error", error);
+      redisSubConnected = false;
+    });
+  }
+
   try {
     pubsub = new RedisPubSub({
       publisher,

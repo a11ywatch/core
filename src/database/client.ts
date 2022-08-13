@@ -31,11 +31,6 @@ let client: MongoClient; // shared client across application
 
 const initDbConnection = async (dbconnection?: string) => {
   try {
-    await closeDbConnection(); // reset db connections
-  } catch (e) {
-    console.error(e);
-  }
-  try {
     client = createClient(dbconnection);
     client = await client?.connect();
   } catch (e) {

@@ -1,4 +1,4 @@
-import { ApiResponse, responseModel, makeWebsite } from "@app/core/models";
+import { responseModel, makeWebsite } from "@app/core/models";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getHostName } from "@app/core/utils";
 import { fetchPageIssues } from "./fetch-issues";
@@ -8,6 +8,7 @@ import type { PageMindScanResponse } from "@app/types/schema";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import { SUPER_MODE } from "@app/config/config";
 import { WEBSITE_NOT_FOUND } from "@app/core/strings";
+import { StatusCode } from "@app/web/messages/message";
 
 type ScanParams = {
   userId?: number;
@@ -73,7 +74,7 @@ export const scanWebsite = async ({
   if (!dataSource?.webPage) {
     return responseModel({
       data: null,
-      statusCode: ApiResponse.BadRequest,
+      code: StatusCode.BadRequest,
       success: false,
       message:
         "Website timeout, rendered too slow over 25000 ms or not at all. Check your url and try again.",

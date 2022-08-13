@@ -1,39 +1,24 @@
-import { HttpMessage } from "@app/web/messages/message";
-import { ApiResponse, ResponseParamsModel, ResponseModel } from "./types";
+import { HttpMessage, StatusCode } from "@app/web/messages/message";
+import { ResponseParamsModel, ResponseModel } from "./types";
 
-// response models
-// TODO: refactor
+// response model for HTTP request
+// TODO: refactor and filter code from body on OpenAPI
 const responseModel = (
-  { statusCode, success = true, ...extra }: ResponseParamsModel = {
-    statusCode: ApiResponse.Success,
+  { success = true, ...extra }: ResponseParamsModel = {
     success: true,
   }
 ): ResponseModel => {
   let message = extra?.message;
-  let code = extra?.code;
-
-  if (!code) {
-    // for gQL
-    switch (statusCode) {
-      case ApiResponse.NotFound:
-        code = 404;
-        break;
-      case ApiResponse.BadRequest:
-        code = 400;
-        break;
-      default:
-        code = 200;
-        break;
-    }
-  }
+  let code = extra?.code ?? StatusCode.Ok;
 
   // determine success on code
-  if (code > 400) {
+  if (code >= StatusCode.BadRequest) {
     success = false;
   }
 
   const { data = null, ...n } = extra ?? {};
 
+  // TODO: remove for actually messages being used
   if (typeof message === "number") {
     message = HttpMessage[message];
   }

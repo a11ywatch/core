@@ -62,6 +62,8 @@ import { execute, subscribe } from "graphql";
 import { PageSpeedController } from "./core/controllers/page-speed/main";
 import { registerExpressApp } from "./web/register";
 import { setListRoutes } from "./web/routes_groups/list";
+import { StatusCode } from "./web/messages/message";
+import { responseWrap } from "./web/response";
 
 const { GRAPHQL_PORT } = config;
 
@@ -70,23 +72,11 @@ configureAgent();
 
 // all the clients for external request
 const connectClients = async () => {
-  try {
-    await initDbConnection();
-  } catch (e) {
-    console.error(e);
-  }
-  try {
-    await initRedisConnection(); // redis client
-  } catch (e) {
-    console.error(e);
-  }
+  await initDbConnection(); // database connections
+  await initRedisConnection(); // redis connections
 
-  try {
-    createPubSub(); //gql sub
-    connectLimiters(); // rate limiters
-  } catch (e) {
-    console.error(e);
-  }
+  createPubSub(); //gql sub
+  connectLimiters(); // rate limiters
 };
 
 const allowDocDomains = [...whitelist]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
@@ -143,7 +133,8 @@ function initServer(): HttpServer[] {
       })
     );
   });
-  // retrieve a website from the database.
+
+  // retrieve a website from the database. TODO: cleanup
   app.get("/api/website", cors(), async (req, res) => {
     const { userId, domain } = getBaseParams(req);
     let data;
@@ -183,60 +174,30 @@ function initServer(): HttpServer[] {
   app.get("/api/analytics", cors(), async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
-    let data;
-    let code = 200;
-    let message = "";
-
-    try {
-      data = await AnalyticsController().getWebsite({
-        userId,
-        pageUrl: pageUrl ? pageUrl : undefined,
-        domain: domain ? domain : undefined,
-      });
-      message = "Successfully retrieved analytic for page.";
-    } catch (e) {
-      code = 400;
-      message = `Failed to retrieved analytic - ${e}`;
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
+    await responseWrap(res, {
+      callback: () =>
+        AnalyticsController().getWebsite({
+          userId,
+          pageUrl: pageUrl ? pageUrl : undefined,
+          domain: domain ? domain : undefined,
+        }),
+      userId,
+    });
   });
 
-  // TODO: GET SINGLE ISSUE, SCRIPT OpenAPi
-
-  // retrieve a page analytic from the database.
+  // retrieve a pagespeed from the database.
   app.get("/api/pagespeed", cors(), async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
-    let data;
-    let code = 200;
-    let message = "";
-
-    try {
-      data = await PageSpeedController().getWebsite({
-        userId,
-        pageUrl: pageUrl ? pageUrl : undefined,
-        domain: domain ? domain : undefined,
-      });
-      message = "Successfully retrieved pagespeed for website.";
-    } catch (e) {
-      code = 400;
-      message = `Failed to retrieve pagespeed - ${e}`;
-    }
-
-    res.json(
-      responseModel({
-        code,
-        data: data ? data : null,
-        message,
-      })
-    );
+    await responseWrap(res, {
+      callback: () =>
+        PageSpeedController().getWebsite({
+          userId,
+          pageUrl: pageUrl ? pageUrl : undefined,
+          domain: domain ? domain : undefined,
+        }),
+      userId,
+    });
   });
 
   /*
@@ -300,8 +261,7 @@ function initServer(): HttpServer[] {
 
     return res.json({
       data: website,
-      message:
-        "This endpoint is a WIP. It will be used to update your website configuration",
+      message: "Website updated",
     });
   });
 
@@ -367,17 +327,11 @@ function initServer(): HttpServer[] {
   // ADMIN ROUTES
   app.post("/api/run-watcher", cors(), async (req, res) => {
     const { password } = req.body;
-    try {
-      if (password === process.env.ADMIN_PASSWORD) {
-        setImmediate(async () => {
-          await crawlAllAuthedWebsitesCluster();
-        });
-        res.send(true);
-      } else {
-        res.send(false);
-      }
-    } catch (e) {
-      console.error(e);
+    if (password === process.env.ADMIN_PASSWORD) {
+      setImmediate(crawlAllAuthedWebsitesCluster);
+      res.send(true);
+    } else {
+      res.send(false);
     }
   });
 
@@ -403,8 +357,8 @@ function initServer(): HttpServer[] {
     if (res.headersSent) {
       return next(err);
     }
-    res.status(500);
-    res.json({ error: err });
+    res.status(StatusCode.Error);
+    res.json(responseModel({ code: StatusCode.Error, success: false }));
   });
 
   let httpServer: HttpServer;

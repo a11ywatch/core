@@ -59,11 +59,7 @@ export const PageSpeedController = ({ user } = { user: null }) => ({
     let insights;
 
     if (Object.keys(searchProps).length) {
-      try {
-        insights = await collection.findOne(searchProps);
-      } catch (e) {
-        console.error(e);
-      }
+      insights = await collection.findOne(searchProps);
     }
 
     return chain ? [insights, collection] : insights;

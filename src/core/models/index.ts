@@ -1,3 +1,3 @@
-export { responseModel, ApiResponse } from "./response";
+export { responseModel } from "./response";
 export { makeWebsite } from "./website";
 export { makeUser } from "./user";

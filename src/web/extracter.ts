@@ -43,3 +43,7 @@ export const getBaseParamsList = (req: Request) => {
     limit: 5,
   };
 };
+
+// determine if a userID is valid to use for DB querys and etc.
+export const validateUID = (id: string | number) =>
+  typeof id === "number" || typeof id === "string";

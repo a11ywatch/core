@@ -2,8 +2,13 @@ import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
 import type { Website } from "@app/types/types";
 import { PageSpeedController } from "../../page-speed/main";
+import { validateUID } from "@app/web/extracter";
 
-// get a website from the database
+/*
+ * get a website from the database
+ * @params {userId: number, url: string, domain, string} - the query params to run
+ * @returns Promise<[website, collection]>
+ */
 export const getWebsite = async ({
   userId,
   url,
@@ -16,6 +21,7 @@ export const getWebsite = async ({
       url,
       domain,
     });
+
     let website;
 
     if (Object.keys(params).length) {
@@ -102,7 +108,7 @@ export const getWebsitesPaging = async (
     const [collection] = await connect("Websites");
 
     const webPages = await collection
-      .find({ userId })
+      .find(validateUID(userId) ? { userId } : undefined)
       .sort({ order: 1 })
       .skip(offset)
       .limit(limit)
