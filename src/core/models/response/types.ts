@@ -1,6 +1,7 @@
+// response params between gql -> rest [TODO: refactor]
 interface ResponseParamsModel {
-  msgType?: number;
-  statusCode?: number;
+  statusCode?: number; // enum map
+  code?: number; // actual status code to use
   success?: boolean;
   [extra: string]: any;
 }
@@ -14,6 +15,7 @@ interface ResponseModel {
   [extra: string]: any;
 }
 
+// Generic API response for GQL
 enum ApiResponse {
   Success,
   NotFound,

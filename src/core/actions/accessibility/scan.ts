@@ -7,6 +7,7 @@ import { limitIssue } from "./limit-issue";
 import type { PageMindScanResponse } from "@app/types/schema";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import { SUPER_MODE } from "@app/config/config";
+import { WEBSITE_NOT_FOUND } from "@app/core/strings";
 
 type ScanParams = {
   userId?: number;
@@ -36,7 +37,7 @@ export const scanWebsite = async ({
   // redis pubsub not connected
 
   if (!domain) {
-    return responseModel({ msgType: ApiResponse.NotFound });
+    return responseModel({ message: WEBSITE_NOT_FOUND });
   }
 
   if (

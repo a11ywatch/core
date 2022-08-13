@@ -8,15 +8,15 @@ import { getPagesPaging } from "../../core/controllers/pages/find/domains";
 import { getAnalyticsPaging } from "../../core/controllers/analytics";
 import { getScriptsPaging } from "../../core/controllers/scripts";
 import { getPageSpeedPaging } from "../../core/controllers/page-speed/main";
+import { getStatusCodes, HttpMessage } from "../messages/message";
 
-// set all routes that are handled via pagination
+// set all routes that are handled via pagination - Requires a valid user reguardless of SUPER mode.
 export const setListRoutes = (app: Application) => {
   // paginated retreive websites from the database.
   app.get("/api/list/website", cors(), async (req, res) => {
     const { userId, offset, limit } = getBaseParamsList(req);
-    let data;
-    let code = 200;
-    let message = "";
+    let message = HttpMessage.Unauthorized;
+    let data = null;
 
     if (typeof userId !== "undefined") {
       try {
@@ -26,17 +26,20 @@ export const setListRoutes = (app: Application) => {
           offset,
           insights: true, // TODO: make insights optional
         });
-        message = "Successfully retrieved websites.";
+        message = HttpMessage.Ok;
       } catch (e) {
-        code = 400;
-        message = `Failed to retrieved websites - ${e}`;
+        message = HttpMessage.Error;
       }
     }
+
+    const code = getStatusCodes(message);
+
+    res.status(code);
 
     res.json(
       responseModel({
         code,
-        data: data ? data : null,
+        data,
         message,
       })
     );
@@ -45,9 +48,8 @@ export const setListRoutes = (app: Application) => {
   // paginated retreive analytics from the database. Limit default is set to 20.
   app.get("/api/list/analytics", cors(), async (req, res) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
-    let data;
-    let code = 200;
-    let message = "";
+    let message = HttpMessage.Unauthorized;
+    let data = null;
 
     if (typeof userId !== "undefined") {
       try {
@@ -57,17 +59,20 @@ export const setListRoutes = (app: Application) => {
           offset,
           domain,
         });
-        message = "Successfully retrieved analytics.";
+        message = HttpMessage.Ok;
       } catch (e) {
-        code = 400;
-        message = `Failed to retrieved analytics - ${e}`;
+        message = HttpMessage.Error;
       }
     }
+
+    const code = getStatusCodes(message);
+
+    res.status(code);
 
     res.json(
       responseModel({
         code,
-        data: data ? data : null,
+        data,
         message,
       })
     );
@@ -76,9 +81,8 @@ export const setListRoutes = (app: Application) => {
   // paginated retreive pages from the database.
   app.get("/api/list/pages", cors(), async (req: Request, res: Response) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
-    let data;
-    let code = 200;
-    let message = "";
+    let message = HttpMessage.Unauthorized;
+    let data = null;
 
     if (typeof userId !== "undefined") {
       try {
@@ -89,20 +93,21 @@ export const setListRoutes = (app: Application) => {
           domain: domain || undefined,
           insights: true,
         });
-        if (data) {
-          message = "Successfully retrieved pages.";
-        }
+        message = HttpMessage.Ok;
       } catch (e) {
-        code = 400;
-        message = `Failed to retrieved pages - ${e}`;
+        message = HttpMessage.Error;
       }
     }
+
+    const code = getStatusCodes(message);
+
+    res.status(code);
 
     res.json(
       responseModel({
         code,
-        data: data ? data : null,
-        message,
+        data,
+        message: HttpMessage[message],
       })
     );
   });
@@ -110,10 +115,8 @@ export const setListRoutes = (app: Application) => {
   // paginated retreive scripts from the database. Limit default is set to 20.
   app.get("/api/list/scripts", cors(), async (req: Request, res: Response) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
-
-    let data;
-    let code = 200;
-    let message = "";
+    let message = HttpMessage.Unauthorized;
+    let data = null;
 
     if (typeof userId !== "undefined") {
       try {
@@ -123,17 +126,20 @@ export const setListRoutes = (app: Application) => {
           offset,
           domain,
         });
-        message = "Successfully retrieved scripts.";
+        message = HttpMessage.Ok;
       } catch (e) {
-        code = 400;
-        message = `Failed to retrieved scripts - ${e}`;
+        message = HttpMessage.Error;
       }
     }
+
+    const code = getStatusCodes(message);
+
+    res.status(code);
 
     res.json(
       responseModel({
         code,
-        data: data ? data : null,
+        data,
         message,
       })
     );
@@ -142,10 +148,8 @@ export const setListRoutes = (app: Application) => {
   // list of issues
   app.get("/api/list/issue", cors(), async (req: Request, res: Response) => {
     const { userId, domain, pageUrl, limit, offset } = getBaseParamsList(req);
-
-    let data;
-    let code = 200;
-    let message = "";
+    let message = HttpMessage.Unauthorized;
+    let data = null;
 
     if (typeof userId !== "undefined") {
       try {
@@ -156,17 +160,20 @@ export const setListRoutes = (app: Application) => {
           pageUrl,
           offset,
         });
-        message = "Successfully retrieved issues.";
+        message = HttpMessage.Ok;
       } catch (e) {
-        code = 400;
-        message = `Failed to retrieve issues - ${e}`;
+        message = HttpMessage.Error;
       }
     }
+
+    const code = getStatusCodes(message);
+
+    res.status(code);
 
     res.json(
       responseModel({
         code,
-        data: data ? data : null,
+        data,
         message,
       })
     );
@@ -178,10 +185,8 @@ export const setListRoutes = (app: Application) => {
     cors(),
     async (req: Request, res: Response) => {
       const { userId, domain, pageUrl, limit, offset } = getBaseParamsList(req);
-
-      let data;
-      let code = 200;
-      let message = "";
+      let message = HttpMessage.Unauthorized;
+      let data = null;
 
       if (typeof userId !== "undefined") {
         try {
@@ -193,17 +198,19 @@ export const setListRoutes = (app: Application) => {
             offset,
             all: false,
           });
-          message = "Successfully retrieved pagespeed.";
+          message = HttpMessage.Ok;
         } catch (e) {
-          code = 400;
-          message = `Failed to retrieve pagespeed - ${e}`;
+          message = HttpMessage.Error;
         }
       }
+      const code = getStatusCodes(message);
+
+      res.status(code);
 
       res.json(
         responseModel({
           code,
-          data: data ? data : null,
+          data,
           message,
         })
       );

@@ -1,9 +1,10 @@
-import { WEBSITE_NOT_FOUND, CRAWLER_FINISHED } from "@app/core/strings";
+import { SUCCESS } from "@app/core/strings";
 import { ApiResponse, ResponseParamsModel, ResponseModel } from "./types";
 
+// response models
+// TODO: refactor
 const responseModel = (
-  { msgType, statusCode, success = true, ...extra }: ResponseParamsModel = {
-    msgType: ApiResponse.Success,
+  { statusCode, success = true, ...extra }: ResponseParamsModel = {
     statusCode: ApiResponse.Success,
     success: true,
   }
@@ -12,14 +13,7 @@ const responseModel = (
   let code = extra?.code;
 
   if (!message) {
-    switch (msgType) {
-      case ApiResponse.NotFound:
-        message = WEBSITE_NOT_FOUND;
-        break;
-      default:
-        message = CRAWLER_FINISHED;
-        break;
-    }
+    message = SUCCESS;
   }
 
   if (!code) {
@@ -37,11 +31,20 @@ const responseModel = (
     }
   }
 
+  // determine success on code
+  if (code > 400) {
+    success = false;
+  }
+
+  const { data = null, ...n } = extra ?? {};
+
+  // proper shape
   return {
-    ...extra,
+    data,
     success,
     code,
     message,
+    ...n,
   };
 };
 
