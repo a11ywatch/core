@@ -21,12 +21,13 @@ export const registerExpressApp = (app: Express) => {
   if (!config.SUPER_MODE) {
     app.use("/playground", limiter);
     app.use("/grpc-docs", limiter);
-    app.use("/api/iframe", limiter);
     app.use("/api/get-website", limiter);
     app.use("/api/report", limiter);
     // TODO: set custom auth limiters
     app.use("/api/register", scanLimiter);
     app.use("/api/login", scanLimiter);
+    // expensive endpoints
+    app.use("/api/iframe", scanLimiter);
     app.use("/api/scan-simple", scanLimiter);
     app.use("/api/crawl", scanLimiter);
     app.use("/api/crawl-stream", scanLimiter);

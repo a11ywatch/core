@@ -30,7 +30,7 @@ const connectLimiters = () => {
 
     scanLimiter = rateLimit({
       windowMs: 1 * 30 * 1000, // 30 seconds
-      max: 4, // Limit each IP to 4 requests per `window` (here, per 30 secs)
+      max: 3, // Limit each IP to 3 requests per `window` (here, per 30 secs)
       standardHeaders: true,
       legacyHeaders: false,
       store,
