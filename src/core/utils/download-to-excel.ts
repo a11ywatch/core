@@ -1,18 +1,17 @@
-import type { Request, Response } from "express";
 import type { Issue } from "@app/types/types";
 import excel from "exceljs";
 import { StatusCode } from "@app/web/messages/message";
+import { FastifyContext } from "apollo-server-fastify";
 
 const downloadToExcel = async (
-  _req: Request,
-  res: Response,
-  _next: any,
+  _req: FastifyContext["request"],
+  res: FastifyContext["reply"],
   data: Issue | any
 ) => {
   const source = data?.website ? data?.website : data;
 
   if (!source) {
-    res.status(StatusCode.Ok).end();
+    res.status(StatusCode.Ok).send();
     return;
   }
 
@@ -53,18 +52,18 @@ const downloadToExcel = async (
       worksheet.addRows(rows);
     }
 
-    res.setHeader(
+    res.header(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.setHeader(
+    res.header(
       "Content-Disposition",
       "attachment; filename=" + `${pageName}-audit.xlsx`
     );
 
-    await workbook.xlsx.write(res);
+    await workbook.xlsx.write(res as any);
 
-    res.status(200).end();
+    res.status(StatusCode.Ok).send();
   } catch (e) {
     console.error(e);
   }

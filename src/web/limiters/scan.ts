@@ -1,62 +1,30 @@
-import rateLimit from "express-rate-limit";
 import { redisClient } from "@app/database/memory-client";
+
 import {
   createRateLimitDirective,
   RedisStore as GraphQLRedisStore,
   getGraphQLRateLimiter,
 } from "graphql-rate-limit";
 
-let RedisStore;
-let limiter; // generic limiter
-let scanLimiter; // website scans for new reports and crawls
-let store; // redis store to use
-let gqlRateLimiter; // graphql rate limit
-
-(async () => {
-  if (!RedisStore) {
-    try {
-      RedisStore = (await import("rate-limit-redis")).default;
-    } catch (e) {
-      console.error(`Redis disabled. Node v13 and above is required`);
-    }
-  }
-})();
-
-const connectLimiters = () => {
-  try {
-    store = new RedisStore({
-      // @ts-ignore
-      sendCommand: (...args: string[]) => redisClient.call(...args),
-    });
-  } catch (e) {
-    console.error(e);
-  }
-
-  // setup rate limits
-  if (store) {
-    try {
-      limiter = rateLimit({
-        windowMs: 1 * 60 * 1000, // 60 seconds
-        max: 30, // Limit each IP to 30 API requests per `window` (here, per minute)
-        standardHeaders: true,
-        legacyHeaders: false,
-        store,
-        keyGenerator: (request, _response) =>
-          request.header["x-forwarded-for"] || request.ip,
-      });
-
-      scanLimiter = rateLimit({
-        windowMs: 1 * 30 * 1000, // 30 seconds
-        max: 3, // Limit each IP to 3 requests per `window` (here, per 30 secs)
-        standardHeaders: true,
-        legacyHeaders: false,
-        store,
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }
+let limiter = {
+  config: {
+    rateLimit: {
+      max: 10,
+      timeWindow: "1 minute",
+    },
+  },
 };
+// crawl limiter
+let scanLimiter = {
+  config: {
+    rateLimit: {
+      max: 3,
+      timeWindow: "1 minute",
+    },
+  },
+};
+
+let gqlRateLimiter; // graphql rate limit
 
 const getGqlRateLimitDirective = () => {
   try {
@@ -69,6 +37,7 @@ const getGqlRateLimitDirective = () => {
         }s and try again`,
       store: new GraphQLRedisStore(redisClient),
     };
+
     gqlRateLimiter = getGraphQLRateLimiter(rateLimitOptions);
 
     return createRateLimitDirective(rateLimitOptions);
@@ -77,11 +46,4 @@ const getGqlRateLimitDirective = () => {
   }
 };
 
-export {
-  gqlRateLimiter,
-  store,
-  limiter,
-  scanLimiter,
-  getGqlRateLimitDirective,
-  connectLimiters,
-};
+export { gqlRateLimiter, limiter, scanLimiter, getGqlRateLimitDirective };

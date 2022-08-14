@@ -50,7 +50,12 @@ const closeRedisConnection = () => {
   }
 };
 
+const createRedisClient = () => {
+  return new Redis(options);
+};
+
 export {
+  createRedisClient,
   redisClient,
   initRedisConnection,
   closeRedisConnection,

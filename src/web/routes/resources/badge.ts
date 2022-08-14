@@ -1,11 +1,14 @@
 import { rawStatusBadge } from "@app/core/assets";
 import { AnalyticsController } from "@app/core/controllers";
 import { Analytic } from "@app/types/types";
-import type { Request, Response } from "express";
+import { FastifyContext } from "apollo-server-fastify";
 
 // get the status badge for a domain
-export const statusBadge = async (req: Request, res: Response) => {
-  const domain = req.params?.domain?.replace(".svg", "");
+export const statusBadge = async (
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
+) => {
+  const domain = (req.params as any)?.domain?.replace(".svg", "");
   const page: Analytic = await AnalyticsController().getWebsite(
     { domain },
     false
@@ -27,6 +30,6 @@ export const statusBadge = async (req: Request, res: Response) => {
     }
   }
 
-  res.setHeader("Content-Type", "image/svg+xml");
+  res.header("Content-Type", "image/svg+xml");
   res.send(rawStatusBadge({ statusColor, score }));
 };

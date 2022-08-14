@@ -1,15 +1,13 @@
-import { Request } from "express";
-import type { AppResponse } from "@app/types/types";
 import { initUrl } from "@a11ywatch/website-source-builder";
+import { fetchFrame } from "node-iframe";
 
-const createIframe = (req: Request, res: AppResponse) => {
-  const origin = req.get("origin");
-
-  res.set("Access-Control-Allow-Origin", origin);
-  res.setHeader("Content-Type", "text/html");
-
+/*
+ * Create an iframe based off a url and reverse engineer the content for CORS.
+ * Uses node-iframe package to handle iframes.
+ */
+const createIframe = async (req, res) => {
   try {
-    const baseUrl = String(req.query.url || req.query.websiteUrl);
+    const baseUrl = req.query.url || req.query.websiteUrl;
 
     if (!baseUrl) {
       return res.send(false);
@@ -21,10 +19,12 @@ const createIframe = (req: Request, res: AppResponse) => {
       res.redirect(url);
     }
 
-    res.createIframe({
+    const frame = await fetchFrame({
       url,
       baseHref: !!req.query.baseHref,
     });
+
+    res.type("text/html").send(frame);
   } catch (e) {
     console.error(e);
     res.send(false);

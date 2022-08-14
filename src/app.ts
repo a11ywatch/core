@@ -1,15 +1,12 @@
 import type { Server as HttpServer } from "http";
-import type { AddressInfo } from "net";
-import express from "express";
-import http from "http";
-import https from "https";
-import cors from "cors";
+import fastify, { FastifyInstance } from "fastify";
 import { configureAgent } from "node-iframe";
 import { CronJob } from "cron";
 import path from "path";
-import { ApolloServer, ExpressContext } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-fastify";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
+import { createReadStream } from "fs";
 
 import {
   corsOptions,
@@ -17,7 +14,6 @@ import {
   logServerInit,
   PRIVATE_KEY,
   PUBLIC_KEY,
-  whitelist,
 } from "./config";
 import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
@@ -40,12 +36,10 @@ import { statusBadge } from "./web/routes/resources/badge";
 import { scanSimple } from "./web/routes/scan";
 import { setGithubActionRoutes } from "./web/routes_groups/github-actions";
 import { setAuthRoutes } from "./web/routes_groups/auth";
-import { connectLimiters } from "./web/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken } from "./core/utils";
 import { retreiveUserByTokenWrapper } from "./core/utils/get-user-data";
-import { responseModel } from "./core/models";
 import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
@@ -57,13 +51,15 @@ import { updateWebsite } from "./core/controllers/websites/update";
 import { graphqlPlayground } from "./html";
 import { execute, subscribe } from "graphql";
 import { PageSpeedController } from "./core/controllers/page-speed/main";
-import { registerExpressApp } from "./web/register";
+import { registerApp } from "./web/register";
 import { setListRoutes } from "./web/routes_groups/list";
 import { StatusCode } from "./web/messages/message";
 import { responseWrap } from "./web/response";
 import { getWebParams } from "./web/params/web";
 import { addWebsiteWrapper } from "./core/controllers/websites/set/add-website";
 import { getWebsiteWrapper } from "./core/controllers/websites/find/get";
+import { responseModel } from "./core/models";
+import { limiter, scanLimiter } from "./web/limiters";
 
 const { GRAPHQL_PORT } = config;
 
@@ -76,49 +72,45 @@ const connectClients = async () => {
   await initRedisConnection(); // redis connections
 
   createPubSub(); //gql sub
-  connectLimiters(); // rate limiters
 };
 
-function initServer(): HttpServer[] {
-  const app = express();
-  let server: ApolloServer<ExpressContext>;
+const fastifyConfig = {
+  trustProxy: true,
+  ...(process.env.ENABLE_SSL === "true" &&
+    PRIVATE_KEY &&
+    PUBLIC_KEY && {
+      http2: true,
+      https: {
+        key: PRIVATE_KEY,
+        cert: PUBLIC_KEY,
+      },
+    }),
+};
 
-  // setup all middlewares and app settings
-  registerExpressApp(app);
-
-  // email handling
-  app.options(CONFIRM_EMAIL, cors());
-  app.options(UNSUBSCRIBE_EMAILS, cors());
+async function initServer(): Promise<HttpServer[]> {
+  const fast: FastifyInstance = await fastify(fastifyConfig);
+  const app = await registerApp(fast);
 
   // root
   app.get(ROOT, root);
 
-  app.get("/status/:domain", cors(), statusBadge);
+  app.get("/status/:domain", statusBadge);
 
-  app.get("/playground", (_req, res) => {
-    res.send(graphqlPlayground);
+  app.get("/playground", (_, res) => {
+    res.type("text/html").send(graphqlPlayground);
   });
 
-  // TODO: move to client
-  app.get("/grpc-docs", cors(), (req, res) => {
-    const origin = req.get("origin");
-
-    if (whitelist.includes(origin)) {
-      res.set("Access-Control-Allow-Origin", origin);
-    }
-
-    res.sendFile(path.resolve("public/protodoc/index.html"));
+  app.get("/grpc-docs", (_, res) => {
+    res
+      .type("text/html")
+      .send(createReadStream(path.resolve("public/protodoc/index.html")));
   });
 
-  /*
-   * Create an iframe based off a url and reverse engineer the content for CORS.
-   * Uses node-iframe package to handle iframes.
-   */
-  app.get("/api/iframe", cors(), createIframeEvent);
+  app.get("/api/iframe", createIframeEvent);
   // get a previus run report @query {q: string}
-  app.get("/api/report", cors(), getWebsiteReport);
+  app.get("/api/report", getWebsiteReport);
   // retrieve a user from the database.
-  app.get("/api/user", cors(), async (req, res) => {
+  app.get("/api/user", async (req, res) => {
     const auth = req.headers.authorization;
 
     await responseWrap(res, {
@@ -128,7 +120,7 @@ function initServer(): HttpServer[] {
   });
 
   // retrieve a website from the database. TODO: cleanup
-  app.get("/api/website", cors(), async (req, res) => {
+  app.get("/api/website", async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
     await responseWrap(res, {
@@ -143,7 +135,7 @@ function initServer(): HttpServer[] {
   });
 
   // retrieve a page analytic from the database.
-  app.get("/api/analytics", cors(), async (req, res) => {
+  app.get("/api/analytics", async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
     await responseWrap(res, {
@@ -158,7 +150,7 @@ function initServer(): HttpServer[] {
   });
 
   // retrieve a pagespeed from the database.
-  app.get("/api/pagespeed", cors(), async (req, res) => {
+  app.get("/api/pagespeed", async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
     await responseWrap(res, {
@@ -175,40 +167,40 @@ function initServer(): HttpServer[] {
   /*
    * Single page scan
    */
-  app.post("/api/scan-simple", cors(), scanSimple);
+  app.post("/api/scan-simple", limiter, scanSimple);
   /*
    * Site wide scan.
    * Uses Event based handling to get pages max timeout 15mins.
    */
-  app.post("/api/crawl", cors(), crawlRest);
+  app.post("/api/crawl", scanLimiter, crawlRest);
 
   /*
    * Site wide scan handles via stream.
    * Uses Event based handling to extract pages.
    */
-  app.post("/api/crawl-stream", cors(), crawlStream);
+  app.post("/api/crawl-stream", scanLimiter, crawlStream);
 
   /*
    * Site wide scan handles via stream slim data sized.
    * Uses Event based handling to extract pages.
    */
-  app.post("/api/crawl-stream-slim", cors(), crawlStreamSlim);
+  app.post("/api/crawl-stream-slim", scanLimiter, crawlStreamSlim);
 
   // get base64 to image name
-  app.post(IMAGE_CHECK, cors(), detectImage);
+  app.post(IMAGE_CHECK, detectImage);
 
   /*
    * Update website configuration.
    * This sets the website configuration for crawling like user agents, headers, and etc.
    */
-  app.put("/api/website", cors(), async (req, res) => {
+  app.put("/api/website", async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization);
     const userId = usr?.payload?.keyid;
 
     if (typeof userId === "undefined") {
       res.status(StatusCode.Unauthorized);
 
-      return res.json({
+      return res.send({
         data: null,
         message: "Authentication required",
       });
@@ -233,7 +225,7 @@ function initServer(): HttpServer[] {
       actions,
     });
 
-    return res.json({
+    return res.send({
       data: website,
       message: "Website updated",
     });
@@ -243,7 +235,7 @@ function initServer(): HttpServer[] {
    * Add website.
    * This sets the website configuration for crawling like user agents, headers, and etc.
    */
-  app.post("/api/website", cors(), async (req, res) => {
+  app.post("/api/website", async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization);
     const userId = usr?.payload?.keyid;
 
@@ -260,7 +252,7 @@ function initServer(): HttpServer[] {
   });
 
   // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
-  app.get("/api/get-website", cors(), getWebsiteAPI);
+  app.get("/api/get-website", getWebsiteAPI);
 
   // Paginated List Routes
   setListRoutes(app);
@@ -269,9 +261,8 @@ function initServer(): HttpServer[] {
   // GITHUB
   setGithubActionRoutes(app);
   // ADMIN ROUTES
-  app.post("/api/run-watcher", cors(), async (req, res) => {
-    const { password } = req.body;
-    if (password === process.env.ADMIN_PASSWORD) {
+  app.post("/api/run-watcher", async (req, res) => {
+    if ((req.body as any)?.password === process.env.ADMIN_PASSWORD) {
       setImmediate(crawlAllAuthedWebsitesCluster);
       res.send(true);
     } else {
@@ -279,15 +270,13 @@ function initServer(): HttpServer[] {
     }
   });
 
-  // EMAIL handling
+  // EMAIL
   // unsubscribe to emails or Alerts.
-  app
-    .route(UNSUBSCRIBE_EMAILS)
-    .get(cors(), unSubEmails)
-    .post(cors(), unSubEmails);
-
+  app.get(UNSUBSCRIBE_EMAILS, unSubEmails);
+  app.post(UNSUBSCRIBE_EMAILS, unSubEmails);
   // email confirmation route
-  app.route(CONFIRM_EMAIL).get(cors(), confirmEmail).post(cors(), confirmEmail);
+  app.get(CONFIRM_EMAIL, confirmEmail);
+  app.post(CONFIRM_EMAIL, confirmEmail);
 
   // INTERNAL
   app.get("/_internal_/healthcheck", async (_, res) => {
@@ -296,24 +285,20 @@ function initServer(): HttpServer[] {
     });
   });
 
-  //An error handling middleware
-  app.use(function (err, _req, res, next) {
-    if (res.headersSent) {
-      return next(err);
-    }
-    res.status(StatusCode.Error);
-    res.json(
+  // An error handling middleware
+  app.setErrorHandler(function (error, _request, reply) {
+    const statusCode = error?.statusCode || StatusCode.Error;
+
+    reply.status(statusCode).send(
       responseModel({
-        code: StatusCode.Error,
+        code: statusCode,
         success: false,
-        message: err,
+        message: error?.message,
       })
     );
   });
 
-  let httpServer: HttpServer;
-
-  server = new ApolloServer(
+  const server = new ApolloServer(
     getServerConfig({
       plugins: [
         {
@@ -329,24 +314,16 @@ function initServer(): HttpServer[] {
     })
   );
 
-  if (process.env.ENABLE_SSL === "true") {
-    httpServer = https.createServer(
-      {
-        key: PRIVATE_KEY,
-        cert: PUBLIC_KEY,
-      },
-      app
-    );
-  } else {
-    httpServer = http.createServer(app);
-  }
-
-  const listener = httpServer.listen(GRAPHQL_PORT);
-
   const { schema } = getServerConfig();
 
+  await server.start();
+
+  app.register(server.createHandler({ cors: corsOptions }));
+
+  app.listen({ port: GRAPHQL_PORT });
+
   const subscriptionServer = new WebSocketServer({
-    server: httpServer,
+    server: app.server,
     path: server.graphqlPath,
   });
 
@@ -368,29 +345,24 @@ function initServer(): HttpServer[] {
     subscriptionServer
   );
 
-  server.start().then(() => {
-    server.applyMiddleware({ app, cors: corsOptions });
-
-    logServerInit((listener.address() as AddressInfo).port, {
-      graphqlPath: server.graphqlPath,
-    });
-
-    new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+  logServerInit(GRAPHQL_PORT, {
+    graphqlPath: server.graphqlPath,
   });
 
-  return [listener];
+  new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+
+  return [app.server];
 }
 
 // core http app server
 let coreServer: HttpServer;
-
 // determine if the server started
 let serverInited = false;
 let serverReady = false;
 
 // start the http, graphl, events, subs, and gRPC server
-const startServer = async () => {
-  serverInited = true; // do not wait for express and rely on health check
+const startServer = async (disableHttp?: boolean) => {
+  serverInited = true; // do not wait for http server and rely on grpc health check
 
   if (config.SUPER_MODE) {
     console.log("Application started in SUPER mode. All restrictions removed.");
@@ -405,9 +377,14 @@ const startServer = async () => {
   // start the gRPC server
   await startGRPC();
 
+  if (disableHttp) {
+    serverReady = true;
+    return;
+  }
+
   return new Promise(async (resolve, reject) => {
     try {
-      [coreServer] = initServer();
+      [coreServer] = await initServer();
 
       serverReady = true;
 

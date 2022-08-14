@@ -1,4 +1,3 @@
-import type { NextFunction, Request, Response } from "express";
 import { getReport } from "@app/core/controllers/reports";
 import { downloadToExcel, getUserFromToken } from "@app/core/utils";
 import { Website } from "@app/types/types";
@@ -8,13 +7,13 @@ import { paramParser } from "@app/web/params/extracter";
 import { StatusCode } from "@app/web/messages/message";
 import { responseModel } from "@app/core/models";
 import { URL_NOT_FOUND } from "@app/core/strings/errors";
+import { FastifyContext } from "apollo-server-fastify";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage
 export const getWebsiteAPI = async (
-  req: Request,
-  res: Response,
-  next?: NextFunction
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
 ) => {
   const download = paramParser(req, "download");
   const slug =
@@ -54,7 +53,7 @@ export const getWebsiteAPI = async (
   if (download) {
     if (data) {
       try {
-        return await downloadToExcel(req, res, next, data);
+        return await downloadToExcel(req, res, data);
       } catch (e) {
         console.error(e);
       }
@@ -64,11 +63,14 @@ export const getWebsiteAPI = async (
     }
   }
 
-  res.json(data);
+  res.send(data);
 };
 
 // get a report and include the authenticated user
-export const getWebsiteReport = async (req: Request, res: Response) => {
+export const getWebsiteReport = async (
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
+) => {
   const q = paramParser(req, "q");
   const url = paramParser(req, "url");
   const pageUrl = paramParser(req, "pageUrl");
@@ -102,5 +104,5 @@ export const getWebsiteReport = async (req: Request, res: Response) => {
     console.error(e);
   }
 
-  res.json(data);
+  res.send(data);
 };

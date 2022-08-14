@@ -2,16 +2,20 @@ import { UsersController } from "@app/core/controllers";
 import { getUserFromToken } from "@app/core/utils";
 import { imageDetect } from "@app/core/external";
 import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
-import type { Request, Response } from "express";
+
 import { StatusCode } from "@app/web/messages/message";
 import { responseModel } from "@app/core/models";
+import { FastifyContext } from "apollo-server-fastify";
 
-const detectImage = async (req: Request, res: Response) => {
-  const img = req.body?.imageBase64;
+const detectImage = async (
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
+) => {
+  const img = (req.body as any)?.imageBase64;
 
   if (!img) {
     res.status(StatusCode.BadRequest);
-    res.json({
+    res.send({
       data: null,
       message: "Request body property 'imageBase64' expected",
       success: false,
@@ -25,7 +29,7 @@ const detectImage = async (req: Request, res: Response) => {
   if (!user) {
     res.status(StatusCode.Unauthorized);
 
-    res.json({
+    res.send({
       data: null,
       message: req.headers?.authorization
         ? TOKEN_EXPIRED_ERROR
@@ -42,7 +46,7 @@ const detectImage = async (req: Request, res: Response) => {
   }).updateApiUsage({ id: keyid });
 
   if (!canScan) {
-    res.json({
+    res.send({
       data: null,
       message: RATE_EXCEEDED_ERROR,
       success: false,
@@ -52,13 +56,9 @@ const detectImage = async (req: Request, res: Response) => {
 
   let data = { status: false };
 
-  try {
-    data = await imageDetect({ img });
-  } catch (e) {
-    console.error(e);
-  }
+  data = await imageDetect({ img });
 
-  res.json(responseModel({ code: StatusCode.Ok, data }));
+  res.send(responseModel({ code: StatusCode.Ok, data }));
 };
 
 export { detectImage };

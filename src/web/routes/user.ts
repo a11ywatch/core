@@ -28,13 +28,13 @@ const unSubEmails = async (req, res) => {
       email,
     });
 
-    res.json({
+    res.send({
       message: "Unsubscribed from email alerts.",
       success: true,
     });
   } catch (e) {
     console.error(e);
-    res.json({
+    res.send({
       success: false,
       message: "Failed to unsubscribed from email alerts",
     });

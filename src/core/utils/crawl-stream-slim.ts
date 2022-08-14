@@ -1,15 +1,16 @@
 import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { getKey } from "@app/event/crawl-tracking";
-import { Response } from "express";
+
 import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
 import type { CrawlProps } from "./crawl-stream";
+import { FastifyContext } from "apollo-server-fastify";
 
 // crawl website slim and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlHttpStreamSlim = (
   props: CrawlProps,
-  res: Response,
+  res: FastifyContext["reply"],
   client?: string,
   onlyData?: boolean // remove issues and other data from stream
 ): Promise<boolean> => {
@@ -38,16 +39,16 @@ export const crawlHttpStreamSlim = (
           data.pageLoadTime = null;
           data.issues = null;
         }
-        res.write(`${JSON.stringify(data)},`);
+        res.raw.write(`${JSON.stringify(data)},`);
       }
     });
 
     crawlTrackingEmitter.once(
       `crawl-complete-${getKey(domain, undefined, userId)}`,
       () => {
-        if (client.includes("a11ywatch_cli/")) {
+        if (client && client.includes("a11ywatch_cli/")) {
           // send extra item for trailing comma handler
-          res.write(`${JSON.stringify({ url: "", domain: "" })}`, () => {
+          res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () => {
             resolve(true);
           });
         } else {

@@ -1,5 +1,3 @@
-import { Application } from "express";
-import cors from "cors";
 import { createUser } from "@app/core/controllers/users/set";
 import { verifyUser } from "@app/core/controllers/users/update";
 import { getUserFromToken } from "@app/core/utils";
@@ -7,6 +5,8 @@ import { config, cookieConfigs } from "@app/config";
 import { getUser } from "@app/core/controllers/users";
 import { request } from "https";
 import { StatusCode } from "../messages/message";
+import type { FastifyInstance } from "fastify";
+import { validateUID } from "../params/extracter";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -59,51 +59,47 @@ const onAuthGithub = (requestToken: string): Promise<any> => {
 };
 
 // set all authentication routes
-export const setAuthRoutes = (app: Application) => {
-  app.post("/api/register", cors(), async (req, res) => {
+export const setAuthRoutes = (app: FastifyInstance) => {
+  app.post("/api/register", async (req, res) => {
     try {
       const auth = await createUser(req.body);
 
-      res.cookie("jwt", auth.jwt, cookieConfigs);
-
-      res.json(auth);
+      res.setCookie("jwt", auth.jwt, cookieConfigs).send(auth);
     } catch (e) {
       res.status(StatusCode.BadRequest);
-      res.json({
+      res.send({
         data: null,
         message: e?.message,
       });
     }
   });
-  app.post("/api/login", cors(), async (req, res) => {
+  app.post("/api/login", async (req, res) => {
     try {
       const auth = await verifyUser(req.body);
 
-      res.cookie("jwt", auth.jwt, cookieConfigs);
-
-      res.json(auth);
+      res.setCookie("jwt", auth.jwt, cookieConfigs).send(auth);
     } catch (e) {
       res.status(StatusCode.BadRequest);
-      res.json({
+      res.send({
         data: null,
         message: e?.message,
       });
     }
   });
 
-  app.post("/api/logout", cors(), (_req, res) => {
-    res.cookie("jwt", "", cookieConfigs);
+  app.post("/api/logout", (_req, res) => {
+    res.setCookie("jwt", "", cookieConfigs);
     res.clearCookie("jwt");
-    res.end();
+    res.send();
   });
 
   // A NEW INSTANCE OF THE APP BASIC PING (RUNS ONCE ON APP START)
-  app.post("/api/ping", cors(), async (req, res) => {
+  app.post("/api/ping", async (req, res) => {
     const usr = getUserFromToken(req.cookies.jwt);
 
     const id = usr?.payload?.keyid;
 
-    if (typeof id !== "undefined") {
+    if (validateUID(id)) {
       const [user, collection] = await getUser({ id });
 
       if (user) {
@@ -118,11 +114,11 @@ export const setAuthRoutes = (app: Application) => {
       }
     }
 
-    res.sendStatus(200);
+    res.status(200).send();
   });
 
   app.get("/github/callback", async (req, res) => {
-    const requestToken = req.query.code + "";
+    const requestToken = (req.query as any).code + "";
     let authentication;
 
     try {

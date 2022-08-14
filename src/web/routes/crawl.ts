@@ -4,15 +4,19 @@ import { responseModel } from "@app/core/models";
 import { paramParser } from "../params/extracter";
 import { WEBSITE_URL_ERROR } from "@app/core/strings";
 import { StatusCode } from "../messages/message";
+import { FastifyContext } from "apollo-server-fastify";
 
-// perform a website crawl coming from express
-export const crawlRest = async (req, res) => {
+// perform a website crawl coming from fastify
+export const crawlRest = async (
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
+) => {
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
 
   if (!url) {
     res.status(StatusCode.BadRequest);
-    res.json(
+    res.send(
       responseModel({
         code: StatusCode.BadRequest,
         data: null,
@@ -38,7 +42,7 @@ export const crawlRest = async (req, res) => {
         tld: userNext?.role >= 2,
       });
 
-      res.json(
+      res.send(
         responseModel({
           code: StatusCode.Ok,
           data,

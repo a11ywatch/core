@@ -2,7 +2,7 @@ import { createTestClient } from "apollo-server-testing";
 import { getServerConfig } from "@app/apollo-server";
 import gql from "graphql-tag";
 import { initDbConnection, closeDbConnection } from "@app/database";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-fastify";
 
 let server: ApolloServer;
 

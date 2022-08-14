@@ -1,6 +1,6 @@
 import fs from "fs";
 import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
-import { CookieOptions } from "express";
+import { CookieSerializeOptions } from "@fastify/cookie";
 
 const DEV = process.env.NODE_ENV !== "production";
 const TEST_ENV = process.env.NODE_ENV === "test";
@@ -69,7 +69,7 @@ export const config = {
   SUPER_MODE,
 };
 
-let cookieConfigs: CookieOptions = {
+let cookieConfigs: CookieSerializeOptions = {
   maxAge: 228960000,
   sameSite: "lax",
   httpOnly: true,

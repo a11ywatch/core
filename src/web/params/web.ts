@@ -1,8 +1,9 @@
-import { Request } from "express";
+import { FastifyContext } from "apollo-server-fastify";
+
 import { paramParser } from "./extracter";
 
 // extract params for website configuration
-export const getWebParams = (req: Request) => {
+export const getWebParams = (req: FastifyContext["request"]) => {
   const url = paramParser(req, "url");
   const customHeaders = paramParser(req, "customHeaders");
   const mobile = paramParser(req, "mobile");

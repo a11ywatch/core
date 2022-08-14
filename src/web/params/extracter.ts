@@ -1,16 +1,16 @@
 import { getUserFromToken } from "@app/core/utils";
-import { Request } from "express";
+import { FastifyContext } from "apollo-server-fastify";
 
 // extract query or body params from req
-export const paramParser = (req: Request, value: string) =>
-  req.query[value] || req.body[value];
+export const paramParser = (req: FastifyContext["request"], value: string) => {
+  return (req.query && req.query[value]) || (req.body && req.body[value]);
+};
 
 // get the base params for a standard collection retrieval by userId, domain, and url
-export const getBaseParams = (req: Request) => {
+export const getBaseParams = (req: FastifyContext["request"]) => {
   const usr = getUserFromToken(req.headers.authorization);
-
   const dman = paramParser(req, "domain");
-  const url = paramParser(req, "url" || paramParser(req, "pageUrl"));
+  const url = paramParser(req, "url") || paramParser(req, "pageUrl");
 
   const domain = dman ? decodeURIComponent(dman) : undefined;
   const pageUrl = url ? decodeURIComponent(url) : undefined;
@@ -25,13 +25,14 @@ export const getBaseParams = (req: Request) => {
 };
 
 // get the base params for a standard collection retrieval by userId, domain, and url, with pagination
-export const getBaseParamsList = (req: Request) => {
+export const getBaseParamsList = (req: FastifyContext["request"]) => {
   const { userId, domain, pageUrl } = getBaseParams(req);
+  const query = req.query as { offset?: number };
 
   let offset;
 
-  if (req.query.offset) {
-    const oset = Number(req.query.offset);
+  if (query?.offset) {
+    const oset = Number(query?.offset);
     offset = Number.isNaN(oset) ? 0 : oset;
   }
 

@@ -1,43 +1,23 @@
-import express, { Express } from "express";
-import cors from "cors";
-import createIframe from "node-iframe";
-import { corsOptions, config } from "../config";
-import cookieParser from "cookie-parser";
-import { limiter, scanLimiter } from "./limiters/scan";
-import path from "path";
+import cookie from "@fastify/cookie";
+import { FastifyInstance } from "fastify";
+import { createRedisClient } from "@app/database/memory-client";
+import ratelimit from "@fastify/rate-limit";
+import { cookieConfigs } from "@app/config";
 
-/* express application setup middlewares
-@params app - express 
-@returns void
-*/
-export const registerExpressApp = (app: Express) => {
-  app.disable("x-powered-by");
+/*
+ * fastify application setup middlewares
+ * @params app - fastify
+ * @returns void
+ */
+export const registerApp = async (app: FastifyInstance) => {
+  await app.register(ratelimit, {
+    max: 100,
+    timeWindow: "1 minute",
+    redis: createRedisClient(),
+  });
+  await app.register(cookie, {
+    parseOptions: cookieConfigs,
+  });
 
-  app.set("trust proxy", true);
-  // mw parsers
-  app.use(cookieParser());
-  app.use(cors(corsOptions));
-  app.use(express.urlencoded({ extended: true }));
-
-  app.use(express.json({ limit: "200mb" })); // data should not be larger than 200mb
-
-  // rate limits on expensive endpoints
-  if (!config.SUPER_MODE) {
-    // DOCS
-    app.use("/playground", limiter);
-    app.use("/grpc-docs", limiter);
-    // TODO: set custom auth limiters
-    app.use("/api/register", scanLimiter);
-    app.use("/api/login", scanLimiter);
-    // expensive endpoints
-    app.use("/api/iframe", scanLimiter);
-    app.use("/api/scan-simple", scanLimiter);
-    app.use("/api/crawl", scanLimiter);
-    app.use("/api/crawl-stream", scanLimiter);
-    app.use("/api/image-check", scanLimiter); // TODO: REMOVE on next chrome store update
-  }
-
-  app.use(express.static(path.resolve("public")));
-
-  app.use(createIframe);
+  return app;
 };

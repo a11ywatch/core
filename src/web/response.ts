@@ -1,8 +1,8 @@
 import { SUPER_MODE } from "@app/config/config";
 import { responseModel } from "@app/core/models";
-import { Response } from "express";
 import { validateUID } from "./params/extracter";
 import { HttpMessage, StatusCode } from "./messages/message";
+import { FastifyContext } from "apollo-server-fastify";
 
 /*
  * Response wrapper for expres API
@@ -14,7 +14,7 @@ import { HttpMessage, StatusCode } from "./messages/message";
  * @param source - {callback, userId}
  * @return Promise<void>
  */
-export const responseWrap = async (res: Response, source) => {
+export const responseWrap = async (res: FastifyContext["reply"], source) => {
   const { callback, userId } = source ?? {};
 
   let message = HttpMessage.Ok;
@@ -35,9 +35,9 @@ export const responseWrap = async (res: Response, source) => {
     }
   }
 
-  res.status(code);
+  res.statusCode = code;
 
-  res.json(
+  res.send(
     responseModel({
       code,
       data,

@@ -1,5 +1,5 @@
 import { StatusCode } from "@app/web/messages/message";
-import type { NextFunction, Request, Response } from "express";
+import { FastifyContext } from "apollo-server-fastify";
 
 import { crawlHttpStream } from "../utils/crawl-stream";
 import { crawlHttpStreamSlim } from "../utils/crawl-stream-slim";
@@ -9,21 +9,24 @@ import { getCrawlConfig } from "./crawl-config";
 // Crawl stream with events.
 // returns an array of reports for performance
 export const crawlStream = async (
-  req: Request,
-  res: Response,
-  _next: NextFunction,
-  slim: boolean = false
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"],
+  slim?: boolean
 ) => {
-  const baseUrl = req.body?.websiteUrl || req.body?.url;
+  const body = req.body as any;
+  const baseUrl = body?.websiteUrl || body?.url;
+
   const url = baseUrl && decodeURIComponent(baseUrl);
 
   if (!url) {
     res.status(StatusCode.BadRequest);
-    res.json([]);
+    res.send([]);
     return;
   }
 
-  const client = req.get("X-Request-Client");
+  const client = (req.headers["X-Request-Client"] ||
+    req.headers["x-request-client"]) as string;
+
   const userNext = await getUserFromApiScan(
     req?.headers?.authorization,
     req,
@@ -31,7 +34,7 @@ export const crawlStream = async (
   );
 
   if (userNext) {
-    res.writeHead(StatusCode.Ok, {
+    res.raw.writeHead(StatusCode.Ok, {
       "Content-Type": "application/json",
       "Transfer-Encoding": "chunked",
     });
@@ -40,11 +43,11 @@ export const crawlStream = async (
       id: userNext.id,
       url,
       role: userNext.role,
-      subdomains: req.body.subdomains,
-      tld: req.body.tld,
+      subdomains: body.subdomains,
+      tld: body.tld,
     });
 
-    res.write("[");
+    res.raw.write("[");
 
     if (slim) {
       await crawlHttpStreamSlim(crawlProps, res, client);
@@ -52,7 +55,8 @@ export const crawlStream = async (
       await crawlHttpStream(crawlProps, res, client);
     }
 
-    res.write("]");
-    res.end();
+    res.raw.write("]");
+
+    res.raw.end();
   }
 };

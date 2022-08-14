@@ -1,8 +1,7 @@
 import { UsersController } from "../../controllers";
 import { getPayLoad } from "../../utils/query-payload";
 
-export const user = async (_, { id, password }, context) => {
-  const { models, ...ctx } = context;
+export const user = async (_, { id, password }, ctx) => {
   const { userId, audience } = getPayLoad(ctx, {
     id,
     password,

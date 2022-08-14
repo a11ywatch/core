@@ -1,6 +1,3 @@
-import { Request, Response, Application } from "express";
-import cors from "cors";
-
 import { getBaseParamsList } from "../params/extracter";
 import { getWebsitesPaging } from "../../core/controllers/websites/find/get";
 import { getIssuesPaging } from "../../core/controllers/issues/find";
@@ -9,11 +6,12 @@ import { getAnalyticsPaging } from "../../core/controllers/analytics";
 import { getScriptsPaging } from "../../core/controllers/scripts";
 import { getPageSpeedPaging } from "../../core/controllers/page-speed/main";
 import { responseWrap } from "../response";
+import type { FastifyInstance } from "fastify";
 
 // set all routes that are handled via pagination - Requires a valid user reguardless of SUPER mode.
-export const setListRoutes = (app: Application) => {
+export const setListRoutes = (app: FastifyInstance) => {
   // paginated retrieve websites from the database.
-  app.get("/api/list/website", cors(), async (req, res) => {
+  app.get("/api/list/website", async (req, res) => {
     const { userId, offset, limit } = getBaseParamsList(req);
 
     await responseWrap(res, {
@@ -29,7 +27,7 @@ export const setListRoutes = (app: Application) => {
   });
 
   // paginated retrieve analytics from the database. Limit default is set to 20.
-  app.get("/api/list/analytics", cors(), async (req, res) => {
+  app.get("/api/list/analytics", async (req, res) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
 
     await responseWrap(res, {
@@ -45,7 +43,7 @@ export const setListRoutes = (app: Application) => {
   });
 
   // paginated retrieve pages from the database.
-  app.get("/api/list/pages", cors(), async (req: Request, res: Response) => {
+  app.get("/api/list/pages", async (req, res) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
 
     await responseWrap(res, {
@@ -62,7 +60,7 @@ export const setListRoutes = (app: Application) => {
   });
 
   // paginated retrieve scripts from the database. Limit default is set to 20.
-  app.get("/api/list/scripts", cors(), async (req: Request, res: Response) => {
+  app.get("/api/list/scripts", async (req, res) => {
     const { userId, domain, limit, offset } = getBaseParamsList(req);
 
     await responseWrap(res, {
@@ -78,7 +76,7 @@ export const setListRoutes = (app: Application) => {
   });
 
   // list of issues
-  app.get("/api/list/issue", cors(), async (req: Request, res: Response) => {
+  app.get("/api/list/issue", async (req, res) => {
     const { userId, domain, pageUrl, limit, offset } = getBaseParamsList(req);
 
     await responseWrap(res, {
@@ -95,24 +93,20 @@ export const setListRoutes = (app: Application) => {
   });
 
   // list of pagespeed collections
-  app.get(
-    "/api/list/pagespeed",
-    cors(),
-    async (req: Request, res: Response) => {
-      const { userId, domain, pageUrl, limit, offset } = getBaseParamsList(req);
+  app.get("/api/list/pagespeed", async (req, res) => {
+    const { userId, domain, pageUrl, limit, offset } = getBaseParamsList(req);
 
-      await responseWrap(res, {
-        callback: () =>
-          getPageSpeedPaging({
-            userId,
-            limit,
-            domain,
-            pageUrl,
-            offset,
-            all: false,
-          }),
-        userId,
-      });
-    }
-  );
+    await responseWrap(res, {
+      callback: () =>
+        getPageSpeedPaging({
+          userId,
+          limit,
+          domain,
+          pageUrl,
+          offset,
+          all: false,
+        }),
+      userId,
+    });
+  });
 };

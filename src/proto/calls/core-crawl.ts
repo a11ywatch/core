@@ -4,7 +4,7 @@ import { getCrawlConfig } from "@app/core/streams/crawl-config";
 import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
 import { getKey } from "@app/event/crawl-tracking";
-import { Response } from "express";
+
 import { domainName } from "@app/core/utils/domain-name";
 import { getHostName } from "@app/core/utils/get-host";
 import type { CrawlProps } from "@app/core/utils/crawl-stream";
@@ -12,7 +12,7 @@ import type { CrawlProps } from "@app/core/utils/crawl-stream";
 // crawl website slim and wait for finished emit event to continue @return Website[].
 export const crawlStreaming = (
   props: CrawlProps,
-  res: Response
+  res: any // grpc response
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld } = props;
 
@@ -34,7 +34,7 @@ export const crawlStreaming = (
 
       // only send when true
       if (data) {
-        // trim data for sending minimally
+        // trim data for sending miniaml
         data.pageLoadTime = null;
         data.issues = null;
         res.write({ data });

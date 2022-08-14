@@ -1,22 +1,26 @@
 import { getUserFromApi } from "@app/core/utils";
 import { scanWebsite, crawlPage } from "@app/core/actions";
-import type { Request, Response } from "express";
+
 import { paramParser } from "../params/extracter";
 import { WEBSITE_URL_ERROR } from "@app/core/strings";
 import { responseModel } from "@app/core/models";
 import { StatusCode } from "../messages/message";
+import type { FastifyContext } from "apollo-server-fastify";
 
 /*
  * SCAN -> PAGEMIND: Single page [does not store values to cdn]
  * Deducts API usage for the day
  **/
-export const scanSimple = async (req: Request, res: Response) => {
+export const scanSimple = async (
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
+) => {
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
 
   if (!url) {
     res.status(400);
-    res.json(
+    res.send(
       responseModel({
         code: StatusCode.BadRequest,
         data: null,
@@ -59,7 +63,7 @@ export const scanSimple = async (req: Request, res: Response) => {
         });
       }
 
-      res.json(resData);
+      res.send(resData);
     }
   } catch (e) {
     console.error(e);

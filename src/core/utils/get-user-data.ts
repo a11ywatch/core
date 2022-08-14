@@ -1,16 +1,22 @@
 import type { User } from "@app/types/schema";
-import { Request, Response } from "express";
 import { UsersController } from "../controllers";
 import { RATE_EXCEEDED_ERROR } from "../strings";
 import { getUserFromToken, extractTokenKey } from "./get-user";
 import { config } from "@app/config/config";
 import { frontendClientOrigin } from "./is-client";
 import { StatusCode } from "@app/web/messages/message";
+import { FastifyContext } from "apollo-server-fastify";
+import { validateUID } from "@app/web/params/extracter";
 
 // return a user from id
 export const getUserFromId = async (user, keyid) => {
   let userData;
   let collectionData;
+
+  // a valid keyid required
+  if (!validateUID(keyid)) {
+    return [null, null];
+  }
 
   const [data, collection] = await UsersController({
     user,
@@ -29,8 +35,8 @@ export const getUserFromId = async (user, keyid) => {
  **/
 export const getUserFromApi = async (
   token: string,
-  req: Request,
-  res: Response
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"]
 ): Promise<User> => {
   const jwt = extractTokenKey(token ? String(token).trim() : "");
   const user = getUserFromToken(jwt);
@@ -50,11 +56,11 @@ export const getUserFromApi = async (
   }
 
   // check if origin is from front-end client simply allow rate limits or super mode
-  const isClient = frontendClientOrigin(req.get("origin"));
+  const isClient = frontendClientOrigin(req.headers["origin"]);
 
   // auth required unless front-end client
   if (!isClient && !token) {
-    res.json({
+    res.send({
       data: null,
       message:
         "Authentication required. Add your authentication header and try again.",
@@ -77,7 +83,7 @@ export const getUserFromApi = async (
 
     // auth required unless front-end client. TODO: validate old keys with current user in DB. jwt === user.jwt.
     if (jwt && !userData) {
-      res.json({
+      res.send({
         data: null,
         message: "Error, API token is invalid. Please update your API token.",
         success: false,
@@ -87,7 +93,7 @@ export const getUserFromApi = async (
 
     // check usage limits
     if (!canScan) {
-      res.json({
+      res.send({
         data: null,
         message: RATE_EXCEEDED_ERROR,
         success: false,
@@ -112,13 +118,14 @@ export const getUserFromApi = async (
  */
 export const getUserFromApiScan = async (
   token: string = "",
-  _req: Request,
-  res: Response
+  _req: FastifyContext["request"],
+  res: FastifyContext["reply"]
 ): Promise<User> => {
   // auth required unless SUPER MODE
+
   if (!token && !config.SUPER_MODE) {
     res.status(StatusCode.Unauthorized);
-    res.json({
+    res.send({
       data: null,
       message:
         "Authentication required. Add your Authorization header and try again.",
@@ -142,7 +149,7 @@ export const getUserFromApiScan = async (
   }).updateScanAttempt({ id: user.id, user: user, collection });
 
   if (!config.SUPER_MODE && !canScan) {
-    res.json({
+    res.send({
       data: null,
       message: RATE_EXCEEDED_ERROR,
       success: false,
