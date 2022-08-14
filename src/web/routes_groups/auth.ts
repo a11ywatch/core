@@ -6,12 +6,13 @@ import { getUserFromToken } from "@app/core/utils";
 import { config, cookieConfigs } from "@app/config";
 import { getUser } from "@app/core/controllers/users";
 import { request } from "https";
+import { StatusCode } from "../messages/message";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
 // Authenticate with github @param requestToken string
-const oAuthGithub = (requestToken: string): Promise<any> => {
+const onAuthGithub = (requestToken: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     // TODO: shape with ttsc
     const data = JSON.stringify({
@@ -32,6 +33,8 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
         path: `/login/oauth/access_token`,
       },
       (res) => {
+        res.setEncoding("utf8");
+
         let resd = "";
 
         res.on("data", (chunk) => {
@@ -39,11 +42,6 @@ const oAuthGithub = (requestToken: string): Promise<any> => {
         });
 
         res.on("end", () => {
-          try {
-            resd = JSON.parse(resd);
-          } catch (e) {
-            console.error(e);
-          }
           resolve(resd);
         });
       }
@@ -70,6 +68,7 @@ export const setAuthRoutes = (app: Application) => {
 
       res.json(auth);
     } catch (e) {
+      res.status(StatusCode.BadRequest);
       res.json({
         data: null,
         message: e?.message,
@@ -84,7 +83,7 @@ export const setAuthRoutes = (app: Application) => {
 
       res.json(auth);
     } catch (e) {
-      console.error(e);
+      res.status(StatusCode.BadRequest);
       res.json({
         data: null,
         message: e?.message,
@@ -127,7 +126,7 @@ export const setAuthRoutes = (app: Application) => {
     let authentication;
 
     try {
-      authentication = await oAuthGithub(requestToken);
+      authentication = await onAuthGithub(requestToken);
     } catch (e) {
       console.error(e);
     }

@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.4.70",
+  "version": "0.4.72",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -34,6 +34,7 @@
     "graphql-redis-subscriptions": "^2.5.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-tag": "2.12.6",
+    "graphql-ws": "^5.10.0",
     "ioredis": "^5.2.2",
     "jsonwebtoken": "8.5.1",
     "mongodb": "3.7.3",
@@ -42,7 +43,7 @@
     "pb-util": "^1.0.3",
     "rate-limit-redis": "^3.0.1",
     "stripe": "7.14.0",
-    "subscriptions-transport-ws": "^0.11.0"
+    "ws": "^8.8.1"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "2.2.2",
@@ -56,6 +57,7 @@
     "@types/nodemailer": "^6.4.4",
     "@types/stripe": "^7.0.0",
     "@types/universal-analytics": "^0.4.5",
+    "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
     "apollo-server-testing": "^2.25.3",

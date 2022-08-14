@@ -7,6 +7,9 @@ import cors from "cors";
 import { configureAgent } from "node-iframe";
 import { CronJob } from "cron";
 import path from "path";
+import { ApolloServer, ExpressContext } from "apollo-server-express";
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
 
 import {
   corsOptions,
@@ -40,10 +43,9 @@ import { setAuthRoutes } from "./web/routes_groups/auth";
 import { connectLimiters } from "./web/limiters/scan";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
-import { getUserFromToken, parseCookie } from "./core/utils";
+import { getUserFromToken } from "./core/utils";
 import { retreiveUserByTokenWrapper } from "./core/utils/get-user-data";
 import { responseModel } from "./core/models";
-import { ApolloServer, ExpressContext } from "apollo-server-express";
 import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
@@ -53,7 +55,6 @@ import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
 import { updateWebsite } from "./core/controllers/websites/update";
 import { graphqlPlayground } from "./html";
-import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
 import { PageSpeedController } from "./core/controllers/page-speed/main";
 import { registerExpressApp } from "./web/register";
@@ -77,8 +78,6 @@ const connectClients = async () => {
   createPubSub(); //gql sub
   connectLimiters(); // rate limiters
 };
-
-const allowDocDomains = [...whitelist]; // vercel.com for getStaticProps building pages. [TODO: move files out of this system]
 
 function initServer(): HttpServer[] {
   const app = express();
@@ -104,7 +103,7 @@ function initServer(): HttpServer[] {
   app.get("/grpc-docs", cors(), (req, res) => {
     const origin = req.get("origin");
 
-    if (allowDocDomains.includes(origin)) {
+    if (whitelist.includes(origin)) {
       res.set("Access-Control-Allow-Origin", origin);
     }
 
@@ -313,7 +312,6 @@ function initServer(): HttpServer[] {
   });
 
   let httpServer: HttpServer;
-  let subscriptionServer;
 
   server = new ApolloServer(
     getServerConfig({
@@ -322,7 +320,7 @@ function initServer(): HttpServer[] {
           async serverWillStart() {
             return {
               async drainServer() {
-                subscriptionServer?.close();
+                serverCleanup?.dispose();
               },
             };
           },
@@ -347,25 +345,27 @@ function initServer(): HttpServer[] {
 
   const { schema } = getServerConfig();
 
-  subscriptionServer = SubscriptionServer.create(
+  const subscriptionServer = new WebSocketServer({
+    server: httpServer,
+    path: server.graphqlPath,
+  });
+
+  const serverCleanup = useServer(
     {
       schema,
       execute,
       subscribe,
-      async onConnect(_cnxnParams, webSocket, _cnxnContext) {
-        const cookie = webSocket?.upgradeReq?.headers?.cookie;
-        const parsedCookie = parseCookie(cookie);
-        const user = getUserFromToken(parsedCookie?.jwt || "");
+      onConnect(_cnxnParams) {
+        const user = getUserFromToken(
+          _cnxnParams?.connectionParams?.authorization as string
+        );
 
         return {
           userId: user?.payload?.keyid,
         };
       },
     },
-    {
-      server: httpServer,
-      path: server.graphqlPath,
-    }
+    subscriptionServer
   );
 
   server.start().then(() => {
@@ -376,7 +376,6 @@ function initServer(): HttpServer[] {
     });
 
     new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
-    // TODO: nightly cron to handle redis page hits into db
   });
 
   return [listener];

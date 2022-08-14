@@ -8,7 +8,8 @@ export const extractTokenKey = (bearerToken: string) =>
 export const getUserFromToken = (
   bearerToken?: string
 ): null | (Jwt & { payload: Partial<Jwt["payload"] & { keyid: number }> }) => {
-  const token = extractTokenKey(bearerToken);
+  const token =
+    typeof bearerToken === "string" ? extractTokenKey(bearerToken) : "";
 
   if (token) {
     try {
