@@ -1,4 +1,4 @@
-import { config } from "./config";
+import { config, PRIVATE_KEY, PUBLIC_KEY } from "./config";
 
 const { CLIENT_URL, ROOT_URL, DEV } = config;
 
@@ -35,14 +35,29 @@ export const BYPASS_AUTH = [
   "getIssue",
 ];
 
-export const cronTimer = DEV ? "0 1 * * *" : "0 16 * * *";
+const cronTimer = DEV ? "0 1 * * *" : "0 16 * * *";
 
 const source = DEV ? "localhost" : ROOT_URL;
 
-export const logServerInit = (port, { graphqlPath = "/graphql" }) => {
+const logServerInit = (port, { graphqlPath = "/graphql" }) => {
   console.log(`Server ready at ${source}:${port}`);
   console.log(`GraphQl Server ready at ${source}:${port}${graphqlPath}`);
   console.log(`Subscriptions ready at ws://${source}:${port}${graphqlPath}`);
 };
 
-export { corsOptions };
+const fastifyConfig = {
+  trustProxy: true,
+  ignoreTrailingSlash: true,
+  ...(process.env.ENABLE_SSL === "true" &&
+    PRIVATE_KEY &&
+    PUBLIC_KEY && {
+      http2: true,
+      https: {
+        allowHTTP1: true,
+        key: PRIVATE_KEY,
+        cert: PUBLIC_KEY,
+      },
+    }),
+};
+
+export { corsOptions, logServerInit, fastifyConfig, cronTimer };

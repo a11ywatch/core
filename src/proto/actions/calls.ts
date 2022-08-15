@@ -1,9 +1,28 @@
 import { pageMindClient, crawlerClient, mavClient } from "../website-client";
+import type { PageMindScanResponse } from "../../types/schema";
+
+// params to perform website scans
+export interface ScanRpcParams {
+  url: string;
+  userId?: number;
+  pageHeaders?: any[];
+  pageInsights?: boolean;
+  noStore?: boolean; // prevent storing values to CDN server
+  scriptsEnabled?: boolean; // scripts storing enabled for user
+  mobile?: boolean; // is the testing done in mobile view port
+  standard?: string; // is the testing done in mobile view port
+  ua?: string; // is the testing done in mobile view port
+  actions?: string[]; // perform actions before testing
+  cv?: boolean; // can use computer vision
+  pageSpeedApiKey?: string; // the PageSpeed api key to use for request
+}
 
 // perform scan to gRPC -> pagemind for website issues
-export const scan = (website = {}) => {
+export const scan = (
+  website?: ScanRpcParams
+): Promise<PageMindScanResponse> => {
   return new Promise((resolve, reject) => {
-    pageMindClient.scan(website, (error, res) => {
+    pageMindClient.scan(website || {}, (error, res) => {
       if (!error) {
         resolve(res);
       } else {
@@ -52,10 +71,10 @@ export const setScript = (website = {}) => {
   });
 };
 
-// detect image type
-const parseImg = (website = {}) => {
+// parse an image to base64 -> mav service
+const parseImg = (img = {}) => {
   return new Promise((resolve, reject) => {
-    mavClient.parseImg(website, (error, res) => {
+    mavClient.parseImg(img, (error, res) => {
       if (!error) {
         resolve(res);
       } else {

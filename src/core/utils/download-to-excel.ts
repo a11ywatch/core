@@ -61,9 +61,10 @@ const downloadToExcel = async (
       "attachment; filename=" + `${pageName}-audit.xlsx`
     );
 
-    await workbook.xlsx.write(res as any);
+    // convert to buffer instead of streaming
+    const buffer = await workbook.xlsx.writeBuffer();
 
-    res.status(StatusCode.Ok).send();
+    res.status(StatusCode.Ok).send(buffer);
   } catch (e) {
     console.error(e);
   }

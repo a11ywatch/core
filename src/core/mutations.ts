@@ -124,11 +124,11 @@ export const Mutation = {
     let data;
 
     if (!unauth) {
-      // TODO: INC API LIMITS
       data = (await crawlPage(
         {
           url,
           userId: keyid,
+          sendSub: true,
         },
         false
       )) as any;

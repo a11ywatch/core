@@ -17,6 +17,7 @@ const createIframe = async (req, res) => {
 
     if (url.includes(".pdf")) {
       res.redirect(url);
+      return;
     }
 
     const frame = await fetchFrame({

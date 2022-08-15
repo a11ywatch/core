@@ -12,9 +12,9 @@ type CrawlMultiSite = {
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlMultiSiteWithEvent = (props): Promise<CrawlMultiSite> => {
-  return new Promise(async (resolve) => {
-    const { url, userId, subdomains, tld } = props;
+  const { url, userId, subdomains, tld } = props;
 
+  return new Promise(async (resolve) => {
     try {
       // start site-wide crawls
       setImmediate(async () => {

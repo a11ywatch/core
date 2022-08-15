@@ -14,6 +14,7 @@ const getServerConfig = (
     introspection: true,
     schema,
     cache: "bounded",
+    // csrfPrevention: false,
     context: (ctx) => {
       const req = ctx?.request;
       const authentication = (req?.headers as any)?.authorization || "";

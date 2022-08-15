@@ -10,7 +10,7 @@ import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getPage } from "@app/core/controllers/pages/find";
 import { UsersController } from "@app/core/controllers/users";
-import { extractPageData } from "./extract-page-data";
+import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
@@ -75,7 +75,7 @@ export const crawlPage = async (
   } = crawlConfig ?? {};
 
   // detect if redis is connected to send subs
-  const sendSub: boolean = redisConnected && (crawlConfig?.sendSub || true);
+  const sendSub: boolean = redisConnected && crawlConfig?.sendSub;
 
   let uid;
 
@@ -333,7 +333,11 @@ export const crawlPage = async (
 
     if (pageConstainsIssues) {
       if (sendSub) {
-        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        try {
+          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        } catch (_) {
+          // silent pub sub errors
+        }
       }
 
       // send email if issues of type error exist for the page. TODO: remove from layer.

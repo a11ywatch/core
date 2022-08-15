@@ -1,20 +1,14 @@
-import type { Server as HttpServer } from "http";
+import { createReadStream } from "fs";
+import path from "path";
 import fastify, { FastifyInstance } from "fastify";
+import { ApolloServer } from "apollo-server-fastify";
 import { configureAgent } from "node-iframe";
 import { CronJob } from "cron";
-import path from "path";
-import { ApolloServer } from "apollo-server-fastify";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
-import { createReadStream } from "fs";
+import type { Server as HttpServer } from "http";
 
-import {
-  corsOptions,
-  config,
-  logServerInit,
-  PRIVATE_KEY,
-  PUBLIC_KEY,
-} from "./config";
+import { config, logServerInit, fastifyConfig, corsOptions } from "./config";
 import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { getBaseParams, paramParser } from "./web/params/extracter";
@@ -66,29 +60,36 @@ const { GRAPHQL_PORT } = config;
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
 
-// all the clients for external request
+// all the connections for external request
 const connectClients = async () => {
   await initDbConnection(); // database connections
   await initRedisConnection(); // redis connections
-
-  createPubSub(); //gql sub
-};
-
-const fastifyConfig = {
-  trustProxy: true,
-  ...(process.env.ENABLE_SSL === "true" &&
-    PRIVATE_KEY &&
-    PUBLIC_KEY && {
-      http2: true,
-      https: {
-        key: PRIVATE_KEY,
-        cert: PUBLIC_KEY,
-      },
-    }),
+  createPubSub(); // redis gql pub/sub
 };
 
 async function initServer(): Promise<HttpServer[]> {
+  let serverCleanup; // cleanup the ws server
+  const gqlServerConfig = getServerConfig({
+    plugins: [
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              serverCleanup?.dispose();
+            },
+          };
+        },
+      },
+    ],
+  });
+
+  // graphql server
+  const server = new ApolloServer(gqlServerConfig);
+
+  await server.start(); // start the graphql server
+
   const fast: FastifyInstance = await fastify(fastifyConfig);
+  await fast.register(await server.createHandler({ cors: corsOptions }));
   const app = await registerApp(fast);
 
   // root
@@ -279,14 +280,14 @@ async function initServer(): Promise<HttpServer[]> {
   app.post(CONFIRM_EMAIL, confirmEmail);
 
   // INTERNAL
-  app.get("/_internal_/healthcheck", async (_, res) => {
+  app.get("/_internal_/healthcheck", (_, res) => {
     res.send({
       status: "healthy",
     });
   });
 
   // An error handling middleware
-  app.setErrorHandler(function (error, _request, reply) {
+  await app.setErrorHandler(function (error, _request, reply) {
     const statusCode = error?.statusCode || StatusCode.Error;
 
     reply.status(statusCode).send(
@@ -298,38 +299,16 @@ async function initServer(): Promise<HttpServer[]> {
     );
   });
 
-  const server = new ApolloServer(
-    getServerConfig({
-      plugins: [
-        {
-          async serverWillStart() {
-            return {
-              async drainServer() {
-                serverCleanup?.dispose();
-              },
-            };
-          },
-        },
-      ],
-    })
-  );
-
-  const { schema } = getServerConfig();
-
-  await server.start();
-
-  app.register(server.createHandler({ cors: corsOptions }));
-
-  app.listen({ port: GRAPHQL_PORT });
+  await app.listen(GRAPHQL_PORT, "0.0.0.0");
 
   const subscriptionServer = new WebSocketServer({
     server: app.server,
     path: server.graphqlPath,
   });
 
-  const serverCleanup = useServer(
+  serverCleanup = useServer(
     {
-      schema,
+      schema: gqlServerConfig.schema,
       execute,
       subscribe,
       onConnect(_cnxnParams) {
