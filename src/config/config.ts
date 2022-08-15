@@ -1,6 +1,6 @@
 import fs from "fs";
 import { replaceDockerNetwork } from "@a11ywatch/website-source-builder";
-import { CookieSerializeOptions } from "@fastify/cookie";
+import type { CookieSerializeOptions } from "@fastify/cookie";
 
 const DEV = process.env.NODE_ENV !== "production";
 const TEST_ENV = process.env.NODE_ENV === "test";

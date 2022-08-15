@@ -10,7 +10,7 @@ import { getWebsite } from "@app/core/controllers/websites";
 import { AnalyticsController } from "@app/core/controllers/analytics";
 import { getPage } from "@app/core/controllers/pages/find";
 import { UsersController } from "@app/core/controllers/users";
-import { extractPageData } from "./extract-page-data";
+import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";

@@ -46,8 +46,8 @@ function createPubSub() {
   // setup sub events
   if (subscriber) {
     subscriber.on("error", (error) => {
-      redisLogEnabled && console.error("redis error", error);
       redisSubConnected = false;
+      redisLogEnabled && console.error("redis error", error);
     });
   }
 

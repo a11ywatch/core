@@ -2,14 +2,15 @@ import { responseModel, makeWebsite } from "@app/core/models";
 import { ResponseModel } from "@app/core/models/response/types";
 import { getHostName } from "@app/core/utils";
 import { fetchPageIssues } from "./fetch-issues";
-import { extractPageData } from "./extract-page-data";
-import { limitIssue } from "./limit-issue";
+import { extractPageData } from "../../utils/shapes/extract-page-data";
+import { limitIssue } from "../../utils/filters/limit-issue";
 import type { PageMindScanResponse } from "@app/types/schema";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import { SUPER_MODE } from "@app/config/config";
 import { WEBSITE_NOT_FOUND } from "@app/core/strings";
 import { StatusCode } from "@app/web/messages/message";
 import { SCAN_TIMEOUT } from "@app/core/strings/errors";
+import { validateUID } from "@app/web/params/extracter";
 
 type ScanParams = {
   userId?: number;
@@ -51,20 +52,14 @@ export const scanWebsite = async ({
 
   const website = makeWebsite({ url: pageUrl, domain });
 
-  let dataSource: PageMindScanResponse;
-
-  try {
-    dataSource = await fetchPageIssues({
-      pageHeaders: website.pageHeaders,
-      url: pageUrl,
-      userId,
-      pageInsights, // TODO: get website if auth determine if Lighthouse enabled
-      noStore,
-      scriptsEnabled: false,
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  const dataSource: PageMindScanResponse = await fetchPageIssues({
+    pageHeaders: website.pageHeaders,
+    url: pageUrl,
+    userId,
+    pageInsights, // TODO: get website if auth determine if Lighthouse enabled
+    noStore,
+    scriptsEnabled: false,
+  });
 
   // handled successful but, page did not exist or rendered to slow.
   if (!dataSource?.webPage) {
@@ -84,11 +79,14 @@ export const scanWebsite = async ({
       let currentIssues = issues?.issues;
       let limitedCount = false;
 
-      if (typeof userId !== "undefined") {
+      const uid = validateUID(userId);
+
+      // TODO: remove temp assign
+      if (uid) {
         website.userId = userId;
       }
 
-      if (!SUPER_MODE && typeof userId === "undefined") {
+      if (!SUPER_MODE && !uid) {
         currentIssues = limitIssue(issues);
         limitedCount = true;
       }
