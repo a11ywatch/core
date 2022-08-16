@@ -9,7 +9,10 @@ import { useServer } from "graphql-ws/lib/use/ws";
 import type { Server as HttpServer } from "http";
 
 import { config, logServerInit, fastifyConfig, corsOptions } from "./config";
-import { crawlAllAuthedWebsitesCluster } from "./core/controllers/websites";
+import {
+  crawlAllAuthedWebsitesCluster,
+  WebsitesController,
+} from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { getBaseParams, paramParser } from "./web/params/extracter";
 import {
@@ -119,8 +122,7 @@ async function initServer(): Promise<HttpServer[]> {
       auth,
     });
   });
-
-  // retrieve a website from the database. TODO: cleanup
+  // get a website from the database
   app.get("/api/website", async (req, res) => {
     const { userId, domain, pageUrl } = getBaseParams(req);
 
@@ -247,6 +249,30 @@ async function initServer(): Promise<HttpServer[]> {
           canScan: false,
           // configuration
           ...getWebParams(req),
+        }),
+      userId,
+    });
+  });
+
+  /*
+   * Delete website and all related data.
+   * This removes the website from the database it can be by a url, domain, or empty poping the db entry.
+   */
+  app.delete("/api/website", async (req, res) => {
+    const usr = getUserFromToken(req.headers.authorization);
+    const userId = usr?.payload?.keyid;
+
+    const url = paramParser(req, "url");
+    const deleteMany = paramParser(req, "deleteMany");
+    const domain = paramParser(req, "domain");
+
+    await responseWrap(res, {
+      callback: () =>
+        WebsitesController().removeWebsite({
+          userId,
+          deleteMany,
+          url,
+          domain,
         }),
       userId,
     });

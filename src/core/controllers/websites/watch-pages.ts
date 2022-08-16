@@ -14,12 +14,6 @@ type Page = {
 export async function websiteWatch(
   pages: Page[] | Website[] = []
 ): Promise<void> {
-  if (pages && Array.isArray(!pages)) {
-    return Promise.resolve(null);
-  }
-
-  console.log(`watcher job count ${pages.length}`);
-
   for (const website of pages) {
     const { userId, url, subdomains, tld } = website;
     const [user] = await getUser({ id: userId });

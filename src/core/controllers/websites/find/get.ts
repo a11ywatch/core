@@ -14,19 +14,15 @@ export const getWebsite = async ({
   url,
   domain,
 }: Website): Promise<[Website, any]> => {
+  const params = websiteSearchParams({
+    userId,
+    url,
+    domain,
+  });
+
   try {
     const [collection] = await connect("Websites");
-    const params = websiteSearchParams({
-      userId,
-      url,
-      domain,
-    });
-
-    let website;
-
-    if (Object.keys(params).length) {
-      website = await collection.findOne(params);
-    }
+    const website = await collection.findOne(params);
 
     return [website, collection];
   } catch (e) {

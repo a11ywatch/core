@@ -3,12 +3,12 @@ import { websiteSearchParams } from "@app/core/utils";
 
 export const HistoryController = ({ user } = { user: null }) => ({
   getHistoryItem: async (
-    { userId, url, domain }: { userId: number; url?: string; domain?: string },
+    params: { userId?: number; url?: string; domain?: string },
     chain
   ) => {
     try {
       const [collection] = await connect("History");
-      const searchProps = websiteSearchParams({ userId, url, domain });
+      const searchProps = websiteSearchParams(params);
       const history = await collection.findOne(searchProps);
 
       return chain ? [history, collection] : history;
