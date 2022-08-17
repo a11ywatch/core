@@ -75,7 +75,7 @@ export const crawlPage = async (
   } = crawlConfig ?? {};
 
   // detect if redis is connected to send subs
-  const sendSub: boolean = redisConnected && crawlConfig?.sendSub;
+  const sendSub: boolean = redisConnected && (crawlConfig?.sendSub ?? true);
 
   let uid;
 

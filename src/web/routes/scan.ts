@@ -1,7 +1,7 @@
 import { getUserFromApi } from "@app/core/utils";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 
-import { paramParser } from "../params/extracter";
+import { paramParser, validateUID } from "../params/extracter";
 import { WEBSITE_URL_ERROR } from "@app/core/strings";
 import { responseModel } from "@app/core/models";
 import { StatusCode } from "../messages/message";
@@ -46,12 +46,13 @@ export const scanSimple = async (
 
       let resData = {};
 
-      if (typeof userId !== "undefined") {
+      if (validateUID(userId)) {
         resData = await crawlPage(
           {
             url,
             userId,
             pageInsights,
+            sendSub: false,
           },
           false
         );
