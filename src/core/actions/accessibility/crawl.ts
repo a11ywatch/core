@@ -278,7 +278,7 @@ export const crawlPage = async (
         }
       }
 
-      const shouldUpsertCollections = pageConstainsIssues || issueExist;
+      const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
 
       // Add to Issues collection if page contains issues or if record should update/delete.
       if (shouldUpsertCollections) {
@@ -308,6 +308,7 @@ export const crawlPage = async (
         ); // ISSUES COLLECTION
       }
 
+      // Pages
       if ((!newSite && shouldUpsertCollections) || newSite) {
         await collectionUpsert(
           updateWebsiteProps,
@@ -318,9 +319,9 @@ export const crawlPage = async (
         );
       }
 
-      // every page gets a script ATM. TODO conditional scripts.
+      // Add script to collection
       if (scriptsEnabled) {
-        await collectionUpsert(script, [scriptsCollection, scripts]); // SCRIPTS COLLECTION
+        await collectionUpsert(script, [scriptsCollection, scripts]);
       }
     }
 
@@ -371,7 +372,7 @@ export const crawlPage = async (
       );
     }
 
-    return resolve(responseModel(responseData));
+    return resolve(responseModel(responseData)); // TODO: remove responseModel from layer
   });
 };
 

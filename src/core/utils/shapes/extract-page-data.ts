@@ -57,14 +57,16 @@ export const extractPageData = (
 
   return {
     userId,
-    errorCount,
-    warningCount,
-    noticeCount,
-    adaScore,
+    // collections
     script,
     issues,
     webPage: website,
     issuesInfo,
     lighthouseData,
+    // stats
+    errorCount,
+    warningCount,
+    noticeCount,
+    adaScore,
   };
 };

@@ -12,7 +12,7 @@ const WebsiteModel = {
     color: "",
   },
   issuesInfo: {
-    adaScore: 0,
+    adaScore: 0, // rename to score
     warningCount: 0,
     errorCount: 0,
     noticeCount: 0,
