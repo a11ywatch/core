@@ -66,4 +66,13 @@ export const website = gql`
     pages(limit: Int = 0, offset: Int = 0, offset: Int = 0): [Pages]
     actions(limit: Int = 0, offset: Int = 0): [PageActions]
   }
+
+  """
+  A website crawl status.
+  """
+  type CrawlStatus {
+    domain: String
+    adaScoreAverage: Int
+    shutdown: Boolean
+  }
 `;

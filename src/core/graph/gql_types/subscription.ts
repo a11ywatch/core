@@ -8,7 +8,7 @@ export const subscription = gql`
     websiteAdded(userId: Int): Website
     issueAdded(userId: Int): Issue
     emailVerified(userId: Int): User
-    crawlComplete(userId: Int): Website
+    crawlComplete(userId: Int): CrawlStatus
     websiteRemoved: Website
   }
 `;
