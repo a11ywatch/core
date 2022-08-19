@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {

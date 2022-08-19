@@ -121,7 +121,7 @@ export const mutation = gql`
   type UpdateWebSiteMutationResponse implements MutationResponse {
     code: String!
     success: Boolean!
-    message: String!
+    message: String
     website: Website
   }
 
@@ -147,6 +147,6 @@ export const mutation = gql`
   interface MutationResponse {
     code: String!
     success: Boolean!
-    message: String!
+    message: String
   }
 `;
