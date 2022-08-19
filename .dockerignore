@@ -1,13 +1,9 @@
-yarn-error.log
 Dockerfile
 Dockerfile.dev
-sample.env
 README.md
-.eslintrc
 public.key
 private.key
 dist
 coverage
 .env
-jest-mongodb-config.ts
 jest.config.ts

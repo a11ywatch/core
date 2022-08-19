@@ -10,8 +10,17 @@ type CrawlMultiSite = {
   success?: boolean;
 };
 
+type CrawlProps = {
+  url: string;
+  userId?: number;
+  subdomains?: boolean;
+  tld?: boolean;
+};
+
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
-export const crawlMultiSiteWithEvent = (props): Promise<CrawlMultiSite> => {
+export const crawlMultiSiteWithEvent = (
+  props: CrawlProps
+): Promise<CrawlMultiSite> => {
   const { url, userId, subdomains, tld } = props;
 
   return new Promise(async (resolve) => {

@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.10",
+  "version": "0.5.13",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -20,9 +20,9 @@
     "@graphql-tools/schema": "^8.5.1",
     "@grpc/grpc-js": "1.6.7",
     "@grpc/proto-loader": "0.7.0",
-    "apollo-server": "3.10.0",
-    "apollo-server-core": "3.10.0",
-    "apollo-server-fastify": "^3.10.1",
+    "apollo-server": "3.10.1",
+    "apollo-server-core": "3.10.1",
+    "apollo-server-fastify": "3.10.1",
     "cron": "2.1.0",
     "date-fns": "2.29.1",
     "exceljs": "^4.3.0",

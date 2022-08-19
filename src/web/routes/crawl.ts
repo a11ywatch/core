@@ -37,7 +37,6 @@ export const crawlRest = async (
       const { data, message } = await crawlMultiSiteWithEvent({
         url,
         userId: userNext.id,
-        scan: false,
         subdomains: userNext?.role >= 1,
         tld: userNext?.role >= 2,
       });

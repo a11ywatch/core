@@ -2,14 +2,14 @@ import Redis from "ioredis";
 
 const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 
-let redisConnected = true;
+let redisConnected = true; // determine all redis connectivity
 let redisClient: Redis;
 
 const options = {
   host: process.env.REDIS_HOST || "127.0.0.1",
   port: 6379,
   autoResubscribe: false,
-  maxRetriesPerRequest: null,
+  maxRetriesPerRequest: undefined,
   lazyConnect: true,
   enableAutoPipelining: true,
   retryStrategy(times) {
@@ -25,7 +25,7 @@ const options = {
   },
 };
 
-// redis client
+// redis top level client
 const initRedisConnection = async () => {
   try {
     redisClient = new Redis(options);
@@ -51,7 +51,18 @@ const closeRedisConnection = () => {
 };
 
 const createRedisClient = () => {
-  return new Redis(options);
+  const newClient = new Redis(options);
+
+  newClient?.on("error", (error) => {
+    redisLogEnabled && console.error("redis error", error);
+    redisConnected = false;
+  });
+
+  newClient?.on("connect", () => {
+    redisConnected = true;
+  });
+
+  return newClient;
 };
 
 export {
