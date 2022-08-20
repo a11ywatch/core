@@ -1,5 +1,4 @@
 import { jsonParse } from "@app/core/utils";
-import Result from "@app/types/lhr";
 import { Struct } from "pb-util/build";
 
 export const extractPageData = (
@@ -28,26 +27,18 @@ export const extractPageData = (
     }
 
     if (insight) {
-      let parsedInsight: Result;
-      try {
-        // extract data to valid JSON
-        parsedInsight = jsonParse(insight as Struct) ?? undefined;
-      } catch (e) {
-        console.error(e);
-      }
+      const parsedInsight: Record<string, unknown> = jsonParse(
+        insight as Struct
+      );
 
       if (parsedInsight) {
         try {
-          const json = JSON.stringify(parsedInsight);
-
-          if (parsedInsight) {
-            lighthouseData = {
-              userId,
-              domain: website.domain,
-              pageUrl: website.pageUrl || website.url,
-              json,
-            };
-          }
+          lighthouseData = {
+            userId,
+            domain: website.domain,
+            pageUrl: website.pageUrl || website.url,
+            json: JSON.stringify(parsedInsight), // TODO: prevent having to stringify
+          };
         } catch (e) {
           console.error(e);
         }

@@ -7,7 +7,7 @@ import {
   scripts,
   issue,
   issues,
-} from "./graph/queries";
+} from "../web/graph/queries";
 
 export const Query = {
   issue,

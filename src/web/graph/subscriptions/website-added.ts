@@ -1,5 +1,5 @@
 import { withFilter } from "graphql-subscriptions";
-import { WEBSITE_ADDED } from "../../static";
+import { WEBSITE_ADDED } from "../../../core/static";
 import { pubsub } from "@app/database/pubsub";
 
 export const websiteAdded = {

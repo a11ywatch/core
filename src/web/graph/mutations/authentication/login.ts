@@ -1,14 +1,14 @@
-import { EMAIL_ERROR } from "../../../strings";
-import { UsersController } from "../../../controllers";
+import { EMAIL_ERROR } from "../../../../core/strings";
+import { UsersController } from "../../../../core/controllers";
 import { cookieConfigs } from "../../../../config";
 
-// register a user account via mutation
-export async function register(
+// login user via mutation
+export async function login(
   _,
   { email, password, googleId, githubId },
   context
 ) {
-  const loginUser = await UsersController().createUser({
+  const loginUser = await UsersController().verifyUser({
     email,
     password,
     googleId,

@@ -1,6 +1,6 @@
-import { UsersController } from "../../controllers";
-import { EMAIL_ERROR } from "../../strings";
-import { getPayLoad } from "../../utils/query-payload";
+import { UsersController } from "../../../core/controllers";
+import { EMAIL_ERROR } from "../../../core/strings";
+import { getPayLoad } from "../../../core/utils/query-payload";
 
 export const filterEmailDates = async (
   _,

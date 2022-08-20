@@ -1,5 +1,5 @@
-import { WebsitesController } from "../../controllers";
-import { getPayLoad } from "../../utils/query-payload";
+import { WebsitesController } from "../../../core/controllers";
+import { getPayLoad } from "../../../core/utils/query-payload";
 
 export const website = async (_, { url, ...props }, context) => {
   const userId = getPayLoad(context, props)?.userId;

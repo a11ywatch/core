@@ -17,7 +17,7 @@ import {
   meta,
   input,
   invoice,
-} from "./graph/gql_types";
+} from "../web/graph/gql_types";
 import { getGqlRateLimitDirective } from "@app/web/limiters";
 import gql from "graphql-tag";
 import { applyMiddleware } from "graphql-middleware";

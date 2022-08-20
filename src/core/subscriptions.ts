@@ -4,7 +4,7 @@ import {
   websiteAdded,
   websiteRemoved,
   crawlComplete,
-} from "./graph/subscriptions";
+} from "../web/graph/subscriptions";
 
 export const Subscription = {
   emailVerified,

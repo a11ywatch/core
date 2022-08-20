@@ -1,12 +1,12 @@
 import { withFilter } from "graphql-subscriptions";
-import { ISSUE_ADDED } from "../../static";
+import { CRAWL_COMPLETE } from "../../../core/static";
 import { pubsub } from "@app/database/pubsub";
 
-export const issueAdded = {
+export const crawlComplete = {
   subscribe: withFilter(
-    () => pubsub.asyncIterator(ISSUE_ADDED),
+    () => pubsub.asyncIterator(CRAWL_COMPLETE),
     (payload: any, variables: any, context: any) => {
-      const id = payload.issueAdded.userId;
+      const id = payload.crawlComplete.userId;
 
       return id === context?.userId || id === variables?.userId;
     }
