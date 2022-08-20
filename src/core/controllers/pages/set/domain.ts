@@ -3,7 +3,7 @@ import { getLastItemInCollection } from "@app/core/utils";
 import { getPage } from "../find";
 
 export const addDomain = async ({ userId, url }) => {
-  const [siteExist, collection] = await getPage({ userId, url }, true);
+  const [siteExist, collection] = await getPage({ userId, url });
 
   if (siteExist) {
     throw new Error(WEBSITE_EXIST_ERROR);

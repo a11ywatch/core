@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.15",
+  "version": "0.5.19",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -37,7 +37,7 @@
     "graphql-ws": "^5.10.0",
     "ioredis": "^5.2.2",
     "jsonwebtoken": "8.5.1",
-    "mongodb": "3.7.3",
+    "mongodb": "4.9.0",
     "node-iframe": "^1.8.4",
     "nodemailer": "6.7.7",
     "pb-util": "^1.0.3",
@@ -106,7 +106,7 @@
   "config": {
     "mongodbMemoryServerOptions": {
       "binary": {
-        "version": "3.7.3",
+        "version": "4.9.0",
         "skipMD5": true
       },
       "instance": {

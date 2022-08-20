@@ -1,40 +1,34 @@
 import { MongoClient, Collection } from "mongodb";
 import { config } from "../config/config";
 
-const connectionConfigs = {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-};
+let client: MongoClient; // shared client across application
+let connected = false; // is client connected
 
 // create a mongodb client.
 const createClient = (dbconnection?: string): MongoClient => {
   let client;
-  try {
-    client = new MongoClient(dbconnection || config.DB_URL, connectionConfigs);
-  } catch (e) {
-    console.error(e);
-  }
 
-  // retry with mem db
-  if (!client && !dbconnection) {
-    try {
-      client = new MongoClient(process.env.MONGO_URL, connectionConfigs);
-    } catch (e) {
-      console.error(e);
-    }
+  try {
+    client = new MongoClient(dbconnection || config.DB_URL);
+  } catch (_) {
+    console.info(
+      "MongoDB not established. Start mongo on port 27017 to persist data."
+    );
   }
 
   return client;
 };
 
-let client: MongoClient; // shared client across application
-
 const initDbConnection = async (dbconnection?: string) => {
-  try {
-    client = createClient(dbconnection);
-    client = await client?.connect();
-  } catch (e) {
-    console.error("MongoDB not connected.");
+  client = createClient(dbconnection);
+
+  if (client) {
+    try {
+      client = await client?.connect();
+      connected = true;
+    } catch (e) {
+      console.error("MongoDB failed to connected.");
+    }
   }
 };
 
@@ -54,23 +48,15 @@ const connect = async (
   return [collection, client];
 };
 
-// detect if client is connected use back compat topology
-const isConnected = () => {
-  if (client && "topology" in client) {
-    // @ts-ignore
-    return client && client.topology && client.topology?.isConnected();
-  }
-  return client?.isConnected();
-};
-
 const closeDbConnection = async () => {
-  try {
-    if (isConnected()) {
+  if (connected) {
+    try {
       await client?.close();
+      connected = false;
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
 };
 
-export { client, connect, initDbConnection, closeDbConnection };
+export { client, connected, connect, initDbConnection, closeDbConnection };

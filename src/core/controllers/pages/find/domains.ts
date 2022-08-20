@@ -31,16 +31,19 @@ export const getDomains = async (
 
 // Get the page from the collection
 // @example await getPage({userID: 2}) // returns Pages collection and not Website
-export const getPage = async (
-  { userId, url }: { userId?: number; url?: string },
-  chain?: boolean
-) => {
+export const getPage = async ({
+  userId,
+  url,
+}: {
+  userId?: number;
+  url?: string;
+}) => {
   try {
     const [collection] = await connect("Pages");
     const searchProps = websiteSearchParams({ url, userId });
     const website = await collection.findOne(searchProps);
 
-    return chain ? [website, collection] : website;
+    return [website, collection];
   } catch (e) {
     console.error(e);
     return [null, null];

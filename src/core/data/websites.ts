@@ -22,7 +22,11 @@ export const Website = {
     });
 
     // TODO: move to DB.
-    if (filter && issues && ["error", "notice", "warning"].includes(filter)) {
+    if (
+      filter &&
+      Array.isArray(issues) &&
+      ["error", "notice", "warning"].includes(filter)
+    ) {
       return issues.filter((item) => {
         if (item?.issues) {
           item.issues = item?.issues?.filter((issue) => issue?.type === filter);

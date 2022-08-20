@@ -22,7 +22,7 @@ export const getWebsite = async ({
 
   try {
     const [collection] = await connect("Websites");
-    const website = await collection.findOne(params);
+    const website = (await collection.findOne(params)) as Website;
 
     return [website, collection];
   } catch (e) {

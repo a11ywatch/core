@@ -18,7 +18,8 @@ async function getUser({
   const params = userParams({ email, id, emailConfirmCode });
 
   try {
-    const user = await collection.findOne(params);
+    const user = (await collection.findOne(params)) as User;
+
     return [user, collection];
   } catch (e) {
     console.error(e);

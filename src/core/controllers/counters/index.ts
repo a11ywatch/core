@@ -1,14 +1,19 @@
 import { connect } from "@app/database";
 import { websiteSearchParams } from "@app/core/utils";
+import { Collection, Document, WithId } from "mongodb";
 
-const getCounter = async ({ _id }, chain?: boolean) => {
+const getCounter = async (
+  { _id },
+  chain?: boolean
+): Promise<[WithId<Document>, Collection<Document>]> => {
   try {
     const [collection] = await connect("Counters");
     const counter = await collection.findOne({ _id });
 
-    return chain ? [counter, collection] : counter;
+    return [counter, collection];
   } catch (e) {
     console.error(e);
+    return [null, null];
   }
 };
 
@@ -21,6 +26,7 @@ const getNextSequenceValue = async (sequenceName) => {
       true
     );
 
+    // insert first counter
     if (!hascounter) {
       await collection.insertOne({ _id: sequenceName, sequence_value: 0 });
       return 0;
@@ -32,10 +38,13 @@ const getNextSequenceValue = async (sequenceName) => {
       },
       { $inc: { sequence_value: 1 } },
       {
+        // @ts-ignore
         returnNewDocument: true,
         projection: { sequence_value: 1, _id: 1 },
       }
     );
+
+    // @ts-ignore
     return sequenceDocument?.value?.sequence_value;
   } catch (e) {
     console.error(e);

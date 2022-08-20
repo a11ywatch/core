@@ -10,7 +10,7 @@ services:
     ports:
       - "3280:3280"
     environment:
-      - DB_URL=${DB_URL:-mongodb://mongodb:27017/?compressors=zlib&gssapiServiceName=mongodb}
+      - DB_URL=${DB_URL:-mongodb://mongodb:27017}
       - DB_NAME=${DB_NAME:-a11ywatch}
       - APOLLO_KEY=${APOLLO_KEY}
       - APOLLO_GRAPH_VARIANT=${APOLLO_GRAPH_VARIANT:-current}

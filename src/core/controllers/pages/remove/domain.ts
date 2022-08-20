@@ -6,7 +6,7 @@ import {
 import { getPage } from "../find";
 
 export const removeDomain = async ({ userId, url, deleteMany = false }) => {
-  const [siteExist, collection] = await getPage({ userId, url }, true);
+  const [siteExist, collection] = await getPage({ userId, url });
 
   if (deleteMany) {
     await collection.deleteMany({ userId });

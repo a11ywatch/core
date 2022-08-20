@@ -1,5 +1,6 @@
 import { connect } from "@app/database";
 import { getHostName, websiteSearchParams } from "@app/core/utils";
+import { Issue } from "@app/types/schema";
 
 export const getIssue = async (
   { url, pageUrl, userId, noRetries }: any,
@@ -16,6 +17,7 @@ export const getIssue = async (
 
     let issue;
 
+    // TODO: remove props and allow all
     if (Object.keys(searchProps).length) {
       issue = await collection.findOne(searchProps);
 
@@ -60,7 +62,7 @@ export const getIssues = async ({ userId, domain, pageUrl }: any) => {
 };
 
 // get issues for a user with pagination offsets.
-export const getIssuesPaging = async (params, chain?: boolean) => {
+export const getIssuesPaging = async (params) => {
   try {
     const [collection] = await connect("Issues");
     const {
@@ -78,15 +80,15 @@ export const getIssuesPaging = async (params, chain?: boolean) => {
       all,
     });
 
-    const websites = await collection
+    const issues = (await collection
       .find(searchParams)
       .skip(offset)
       .limit(limit)
-      .toArray();
+      .toArray()) as Issue[];
 
-    return chain ? [websites, collection] : websites;
+    return issues;
   } catch (e) {
     console.error(e);
-    return [null, null];
+    return [];
   }
 };

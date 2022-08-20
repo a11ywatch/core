@@ -207,13 +207,10 @@ export const crawlPage = async (
     } = extractPageData(dataSource);
 
     // PAGE COLLECTION
-    const [newSite, pagesCollection] = await getPage(
-      {
-        userId,
-        url: pageUrl,
-      },
-      true
-    );
+    const [newSite, pagesCollection] = await getPage({
+      userId,
+      url: pageUrl,
+    });
 
     const [issueExist, issuesCollection] = await IssuesController().getIssue(
       { pageUrl, userId, noRetries: true },

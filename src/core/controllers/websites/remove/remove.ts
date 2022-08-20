@@ -49,8 +49,7 @@ export const removeWebsite = async ({
     : { domain: siteExist?.domain };
 
   const [history, historyCollection] = await HistoryController().getHistoryItem(
-    baseRemoveQuery,
-    true
+    baseRemoveQuery
   );
 
   let deleteQuery: Record<string, unknown> = baseRemoveQuery;
