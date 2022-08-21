@@ -21,7 +21,6 @@ import {
 } from "@app/config/config";
 import type { User, Website } from "@app/types/types";
 import type { Issue } from "../../../types/schema";
-import { redisConnected } from "@app/database/memory-client";
 import { findPageActionsByPath } from "@app/core/controllers/page-actions/find";
 import { PageSpeedController } from "@app/core/controllers/page-speed/main";
 import { validateScanEnabled } from "@app/core/controllers/users/update/scan-attempt";
@@ -72,27 +71,13 @@ export const crawlPage = async (
   sendEmail?: boolean, // determine if email should be sent based on results
   blockEvent?: boolean // block event from emitting
 ): Promise<ResponseModel> => {
-  const {
-    userId,
-    url: urlMap,
-    pageInsights = false,
-    user: usr,
-  } = crawlConfig ?? {};
-
-  // detect if redis is connected to send subs
-  const sendSub: boolean = redisConnected && (crawlConfig?.sendSub ?? true);
-
-  let uid;
-
-  if (typeof usr !== "undefined") {
-    uid = usr.id;
-  } else {
-    uid = userId;
-  }
+  const { url: urlMap, pageInsights = false, user: usr } = crawlConfig ?? {};
+  const sendSub: boolean = crawlConfig?.sendSub ?? true; // detect if redis is connected to send subs
+  const userId = usr?.id ?? crawlConfig?.userId;
 
   // get user role
   const [userData, userCollection] = await UsersController().getUser({
-    id: uid,
+    id: userId,
   });
 
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);

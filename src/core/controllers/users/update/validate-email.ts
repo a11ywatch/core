@@ -19,7 +19,11 @@ export const validateEmail = async ({ code }) => {
         }
       );
 
-      await pubsub.publish(EMAIL_VERIFIED, { emailVerified: true });
+      await pubsub
+        .publish(EMAIL_VERIFIED, { emailVerified: true })
+        .catch((e) => {
+          console.error(e);
+        });
 
       return true;
     }

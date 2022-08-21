@@ -72,7 +72,7 @@ let serverReady = false; // server is ready to go
 const connectClients = async () => {
   await initDbConnection(); // database connections
   await initRedisConnection(); // redis connections
-  createPubSub(); // redis gql pub/sub
+  await createPubSub(); // redis gql pub/sub
 };
 
 async function initServer(): Promise<HttpServer[]> {

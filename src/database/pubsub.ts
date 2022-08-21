@@ -1,17 +1,19 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
-import { createRedisClient } from "./memory-client";
+import { createRedisClient, redisConnected } from "./memory-client";
 
-let pubsub: RedisPubSub;
+let pubsub: Partial<RedisPubSub>;
 
 // PUB/SUB GQL Redis client
-function createPubSub() {
-  try {
+async function createPubSub() {
+  if (redisConnected) {
     pubsub = new RedisPubSub({
       publisher: createRedisClient(),
       subscriber: createRedisClient(),
     });
-  } catch (e) {
-    console.error(e);
+  } else {
+    const { PubSub } = await import("graphql-subscriptions");
+    // use memory sub
+    pubsub = new PubSub();
   }
 }
 
