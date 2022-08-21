@@ -57,11 +57,16 @@ import { addWebsiteWrapper } from "./core/controllers/websites/set/add-website";
 import { getWebsiteWrapper } from "./core/controllers/websites/find/get";
 import { responseModel } from "./core/models";
 import { limiter, scanLimiter } from "./web/limiters";
-
-const { GRAPHQL_PORT } = config;
+import { appEmitter } from "./event/emitters/control";
 
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
+
+const { GRAPHQL_PORT } = config;
+
+let coreServer: HttpServer; // core http app server
+let serverInited = false; // determine if the server started
+let serverReady = false; // server is ready to go
 
 // all the connections for external request
 const connectClients = async () => {
@@ -95,8 +100,7 @@ async function initServer(): Promise<HttpServer[]> {
   await fast.register(await server.createHandler({ cors: corsOptions }));
   const app = await registerApp(fast);
 
-  // root
-  app.get(ROOT, root);
+  app.get(ROOT, root); // root
 
   app.get("/status/:domain", statusBadge);
 
@@ -111,9 +115,9 @@ async function initServer(): Promise<HttpServer[]> {
   });
 
   app.get("/api/iframe", createIframeEvent);
-  // get a previus run report @query {q: string}
+  // get a previus run report
   app.get("/api/report", getWebsiteReport);
-  // retrieve a user from the database.
+  // retrieve a user from the database
   app.get("/api/user", async (req, res) => {
     const auth = req.headers.authorization;
 
@@ -359,46 +363,42 @@ async function initServer(): Promise<HttpServer[]> {
   return [app.server];
 }
 
-// core http app server
-let coreServer: HttpServer;
-// determine if the server started
-let serverInited = false;
-let serverReady = false;
-
 // start the http, graphl, events, subs, and gRPC server
 const startServer = async (disableHttp?: boolean) => {
-  serverInited = true; // do not wait for http server and rely on grpc health check
+  if (!serverInited) {
+    serverInited = true; // do not wait for http server and rely on grpc health check
+    // tracking event emitter
+    establishCrawlTracking(); // quick setup all event emitters binding
 
-  if (config.SUPER_MODE) {
-    console.log("Application started in SUPER mode. All restrictions removed.");
-  }
-
-  // tracking event emitter
-  establishCrawlTracking();
-
-  // connect all clients
-  await connectClients();
-
-  // start the gRPC server
-  await startGRPC();
-
-  if (disableHttp) {
-    serverReady = true;
-    return;
-  }
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      [coreServer] = await initServer();
-
-      serverReady = true;
-
-      resolve([coreServer]);
-    } catch (e) {
-      console.error(["SERVER FAILED TO START", e]);
-      reject(e);
+    if (config.SUPER_MODE) {
+      console.log(
+        "Application started in SUPER mode. All restrictions removed."
+      );
     }
-  });
+
+    // connect all clients
+    await connectClients();
+    // start the gRPC server
+    await startGRPC();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (disableHttp) {
+          serverReady = true;
+        } else {
+          [coreServer] = await initServer();
+          serverReady = true;
+        }
+        resolve([coreServer]);
+      } catch (e) {
+        console.error(["SERVER FAILED TO START", e]);
+        reject(e);
+      } finally {
+        appEmitter.emit("event:init", true);
+      }
+    });
+  }
+  return Promise.resolve();
 };
 
 // determine if the server is completly ready
@@ -407,23 +407,7 @@ const isReady = async () => {
     if (serverReady) {
       resolve(true);
     } else {
-      // TODO: listen for event emitt
-      const serverInterval = setInterval(() => {
-        if (serverReady) {
-          clearInterval(serverInterval);
-          resolve(true);
-        }
-      }, 3);
-
-      // give 75 ms to wait for server to start before clearing out if server has not inited
-      if (!serverInited) {
-        setTimeout(() => {
-          if (!serverInited) {
-            clearInterval(serverInterval);
-            resolve(serverReady);
-          }
-        }, 75);
-      }
+      appEmitter.once("event:init", resolve);
     }
   });
 };
@@ -437,6 +421,8 @@ const killServer = async () => {
       closeRedisConnection(),
       killGrpcServer(),
     ]);
+    serverReady = false;
+    serverInited = false;
   } catch (e) {
     console.error("failed to shutdown server", e);
   }

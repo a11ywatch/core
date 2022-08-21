@@ -14,7 +14,11 @@ import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "@app/core/models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
-import { SUPER_MODE, SCRIPTS_ENABLED } from "@app/config/config";
+import {
+  SUPER_MODE,
+  SCRIPTS_ENABLED,
+  DISABLE_STORE_SCRIPTS,
+} from "@app/config/config";
 import type { User, Website } from "@app/types/types";
 import type { Issue } from "../../../types/schema";
 import { redisConnected } from "@app/database/memory-client";
@@ -32,6 +36,7 @@ export type CrawlConfig = {
   pageInsights?: boolean; // use page insights to get info
   sendSub?: boolean; // use pub sub
   user?: User; // optional pass user
+  noStore?: boolean; // when enabled - do not store data to fs for js scripts etc
 };
 
 // track the crawl events between crawls
@@ -85,6 +90,7 @@ export const crawlPage = async (
     uid = userId;
   }
 
+  // get user role
   const [userData, userCollection] = await UsersController().getUser({
     id: uid,
   });
@@ -120,6 +126,12 @@ export const crawlPage = async (
     const insightsLocked = !SUPER_MODE && (freeAccount || userData?.role === 1);
 
     let insightsEnabled = false;
+    let noStore = crawlConfig.noStore || DISABLE_STORE_SCRIPTS;
+
+    // prevent storage on free accounts js scripts
+    if (!SUPER_MODE && !freeAccount) {
+      noStore = true;
+    }
 
     if (website?.pageInsights || pageInsights) {
       // only premium and above get lighthouse on all pages.
@@ -146,12 +158,12 @@ export const crawlPage = async (
       actions,
       cv: SUPER_MODE || userData?.role === 2,
       pageSpeedApiKey: userData?.pageSpeedApiKey,
+      noStore,
     });
 
     let shutdown = false;
 
     if (!SUPER_MODE) {
-      // TODO: add tracking wasting resources that do not exist
       const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
       const pastUptime = userData?.scanInfo?.totalUptime || 0;
 

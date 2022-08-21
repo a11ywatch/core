@@ -1,11 +1,10 @@
 import { EventEmitter } from "events";
 
-// crawl emiiter for data
+// crawl emitter
 class CrawlEmitter extends EventEmitter {}
 
-const crawlEmitter = new CrawlEmitter();
-
-const crawlTrackingEmitter = new CrawlEmitter();
+const crawlEmitter = new CrawlEmitter(); // active crawl event handling
+const crawlTrackingEmitter = new CrawlEmitter(); // crawl active tracking
 
 crawlEmitter.setMaxListeners(0);
 crawlTrackingEmitter.setMaxListeners(0);

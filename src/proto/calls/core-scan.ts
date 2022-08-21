@@ -1,17 +1,18 @@
 import { getUserFromApi } from "@app/core/utils/get-user-rpc";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { validateUID } from "@app/web/params/extracter";
+import { DISABLE_STORE_SCRIPTS } from "@app/config/config";
 
 // core single page scan with results
 export const coreScan = async (call, callback) => {
   const { authorization, url, pageInsights } = call.request;
-
   const userNext = await getUserFromApi(authorization); // get current user
 
   let data = {};
 
   if (userNext) {
     const userId = userNext?.id;
+    const noStore = DISABLE_STORE_SCRIPTS || !userNext?.role;
 
     if (validateUID(userId)) {
       const resData = await crawlPage(
@@ -20,15 +21,15 @@ export const coreScan = async (call, callback) => {
           userId,
           pageInsights: !!pageInsights,
           sendSub: false,
+          noStore,
         },
         false
       );
-
       data = resData?.data;
     } else {
       const resData = await scanWebsite({
         url,
-        noStore: true,
+        noStore,
         pageInsights: !!pageInsights,
       });
       data = resData?.data;

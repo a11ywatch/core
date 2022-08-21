@@ -59,7 +59,7 @@ export const scanSimple = async (
       } else {
         resData = await scanWebsite({
           url,
-          noStore: true,
+          noStore: userNext?.role < 2,
           pageInsights,
         });
       }

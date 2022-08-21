@@ -6,7 +6,7 @@ import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { limitIssue } from "../../utils/filters/limit-issue";
 import type { PageMindScanResponse } from "@app/types/schema";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
-import { SUPER_MODE } from "@app/config/config";
+import { DISABLE_STORE_SCRIPTS, SUPER_MODE } from "@app/config/config";
 import { WEBSITE_NOT_FOUND } from "@app/core/strings";
 import { StatusCode } from "@app/web/messages/message";
 import { SCAN_TIMEOUT } from "@app/core/strings/errors";
@@ -15,7 +15,7 @@ import { validateUID } from "@app/web/params/extracter";
 type ScanParams = {
   userId?: number;
   url: string;
-  noStore?: boolean;
+  noStore?: boolean; // prevent script storage
   pageInsights?: boolean; // lighthouse insights
 };
 
@@ -31,13 +31,11 @@ type ScanParams = {
 export const scanWebsite = async ({
   userId,
   url,
-  noStore = false,
+  noStore = DISABLE_STORE_SCRIPTS,
   pageInsights = false,
 }: ScanParams): Promise<ResponseModel> => {
   const pageUrl = removeTrailingSlash(url);
   const domain = getHostName(pageUrl);
-
-  // redis pubsub not connected
 
   if (!domain) {
     return responseModel({ message: WEBSITE_NOT_FOUND });
@@ -52,12 +50,18 @@ export const scanWebsite = async ({
 
   const website = makeWebsite({ url: pageUrl, domain });
 
+  let preventStorage = noStore;
+
+  if (!SUPER_MODE) {
+    preventStorage = true;
+  }
+
   const dataSource: PageMindScanResponse = await fetchPageIssues({
     pageHeaders: website.pageHeaders,
     url: pageUrl,
     userId,
-    pageInsights, // TODO: get website if auth determine if Lighthouse enabled
-    noStore,
+    pageInsights,
+    noStore: preventStorage,
     scriptsEnabled: false,
   });
 
@@ -71,6 +75,8 @@ export const scanWebsite = async ({
     });
   }
 
+  const userFound = validateUID(userId);
+
   return new Promise((resolve, reject) => {
     try {
       const { script, issues, webPage } = extractPageData(dataSource);
@@ -79,14 +85,12 @@ export const scanWebsite = async ({
       let currentIssues = issues?.issues;
       let limitedCount = false;
 
-      const uid = validateUID(userId);
-
       // TODO: remove temp assign
-      if (uid) {
+      if (userFound) {
         website.userId = userId;
       }
 
-      if (!SUPER_MODE && !uid) {
+      if (!SUPER_MODE && !userFound) {
         currentIssues = limitIssue(issues);
         limitedCount = true;
       }

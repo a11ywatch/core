@@ -35,6 +35,7 @@ In order to store javascript locally to use you need to enable the following env
 
 ```
 SCRIPTS_ENABLED=true
+A11YWATCH_NO_STORE=false
 ```
 
 ## Queue
