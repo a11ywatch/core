@@ -8,9 +8,15 @@ import { getKey } from "@app/event/crawl-tracking";
 import { domainName } from "@app/core/utils/domain-name";
 import { getHostName } from "@app/core/utils/get-host";
 import type { CrawlProps } from "@app/core/utils/crawl-stream";
+import type { ServerWritableStream } from "@grpc/grpc-js";
+
+type ServerCallStreaming = ServerWritableStream<
+  { url: string; authorization: string; subdomains: boolean; tld: boolean },
+  {}
+>;
 
 // core multi page streaming gRPC scanning
-export const coreCrawl = async (call) => {
+export const coreCrawl = async (call: ServerCallStreaming) => {
   const { authorization, url, subdomains, tld } = call.request;
 
   const userNext = await getUserFromApi(authorization); // get current user
@@ -27,13 +33,13 @@ export const coreCrawl = async (call) => {
     await crawlStreaming(crawlProps, call);
   }
 
-  call?.end();
+  call.end();
 };
 
 // crawl website slim and wait for finished emit event to continue @return Website[].
 export const crawlStreaming = (
   props: CrawlProps,
-  call: any // grpc response
+  call: ServerCallStreaming
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld } = props;
 

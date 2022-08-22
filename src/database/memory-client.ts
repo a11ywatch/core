@@ -28,7 +28,7 @@ const options = {
 };
 
 // redis top level client
-const initRedisConnection = async () => {
+const initRedisConnection = async (): Promise<boolean> => {
   return new Promise(async (resolve) => {
     try {
       redisClient = new Redis(options);
@@ -47,7 +47,7 @@ const initRedisConnection = async () => {
       await redisClient.connect();
     } catch (_) {}
 
-    resolve(true);
+    resolve(redisConnected);
   });
 };
 

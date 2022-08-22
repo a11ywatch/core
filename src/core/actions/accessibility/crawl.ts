@@ -203,11 +203,10 @@ export const crawlPage = async (
       lighthouseData, // page insights
     } = extractPageData(dataSource);
 
-    // PAGE COLLECTION
     const [newSite, pagesCollection] = await getPage({
       userId,
       url: pageUrl,
-    });
+    }); // PAGE COLLECTION
 
     const [issueExist, issuesCollection] = await IssuesController().getIssue(
       { pageUrl, userId, noRetries: true },

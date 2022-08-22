@@ -6,7 +6,6 @@ import { scan } from "./calls/scan";
 import { scanStream } from "./calls/scan-stream";
 import { coreScan } from "./calls/core-scan";
 import { coreCrawl } from "./calls/core-crawl";
-
 import { loadProto } from "./website";
 
 let server: Server;
@@ -17,7 +16,7 @@ export const createServer = async () => {
 
   server = new Server();
 
-  // rust protobuff needs package defs
+  // crawl controll website service
   server.addService(
     websiteProto["website.WebsiteService"] as ServiceDefinition,
     {
@@ -32,6 +31,7 @@ export const createServer = async () => {
     }
   );
 
+  // core service
   server.addService(coreProto["apicore.CoreService"] as ServiceDefinition, {
     // single page scan and get results
     scan: coreScan,

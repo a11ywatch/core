@@ -2,9 +2,16 @@ import { getUserFromApi } from "@app/core/utils/get-user-rpc";
 import { scanWebsite, crawlPage } from "@app/core/actions";
 import { validateUID } from "@app/web/params/extracter";
 import { DISABLE_STORE_SCRIPTS } from "@app/config/config";
+import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
 
 // core single page scan with results
-export const coreScan = async (call, callback) => {
+export const coreScan = async (
+  call: ServerWritableStream<
+    { url: string; authorization: string; pageInsights: boolean },
+    {}
+  >,
+  callback: sendUnaryData<any>
+) => {
   const { authorization, url, pageInsights } = call.request;
   const userNext = await getUserFromApi(authorization); // get current user
 

@@ -1,6 +1,6 @@
 import fastq from "fastq";
 import { cpus } from "os";
-import { crawlWebsite as crawl } from "@app/core/actions";
+import { crawlWebsite } from "@app/core/actions";
 import { setWebsiteScore } from "@app/core/utils/stats/score";
 import { Method } from "@app/database/config";
 import type { ResponseModel } from "@app/core/models/response/types";
@@ -19,7 +19,7 @@ type Task = {
 
 // the async worker to use for crawling pages
 async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
-  return await crawl(arg);
+  return await crawlWebsite(arg);
 }
 
 // the async worker to use for completed crawl actions. TODO: remove for collection appending raw value to score.
