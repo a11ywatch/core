@@ -1,13 +1,13 @@
-import { getReport } from "@app/core/controllers/reports";
-import { downloadToExcel, getUserFromToken } from "@app/core/utils";
-import { Website } from "@app/types/types";
-import { initUrl } from "@a11ywatch/website-source-builder";
-import { retreiveUserByToken } from "@app/core/utils/get-user-data";
-import { paramParser } from "@app/web/params/extracter";
-import { StatusCode } from "@app/web/messages/message";
-import { responseModel } from "@app/core/models";
-import { URL_NOT_FOUND } from "@app/core/strings/errors";
 import { FastifyContext } from "apollo-server-fastify";
+import { initUrl } from "@a11ywatch/website-source-builder";
+import { downloadToExcel, getUserFromToken } from "../../../core/utils";
+import { getReport } from "../../../core/controllers/reports";
+import { retreiveUserByToken } from "../../../core/utils/get-user-data";
+import { paramParser } from "../../params/extracter";
+import { StatusCode } from "../../messages/message";
+import { responseModel } from "../../../core/models";
+import { URL_NOT_FOUND } from "../../../core/strings/errors";
+import type { Website } from "@app/types/types";
 // import { redisClient } from "@app/database/memory-client";
 
 // TODO: Refactor usage

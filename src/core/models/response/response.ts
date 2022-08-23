@@ -1,4 +1,4 @@
-import { HttpMessage, StatusCode } from "@app/web/messages/message";
+import { HttpMessage, StatusCode } from "../../../web/messages/message";
 import { ResponseParamsModel, ResponseModel } from "./types";
 
 // response model for HTTP request

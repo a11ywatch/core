@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.29",
+  "version": "0.5.35",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -102,17 +102,5 @@
       "coverage",
       "node_modules"
     ]
-  },
-  "config": {
-    "mongodbMemoryServerOptions": {
-      "binary": {
-        "version": "4.9.0",
-        "skipMD5": true
-      },
-      "instance": {
-        "dbName": "a11ywatch"
-      },
-      "autoStart": true
-    }
   }
 }

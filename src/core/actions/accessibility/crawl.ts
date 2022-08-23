@@ -27,7 +27,7 @@ import { validateScanEnabled } from "@app/core/controllers/users/update/scan-att
 import { RATE_EXCEEDED_ERROR } from "@app/core/strings";
 import { collectionIncrement } from "@app/core/utils/collection-upsert";
 import { SCAN_TIMEOUT } from "@app/core/strings/errors";
-import { StatusCode } from "@app/web/messages/message";
+import { StatusCode } from "../../../web/messages/message";
 
 export type CrawlConfig = {
   userId: number; // user id

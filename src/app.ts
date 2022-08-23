@@ -367,15 +367,13 @@ async function initServer(): Promise<HttpServer[]> {
 const startServer = async (disableHttp?: boolean) => {
   if (!serverInited) {
     serverInited = true; // do not wait for http server and rely on grpc health check
-    // tracking event emitter
-    establishCrawlTracking(); // quick setup all event emitters binding
-
     if (config.SUPER_MODE) {
       console.log(
         "Application started in SUPER mode. All restrictions removed."
       );
     }
-
+    // tracking event emitter
+    establishCrawlTracking(); // quick setup all event emitters binding
     // connect all clients
     await connectClients();
     // start the gRPC server

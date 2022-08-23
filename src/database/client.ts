@@ -59,4 +59,32 @@ const closeDbConnection = async () => {
   }
 };
 
-export { client, connected, connect, initDbConnection, closeDbConnection };
+// pool status until connected max timeout of 50ms
+const pollTillConnected = async (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (connected) {
+      resolve(connected);
+    } else {
+      const maxTimer = setTimeout(() => {
+        clearInterval(timerr);
+        resolve(connected);
+      }, 80);
+      const timerr = setInterval(() => {
+        if (connected) {
+          clearInterval(timerr);
+          clearTimeout(maxTimer);
+          resolve(true);
+        }
+      }, 2);
+    }
+  });
+};
+
+export {
+  client,
+  connected,
+  connect,
+  pollTillConnected,
+  initDbConnection,
+  closeDbConnection,
+};

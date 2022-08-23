@@ -1,16 +1,16 @@
-import { responseModel, makeWebsite } from "@app/core/models";
-import { ResponseModel } from "@app/core/models/response/types";
-import { getHostName } from "@app/core/utils";
+import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
+import { responseModel, makeWebsite } from "../../models";
+import { ResponseModel } from "../../models/response/types";
+import { getHostName } from "../../utils";
 import { fetchPageIssues } from "./fetch-issues";
 import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { limitIssue } from "../../utils/filters/limit-issue";
+import { DISABLE_STORE_SCRIPTS, SUPER_MODE } from "../../../config/config";
+import { WEBSITE_NOT_FOUND } from "../../strings";
+import { StatusCode } from "../../../web/messages/message";
+import { SCAN_TIMEOUT } from "../../strings/errors";
+import { validateUID } from "../../../web/params/extracter";
 import type { PageMindScanResponse } from "@app/types/schema";
-import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
-import { DISABLE_STORE_SCRIPTS, SUPER_MODE } from "@app/config/config";
-import { WEBSITE_NOT_FOUND } from "@app/core/strings";
-import { StatusCode } from "@app/web/messages/message";
-import { SCAN_TIMEOUT } from "@app/core/strings/errors";
-import { validateUID } from "@app/web/params/extracter";
 
 type ScanParams = {
   userId?: number;

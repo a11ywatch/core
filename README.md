@@ -38,6 +38,14 @@ SCRIPTS_ENABLED=true
 A11YWATCH_NO_STORE=false
 ```
 
+## Testing
+
+In order to easily test the application we use [dagger](https://docs.dagger.io/)
+
+```
+dagger do build
+```
+
 ## Queue
 
 Set the limit to number of test in parallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.

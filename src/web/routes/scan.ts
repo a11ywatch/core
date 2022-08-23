@@ -1,9 +1,8 @@
-import { getUserFromApi } from "@app/core/utils";
-import { scanWebsite, crawlPage } from "@app/core/actions";
-
+import { getUserFromApi } from "../../core/utils";
+import { scanWebsite, crawlPage } from "../../core/actions";
 import { paramParser, validateUID } from "../params/extracter";
-import { WEBSITE_URL_ERROR } from "@app/core/strings";
-import { responseModel } from "@app/core/models";
+import { WEBSITE_URL_ERROR } from "../../core/strings";
+import { responseModel } from "../../core/models";
 import { StatusCode } from "../messages/message";
 import type { FastifyContext } from "apollo-server-fastify";
 

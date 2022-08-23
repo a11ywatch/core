@@ -1,9 +1,9 @@
-import { createUser } from "@app/core/controllers/users/set";
-import { verifyUser } from "@app/core/controllers/users/update";
-import { getUserFromToken } from "@app/core/utils";
-import { config, cookieConfigs } from "@app/config";
-import { getUser } from "@app/core/controllers/users";
 import { request } from "https";
+import { createUser } from "../../core/controllers/users/set";
+import { verifyUser } from "../../core/controllers/users/update";
+import { getUserFromToken } from "../../core/utils";
+import { config, cookieConfigs } from "../../config";
+import { getUser } from "../../core/controllers/users";
 import { StatusCode } from "../messages/message";
 import type { FastifyInstance } from "fastify";
 import { validateUID } from "../params/extracter";

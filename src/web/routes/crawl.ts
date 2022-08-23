@@ -1,10 +1,10 @@
-import { getUserFromApiScan } from "@app/core/utils/get-user-data";
-import { crawlMultiSiteWithEvent } from "@app/core/utils";
-import { responseModel } from "@app/core/models";
-import { paramParser } from "../params/extracter";
-import { WEBSITE_URL_ERROR } from "@app/core/strings";
-import { StatusCode } from "../messages/message";
 import { FastifyContext } from "apollo-server-fastify";
+import { getUserFromApiScan } from "../../core/utils/get-user-data";
+import { crawlMultiSiteWithEvent } from "../../core/utils";
+import { responseModel } from "../../core/models";
+import { paramParser } from "../params/extracter";
+import { WEBSITE_URL_ERROR } from "../../core/strings";
+import { StatusCode } from "../messages/message";
 
 // perform a website crawl coming from fastify
 export const crawlRest = async (
