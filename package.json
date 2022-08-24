@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.35",
+  "version": "0.5.36",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -18,8 +18,8 @@
     "@fastify/cors": "^7.0.0",
     "@fastify/rate-limit": "^6.0.1",
     "@graphql-tools/schema": "^8.5.1",
-    "@grpc/grpc-js": "1.6.7",
-    "@grpc/proto-loader": "0.7.0",
+    "@grpc/grpc-js": "1.6.10",
+    "@grpc/proto-loader": "0.7.2",
     "apollo-server": "3.10.1",
     "apollo-server-core": "3.10.1",
     "apollo-server-fastify": "3.10.1",
