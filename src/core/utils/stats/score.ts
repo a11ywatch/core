@@ -18,66 +18,53 @@ export async function setWebsiteScore({
   duration,
   shutdown = false,
 }) {
-  let website;
-  let websiteCollection;
-
-  try {
-    [website, websiteCollection] = await getWebsite({
-      domain,
-      userId,
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  let [website, websiteCollection] = await getWebsite({
+    domain,
+    userId,
+  });
 
   const all = website?.subdomains || website?.tld;
   const targetDomain = website?.domain || domain;
 
-  try {
-    const data = await generateWebsiteScore({
-      domain: targetDomain,
-      userId,
-      all,
+  const data = await generateWebsiteScore({
+    domain: targetDomain,
+    userId,
+    all,
+  });
+
+  const issuesInfo = data?.issuesInfo;
+
+  if (issuesInfo && website) {
+    const dur = Number(Number.parseFloat(duration).toFixed(2));
+    await collectionUpsert(
+      {
+        ...website,
+        issuesInfo,
+        crawlDuration: typeof dur === "number" ? dur : 0, // time it took to crawl the entire website in ms
+        shutdown, // crawl did not complete - plan needs to be higher
+      },
+      [websiteCollection, !!website],
+      {
+        searchProps: {
+          domain: website?.domain,
+          userId,
+        },
+      }
+    );
+  }
+
+  await pubsub
+    .publish(CRAWL_COMPLETE, {
+      crawlComplete: {
+        userId,
+        domain: website?.domain,
+        adaScoreAverage: issuesInfo?.adaScoreAverage,
+        shutdown,
+      },
+    })
+    .catch((e) => {
+      console.error(e);
     });
 
-    const issuesInfo = data?.issuesInfo;
-
-    if (issuesInfo && website) {
-      const dur = Number(Number.parseFloat(duration).toFixed(2));
-      await collectionUpsert(
-        {
-          ...website,
-          issuesInfo,
-          crawlDuration: typeof dur === "number" ? dur : 0, // time it took to crawl the entire website in ms
-          shutdown, // crawl did not complete - plan needs to be higher
-        },
-        [websiteCollection, !!website],
-        {
-          searchProps: {
-            domain: website?.domain,
-            userId,
-          },
-        }
-      );
-    }
-
-    // TODO: MOVE OUT OF METHOD
-    await pubsub
-      .publish(CRAWL_COMPLETE, {
-        crawlComplete: {
-          userId,
-          domain: website?.domain,
-          adaScoreAverage: issuesInfo?.adaScoreAverage,
-          shutdown,
-        },
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-
-    return Promise.resolve(true);
-  } catch (e) {
-    console.error(e);
-    return Promise.resolve(false);
-  }
+  return Promise.resolve(true);
 }

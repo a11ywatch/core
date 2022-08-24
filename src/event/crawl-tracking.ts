@@ -1,16 +1,17 @@
 import { getHostName } from "@a11ywatch/website-source-builder";
-import { qWebsiteWorker } from "@app/queues/crawl";
-import { crawlTrackingEmitter } from "./emitters/crawl";
 import { performance } from "perf_hooks";
-import { domainName } from "@app/core/utils";
+import { qWebsiteWorker } from "../queues/crawl";
+import { crawlTrackingEmitter } from "./emitters/crawl";
+import { domainName } from "../core/utils";
 
+// handle hostname assign from domain or pages
 const extractHostname = (domain?: string, pages?: string[]) => {
-  if (pages && pages.length === 1) {
-    return domainName(getHostName(pages[0]));
+  const target = pages && pages.length === 1 ? pages[0] : domain;
+
+  if (target) {
+    return domainName(getHostName(target));
   }
-  if (domain) {
-    return domainName(getHostName(domain));
-  }
+
   return "";
 };
 
@@ -56,12 +57,9 @@ export const establishCrawlTracking = () => {
       if (crawlingSet[key].crawling) {
         crawlingSet[key].total = crawlingSet[key].total + 1;
       }
-
-      // shutdown the events
       if (crawlingSet[key].shutdown) {
         call.write({ message: "shutdown" });
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-
         qWebsiteWorker
           .push({
             userId: target.user_id,
@@ -74,7 +72,6 @@ export const establishCrawlTracking = () => {
             },
           })
           .catch((err) => console.error(err));
-
         crawlingSet = removeKey(key, crawlingSet);
       } else {
         call.write({ message: "" });
@@ -136,7 +133,6 @@ export const establishCrawlTracking = () => {
 
       if (crawlingSet[key].current === crawlingSet[key].total) {
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-
         qWebsiteWorker
           .push({
             userId,
@@ -149,9 +145,7 @@ export const establishCrawlTracking = () => {
             },
           })
           .catch((err) => console.error(err));
-
-        // Crawl completed
-        crawlingSet = removeKey(key, crawlingSet);
+        crawlingSet = removeKey(key, crawlingSet); // remove after completion
       }
     }
   });

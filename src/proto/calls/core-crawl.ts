@@ -1,14 +1,12 @@
-import { getUserFromApi } from "@app/core/utils/get-user-rpc";
-import { getCrawlConfig } from "@app/core/streams/crawl-config";
-
-import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
-import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
-import { getKey } from "@app/event/crawl-tracking";
-
-import { domainName } from "@app/core/utils/domain-name";
-import { getHostName } from "@app/core/utils/get-host";
-import type { CrawlProps } from "@app/core/utils/crawl-stream";
 import type { ServerWritableStream } from "@grpc/grpc-js";
+import { getUserFromApi } from "../../core/utils/get-user-rpc";
+import { getCrawlConfig } from "../../core/streams/crawl-config";
+import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
+import { crawlEmitter, crawlTrackingEmitter } from "../../event";
+import { getKey } from "../../event/crawl-tracking";
+import { domainName } from "../../core/utils/domain-name";
+import { getHostName } from "../../core/utils/get-host";
+import type { CrawlProps } from "../../core/utils/crawl-stream";
 
 type ServerCallStreaming = ServerWritableStream<
   { url: string; authorization: string; subdomains: boolean; tld: boolean },

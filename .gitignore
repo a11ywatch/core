@@ -47,4 +47,5 @@ ecs.config
 private.key
 public.key
 
-cue.mod
+# dagger
+cue.mod/pkg

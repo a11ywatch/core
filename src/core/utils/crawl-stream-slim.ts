@@ -1,11 +1,11 @@
-import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
-import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
-import { getKey } from "@app/event/crawl-tracking";
+import type { FastifyContext } from "apollo-server-fastify";
+import { watcherCrawl } from "../actions/accessibility/watcher_crawl";
+import { getKey } from "../../event/crawl-tracking";
+import { crawlEmitter, crawlTrackingEmitter } from "../../event";
 
 import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
 import type { CrawlProps } from "./crawl-stream";
-import { FastifyContext } from "apollo-server-fastify";
 
 // crawl website slim and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlHttpStreamSlim = (
