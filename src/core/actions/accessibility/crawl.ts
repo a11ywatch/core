@@ -1,33 +1,33 @@
-import { emailMessager } from "@app/core/messagers";
 import { sourceBuild } from "@a11ywatch/website-source-builder";
-import { pubsub } from "@app/database/pubsub";
-import { ISSUE_ADDED } from "@app/core/static";
-import { responseModel } from "@app/core/models";
-import { collectionUpsert, domainName } from "@app/core/utils";
-import { IssuesController } from "@app/core/controllers/issues";
-import { ScriptsController } from "@app/core/controllers/scripts";
-import { getWebsite } from "@app/core/controllers/websites";
-import { AnalyticsController } from "@app/core/controllers/analytics";
-import { getPage } from "@app/core/controllers/pages/find";
-import { UsersController } from "@app/core/controllers/users";
+import { emailMessager } from "../../messagers";
+import { pubsub } from "../../../database/pubsub";
+import { ISSUE_ADDED } from "../../static";
+import { responseModel } from "../../models";
+import { collectionUpsert, domainName } from "../../utils";
+import { IssuesController } from "../../controllers/issues";
+import { ScriptsController } from "../../controllers/scripts";
+import { getWebsite } from "../../controllers/websites";
+import { AnalyticsController } from "../../controllers/analytics";
+import { getPage } from "../../controllers/pages/find";
+import { UsersController } from "../../controllers/users";
 import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { fetchPageIssues } from "./fetch-issues";
-import { ResponseModel } from "@app/core/models/response/types";
-import { crawlEmitter, crawlTrackingEmitter } from "@app/event";
+import { ResponseModel } from "../../models/response/types";
+import { crawlEmitter, crawlTrackingEmitter } from "../../../event";
 import {
   SUPER_MODE,
   SCRIPTS_ENABLED,
   DISABLE_STORE_SCRIPTS,
-} from "@app/config/config";
-import type { User, Website } from "@app/types/types";
-import type { Issue } from "../../../types/schema";
-import { findPageActionsByPath } from "@app/core/controllers/page-actions/find";
-import { PageSpeedController } from "@app/core/controllers/page-speed/main";
-import { validateScanEnabled } from "@app/core/controllers/users/update/scan-attempt";
-import { RATE_EXCEEDED_ERROR } from "@app/core/strings";
-import { collectionIncrement } from "@app/core/utils/collection-upsert";
-import { SCAN_TIMEOUT } from "@app/core/strings/errors";
+} from "../../../config/config";
+import { findPageActionsByPath } from "../../controllers/page-actions/find";
+import { PageSpeedController } from "../../controllers/page-speed/main";
+import { validateScanEnabled } from "../../controllers/users/update/scan-attempt";
+import { RATE_EXCEEDED_ERROR } from "../../strings";
+import { collectionIncrement } from "../../utils/collection-upsert";
+import { SCAN_TIMEOUT } from "../../strings/errors";
 import { StatusCode } from "../../../web/messages/message";
+import type { User, Website } from "../../../types/types";
+import type { Issue } from "../../../types/schema";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -98,275 +98,260 @@ export const crawlPage = async (
     });
   }
 
-  return new Promise(async (resolve) => {
-    // WEBSITE COLLECTION
-    const [website, websiteCollection] = await getWebsite({
-      domain,
-      userId,
-    });
+  // WEBSITE COLLECTION
+  const [website, websiteCollection] = await getWebsite({
+    domain,
+    userId,
+  });
 
-    const freeAccount = !userData?.role || userData?.role == 0; // free account
-    const scriptsEnabled = SUPER_MODE ? SCRIPTS_ENABLED : !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
-    const rootPage = pathname === "/"; // the url is the base domain index.
-    const insightsLocked = !SUPER_MODE && (freeAccount || userData?.role === 1);
+  const freeAccount = !userData?.role || userData?.role == 0; // free account
+  const scriptsEnabled = SUPER_MODE ? SCRIPTS_ENABLED : !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+  const rootPage = pathname === "/"; // the url is the base domain index.
+  const insightsLocked = !SUPER_MODE && (freeAccount || userData?.role === 1);
 
-    let insightsEnabled = false;
-    let noStore = crawlConfig.noStore || DISABLE_STORE_SCRIPTS;
+  let insightsEnabled = false;
+  let noStore = crawlConfig.noStore || DISABLE_STORE_SCRIPTS;
 
-    // prevent storage on free accounts js scripts
-    if (!SUPER_MODE && !freeAccount) {
-      noStore = true;
+  // prevent storage on free accounts js scripts
+  if (!SUPER_MODE && !freeAccount) {
+    noStore = true;
+  }
+
+  if (website?.pageInsights || pageInsights) {
+    // only premium and above get lighthouse on all pages.
+    if (userData?.pageSpeedApiKey) {
+      insightsEnabled = true;
+    } else if (insightsLocked) {
+      insightsEnabled = rootPage;
+    } else {
+      insightsEnabled = pageInsights || website?.pageInsights;
     }
+  }
 
-    if (website?.pageInsights || pageInsights) {
-      // only premium and above get lighthouse on all pages.
-      if (userData?.pageSpeedApiKey) {
-        insightsEnabled = true;
-      } else if (insightsLocked) {
-        insightsEnabled = rootPage;
-      } else {
-        insightsEnabled = pageInsights || website?.pageInsights;
-      }
-    }
+  const actions = await findPageActionsByPath({ userId, path: pathname });
 
-    const actions = await findPageActionsByPath({ userId, path: pathname });
+  const dataSource = await fetchPageIssues({
+    pageHeaders: website?.pageHeaders,
+    url: urlMap,
+    userId,
+    pageInsights: insightsEnabled,
+    scriptsEnabled,
+    mobile: website?.mobile,
+    ua: website?.ua,
+    standard: website?.standard,
+    actions,
+    cv: SUPER_MODE || userData?.role === 2,
+    pageSpeedApiKey: userData?.pageSpeedApiKey,
+    noStore,
+  });
 
-    const dataSource = await fetchPageIssues({
-      pageHeaders: website?.pageHeaders,
-      url: urlMap,
-      userId,
-      pageInsights: insightsEnabled,
-      scriptsEnabled,
-      mobile: website?.mobile,
-      ua: website?.ua,
-      standard: website?.standard,
-      actions,
-      cv: SUPER_MODE || userData?.role === 2,
-      pageSpeedApiKey: userData?.pageSpeedApiKey,
-      noStore,
-    });
+  let shutdown = false;
 
-    let shutdown = false;
+  if (!SUPER_MODE) {
+    const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
+    const pastUptime = userData?.scanInfo?.totalUptime || 0;
+    const totalUptime = ttime + pastUptime;
 
-    if (!SUPER_MODE) {
-      const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
-      const pastUptime = userData?.scanInfo?.totalUptime || 0;
+    // check if scan has shut down
+    const updatedUser = {
+      ...userData,
+      scanInfo: {
+        ...userData?.scanInfo,
+        totalUptime,
+      },
+    };
+    shutdown = validateScanEnabled({ user: updatedUser }) === false;
+    await collectionIncrement(
+      {
+        "scanInfo.totalUptime": ttime, // add new uptime to collection
+      },
+      userCollection,
+      { id: userId }
+    ); // User
+  }
 
-      const totalUptime = ttime + pastUptime;
-
-      // check if scan has shut down. TODO: remove
-      const updatedUser = {
-        ...userData,
-        scanInfo: {
-          ...userData?.scanInfo,
-          totalUptime,
-        },
-      };
-
-      // TODO: remove and use shutdown prior
-      shutdown = validateScanEnabled({ user: updatedUser }) === false;
-
-      await collectionIncrement(
-        {
-          "scanInfo.totalUptime": ttime, // add new uptime to collection
-        },
-        userCollection,
-        { id: userId }
-      ); // User COLLECTION
-    }
-
-    // TODO: SET PAGE OFFLINE DB
-    if (!dataSource || !dataSource?.webPage) {
-      trackerProccess(
-        undefined,
-        { domain, urlMap, userId, shutdown },
-        blockEvent
-      );
-
-      return resolve(
-        responseModel({
-          data: null,
-          code: StatusCode.BadRequest,
-          success: false,
-          message: SCAN_TIMEOUT,
-        })
-      );
-    }
-
-    // TODO: MOVE TO QUEUE
-    let {
-      script,
-      issues: pageIssues,
-      webPage,
-      adaScore,
-      issuesInfo,
-      lighthouseData, // page insights
-    } = extractPageData(dataSource);
-
-    const [newSite, pagesCollection] = await getPage({
-      userId,
-      url: pageUrl,
-    }); // PAGE COLLECTION
-
-    const [issueExist, issuesCollection] = await IssuesController().getIssue(
-      { pageUrl, userId, noRetries: true },
-      true
+  // TODO: SET PAGE OFFLINE DB
+  if (!dataSource || !dataSource?.webPage) {
+    trackerProccess(
+      undefined,
+      { domain, urlMap, userId, shutdown },
+      blockEvent
     );
 
-    const [analytics, analyticsCollection] =
-      await AnalyticsController().getWebsite({ pageUrl, userId }, true);
-
-    const [pageSpeed, pageSpeedCollection] =
-      await PageSpeedController().getWebsite({ pageUrl, userId }, true);
-
-    const newIssue = Object.assign({}, pageIssues, {
-      domain,
-      userId,
-      pageUrl,
+    return responseModel({
+      data: null,
+      code: StatusCode.BadRequest,
+      success: false,
+      message: SCAN_TIMEOUT,
     });
+  }
 
-    // issues array
-    const subIssues: Issue[] = pageIssues?.issues ?? [];
-    const pageConstainsIssues = subIssues?.length;
+  // TODO: MOVE TO QUEUE
+  let {
+    script,
+    issues: pageIssues,
+    webPage,
+    adaScore,
+    issuesInfo,
+    lighthouseData, // page insights
+  } = extractPageData(dataSource);
 
-    // // TODO: MERGE ISSUES FROM ALL PAGES
-    const updateWebsiteProps: Website = Object.assign({}, webPage, {
-      online: true,
-      userId,
-    });
+  const [newSite, pagesCollection] = await getPage({
+    userId,
+    url: pageUrl,
+  }); // PAGE COLLECTION
 
-    let scripts;
-    let scriptsCollection;
+  const [issueExist, issuesCollection] = await IssuesController().getIssue(
+    { pageUrl, userId, noRetries: true },
+    true
+  );
 
-    // if website record exist update integrity of the data.
-    if (website) {
-      // if ROOT domain for scan update Website Collection.
-      if (rootPage) {
-        const { issuesInfo, ...updateProps } = updateWebsiteProps;
+  const [analytics, analyticsCollection] =
+    await AnalyticsController().getWebsite({ pageUrl, userId }, true);
 
-        await collectionUpsert(
-          updateProps,
-          [websiteCollection, !!updateWebsiteProps],
-          {
-            searchProps: { url: pageUrl, userId },
-          }
-        );
-      }
+  const [pageSpeed, pageSpeedCollection] =
+    await PageSpeedController().getWebsite({ pageUrl, userId }, true);
 
-      // if scripts enabled get collection
-      if (scriptsEnabled) {
-        [scripts, scriptsCollection] = await ScriptsController().getScript(
-          { pageUrl, userId, noRetries: true },
-          true
-        );
+  const newIssue = Object.assign({}, pageIssues, {
+    domain,
+    userId,
+    pageUrl,
+  });
 
-        if (script) {
-          script.userId = userId;
-          // TODO: look into auto meta reason
-          if (!scripts?.scriptMeta) {
-            script.scriptMeta = {
-              skipContentEnabled: true,
-            };
-          }
-        }
-      }
+  // issues array
+  const subIssues: Issue[] = pageIssues?.issues ?? [];
+  const pageConstainsIssues = subIssues?.length;
 
-      const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
+  // // TODO: MERGE ISSUES FROM ALL PAGES
+  const updateWebsiteProps: Website = Object.assign({}, webPage, {
+    online: true,
+    userId,
+  });
 
-      // Add to Issues collection if page contains issues or if record should update/delete.
-      if (shouldUpsertCollections) {
-        await collectionUpsert(lighthouseData, [
-          pageSpeedCollection,
-          pageSpeed,
-        ]); // PageInsights
+  let scripts;
+  let scriptsCollection;
 
-        const { issueMeta, ...analyticsProps } = issuesInfo;
-        await collectionUpsert(
-          {
-            pageUrl,
-            domain,
-            userId,
-            adaScore,
-            ...analyticsProps,
-          },
-          [analyticsCollection, analytics]
-        ); // ANALYTICS
+  // if website record exist update integrity of the data.
+  if (website) {
+    // if ROOT domain for scan update Website Collection.
+    if (rootPage) {
+      const { issuesInfo, ...updateProps } = updateWebsiteProps;
 
-        await collectionUpsert(
-          newIssue,
-          [issuesCollection, issueExist, !pageConstainsIssues],
-          {
-            searchProps: { pageUrl, userId },
-          }
-        ); // ISSUES COLLECTION
-      }
-
-      // Pages
-      if ((!newSite && shouldUpsertCollections) || newSite) {
-        await collectionUpsert(
-          updateWebsiteProps,
-          [pagesCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
-          {
-            searchProps: { url: pageUrl, userId },
-          }
-        );
-      }
-
-      // Add script to collection
-      if (scriptsEnabled) {
-        await collectionUpsert(script, [scriptsCollection, scripts]);
-      }
-    }
-
-    // Flatten issues with the array set results without meta.
-    const responseData = {
-      data: Object.assign({}, updateWebsiteProps, {
-        issues: subIssues,
-      }),
-    };
-
-    if (pageConstainsIssues) {
-      if (sendSub) {
-        try {
-          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-        } catch (_) {
-          // silent pub sub errors
-        }
-      }
-
-      // send email if issues of type error exist for the page. TODO: remove from layer.
-      if (sendEmail && issuesInfo?.errorCount) {
-        await emailMessager
-          .sendMail({
-            userId,
-            data: {
-              ...pageIssues,
-              issuesInfo,
-            },
-            confirmedOnly: true,
-            sendEmail: true,
-          })
-          .catch((e) => {
-            console.error(e);
-          });
-      }
-    }
-
-    if (!blockEvent) {
-      trackerProccess(
-        responseData,
+      await collectionUpsert(
+        updateProps,
+        [websiteCollection, !!updateWebsiteProps],
         {
-          domain,
-          urlMap,
-          userId,
-          shutdown,
-        },
-        blockEvent
+          searchProps: { url: pageUrl, userId },
+        }
       );
     }
 
-    return resolve(responseModel(responseData)); // TODO: remove responseModel from layer
-  });
+    // if scripts enabled get collection
+    if (scriptsEnabled) {
+      [scripts, scriptsCollection] = await ScriptsController().getScript(
+        { pageUrl, userId, noRetries: true },
+        true
+      );
+
+      if (script) {
+        script.userId = userId;
+        // TODO: look into auto meta reason
+        if (!scripts?.scriptMeta) {
+          script.scriptMeta = {
+            skipContentEnabled: true,
+          };
+        }
+      }
+    }
+
+    const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
+
+    // Add to Issues collection if page contains issues or if record should update/delete.
+    if (shouldUpsertCollections) {
+      await collectionUpsert(lighthouseData, [pageSpeedCollection, pageSpeed]); // PageInsights
+
+      const { issueMeta, ...analyticsProps } = issuesInfo;
+      await collectionUpsert(
+        {
+          pageUrl,
+          domain,
+          userId,
+          adaScore,
+          ...analyticsProps,
+        },
+        [analyticsCollection, analytics]
+      ); // ANALYTICS
+
+      await collectionUpsert(
+        newIssue,
+        [issuesCollection, issueExist, !pageConstainsIssues],
+        {
+          searchProps: { pageUrl, userId },
+        }
+      ); // ISSUES COLLECTION
+    }
+
+    // Pages
+    if ((!newSite && shouldUpsertCollections) || newSite) {
+      await collectionUpsert(
+        updateWebsiteProps,
+        [pagesCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
+        {
+          searchProps: { url: pageUrl, userId },
+        }
+      );
+    }
+
+    // Add script to collection
+    if (scriptsEnabled) {
+      await collectionUpsert(script, [scriptsCollection, scripts]);
+    }
+  }
+
+  // Flatten issues with the array set results without meta.
+  const responseData = {
+    data: Object.assign({}, updateWebsiteProps, {
+      issues: subIssues,
+    }),
+  };
+
+  if (pageConstainsIssues) {
+    if (sendSub) {
+      try {
+        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+      } catch (_) {
+        // silent pub sub errors
+      }
+    }
+
+    // send email if issues of type error exist for the page. TODO: remove from layer.
+    if (sendEmail && issuesInfo?.errorCount) {
+      await emailMessager.sendMail({
+        userId,
+        data: {
+          ...pageIssues,
+          issuesInfo,
+        },
+        confirmedOnly: true,
+        sendEmail: true,
+      });
+    }
+  }
+
+  if (!blockEvent) {
+    trackerProccess(
+      responseData,
+      {
+        domain,
+        urlMap,
+        userId,
+        shutdown,
+      },
+      blockEvent
+    );
+  }
+
+  return responseModel(responseData);
 };
 
 /*

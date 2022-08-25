@@ -35,7 +35,7 @@ export type ApiUsage = {
   __typename?: "ApiUsage";
   usage?: Maybe<Scalars["Int"]>;
   usageLimit?: Maybe<Scalars["Int"]>;
-  lastScanDate?: Maybe<Scalars["String"]>;
+  lastScanDate?: Maybe<Scalars["String"]> | Date;
 };
 
 export type BasicMutationResponse = MutationResponse & {

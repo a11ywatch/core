@@ -1,7 +1,7 @@
-import { getHostName } from "@app/core/utils";
-import { responseModel } from "@app/core/models";
+import { CRAWLER_FINISHED, WEBSITE_NOT_FOUND } from "../../../core/strings";
+import { getHostName } from "../../../core/utils";
+import { responseModel } from "../../../core/models";
 import { crawlPage } from "./crawl";
-import { CRAWLER_FINISHED, WEBSITE_NOT_FOUND } from "@app/core/strings";
 
 /*  Crawl the website for issues gRPC from Pagemind.
  *  Gets all users actively trying to crawl pages and joins them together for the scan.

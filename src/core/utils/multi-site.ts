@@ -1,6 +1,6 @@
-import { SUPER_MODE } from "@app/config/config";
-import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
-import { crawlEmitter } from "@app/event";
+import { SUPER_MODE } from "../../config/config";
+import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
+import { crawlEmitter } from "../../event";
 import { domainName } from "./domain-name";
 
 // multi page website crawl gather all results via events

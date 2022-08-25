@@ -21,26 +21,20 @@ export const verifyUserSend = async ({
 
   // if the boolean is true the email send is allowed. TODO: remove from section.
   if (sendEmail && realUser(userId)) {
-    try {
-      const [user, collection] = await getUser({ id: userId });
+    const [user, collection] = await getUser({ id: userId });
+    const userAlertsDisabled = !user || !user?.alertEnabled; // user alerts set to disabled.
+    const confirmedOnlyUsers = confirmedOnly && !user?.emailConfirmed; // user email is not confirmed.
+    const alertsDisabled = userAlertsDisabled || confirmedOnlyUsers; // if  user alerts disabled or email confirmed do not send.
 
-      const userAlertsDisabled = !user || !user?.alertEnabled; // user alerts set to disabled.
-      const confirmedOnlyUsers = confirmedOnly && !user?.emailConfirmed; // user email is not confirmed.
-
-      const alertsDisabled = userAlertsDisabled || confirmedOnlyUsers; // if  user alerts disabled or email confirmed do not send.
-
-      // if not the same day from last email
-      if (!alertsDisabled && getEmailAllowedForDay(user)) {
-        if (
-          !user.lastAlertDateStamp ||
-          !isSameDay(user?.lastAlertDateStamp, new Date())
-        ) {
-          userResponse = user;
-          collectionResponse = collection;
-        }
+    // if not the same day from last email
+    if (!alertsDisabled && getEmailAllowedForDay(user)) {
+      if (
+        !user.lastAlertDateStamp ||
+        !isSameDay(user?.lastAlertDateStamp, new Date())
+      ) {
+        userResponse = user;
+        collectionResponse = collection;
       }
-    } catch (e) {
-      console.error(e);
     }
   }
 

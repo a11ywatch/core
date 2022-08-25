@@ -1,7 +1,7 @@
-import type { Issue } from "@app/types/types";
 import excel from "exceljs";
-import { StatusCode } from "@app/web/messages/message";
-import { FastifyContext } from "apollo-server-fastify";
+import type { FastifyContext } from "apollo-server-fastify";
+import type { Issue } from "../../types/types";
+import { StatusCode } from "../../web/messages/message";
 
 const downloadToExcel = async (
   _req: FastifyContext["request"],

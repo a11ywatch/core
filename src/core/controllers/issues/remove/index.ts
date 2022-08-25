@@ -1,4 +1,4 @@
-import { WEBSITE_NOT_FOUND } from "@app/core/strings";
+import { WEBSITE_NOT_FOUND } from "../../../strings";
 import { getIssue } from "../find";
 
 type RemoveProps = {

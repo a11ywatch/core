@@ -1,5 +1,5 @@
-import { crawlTrackingEmitter } from "@app/event";
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
+import { crawlTrackingEmitter } from "../../event";
 
 // multi page scan started
 export const scanStart = async (

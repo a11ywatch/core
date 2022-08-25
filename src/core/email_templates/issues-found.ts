@@ -1,5 +1,5 @@
 import { getHostName } from "@a11ywatch/website-source-builder";
-import type { Issue } from "@app/types/types";
+import type { Issue } from "../../types/types";
 import { pluralize } from "../utils";
 
 export interface Data {

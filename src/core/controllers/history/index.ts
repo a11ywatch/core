@@ -1,5 +1,5 @@
-import { connect } from "@app/database";
-import { websiteSearchParams } from "@app/core/utils";
+import { connect } from "../../../database";
+import { websiteSearchParams } from "../../utils";
 
 export const HistoryController = ({ user } = { user: null }) => ({
   getHistoryItem: async (params: {

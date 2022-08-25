@@ -1,8 +1,8 @@
-import { crawlMultiSite } from "@app/core/actions";
-import { emailMessager } from "@app/core/messagers";
-import { domainName } from "@app/core/utils";
-import { crawlEmitter } from "@app/event";
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
+import { crawlMultiSite } from "../../core/actions";
+import { emailMessager } from "../../core/messagers";
+import { domainName } from "../../core/utils";
+import { crawlEmitter } from "../../event";
 
 type ScanParams = {
   pages: string[];

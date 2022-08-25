@@ -1,6 +1,6 @@
-import { connect } from "@app/database";
-import { getHostName, websiteSearchParams } from "@app/core/utils";
-import { Issue } from "@app/types/schema";
+import { connect } from "../../../../database";
+import { getHostName, websiteSearchParams } from "../../../utils";
+import type { Issue } from "../../../../types/schema";
 
 export const getIssue = async (
   { url, pageUrl, userId, noRetries }: any,

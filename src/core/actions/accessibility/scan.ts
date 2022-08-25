@@ -10,7 +10,7 @@ import { WEBSITE_NOT_FOUND } from "../../strings";
 import { StatusCode } from "../../../web/messages/message";
 import { SCAN_TIMEOUT } from "../../strings/errors";
 import { validateUID } from "../../../web/params/extracter";
-import type { PageMindScanResponse } from "@app/types/schema";
+import type { PageMindScanResponse } from "../../../types/schema";
 
 type ScanParams = {
   userId?: number;
@@ -50,18 +50,12 @@ export const scanWebsite = async ({
 
   const website = makeWebsite({ url: pageUrl, domain });
 
-  let preventStorage = noStore;
-
-  if (!SUPER_MODE) {
-    preventStorage = true;
-  }
-
   const dataSource: PageMindScanResponse = await fetchPageIssues({
     pageHeaders: website.pageHeaders,
     url: pageUrl,
     userId,
     pageInsights,
-    noStore: preventStorage,
+    noStore: !SUPER_MODE ? true : noStore,
     scriptsEnabled: false,
   });
 
@@ -76,43 +70,33 @@ export const scanWebsite = async ({
   }
 
   const userFound = validateUID(userId);
+  const { script, issues, webPage } = extractPageData(dataSource);
 
-  return new Promise((resolve, reject) => {
-    try {
-      const { script, issues, webPage } = extractPageData(dataSource);
+  // Issues.issues returned. Map against
+  let currentIssues = issues?.issues;
+  let limitedCount = false;
 
-      // Issues.issues returned. Map against
-      let currentIssues = issues?.issues;
-      let limitedCount = false;
+  if (userFound) {
+    website.userId = userId;
+  }
 
-      // TODO: remove temp assign
-      if (userFound) {
-        website.userId = userId;
-      }
+  if (!SUPER_MODE && !userFound) {
+    currentIssues = limitIssue(issues);
+    limitedCount = true;
+  }
 
-      if (!SUPER_MODE && !userFound) {
-        currentIssues = limitIssue(issues);
-        limitedCount = true;
-      }
+  const data = Object.assign({}, website, webPage, {
+    timestamp: new Date().getTime(),
+    script,
+    issues: currentIssues,
+  });
 
-      const data = Object.assign({}, website, webPage, {
-        timestamp: new Date().getTime(),
-        script,
-        issues: currentIssues,
-      });
+  // return limited count from scan
+  if (limitedCount) {
+    data.issuesInfo.limitedCount = currentIssues.length;
+  }
 
-      // return limited count from scan
-      if (limitedCount) {
-        data.issuesInfo.limitedCount = currentIssues.length;
-      }
-
-      resolve(
-        responseModel({
-          data,
-        })
-      );
-    } catch (e) {
-      reject(e);
-    }
+  return responseModel({
+    data,
   });
 };

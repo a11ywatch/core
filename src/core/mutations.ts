@@ -10,12 +10,12 @@ import {
   logout,
 } from "../web/graph/mutations";
 import { watcherCrawl } from "./actions/accessibility/watcher_crawl";
-import { scanWebsite, crawlPage } from "@app/core/actions";
-import { gqlRateLimiter } from "@app/web/limiters/scan";
+import { scanWebsite, crawlPage } from "../core/actions";
+import { gqlRateLimiter } from "../web/limiters/scan";
 import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";
-import { SUPER_MODE } from "@app/config/config";
+import { SUPER_MODE } from "../config/config";
 
 const defaultPayload = {
   keyid: undefined,
@@ -51,16 +51,8 @@ export const Mutation = {
     });
 
     if (canScan) {
-      let website;
-
-      try {
-        [website] = await getWebsite({ userId: keyid, url });
-      } catch (e) {
-        console.error(e);
-      }
-
+      const [website] = await getWebsite({ userId: keyid, url });
       setImmediate(async () => {
-        // TODO: get website stats
         await watcherCrawl({
           url: url,
           userId: keyid,

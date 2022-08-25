@@ -1,4 +1,4 @@
-import type { Issue } from "@app/types/types";
+import type { Issue } from "../../../types/types";
 
 // limit the issue records to 1/4th
 export const limitIssue = (issues: Issue) => {

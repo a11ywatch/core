@@ -1,11 +1,10 @@
-import { connect } from "@app/database";
-import { websiteSearchParams } from "@app/core/utils";
-import { Collection, Document, WithId } from "mongodb";
+import type { Collection, Document, WithId } from "mongodb";
+import { connect } from "../../../database";
+import { websiteSearchParams } from "../../utils";
 
-const getCounter = async (
-  { _id },
-  chain?: boolean
-): Promise<[WithId<Document>, Collection<Document>]> => {
+const getCounter = async ({
+  _id,
+}): Promise<[WithId<Document>, Collection<Document>]> => {
   try {
     const [collection] = await connect("Counters");
     const counter = await collection.findOne({ _id });
@@ -19,12 +18,9 @@ const getCounter = async (
 
 const getNextSequenceValue = async (sequenceName) => {
   try {
-    const [hascounter, collection] = await getCounter(
-      {
-        _id: sequenceName,
-      },
-      true
-    );
+    const [hascounter, collection] = await getCounter({
+      _id: sequenceName,
+    });
 
     // insert first counter
     if (!hascounter) {

@@ -1,6 +1,5 @@
-import { createTransport } from "nodemailer";
-import type { Transporter } from "nodemailer";
-import { config } from "@app/config";
+import { createTransport, Transporter } from "nodemailer";
+import { config } from "../../config";
 
 const { EMAIL_SERVICE_URL, EMAIL_CLIENT_ID, EMAIL_CLIENT_KEY } = config;
 

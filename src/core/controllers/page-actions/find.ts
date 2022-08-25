@@ -1,4 +1,4 @@
-import { connect } from "@app/database";
+import { connect } from "../../../database";
 
 // find page actions by path
 export const findPageActionsByPath = async ({ path, userId }) => {

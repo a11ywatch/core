@@ -1,6 +1,6 @@
-import { userParams } from "@app/core/utils/controller-filter";
-import { connect } from "@app/database";
-import { User } from "@app/types/types";
+import { userParams } from "../../../utils/controller-filter";
+import { connect } from "../../../../database";
+import type { User } from "../../../../types/types";
 
 type GetUserParams = {
   email?: string;

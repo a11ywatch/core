@@ -1,8 +1,8 @@
-import { getUserFromApi } from "@app/core/utils/get-user-rpc";
-import { scanWebsite, crawlPage } from "@app/core/actions";
-import { validateUID } from "@app/web/params/extracter";
-import { DISABLE_STORE_SCRIPTS } from "@app/config/config";
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
+import { getUserFromApi } from "../../core/utils/get-user-rpc";
+import { scanWebsite, crawlPage } from "../../core/actions";
+import { validateUID } from "../../web/params/extracter";
+import { DISABLE_STORE_SCRIPTS } from "../../config/config";
 
 // core single page scan with results
 export const coreScan = async (

@@ -3,7 +3,7 @@ import {
   GRPC_HOST_PAGEMIND,
   GRPC_HOST_CRAWLER,
   GRPC_HOST_MAV,
-} from "@app/config/rpc";
+} from "../config/rpc";
 import { Service, getProto } from "./website";
 
 let pageMindClient: Service["WebsiteService"]["service"];

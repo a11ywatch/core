@@ -1,6 +1,6 @@
-import { crawlTrackingEmitter } from "@app/event";
-import { crawlEnqueue } from "@app/queues/crawl";
-import { ServerWritableStream } from "@grpc/grpc-js";
+import type { ServerWritableStream } from "@grpc/grpc-js";
+import { crawlTrackingEmitter } from "../../event";
+import { crawlEnqueue } from "../../queues/crawl";
 
 type ScanParams = {
   pages: string[];
@@ -13,9 +13,7 @@ type ScanParams = {
 export const scanStream = async (
   call: ServerWritableStream<ScanParams, {}>
 ) => {
-  // pass in call to determine if crawl needs to stop
-  crawlTrackingEmitter.emit("crawl-processing", call);
-
+  crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
   await crawlEnqueue(call.request); // queue to control output.
 
   call.end();

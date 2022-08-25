@@ -1,5 +1,5 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
-import { GRPC_HOST } from "@app/config/rpc";
+import { GRPC_HOST } from "../config/rpc";
 import { scanStart } from "./calls/scan-start";
 import { scanEnd } from "./calls/scan-end";
 import { scan } from "./calls/scan";

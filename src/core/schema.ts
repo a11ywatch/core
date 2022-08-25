@@ -1,4 +1,6 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import gql from "graphql-tag";
+import { applyMiddleware } from "graphql-middleware";
 import { resolvers } from "./resolvers";
 import {
   user,
@@ -18,9 +20,7 @@ import {
   input,
   invoice,
 } from "../web/graph/gql_types";
-import { getGqlRateLimitDirective } from "@app/web/limiters";
-import gql from "graphql-tag";
-import { applyMiddleware } from "graphql-middleware";
+import { getGqlRateLimitDirective } from "../web/limiters";
 
 const typeDefs = gql`
   directive @rateLimit(

@@ -56,7 +56,6 @@ export const crawlStream = async (
     }
 
     res.raw.write("]");
-
     res.raw.end();
   }
 };

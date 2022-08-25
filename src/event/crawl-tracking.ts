@@ -8,11 +8,7 @@ import { domainName } from "../core/utils";
 const extractHostname = (domain?: string, pages?: string[]) => {
   const target = pages && pages.length === 1 ? pages[0] : domain;
 
-  if (target) {
-    return domainName(getHostName(target));
-  }
-
-  return "";
+  return domainName(getHostName(target));
 };
 
 // get a key for the event based on domain and uid.
@@ -50,8 +46,7 @@ export const establishCrawlTracking = () => {
   // track total amount of pages in a website via gRPC.
   crawlTrackingEmitter.on("crawl-processing", (call) => {
     const target = call.request;
-    // process a new item tracking count
-    const key = getKey(target.domain, target.pages, target.user_id);
+    const key = getKey(target.domain, target.pages, target.user_id); // process a new item tracking count
 
     if (crawlingSet[key]) {
       if (crawlingSet[key].crawling) {
@@ -103,7 +98,6 @@ export const establishCrawlTracking = () => {
         !crawlingSet[key].crawling
       ) {
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-
         qWebsiteWorker
           .push({
             userId,
@@ -116,9 +110,7 @@ export const establishCrawlTracking = () => {
             },
           })
           .catch((err) => console.error(err));
-
-        // Crawl completed
-        crawlingSet = removeKey(key, crawlingSet);
+        crawlingSet = removeKey(key, crawlingSet); // Crawl completed
       }
     }
   });

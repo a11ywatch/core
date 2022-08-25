@@ -1,4 +1,4 @@
-import { connect } from "@app/database";
+import { connect } from "../../../database";
 
 export const FeaturesController = ({ user } = { user: null }) => ({
   getFeature: async ({ userId, feature }: any, chain: boolean) => {

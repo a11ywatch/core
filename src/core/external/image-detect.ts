@@ -1,4 +1,4 @@
-import { controller } from "@app/proto/actions/calls";
+import { controller } from "../../proto/actions/calls";
 
 export const imageDetect = async ({ img }: { img: string }): Promise<any> => {
   let dataSource;

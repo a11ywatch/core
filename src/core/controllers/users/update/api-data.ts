@@ -1,7 +1,7 @@
-import { getUser } from "../find";
 import { isSameDay } from "date-fns";
-import { SUPER_MODE } from "@app/config/config";
-import { usageExceededThreshold } from "@app/core/utils";
+import { getUser } from "../find";
+import { SUPER_MODE } from "../../../../config/config";
+import { usageExceededThreshold } from "../../../utils";
 
 /*
  * @param {id}: number|string user identifier
@@ -10,14 +10,7 @@ import { usageExceededThreshold } from "@app/core/utils";
  * and has reset detection if next day.
  */
 export const updateApiUsage = async ({ id }) => {
-  let user;
-  let collection;
-
-  try {
-    [user, collection] = await getUser({ id });
-  } catch (e) {
-    console.error(e);
-  }
+  let [user, collection] = await getUser({ id });
 
   if (!user || SUPER_MODE) {
     // return true for api request allowed
@@ -33,7 +26,7 @@ export const updateApiUsage = async ({ id }) => {
   let currentUsage = apiUsage?.usage || 0;
 
   // if not the same day reset the user back to its limit
-  if (!isSameDay(apiUsage?.lastScanDate as Date, lastScanDate)) {
+  if (!isSameDay(apiUsage?.lastScanDate as any, lastScanDate)) {
     currentUsage = 0;
   }
 
@@ -52,7 +45,7 @@ export const updateApiUsage = async ({ id }) => {
     apiUsage: {
       ...apiUsage, // retain defaults besides usage - and last scan
       usage: currentUsage + 1,
-      lastScanDate,
+      lastScanDate: lastScanDate,
     },
   };
 

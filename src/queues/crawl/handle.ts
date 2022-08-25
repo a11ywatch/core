@@ -1,10 +1,10 @@
+import type { queueAsPromised } from "fastq";
 import fastq from "fastq";
 import { cpus } from "os";
-import { crawlWebsite } from "@app/core/actions";
-import { setWebsiteScore } from "@app/core/utils/stats/score";
-import { Method } from "@app/database/config";
-import type { ResponseModel } from "@app/core/models/response/types";
-import type { queueAsPromised } from "fastq";
+import { crawlWebsite } from "../../core/actions";
+import { setWebsiteScore } from "../../core/utils/stats/score";
+import type { Method } from "../../database/config";
+import type { ResponseModel } from "../../core/models/response/types";
 
 interface Meta {
   method?: Method;
@@ -12,7 +12,7 @@ interface Meta {
 }
 
 type Task = {
-  userId?: number;
+  userId: number; // make sure user id is sent
   url?: string;
   meta?: Meta;
 };
@@ -35,29 +35,21 @@ async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
   });
 }
 
-// get soft queue limit based on CPUS and crawler limit
-// TODO: determine high cpu and control limit.
-const crawlQueueLimit = () => {
-  if (
-    process.env.CRAWL_QUEUE_LIMIT &&
-    !Number.isNaN(Number(process.env.CRAWL_QUEUE_LIMIT))
-  ) {
-    return Number(process.env.CRAWL_QUEUE_LIMIT);
-  } else {
-    const cors = cpus()?.length || 1;
-
-    return Math.max(3 * cors, 4);
-  }
-};
+let cwLimit = 4;
+if (
+  process.env.CRAWL_QUEUE_LIMIT &&
+  !Number.isNaN(Number(process.env.CRAWL_QUEUE_LIMIT))
+) {
+  cwLimit = Number(process.env.CRAWL_QUEUE_LIMIT);
+} else {
+  cwLimit = Math.max(3 * (cpus().length || 1), 4);
+}
 
 // crawl queue handler
-export const q: queueAsPromised<Task> = fastq.promise(
-  asyncWorker,
-  crawlQueueLimit()
-);
+export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, cwLimit);
 
 // determine when crawl completed.
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
   asyncWorkerCrawlComplete,
-  20
+  cwLimit * 2
 );

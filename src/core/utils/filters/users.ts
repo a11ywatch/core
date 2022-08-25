@@ -1,5 +1,5 @@
-import { User } from "@app/types/schema";
 import { getDay, subHours } from "date-fns";
+import type { User } from "../../../types/schema";
 
 interface Params {
   id?: any;
