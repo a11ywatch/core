@@ -1,5 +1,5 @@
-import { getUserFromToken } from "@app/core/utils";
-import { FastifyContext } from "apollo-server-fastify";
+import { getUserFromToken } from "../../core/utils";
+import type { FastifyContext } from "apollo-server-fastify";
 
 // extract query or body params from req
 export const paramParser = (req: FastifyContext["request"], value: string) => {

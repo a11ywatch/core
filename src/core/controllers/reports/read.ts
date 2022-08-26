@@ -1,6 +1,6 @@
-import { SUPER_MODE } from "@app/config/config";
-import { connect } from "@app/database";
 import { URL } from "url";
+import { SUPER_MODE } from "../../../config/config";
+import { connect } from "../../../database";
 
 // get the page report for a website. TODO: REFACTOR..
 export const getReport = async (url: string, userId?: number) => {

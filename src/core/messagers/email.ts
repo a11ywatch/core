@@ -1,4 +1,4 @@
-import { footer } from "@app/html";
+import { footer } from "../../html";
 
 import {
   transporter,
@@ -7,8 +7,8 @@ import {
   pluralize,
 } from "../utils";
 import { issuesResultsTemplate } from "../email_templates";
-import { Website } from "@app/types/schema";
-import { DEV } from "@app/config";
+import { Website } from "../../types/schema";
+import { DEV } from "../../config/config";
 import { verifyUserSend } from "./verify";
 
 // determine when a user last got alerted.
@@ -37,11 +37,7 @@ const sendMail = async ({
   });
 
   if (findUser) {
-    try {
-      await updateLastAlertDate(userId, userCollection);
-    } catch (e) {
-      console.error(e);
-    }
+    await updateLastAlertDate(userId, userCollection);
 
     const { pageUrl, domain, issuesInfo } = data;
 

@@ -1,8 +1,7 @@
 import { isSameDay } from "date-fns";
-
-import { realUser } from "../utils";
 import { getUser } from "../controllers/users";
-import { getEmailAllowedForDay } from "@app/core/utils/filters";
+import { getEmailAllowedForDay } from "../utils/filters";
+import { realUser } from "../utils";
 
 interface VerifySend {
   userId?: number;

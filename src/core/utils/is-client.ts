@@ -1,5 +1,4 @@
-import { config } from "@app/config";
-import { SUPER_MODE } from "@app/config/config";
+import { config, SUPER_MODE } from "../../config/config";
 
 // determine if the path is the front-end client for the hast
 export const frontendClientOrigin = (origin: string) => {

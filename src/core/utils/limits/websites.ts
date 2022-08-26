@@ -1,4 +1,4 @@
-import { SUPER_MODE } from "@app/config/config";
+import { SUPER_MODE } from "../../../config/config";
 
 // return truthy if website should be blocked from adding
 export const blockWebsiteAdd = ({

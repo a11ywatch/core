@@ -1,7 +1,7 @@
-import { rawStatusBadge } from "@app/core/assets";
-import { AnalyticsController } from "@app/core/controllers";
-import { Analytic } from "@app/types/types";
-import { FastifyContext } from "apollo-server-fastify";
+import type { FastifyContext } from "apollo-server-fastify";
+import { rawStatusBadge } from "../../../core/assets";
+import { AnalyticsController } from "../../../core/controllers";
+import type { Analytic } from "../../../types/types";
 
 // get the status badge for a domain
 export const statusBadge = async (

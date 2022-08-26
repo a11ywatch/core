@@ -1,4 +1,4 @@
-import { redisClient } from "@app/database/memory-client";
+import { redisClient } from "../../database/memory-client";
 
 import {
   createRateLimitDirective,

@@ -1,7 +1,7 @@
-import { generateWebsiteScore } from "@app/core/controllers/pages/update";
-import { getWebsite } from "@app/core/controllers/websites";
-import { CRAWL_COMPLETE } from "@app/core/static";
-import { pubsub } from "@app/database/pubsub";
+import { generateWebsiteScore } from "../../controllers/pages/update";
+import { getWebsite } from "../../controllers/websites";
+import { CRAWL_COMPLETE } from "../../static";
+import { pubsub } from "../../../database/pubsub";
 import { collectionUpsert } from "../collection-upsert";
 
 export function setWebsiteScore(props: {

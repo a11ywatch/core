@@ -1,13 +1,13 @@
-import { connect } from "@app/database";
+import { connect } from "../../../../database";
 import {
   WEBSITE_NOT_FOUND,
   SUCCESS,
   SUCCESS_DELETED_ALL,
-} from "@app/core/strings";
+} from "../../../strings";
 import { getWebsite } from "../find";
 import { HistoryController } from "../../history";
-import { domainNameFind } from "@app/core/utils";
-import { validateUID } from "@app/web/params/extracter";
+import { domainNameFind } from "../../../utils";
+import { validateUID } from "../../../../web/params/extracter";
 
 // remove a website or all website and related data.
 export const removeWebsite = async ({

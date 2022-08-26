@@ -1,8 +1,8 @@
-import { connect } from "@app/database";
-import { websiteSearchParams } from "@app/core/utils";
-import type { Website } from "@app/types/types";
+import { connect } from "../../../../database";
+import { websiteSearchParams } from "../../../utils";
 import { PageSpeedController } from "../../page-speed/main";
-import { validateUID } from "@app/web/params/extracter";
+import { validateUID } from "../../../../web/params/extracter";
+import type { Website } from "../../../../types/types";
 
 /*
  * get a website from the database
@@ -27,7 +27,6 @@ export const getWebsite = async ({
     return [website, collection];
   } catch (e) {
     console.error(e);
-
     return [null, null];
   }
 };
@@ -79,14 +78,8 @@ export const getWebsitesPaginated = async (
   page = 0, // page in collection
   offset?: number // use offset to skip
 ): Promise<[Website[], any]> => {
-  let data;
-  let collection;
-
-  try {
-    [collection] = await connect("Websites");
-  } catch (e) {
-    console.error(e);
-  }
+  const [collection] = await connect("Websites");
+  let data = [];
 
   try {
     data = await collection
@@ -108,9 +101,8 @@ export const getWebsitesPaging = async (
   { userId, limit = 3, offset = 0, insights = false },
   chain?: boolean
 ) => {
+  const [collection] = await connect("Websites");
   try {
-    const [collection] = await connect("Websites");
-
     const webPages = await collection
       .find(validateUID(userId) ? { userId } : undefined)
       .sort({ order: 1 })
@@ -142,8 +134,9 @@ export const getWebsitesPaging = async (
 
 // return a list of websites for the user by 20
 export const getWebsites = async ({ userId }, chain?: boolean) => {
+  const [collection] = await connect("Websites");
+
   try {
-    const [collection] = await connect("Websites");
     const websites = await collection.find({ userId }).limit(20).toArray();
 
     return chain ? [websites, collection] : websites;

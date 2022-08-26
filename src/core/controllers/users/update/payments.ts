@@ -1,4 +1,4 @@
-import { config } from "@app/config";
+import { config } from "../../../../config";
 
 import { EMAIL_ERROR, SUCCESS } from "../../../strings";
 import { signJwt } from "../../../utils";

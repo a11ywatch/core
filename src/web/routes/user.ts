@@ -1,4 +1,4 @@
-import { UsersController } from "@app/core/controllers";
+import { UsersController } from "../../core/controllers";
 import { paramParser } from "../params/extracter";
 
 const confirmEmail = async (req, res) => {
@@ -19,26 +19,18 @@ const confirmEmail = async (req, res) => {
 };
 
 const unSubEmails = async (req, res) => {
-  try {
-    const email = paramParser(req, "email") + "";
-    const id = paramParser(req, "id") || paramParser(req, "userId");
+  const email = paramParser(req, "email") + "";
+  const id = paramParser(req, "id") || paramParser(req, "userId");
 
-    await UsersController().unsubscribeEmails({
-      id,
-      email,
-    });
+  await UsersController().unsubscribeEmails({
+    id,
+    email,
+  });
 
-    res.send({
-      message: "Unsubscribed from email alerts.",
-      success: true,
-    });
-  } catch (e) {
-    console.error(e);
-    res.send({
-      success: false,
-      message: "Failed to unsubscribed from email alerts",
-    });
-  }
+  res.send({
+    message: "Unsubscribed from email alerts.",
+    success: true,
+  });
 };
 
 export { confirmEmail, unSubEmails };

@@ -2,8 +2,8 @@ import { FastifyInstance } from "fastify";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import ratelimit from "@fastify/rate-limit";
-import { createRedisClient } from "@app/database/memory-client";
-import { cookieConfigs, SUPER_MODE } from "@app/config/config";
+import { createRedisClient } from "../database/memory-client";
+import { cookieConfigs, SUPER_MODE } from "../config/config";
 
 /*
  * fastify application register addons

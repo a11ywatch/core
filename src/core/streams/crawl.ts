@@ -1,6 +1,5 @@
-import { StatusCode } from "@app/web/messages/message";
-import { FastifyContext } from "apollo-server-fastify";
-
+import type { FastifyContext } from "apollo-server-fastify";
+import { StatusCode } from "../../web/messages/message";
 import { crawlHttpStream } from "../utils/crawl-stream";
 import { crawlHttpStreamSlim } from "../utils/crawl-stream-slim";
 import { getUserFromApiScan } from "../utils/get-user-data";

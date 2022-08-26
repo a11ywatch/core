@@ -1,5 +1,5 @@
 import { getIssue } from "../find";
-import { SUCCESS } from "@app/core/strings";
+import { SUCCESS } from "../../../../core/strings";
 
 export const addIssue = async ({ userId, url, issue }: any) => {
   const [issueExist, collection] = await getIssue({ userId, url }, true);

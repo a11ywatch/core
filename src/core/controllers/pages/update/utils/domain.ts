@@ -1,5 +1,5 @@
-import { getAnalyticsPaging } from "@app/core/controllers/analytics";
-import { arrayAverage } from "@app/core/utils";
+import { getAnalyticsPaging } from "../../../analytics";
+import { arrayAverage } from "../../../../utils";
 
 const defaultIssuesInfo = {
   warningCount: 0,
@@ -43,21 +43,16 @@ export const getRecursiveResults = async ({
       offset?: number,
       prevIssuesInfo?: any
     ): Promise<{ issuesInfo: IssuesInfo }> => {
-      let pages = [];
-      try {
-        pages = await getAnalyticsPaging(
-          {
-            domain,
-            userId,
-            limit: 10,
-            offset,
-            all,
-          },
-          false
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      let pages = await getAnalyticsPaging(
+        {
+          domain,
+          userId,
+          limit: 10,
+          offset,
+          all,
+        },
+        false
+      );
 
       let websiteErrors = prevIssuesInfo?.errorCount ?? 0;
       let websiteWarnings = prevIssuesInfo?.warningCount ?? 0;

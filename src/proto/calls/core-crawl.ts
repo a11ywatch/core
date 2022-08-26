@@ -1,5 +1,5 @@
 import type { ServerWritableStream } from "@grpc/grpc-js";
-import { getUserFromApi } from "../../core/utils/get-user-rpc";
+import { incrementApiByUser } from "../../core/controllers/users/find/get-api";
 import { getCrawlConfig } from "../../core/streams/crawl-config";
 import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
@@ -16,20 +16,17 @@ type ServerCallStreaming = ServerWritableStream<
 // core multi page streaming gRPC scanning
 export const coreCrawl = async (call: ServerCallStreaming) => {
   const { authorization, url, subdomains, tld } = call.request;
+  const userNext = await incrementApiByUser(authorization);
 
-  const userNext = await getUserFromApi(authorization); // get current user
+  const crawlProps = await getCrawlConfig({
+    id: userNext.id,
+    url,
+    role: userNext.role,
+    subdomains,
+    tld,
+  });
 
-  if (userNext) {
-    const crawlProps = await getCrawlConfig({
-      id: userNext.id,
-      url,
-      role: userNext.role,
-      subdomains,
-      tld,
-    });
-
-    await crawlStreaming(crawlProps, call);
-  }
+  await crawlStreaming(crawlProps, call);
 
   call.end();
 };

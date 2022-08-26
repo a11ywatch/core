@@ -20,9 +20,6 @@
     "removeComments": true,
     "declaration": true,
     "baseUrl": ".",
-    "paths": {
-      "@app/*": ["./src/*"]
-    },
     "plugins": [
       {
         "transform": "typescript-json/lib/transform"

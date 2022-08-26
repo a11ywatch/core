@@ -1,1 +1,0 @@
-export { addDomain } from "./domain";

@@ -1,11 +1,13 @@
-import { UsersController } from "@app/core/controllers";
-import { getUserFromToken } from "@app/core/utils";
-import { imageDetect } from "@app/core/external";
-import { TOKEN_EXPIRED_ERROR, RATE_EXCEEDED_ERROR } from "@app/core/strings";
-
-import { StatusCode } from "@app/web/messages/message";
-import { responseModel } from "@app/core/models";
-import { FastifyContext } from "apollo-server-fastify";
+import type { FastifyContext } from "apollo-server-fastify";
+import { UsersController } from "../../../core/controllers";
+import { getUserFromToken } from "../../../core/utils";
+import { imageDetect } from "../../../core/external";
+import {
+  TOKEN_EXPIRED_ERROR,
+  RATE_EXCEEDED_ERROR,
+} from "../../../core/strings";
+import { StatusCode } from "../../../web/messages/message";
+import { responseModel } from "../../../core/models";
 
 const detectImage = async (
   req: FastifyContext["request"],
@@ -54,9 +56,7 @@ const detectImage = async (
     return;
   }
 
-  let data = { status: false };
-
-  data = await imageDetect({ img });
+  const data = await imageDetect({ img });
 
   res.send(responseModel({ code: StatusCode.Ok, data }));
 };

@@ -1,6 +1,6 @@
-import { connect } from "@app/database";
-import { domainNameFind, websiteSearchParams } from "@app/core/utils";
-import { controller } from "@app/proto/actions/calls";
+import { connect } from "../../../database";
+import { domainNameFind, websiteSearchParams } from "../../../core/utils";
+import { controller } from "../../../proto/actions/calls";
 
 const DEFAULT_RESPONSE = {
   script: null,
@@ -23,22 +23,22 @@ export const getScriptsPaging = async (
   { userId, domain, limit = 5, offset = 0, all = false }: Params,
   chain?: boolean
 ) => {
+  const [collection] = await connect("Scripts");
+
+  let params = {};
+
+  if (typeof userId !== "undefined") {
+    params = { userId };
+  }
+  if (typeof domain !== "undefined" && domain) {
+    if (all) {
+      params = domainNameFind(params, domain);
+    } else {
+      params = { ...params, domain };
+    }
+  }
+
   try {
-    const [collection] = await connect("Scripts");
-
-    let params = {};
-
-    if (typeof userId !== "undefined") {
-      params = { userId };
-    }
-    if (typeof domain !== "undefined" && domain) {
-      if (all) {
-        params = domainNameFind(params, domain);
-      } else {
-        params = { ...params, domain };
-      }
-    }
-
     const pages = await collection
       .find(params)
       .skip(offset)
@@ -48,8 +48,7 @@ export const getScriptsPaging = async (
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
-
-    return [null, null];
+    return chain ? [[], collection] : [];
   }
 };
 
@@ -67,12 +66,11 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     },
     chain?: boolean
   ) {
+    const [collection] = await connect("Scripts");
+    const searchProps = websiteSearchParams({ pageUrl, userId });
+    let scripts = null;
+
     try {
-      const [collection] = await connect("Scripts");
-      const searchProps = websiteSearchParams({ pageUrl, userId });
-
-      let scripts;
-
       if (Object.keys(searchProps).length) {
         scripts = await collection.findOne(searchProps);
       }
@@ -80,34 +78,33 @@ export const ScriptsController = ({ user } = { user: null }) => ({
       return chain ? [scripts, collection] : scripts;
     } catch (e) {
       console.error(e);
+      return chain ? [null, collection] : null;
     }
   },
   getScripts: async function ({ userId, pageUrl }) {
-    try {
-      const [collection] = await connect("Scripts");
-      const searchProps = websiteSearchParams({ pageUrl, userId });
-      const scripts = await collection.find(searchProps).limit(1000).toArray();
+    const [collection] = await connect("Scripts");
+    const searchProps = websiteSearchParams({ pageUrl, userId });
 
-      return scripts;
+    try {
+      return await collection.find(searchProps).limit(1000).toArray();
     } catch (e) {
       console.error(e);
     }
   },
   getWebsiteScripts: async function ({ userId, domain }) {
+    const [collection] = await connect("Scripts");
+    const searchProps = websiteSearchParams({ domain, userId });
+    let scripts = [];
+
     try {
-      const [collection] = await connect("Scripts");
-      const searchProps = websiteSearchParams({ domain, userId });
-
-      let scripts = [];
-
       if (Object.keys(searchProps).length) {
         scripts = await collection.find(searchProps).limit(0).toArray();
       }
-
-      return scripts;
     } catch (e) {
       console.error(e);
     }
+
+    return scripts;
   },
   updateScript: async function ({
     userId,
@@ -121,16 +118,16 @@ export const ScriptsController = ({ user } = { user: null }) => ({
       pageUrl,
     };
 
+    let [prevScript, collection] = await ScriptsController().getScript(
+      params,
+      true
+    );
+
+    if (typeof scriptMeta !== "undefined") {
+      prevScript.scriptMeta = scriptMeta;
+    }
+
     try {
-      let [prevScript, collection] = await ScriptsController().getScript(
-        params,
-        true
-      );
-
-      if (typeof scriptMeta !== "undefined") {
-        prevScript.scriptMeta = scriptMeta;
-      }
-
       const script = (await controller.setScript({
         script: prevScript,
         editScript: !!editScript,

@@ -1,8 +1,9 @@
-import { getUser } from "../find";
 import { isSameDay } from "date-fns";
-import { SUPER_MODE } from "@app/config/config";
+import { getUser } from "../find";
+import { SUPER_MODE } from "../../../../config/config";
 
 // Determine if user can perform web accessibility scanning
+// @returns Promise<boolean>
 export const updateScanAttempt = async ({ userId, user, collection }) => {
   // if SUPER_MODE always return truthy
   if (SUPER_MODE) {
@@ -11,11 +12,7 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
 
   // get collection if does not exist
   if (!collection && typeof userId !== "undefined") {
-    try {
-      [user, collection] = await getUser({ id: userId });
-    } catch (e) {
-      console.error(e);
-    }
+    [user, collection] = await getUser({ id: userId });
   }
 
   if (user) {

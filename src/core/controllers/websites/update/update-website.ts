@@ -1,5 +1,5 @@
-import { WEBSITE_NOT_FOUND, SUCCESS } from "@app/core/strings";
-import { connect } from "@app/database";
+import { WEBSITE_NOT_FOUND, SUCCESS } from "../../../../core/strings";
+import { connect } from "../../../../database";
 import { getWebsite } from "../find";
 
 // update a website by properties from form input on adding/
@@ -14,14 +14,7 @@ export const updateWebsite = async ({
   actions = null,
   robots = true,
 }) => {
-  let website;
-  let collection;
-
-  try {
-    [website, collection] = await getWebsite({ userId, url });
-  } catch (e) {
-    console.error(e);
-  }
+  const [website, collection] = await getWebsite({ userId, url });
 
   if (!website) {
     throw new Error(WEBSITE_NOT_FOUND);

@@ -1,5 +1,5 @@
 import { isBefore } from "date-fns";
-import { pubsub } from "@app/database/pubsub";
+import { pubsub } from "../../../../database/pubsub";
 import { EMAIL_VERIFIED } from "../../../static";
 import { getUser } from "../find";
 

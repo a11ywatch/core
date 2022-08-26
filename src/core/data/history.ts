@@ -21,7 +21,7 @@ export const History = {
     return issues;
   },
   pages: async ({ userId, url, domain }) => {
-    return await PagesController().getDomains({
+    return await PagesController().getPages({
       userId,
       url,
       domain,

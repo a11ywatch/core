@@ -1,27 +1,26 @@
-import { connect } from "@app/database";
-import { domainNameFind, websiteSearchParams } from "@app/core/utils";
+import { connect } from "../../../database";
+import { domainNameFind, websiteSearchParams } from "../../utils";
 
 // get analytics by domain for a user with pagination offsets.
-export const getPageSpeedPaging = async (params, chain?: boolean) => {
-  const { userId, domain, limit = 20, offset = 0, all = false } = params ?? {};
+export const getPageSpeedPaging = async (p, chain?: boolean) => {
+  const { userId, domain, limit = 20, offset = 0, all = false } = p ?? {};
+  const [collection] = await connect("PageSpeed");
+
+  let params = {};
+
+  if (typeof userId !== "undefined") {
+    params = { userId };
+  }
+
+  if (typeof domain !== "undefined" && domain) {
+    if (all) {
+      params = domainNameFind(params, domain);
+    } else {
+      params = { ...params, domain };
+    }
+  }
 
   try {
-    const [collection] = await connect("PageSpeed");
-
-    let params = {};
-
-    if (typeof userId !== "undefined") {
-      params = { userId };
-    }
-
-    if (typeof domain !== "undefined" && domain) {
-      if (all) {
-        params = domainNameFind(params, domain);
-      } else {
-        params = { ...params, domain };
-      }
-    }
-
     const items = await collection
       .find(params)
       .skip(offset)
@@ -33,6 +32,7 @@ export const getPageSpeedPaging = async (params, chain?: boolean) => {
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
+    return chain ? [[], null] : [];
   }
 };
 

@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
-import { logoSvg } from "@app/html";
+import { logoSvg } from "../../../../html";
 
 import { EMAIL_ERROR, GENERAL_ERROR } from "../../../strings";
 import { transporter, mailOptions, sendMailCallback } from "../../../utils";

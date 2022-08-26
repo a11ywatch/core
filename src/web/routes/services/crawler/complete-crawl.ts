@@ -1,6 +1,6 @@
 import { getParams } from "./get-params";
-import { getHostName } from "@app/core/utils";
-import { qWebsiteWorker } from "@app/queues/crawl";
+import { getHostName } from "../../../../core/utils";
+import { qWebsiteWorker } from "../../../../queues/crawl";
 
 export const crawlTrackerComplete = async (data?: any) => {
   const {

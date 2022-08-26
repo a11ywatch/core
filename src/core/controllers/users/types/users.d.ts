@@ -1,4 +1,4 @@
-import { User } from "@app/types/types";
+import type { User } from "../../types/types";
 
 export interface AuthParams {
   userId?: number;

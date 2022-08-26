@@ -29,43 +29,31 @@ export const scanSimple = async (
     return;
   }
 
-  try {
-    // returns truthy if can continue
-    const userNext = await getUserFromApi(
-      req?.headers?.authorization,
-      req,
-      res
+  // returns truthy if can continue
+  const userNext = await getUserFromApi(req?.headers?.authorization, req, res);
+  const userId = userNext?.id;
+  const pageInsights =
+    paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
+
+  let resData = {};
+
+  if (validateUID(userId)) {
+    resData = await crawlPage(
+      {
+        url,
+        userId,
+        pageInsights,
+        sendSub: false,
+      },
+      false
     );
-
-    if (userNext) {
-      const pageInsights =
-        paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
-
-      const userId = userNext?.id;
-
-      let resData = {};
-
-      if (validateUID(userId)) {
-        resData = await crawlPage(
-          {
-            url,
-            userId,
-            pageInsights,
-            sendSub: false,
-          },
-          false
-        );
-      } else {
-        resData = await scanWebsite({
-          url,
-          noStore: userNext?.role < 2,
-          pageInsights,
-        });
-      }
-
-      res.send(resData);
-    }
-  } catch (e) {
-    console.error(e);
+  } else {
+    resData = await scanWebsite({
+      url,
+      noStore: userNext?.role < 2,
+      pageInsights,
+    });
   }
+
+  res.send(resData);
 };

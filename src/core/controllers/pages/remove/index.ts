@@ -1,1 +1,0 @@
-export { removeDomain } from "./domain";

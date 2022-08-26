@@ -5,7 +5,7 @@ import { getPayLoad } from "../../../core/utils/query-payload";
 export const pages = async (_, { domain, ...props }, context) => {
   const userId = getPayLoad(context, props)?.userId;
 
-  return await PagesController().getDomains({
+  return await PagesController().getPages({
     userId,
     domain: decodeURIComponent(domain),
   });

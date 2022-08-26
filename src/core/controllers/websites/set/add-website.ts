@@ -1,20 +1,20 @@
+import { initUrl } from "@a11ywatch/website-source-builder";
 import {
   WEBSITE_EXIST_ERROR,
   ADD_FREE_MAX_ERROR,
   SUCCESS,
   WEBSITE_URL_ERROR,
-} from "@app/core/strings";
+} from "../../../strings";
 import {
   getHostName,
   blockWebsiteAdd,
   stripUrlEndingSlash,
-} from "@app/core/utils";
-import { makeWebsite } from "@app/core/models/website";
-import { initUrl } from "@a11ywatch/website-source-builder";
+} from "../../../utils";
+import { makeWebsite } from "../../../models/website";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
-import { watcherCrawl } from "@app/core/actions/accessibility/watcher_crawl";
-import { connect } from "@app/database";
+import { watcherCrawl } from "../../../actions/accessibility/watcher_crawl";
+import { connect } from "../../../../database";
 
 // used on mutations performs a website created following a multi-site scan if enabled
 export const addWebsite = async ({

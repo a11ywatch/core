@@ -1,12 +1,12 @@
-import type { User } from "@app/types/schema";
+import type { FastifyContext } from "apollo-server-fastify";
+import type { User } from "../../types/schema";
 import { UsersController } from "../controllers";
 import { RATE_EXCEEDED_ERROR } from "../strings";
 import { getUserFromToken, extractTokenKey } from "./get-user";
-import { config } from "@app/config/config";
+import { config } from "../../config/config";
 import { frontendClientOrigin } from "./is-client";
-import { StatusCode } from "@app/web/messages/message";
-import { FastifyContext } from "apollo-server-fastify";
-import { validateUID } from "@app/web/params/extracter";
+import { StatusCode } from "../../web/messages/message";
+import { validateUID } from "../../web/params/extracter";
 
 // return a user from id
 export const getUserFromId = async (user, keyid) => {
@@ -40,9 +40,7 @@ export const getUserFromApi = async (
 ): Promise<User> => {
   const jwt = extractTokenKey(token ? String(token).trim() : "");
   const user = getUserFromToken(jwt);
-  // the user id from the token
   const { keyid } = user?.payload ?? {};
-  // api key is set [ may not be valid ]
   const authenticated = typeof keyid !== "undefined";
 
   // response return data
@@ -81,7 +79,6 @@ export const getUserFromApi = async (
       user,
     }).updateApiUsage({ id: keyid });
 
-    // auth required unless front-end client. TODO: validate old keys with current user in DB. jwt === user.jwt.
     if (jwt && !userData) {
       res.send({
         data: null,

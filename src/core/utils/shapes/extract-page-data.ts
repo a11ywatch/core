@@ -1,5 +1,5 @@
-import { jsonParse } from "@app/core/utils";
-import { Struct } from "pb-util/build";
+import type { Struct } from "pb-util/build";
+import { jsonParse } from "../../../core/utils";
 
 export const extractPageData = (
   dataSource: any = { script: null, issues: null, webPage: null }

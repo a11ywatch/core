@@ -1,4 +1,4 @@
-import { SUPER_MODE } from "@app/config/config";
+import { SUPER_MODE } from "../../../config/config";
 
 const UserModel = {
   email: "",

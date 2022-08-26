@@ -1,6 +1,6 @@
 import { addMinutes } from "date-fns";
 import { randomBytes } from "crypto";
-import { config } from "@app/config";
+import { config } from "../../../../config";
 import { EMAIL_ERROR, GENERAL_ERROR, SUCCESS } from "../../../strings";
 import { transporter, mailOptions, sendMailCallback } from "../../../utils";
 import { getUser } from "../find";

@@ -7,8 +7,7 @@ import { paramParser } from "../../params/extracter";
 import { StatusCode } from "../../messages/message";
 import { responseModel } from "../../../core/models";
 import { URL_NOT_FOUND } from "../../../core/strings/errors";
-import type { Website } from "@app/types/types";
-// import { redisClient } from "@app/database/memory-client";
+import type { Website } from "../../../types/types";
 
 // TODO: Refactor usage
 export const getWebsiteAPI = async (
@@ -39,24 +38,16 @@ export const getWebsiteAPI = async (
   const query = initUrl(decodeURIComponent(slug));
   let data: Website;
 
-  try {
-    const report = await getReport(query, userId);
+  const report = await getReport(query, userId);
 
-    if (report?.website) {
-      data = report.website;
-    }
-  } catch (e) {
-    console.error(e);
+  if (report?.website) {
+    data = report.website;
   }
 
   // download report to excel
   if (download) {
     if (data) {
-      try {
-        return await downloadToExcel(req, res, data);
-      } catch (e) {
-        console.error(e);
-      }
+      return await downloadToExcel(req, res, data);
     } else {
       res.send("Error downloading report. Report not found.");
       return;
@@ -84,24 +75,18 @@ export const getWebsiteReport = async (
 
   let userId;
 
-  try {
-    const [user] = await retreiveUserByToken(req.headers.authorization);
-    if (user) {
-      userId = user.id;
-    }
-  } catch (_) {}
+  const [user] = await retreiveUserByToken(req.headers.authorization);
+
+  if (user) {
+    userId = user.id;
+  }
 
   const query = initUrl(decodeURIComponent(slug + ""));
-
+  const report = await getReport(query, userId);
   let data: Website = null;
 
-  try {
-    const report = await getReport(query, userId);
-    if (report?.website) {
-      data = report.website;
-    }
-  } catch (e) {
-    console.error(e);
+  if (report?.website) {
+    data = report.website;
   }
 
   res.send(data);

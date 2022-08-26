@@ -1,18 +1,12 @@
-import { SUCCESS } from "@app/core/strings";
-import { connect } from "@app/database";
+import { SUCCESS } from "../../../strings";
+import { connect } from "../../../../database";
 
 export const sortWebsites = async ({ userId, order = [] }) => {
-  let collection;
-
   if (!order.length) {
     throw new Error("Order required");
   }
 
-  try {
-    [collection] = await connect("Websites");
-  } catch (e) {
-    console.error(e);
-  }
+  const [collection] = await connect("Websites");
 
   if (order && order.length) {
     for (let i = 0; i < order.length; i++) {

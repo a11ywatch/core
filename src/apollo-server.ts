@@ -1,4 +1,4 @@
-import { ApolloServerFastifyConfig } from "apollo-server-fastify";
+import type { ApolloServerFastifyConfig } from "apollo-server-fastify";
 import { BYPASS_AUTH } from "./config";
 import { getUserFromToken } from "./core/utils";
 import { createScheme } from "./core/schema";

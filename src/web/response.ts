@@ -1,8 +1,8 @@
-import { SUPER_MODE } from "@app/config/config";
-import { responseModel } from "@app/core/models";
+import { SUPER_MODE } from "../config/config";
+import { responseModel } from "../core/models/response";
 import { validateUID } from "./params/extracter";
 import { HttpMessage, StatusCode } from "./messages/message";
-import { FastifyContext } from "apollo-server-fastify";
+import type { FastifyContext } from "apollo-server-fastify";
 
 /*
  * Response wrapper for expres API
@@ -30,8 +30,7 @@ export const responseWrap = async (res: FastifyContext["reply"], source) => {
       data = await callback(); // must return datasource directly and not attached to the data property
     } catch (e) {
       message = e.message;
-      // TODO: parse rejection for error code or pass in on-rejection error code
-      code = StatusCode.Error;
+      code = StatusCode.Error; // TODO: parse rejection for error code or pass in on-rejection error code
     }
   }
 

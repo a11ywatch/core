@@ -1,15 +1,15 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.41",
+  "version": "0.5.43",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
-    "dev": "ts-node-dev --transpile-only -r tsconfig-paths/register src/server.ts",
+    "dev": "ts-node-dev --transpile-only src/server.ts",
     "test": "jest",
     "lint": "eslint .",
-    "build": "tsc && tsc-alias",
+    "build": "tsc",
     "start": "NODE_ENV=production node dist/server.js",
-    "pub": "tsc && tsc-alias && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
+    "pub": "tsc && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.3.1",
@@ -68,9 +68,7 @@
     "supertest": "^6.1.1",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
-    "tsc-alias": "1.6.4",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.2.4",
+    "typescript": "^4.8.2",
     "typescript-eslint": "0.0.1-alpha.0"
   },
   "keywords": [

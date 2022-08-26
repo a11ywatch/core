@@ -1,29 +1,30 @@
-import { connect } from "@app/database";
+import { connect } from "../../../../database";
 import {
   domainNameFind,
   getHostName,
   websiteSearchParams,
-} from "@app/core/utils";
+} from "../../../utils";
 import { PageSpeedController } from "../../page-speed/main";
 
-export const getDomains = async (
+// get all pages by url
+export const getPages = async (
   { domain, userId, url }: { domain?: string; userId?: number; url?: string },
   chain?: boolean
 ) => {
+  const [collection] = await connect("Pages");
+  const searchProps = websiteSearchParams({
+    userId,
+    domain: domain || (url && getHostName(url)),
+  });
+
   try {
-    const [collection] = await connect("Pages");
-    const searchProps = websiteSearchParams({
-      userId,
-      domain: domain || (url && getHostName(url)),
-    });
-    // TODO: ADD PAGINATION
-    const websites = await collection
+    const pages = await collection
       .find(searchProps)
       .sort({ url: 1 })
       .limit(0)
       .toArray();
 
-    return chain ? [websites, collection] : websites;
+    return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
   }
@@ -38,9 +39,10 @@ export const getPage = async ({
   userId?: number;
   url?: string;
 }) => {
+  const [collection] = await connect("Pages");
+  const searchProps = websiteSearchParams({ url, userId });
+
   try {
-    const [collection] = await connect("Pages");
-    const searchProps = websiteSearchParams({ url, userId });
     const website = await collection.findOne(searchProps);
 
     return [website, collection];
@@ -52,10 +54,9 @@ export const getPage = async ({
 
 // get all the pages in the database
 export const getAllPages = async () => {
-  try {
-    const [collection] = await connect("Pages");
+  const [collection] = await connect("Pages");
 
-    // TODO: ADD PAGINATION
+  try {
     const websites = await collection.find({}).limit(0).toArray();
 
     return [websites, collection];
@@ -82,18 +83,18 @@ export const getPagesPaging = async (
   },
   chain?: boolean
 ) => {
+  const [collection] = await connect("Pages");
+
+  let params = {};
+
+  if (typeof userId !== "undefined") {
+    params = { userId };
+  }
+  if (typeof domain !== "undefined" && domain) {
+    params = domainNameFind(params, domain);
+  }
+
   try {
-    const [collection] = await connect("Pages");
-
-    let params = {};
-
-    if (typeof userId !== "undefined") {
-      params = { userId };
-    }
-    if (typeof domain !== "undefined" && domain) {
-      params = domainNameFind(params, domain);
-    }
-
     const pages = await collection
       .find(params)
       .skip(offset)
