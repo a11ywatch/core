@@ -23,10 +23,10 @@ export const crawlHttpStream = (
   setImmediate(async () => {
     await watcherCrawl({
       url,
-      scan: true,
       userId,
       subdomains: !!subdomains,
       tld: !!tld,
+      scan: true,
     });
   });
 
@@ -54,7 +54,7 @@ export const crawlHttpStream = (
     crawlTrackingEmitter.once(
       `crawl-complete-${getKey(domain, undefined, userId)}`,
       () => {
-        // send extra item for trailing comma handler
+        // send extra item for trailing comma handler non rpc
         if (client && client.includes("a11ywatch_cli/")) {
           res.raw.write(
             `${JSON.stringify({

@@ -41,10 +41,10 @@ export const crawlStreaming = (
   setImmediate(async () => {
     await watcherCrawl({
       url,
-      scan: true,
       userId,
       subdomains: !!subdomains,
       tld: !!tld,
+      scan: true,
     });
   });
 

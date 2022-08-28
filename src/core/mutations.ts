@@ -56,9 +56,9 @@ export const Mutation = {
         await watcherCrawl({
           url: url,
           userId: keyid,
-          scan: true,
           subdomains: website?.subdomains,
           tld: website?.tld,
+          scan: true,
         });
       });
       return {

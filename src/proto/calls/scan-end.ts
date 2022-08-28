@@ -8,7 +8,6 @@ export const scanEnd = async (
   callback: sendUnaryData<any>
 ) => {
   await crawlTrackerComplete(call.request); // TODO: remove - fully handled via events
-
   crawlTrackingEmitter.emit("crawl-complete", call.request);
 
   callback(null, {});

@@ -42,7 +42,7 @@ if (
 ) {
   cwLimit = Number(process.env.CRAWL_QUEUE_LIMIT);
 } else {
-  cwLimit = Math.max(3 * (cpus().length || 1), 4);
+  cwLimit = Math.max(4 * (cpus().length || 1), 4);
 }
 
 // crawl queue handler

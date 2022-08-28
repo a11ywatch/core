@@ -130,10 +130,10 @@ export const addWebsite = async ({
       await watcherCrawl({
         url: url,
         userId,
-        scan: true,
         robots,
         subdomains: subdomainsEnabled,
         tld: tldEnabled,
+        scan: true,
       });
     }
   });

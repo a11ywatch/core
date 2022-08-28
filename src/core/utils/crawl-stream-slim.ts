@@ -19,10 +19,10 @@ export const crawlHttpStreamSlim = (
   setImmediate(async () => {
     await watcherCrawl({
       url,
-      scan: true,
       userId,
       subdomains: !!subdomains,
       tld: !!tld,
+      scan: true,
     });
   });
 
