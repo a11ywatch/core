@@ -10,6 +10,7 @@ export type CrawlProps = {
   userId?: number;
   subdomains?: boolean;
   tld?: boolean;
+  robots?: boolean; // prevent robots txt
 };
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
@@ -18,7 +19,7 @@ export const crawlHttpStream = (
   res: FastifyContext["reply"],
   client?: string
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld } = props;
+  const { url, userId, subdomains, tld, robots = true } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -27,6 +28,7 @@ export const crawlHttpStream = (
       subdomains: !!subdomains,
       tld: !!tld,
       scan: true,
+      robots,
     });
   });
 

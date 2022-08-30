@@ -6,7 +6,7 @@ interface CrawlParams {
   url?: string;
   scan?: boolean; // determine scan or crawl method
   userId?: number;
-  robots?: boolean; // respect robots txt file
+  robots?: boolean; // respect robots txt file defaults to true
   subdomains?: boolean;
   tld?: boolean;
 }
@@ -31,7 +31,7 @@ export const watcherCrawl = async ({
   const crawlParams = {
     url: String(initUrl(url, true)),
     id: userId,
-    norobots: !robots,
+    robots,
     subdomains: subdomains,
     tld: tld,
   };

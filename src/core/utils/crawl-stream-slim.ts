@@ -14,7 +14,7 @@ export const crawlHttpStreamSlim = (
   client?: string,
   onlyData?: boolean // remove issues and other data from stream
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld } = props;
+  const { url, userId, subdomains, tld, robots } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -23,6 +23,7 @@ export const crawlHttpStreamSlim = (
       subdomains: !!subdomains,
       tld: !!tld,
       scan: true,
+      robots,
     });
   });
 

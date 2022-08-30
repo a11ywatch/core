@@ -2,7 +2,14 @@ import { SUPER_MODE } from "../../config/config";
 import { getWebsite } from "../controllers/websites";
 
 // get the website crawl configuration
-export const getCrawlConfig = async ({ id, role, url, tld, subdomains }) => {
+export const getCrawlConfig = async ({
+  id,
+  role,
+  url,
+  tld,
+  subdomains,
+  robots = true,
+}) => {
   let subdomainsEnabled = subdomains;
   let tldEnabled = tld;
 
@@ -29,5 +36,6 @@ export const getCrawlConfig = async ({ id, role, url, tld, subdomains }) => {
     userId: id,
     subdomains: subdomainsEnabled,
     tld: tldEnabled,
+    robots,
   };
 };

@@ -44,6 +44,7 @@ export const crawlStream = async (
       role: userNext.role,
       subdomains: body.subdomains,
       tld: body.tld,
+      robots: body.robots,
     });
 
     res.raw.write("[");

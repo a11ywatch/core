@@ -33,10 +33,12 @@ export const coreCrawl = async (call: ServerCallStreaming) => {
 
 // crawl website slim and wait for finished emit event to continue @return Website[].
 export const crawlStreaming = (
-  props: CrawlProps,
+  props: CrawlProps & {
+    norobo?: boolean;
+  },
   call: ServerCallStreaming
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld } = props;
+  const { url, userId, subdomains, tld, norobo } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -45,6 +47,7 @@ export const crawlStreaming = (
       subdomains: !!subdomains,
       tld: !!tld,
       scan: true,
+      robots: !norobo,
     });
   });
 
