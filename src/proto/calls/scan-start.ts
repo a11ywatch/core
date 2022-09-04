@@ -6,7 +6,9 @@ export const scanStart = async (
   call: ServerWritableStream<{ domain: string; user_id: number }, {}>,
   callback: sendUnaryData<any>
 ) => {
-  crawlTrackingEmitter.emit("crawl-start", call.request);
+  process.nextTick(() => {
+    crawlTrackingEmitter.emit("crawl-start", call.request);
+  });
 
   callback(null, {});
 };
