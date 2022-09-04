@@ -9,12 +9,11 @@ type ScanParams = {
   full: boolean;
 };
 
-// perform scan via streams enqueueing scan
-export const scanStream = async (
-  call: ServerWritableStream<ScanParams, {}>
-) => {
-  crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
-  await crawlEnqueue(call.request); // queue to control output.
+export type ScanRpcCall = ServerWritableStream<ScanParams, {}>;
 
-  call.end();
+// perform scan via streams enqueueing scan
+export const scanStream = async (call: ScanRpcCall) => {
+  crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
+
+  await crawlEnqueue(call.request); // queue to control output.
 };

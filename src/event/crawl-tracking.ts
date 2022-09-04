@@ -3,6 +3,7 @@ import { performance } from "perf_hooks";
 import { qWebsiteWorker } from "../queues/crawl";
 import { crawlTrackingEmitter } from "./emitters/crawl";
 import { domainName } from "../core/utils";
+import type { ScanRpcCall } from "../proto/calls/scan-stream";
 
 // handle hostname assign from domain or pages
 const extractHostname = (domain?: string, pages?: string[]) => {
@@ -44,7 +45,7 @@ export const establishCrawlTracking = () => {
   });
 
   // track total amount of pages in a website via gRPC.
-  crawlTrackingEmitter.on("crawl-processing", (call) => {
+  crawlTrackingEmitter.on("crawl-processing", async (call: ScanRpcCall) => {
     const target = call.request;
     const key = getKey(target.domain, target.pages, target.user_id); // process a new item tracking count
 
@@ -55,8 +56,8 @@ export const establishCrawlTracking = () => {
       if (crawlingSet[key].shutdown) {
         call.write({ message: "shutdown" });
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-        qWebsiteWorker
-          .push({
+        try {
+          await qWebsiteWorker.push({
             userId: target.user_id,
             meta: {
               extra: {
@@ -65,21 +66,19 @@ export const establishCrawlTracking = () => {
                 shutdown: true,
               },
             },
-          })
-          .catch((err) => console.error(err));
+          });
+        } catch (e) {
+          console.error(e);
+        }
         crawlingSet = removeKey(key, crawlingSet);
-      } else {
-        call.write({ message: "" });
       }
-    } else {
-      call.write({ message: "" });
     }
 
     call.end();
   });
 
   // track the amount of pages the website should have and determine if complete.
-  crawlTrackingEmitter.on("crawl-processed", (target) => {
+  crawlTrackingEmitter.on("crawl-processed", async (target) => {
     // process a new item tracking count
     const userId = target.user_id;
     const key = getKey(target.domain, target.pages, userId);
@@ -98,8 +97,8 @@ export const establishCrawlTracking = () => {
         !crawlingSet[key].crawling
       ) {
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-        qWebsiteWorker
-          .push({
+        try {
+          await qWebsiteWorker.push({
             userId,
             meta: {
               extra: {
@@ -108,15 +107,17 @@ export const establishCrawlTracking = () => {
                 shutdown: crawlingSet[key].shutdown,
               },
             },
-          })
-          .catch((err) => console.error(err));
+          });
+        } catch (e) {
+          console.error(e);
+        }
         crawlingSet = removeKey(key, crawlingSet); // Crawl completed
       }
     }
   });
 
   // track when the crawler has processed the pages and sent.
-  crawlTrackingEmitter.on("crawl-complete", (target) => {
+  crawlTrackingEmitter.on("crawl-complete", async (target) => {
     const userId = target.user_id;
     const key = getKey(target.domain, target.pages, userId);
 
@@ -125,8 +126,8 @@ export const establishCrawlTracking = () => {
 
       if (crawlingSet[key].current === crawlingSet[key].total) {
         crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-        qWebsiteWorker
-          .push({
+        try {
+          await qWebsiteWorker.push({
             userId,
             meta: {
               extra: {
@@ -135,8 +136,10 @@ export const establishCrawlTracking = () => {
                 shutdown: crawlingSet[key].shutdown,
               },
             },
-          })
-          .catch((err) => console.error(err));
+          });
+        } catch (e) {
+          console.error(e);
+        }
         crawlingSet = removeKey(key, crawlingSet); // remove after completion
       }
     }

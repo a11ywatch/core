@@ -62,10 +62,10 @@ export const getWebsiteReport = async (
   req: FastifyContext["request"],
   res: FastifyContext["reply"]
 ) => {
-  const q = paramParser(req, "q");
-  const url = paramParser(req, "url");
-  const pageUrl = paramParser(req, "pageUrl");
-  const slug = q || url || pageUrl;
+  const slug =
+    paramParser(req, "q") ||
+    paramParser(req, "url") ||
+    paramParser(req, "pageUrl");
 
   if (!slug) {
     res.status(404);

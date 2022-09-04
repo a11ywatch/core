@@ -29,8 +29,9 @@ export const crawlHttpStreamSlim = (
 
   return new Promise((resolve) => {
     const domain = getHostName(url);
+    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
 
-    crawlEmitter.on(`crawl-${domainName(domain)}-${userId || 0}`, (source) => {
+    const crawlListener = (source) => {
       const data = source?.data;
 
       // only send when true
@@ -42,20 +43,26 @@ export const crawlHttpStreamSlim = (
         }
         res.raw.write(`${JSON.stringify(data)},`);
       }
-    });
+    };
+
+    crawlEmitter.on(crawlEvent, crawlListener);
+
+    const crawlComplete = () => {
+      crawlTrackingEmitter.off(crawlEvent, crawlListener);
+
+      if (client && client.includes("a11ywatch_cli/")) {
+        // send extra item for trailing comma handler
+        res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () => {
+          resolve(true);
+        });
+      } else {
+        resolve(true);
+      }
+    };
 
     crawlTrackingEmitter.once(
       `crawl-complete-${getKey(domain, undefined, userId)}`,
-      () => {
-        if (client && client.includes("a11ywatch_cli/")) {
-          // send extra item for trailing comma handler
-          res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () => {
-            resolve(true);
-          });
-        } else {
-          resolve(true);
-        }
-      }
+      crawlComplete
     );
   });
 };

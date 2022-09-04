@@ -53,22 +53,27 @@ export const crawlStreaming = (
 
   return new Promise((resolve) => {
     const domain = getHostName(url);
+    const crawlKey = `${domainName(domain)}-${userId || 0}`;
+    const crawlEvent = `crawl-${crawlKey}`;
 
-    crawlEmitter.on(`crawl-${domainName(domain)}-${userId || 0}`, (source) => {
+    const crawlListener = (source) => {
       const data = source?.data;
 
-      // only send when true
       if (data) {
-        // trim data for sending miniaml
         data.pageLoadTime = null;
         data.issues = null;
         call.write({ data });
       }
-    });
+    };
+
+    crawlEmitter.on(crawlEvent, crawlListener);
 
     crawlTrackingEmitter.once(
       `crawl-complete-${getKey(domain, undefined, userId)}`,
-      resolve
+      (data) => {
+        crawlEmitter.off(crawlEvent, crawlListener);
+        resolve(data);
+      }
     );
   });
 };

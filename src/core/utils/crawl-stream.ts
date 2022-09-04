@@ -35,7 +35,7 @@ export const crawlHttpStream = (
   return new Promise((resolve) => {
     const domain = getHostName(url);
 
-    crawlEmitter.on(`crawl-${domainName(domain)}-${userId || 0}`, (source) => {
+    const crawlListener = (source) => {
       const data = source?.data;
       if (data) {
         const issuesFound = data?.issues?.length;
@@ -51,11 +51,17 @@ export const crawlHttpStream = (
           })},`
         );
       }
-    });
+    };
+
+    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
+
+    crawlEmitter.on(crawlEvent, crawlListener);
 
     crawlTrackingEmitter.once(
       `crawl-complete-${getKey(domain, undefined, userId)}`,
       () => {
+        crawlTrackingEmitter.off(crawlEvent, crawlListener);
+
         // send extra item for trailing comma handler non rpc
         if (client && client.includes("a11ywatch_cli/")) {
           res.raw.write(
