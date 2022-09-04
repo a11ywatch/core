@@ -1,3 +1,4 @@
+import { crawlingSet, getKey } from "../../event/crawl-tracking";
 import { q } from "./handle";
 
 /*
@@ -9,16 +10,21 @@ export const crawlEnqueue = async (data: {
   user_id: number;
 }) => {
   const { pages = [], user_id } = data;
+  const key = getKey(null, pages, user_id);
+  const event = crawlingSet[key] && crawlingSet[key].event;
 
   // get users for crawl job matching the urls
   for (const url of pages) {
-    await q
-      .push({
+    if (event) {
+      await event.unshift({
         url,
         userId: user_id,
-      })
-      .catch((e) => {
-        console.error(e);
       });
+    } else {
+      await q.unshift({
+        url,
+        userId: user_id,
+      });
+    }
   }
 };

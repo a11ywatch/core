@@ -3,7 +3,6 @@ import { incrementApiByUser } from "../../core/controllers/users/find/get-api";
 import { getCrawlConfig } from "../../core/streams/crawl-config";
 import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
-import { getKey } from "../../event/crawl-tracking";
 import { domainName } from "../../core/utils/domain-name";
 import { getHostName } from "../../core/utils/get-host";
 import type { CrawlProps } from "../../core/utils/crawl-stream";
@@ -13,7 +12,7 @@ type ServerCallStreaming = ServerWritableStream<
   {}
 >;
 
-// core multi page streaming gRPC scanning
+// core multi page streaming gRPC
 export const coreCrawl = async (call: ServerCallStreaming) => {
   const { authorization, url, subdomains, tld } = call.request;
   const userNext = await incrementApiByUser(authorization);
@@ -51,29 +50,35 @@ export const crawlStreaming = (
     });
   });
 
+  const domain = getHostName(url);
+  const crawlKey = `${domainName(domain)}-${userId || 0}`;
+  const crawlEvent = `crawl-${crawlKey}`;
+
   return new Promise((resolve) => {
-    const domain = getHostName(url);
-    const crawlKey = `${domainName(domain)}-${userId || 0}`;
-    const crawlEvent = `crawl-${crawlKey}`;
-
     const crawlListener = (source) => {
-      const data = source?.data;
+      setImmediate(() => {
+        const data = source?.data;
 
-      if (data) {
-        data.pageLoadTime = null;
-        data.issues = null;
-        call.write({ data });
-      }
+        if (data) {
+          data.pageLoadTime = null;
+          data.issues = null;
+          call.write({ data });
+        }
+      });
+    };
+
+    const crawlCompleteListener = (data) => {
+      setImmediate(() => {
+        crawlEmitter.off(crawlEvent, crawlListener);
+        resolve(data);
+      });
     };
 
     crawlEmitter.on(crawlEvent, crawlListener);
 
     crawlTrackingEmitter.once(
-      `crawl-complete-${getKey(domain, undefined, userId)}`,
-      (data) => {
-        crawlEmitter.off(crawlEvent, crawlListener);
-        resolve(data);
-      }
+      `crawl-complete-${crawlKey}`,
+      crawlCompleteListener
     );
   });
 };

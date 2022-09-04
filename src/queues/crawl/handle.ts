@@ -42,11 +42,19 @@ if (
 ) {
   cwLimit = Number(process.env.CRAWL_QUEUE_LIMIT);
 } else {
-  cwLimit = Math.max(8 * (cpus().length || 1), 4);
+  cwLimit = Math.max(5 * (cpus().length || 1), 4);
 }
 
 // crawl queue handler
 export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, cwLimit);
+
+// current worker limit
+export const getCWLimit = (limit = 8) =>
+  Math.max(Math.floor(cwLimit / limit), 1);
+
+// bind the fastq to a function
+export const bindTaskQ = (limit = 8): queueAsPromised<Task> =>
+  fastq.promise(asyncWorker.bind({}), getCWLimit(limit));
 
 // determine when crawl completed.
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
