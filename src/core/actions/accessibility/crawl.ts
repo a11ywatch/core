@@ -44,16 +44,17 @@ const trackerProccess = (
   { domain, urlMap, userId, shutdown = false }: any,
   blockEvent?: boolean
 ) => {
-  if (!blockEvent && data) {
-    crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
-  }
-
-  // determine crawl has been processed top level tracking
-  crawlTrackingEmitter.emit("crawl-processed", {
-    user_id: userId,
-    domain,
-    pages: [urlMap],
-    shutdown,
+  process.nextTick(() => {
+    if (!blockEvent && data) {
+      crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
+    }
+    // determine crawl has been processed top level tracking
+    crawlTrackingEmitter.emit("crawl-processed", {
+      user_id: userId,
+      domain,
+      pages: [urlMap],
+      shutdown,
+    });
   });
 };
 
@@ -233,96 +234,101 @@ export const crawlPage = async (
 
   // if website record exist update integrity of the data.
   if (website) {
-    // if ROOT domain for scan update Website Collection.
-    if (rootPage) {
-      const { issuesInfo, ...updateProps } = updateWebsiteProps;
+    setImmediate(async () => {
+      // if ROOT domain for scan update Website Collection.
+      if (rootPage) {
+        const { issuesInfo, ...updateProps } = updateWebsiteProps;
 
-      await collectionUpsert(
-        updateProps,
-        [websiteCollection, !!updateWebsiteProps],
-        {
-          searchProps: { url: pageUrl, userId },
-        }
-      );
-    }
+        await collectionUpsert(
+          updateProps,
+          [websiteCollection, !!updateWebsiteProps],
+          {
+            searchProps: { url: pageUrl, userId },
+          }
+        );
+      }
 
-    // if scripts enabled get collection
-    if (scriptsEnabled) {
-      [scripts, scriptsCollection] = await ScriptsController().getScript(
-        { pageUrl, userId, noRetries: true },
-        true
-      );
+      // if scripts enabled get collection
+      if (scriptsEnabled) {
+        [scripts, scriptsCollection] = await ScriptsController().getScript(
+          { pageUrl, userId, noRetries: true },
+          true
+        );
 
-      if (script) {
-        script.userId = userId;
-        // TODO: look into auto meta reason
-        if (!scripts?.scriptMeta) {
-          script.scriptMeta = {
-            skipContentEnabled: true,
-          };
+        if (script) {
+          script.userId = userId;
+          // TODO: look into auto meta reason
+          if (!scripts?.scriptMeta) {
+            script.scriptMeta = {
+              skipContentEnabled: true,
+            };
+          }
         }
       }
-    }
 
-    const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
+      const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
 
-    // Add to Issues collection if page contains issues or if record should update/delete.
-    if (shouldUpsertCollections) {
-      await collectionUpsert(lighthouseData, [pageSpeedCollection, pageSpeed]); // PageInsights
+      // Add to Issues collection if page contains issues or if record should update/delete.
+      if (shouldUpsertCollections) {
+        await collectionUpsert(lighthouseData, [
+          pageSpeedCollection,
+          pageSpeed,
+        ]); // PageInsights
 
-      const { issueMeta, ...analyticsProps } = issuesInfo;
-      await collectionUpsert(
-        {
-          pageUrl,
-          domain,
-          userId,
-          adaScore,
-          ...analyticsProps,
-        },
-        [analyticsCollection, analytics]
-      ); // ANALYTICS
+        const { issueMeta, ...analyticsProps } = issuesInfo;
+        await collectionUpsert(
+          {
+            pageUrl,
+            domain,
+            userId,
+            adaScore,
+            ...analyticsProps,
+          },
+          [analyticsCollection, analytics]
+        ); // ANALYTICS
 
-      await collectionUpsert(
-        newIssue,
-        [issuesCollection, issueExist, !pageConstainsIssues],
-        {
-          searchProps: { pageUrl, userId },
-        }
-      ); // ISSUES COLLECTION
-    }
+        await collectionUpsert(
+          newIssue,
+          [issuesCollection, issueExist, !pageConstainsIssues],
+          {
+            searchProps: { pageUrl, userId },
+          }
+        ); // ISSUES COLLECTION
+      }
 
-    // Pages
-    if ((!newSite && shouldUpsertCollections) || newSite) {
-      await collectionUpsert(
-        updateWebsiteProps,
-        [pagesCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
-        {
-          searchProps: { url: pageUrl, userId },
-        }
-      );
-    }
+      // Pages
+      if ((!newSite && shouldUpsertCollections) || newSite) {
+        await collectionUpsert(
+          updateWebsiteProps,
+          [pagesCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
+          {
+            searchProps: { url: pageUrl, userId },
+          }
+        );
+      }
 
-    // Add script to collection
-    if (scriptsEnabled) {
-      await collectionUpsert(script, [scriptsCollection, scripts]);
-    }
+      // Add script to collection
+      if (scriptsEnabled) {
+        await collectionUpsert(script, [scriptsCollection, scripts]);
+      }
+    });
   }
 
   // Flatten issues with the array set results without meta.
   const responseData = {
-    data: Object.assign({}, updateWebsiteProps, {
-      issues: subIssues,
-    }),
+    data: updateWebsiteProps,
   };
+  responseData.data.issues = subIssues;
 
   if (pageConstainsIssues) {
-    if (sendSub) {
-      try {
-        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-      } catch (_) {
-        // silent pub sub errors
-      }
-    }
+    sendSub &&
+      setImmediate(async () => {
+        try {
+          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        } catch (_) {
+          // silent pub sub errors
+        }
+      });
 
     // send email if issues of type error exist for the page. TODO: remove from layer.
     if (sendEmail && issuesInfo?.errorCount) {

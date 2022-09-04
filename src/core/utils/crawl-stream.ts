@@ -36,30 +36,27 @@ export const crawlHttpStream = (
     const domain = getHostName(url);
 
     const crawlListener = (source) => {
-      const data = source?.data;
-      if (data) {
-        const issuesFound = data?.issues?.length;
+      setImmediate(() => {
+        const data = source?.data;
+        if (data) {
+          const issuesFound = data?.issues?.length;
 
-        res.raw.write(
-          `${JSON.stringify({
-            data,
-            message: `${data?.url} has ${issuesFound} issue${
-              issuesFound === 1 ? "" : "s"
-            }`,
-            success: true,
-            code: 200,
-          })},`
-        );
-      }
+          res.raw.write(
+            `${JSON.stringify({
+              data,
+              message: `${data?.url} has ${issuesFound} issue${
+                issuesFound === 1 ? "" : "s"
+              }`,
+              success: true,
+              code: 200,
+            })},`
+          );
+        }
+      });
     };
 
-    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
-
-    crawlEmitter.on(crawlEvent, crawlListener);
-
-    crawlTrackingEmitter.once(
-      `crawl-complete-${getKey(domain, undefined, userId)}`,
-      () => {
+    const crawlCompleteListener = () => {
+      setImmediate(() => {
         crawlTrackingEmitter.off(crawlEvent, crawlListener);
 
         // send extra item for trailing comma handler non rpc
@@ -78,7 +75,16 @@ export const crawlHttpStream = (
         } else {
           resolve(true);
         }
-      }
+      });
+    };
+
+    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
+
+    crawlEmitter.on(crawlEvent, crawlListener);
+
+    crawlTrackingEmitter.once(
+      `crawl-complete-${getKey(domain, undefined, userId)}`,
+      crawlCompleteListener
     );
   });
 };

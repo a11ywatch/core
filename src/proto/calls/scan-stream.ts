@@ -1,6 +1,6 @@
 import type { ServerWritableStream } from "@grpc/grpc-js";
+import { crawlEnqueue } from "../../queues/crawl/crawl";
 import { crawlTrackingEmitter } from "../../event";
-import { crawlEnqueue } from "../../queues/crawl";
 
 type ScanParams = {
   pages: string[];
@@ -13,7 +13,10 @@ export type ScanRpcCall = ServerWritableStream<ScanParams, {}>;
 
 // perform scan via streams enqueueing scan
 export const scanStream = async (call: ScanRpcCall) => {
-  crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
+  process.nextTick(() => {
+    crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
+  });
 
+  // TODO: remove queue for improved browser page handling puppeteer
   await crawlEnqueue(call.request); // queue to control output.
 };
