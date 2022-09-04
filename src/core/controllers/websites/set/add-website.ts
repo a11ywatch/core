@@ -15,6 +15,7 @@ import { getWebsite } from "../find";
 import { getUser } from "../../users";
 import { watcherCrawl } from "../../../actions/accessibility/watcher_crawl";
 import { connect } from "../../../../database";
+import { SUPER_MODE } from "../../../../config/config";
 
 // used on mutations performs a website created following a multi-site scan if enabled
 export const addWebsite = async ({
@@ -74,8 +75,8 @@ export const addWebsite = async ({
 
   const actionsEnabled = actions && Array.isArray(actions) && actions.length;
 
-  const subdomainsEnabled = subdomains && user.role >= 1;
-  const tldEnabled = tld && user.role >= 2;
+  const subdomainsEnabled = subdomains && (SUPER_MODE || user.role >= 1);
+  const tldEnabled = tld && (SUPER_MODE || user.role >= 2);
 
   const website = makeWebsite({
     userId,

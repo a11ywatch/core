@@ -1,9 +1,10 @@
 import type { queueAsPromised } from "fastq";
 import fastq from "fastq";
 import { cpus } from "os";
-import { crawlWebsite } from "../../core/actions";
+import { crawlWebsite } from "../../core/actions/accessibility/crawl-group";
 import { setWebsiteScore } from "../../core/utils/stats/score";
 import type { Method } from "../../database/config";
+import type { ResponseModel } from "../../core/models/response/types";
 
 interface Meta {
   method?: Method;
@@ -15,6 +16,11 @@ type Task = {
   url?: string;
   meta?: Meta;
 };
+
+// the async worker to use for crawling pages
+async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
+  return await crawlWebsite(arg);
+}
 
 // the async worker to use for completed crawl actions. TODO: remove for collection appending raw value to score.
 async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
@@ -36,11 +42,11 @@ if (
 ) {
   cwLimit = Number(process.env.CRAWL_QUEUE_LIMIT);
 } else {
-  cwLimit = Math.max(10 * (cpus().length || 1), 4);
+  cwLimit = Math.max(8 * (cpus().length || 1), 4);
 }
 
 // crawl queue handler
-export const q: queueAsPromised<Task> = fastq.promise(crawlWebsite, cwLimit);
+export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, cwLimit);
 
 // determine when crawl completed.
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(
