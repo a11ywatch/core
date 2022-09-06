@@ -1,6 +1,6 @@
 import { getHostName } from "@a11ywatch/website-source-builder";
 import { performance } from "perf_hooks";
-import { bindTaskQ } from "../queues/crawl/handle";
+import { bindTaskQ, getCWLimit } from "../queues/crawl/handle";
 import { qWebsiteWorker } from "../queues/crawl";
 import { crawlTrackingEmitter } from "./emitters/crawl";
 import { domainName } from "../core/utils";
@@ -22,8 +22,30 @@ export const removeKey = (key, { [key]: _, ...rest }) => rest;
 // track when a new website starts and determine page completion
 let crawlingSet = {};
 
+// rebind the number of concurrency per object
+const rebindConcurrency = () => {
+  setImmediate(() => {
+    const keys = Object.keys(crawlingSet);
+    const newLimit = getCWLimit(keys.length || 1);
+
+    keys.forEach((k) => {
+      if (crawlingSet[k]) {
+        if (crawlingSet[k].event) {
+          setImmediate(() => {
+            if (crawlingSet[k].event.concurrency !== newLimit) {
+              crawlingSet[k].event.concurrency = newLimit;
+            }
+          });
+        }
+      }
+    });
+  });
+};
+
 // init crawling
 const crawlStart = (target) => {
+  rebindConcurrency();
+
   setImmediate(() => {
     const key = getKey(target.domain, target.pages, target.user_id);
     // set the item for tracking
@@ -62,6 +84,8 @@ const crawlComplete = (target) => {
           },
         });
         crawlingSet = removeKey(key, crawlingSet); // remove after completion
+        // rebind event queue and increment limit
+        rebindConcurrency();
       }
     }
   });
