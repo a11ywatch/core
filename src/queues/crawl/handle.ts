@@ -54,7 +54,7 @@ export const getCWLimit = (limit: number = 1) =>
 
 // bind the fastq to a function
 export const bindTaskQ = (limit = 1): queueAsPromised<Task> =>
-  fastq.promise(asyncWorker, getCWLimit(limit));
+  fastq.promise(asyncWorker.bind({}), getCWLimit(limit));
 
 // determine when crawl completed.
 export const qWebsiteWorker: queueAsPromised<Task> = fastq.promise(

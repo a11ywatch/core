@@ -6,6 +6,27 @@ import { crawlTrackingEmitter } from "./emitters/crawl";
 import { domainName } from "../core/utils";
 import type { ScanRpcCall } from "../proto/calls/scan-stream";
 
+type CrawlSet = {
+  total: number; // total pages
+  current: number; // current page number
+  crawling: boolean; // active crawl
+  shutdown: boolean; // crawl shutdown
+  duration: number; // the crawl duration
+  event: ReturnType<typeof bindTaskQ>; // queue
+};
+
+// track when a new website starts and determine page completion
+export let crawlingSet: Record<string, CrawlSet> = {};
+
+const crawlDefault: CrawlSet = {
+  total: 0,
+  current: 0,
+  crawling: true,
+  shutdown: false,
+  duration: 0,
+  event: bindTaskQ(Object.keys(crawlingSet).length), // set to default to memo
+};
+
 // handle hostname assign from domain or pages
 const extractHostname = (domain?: string, pages?: string[]) => {
   const target = pages && pages.length === 1 ? pages[0] : domain;
@@ -19,50 +40,65 @@ export const getKey = (domain, pages, user_id) =>
 // remove key from object
 export const removeKey = (key, { [key]: _, ...rest }) => rest;
 
-// track when a new website starts and determine page completion
-let crawlingSet = {};
-
 // rebind the number of concurrency per object
-const rebindConcurrency = () => {
-  setImmediate(() => {
-    const keys = Object.keys(crawlingSet);
-    const newLimit = getCWLimit(keys.length || 1);
+const rebindConcurrency = async () => {
+  const keys = Object.keys(crawlingSet);
+  const newLimit = getCWLimit(keys.length || 1);
 
-    keys.forEach((k) => {
-      if (crawlingSet[k]) {
-        if (crawlingSet[k].event) {
-          setImmediate(() => {
-            if (crawlingSet[k].event.concurrency !== newLimit) {
-              crawlingSet[k].event.concurrency = newLimit;
-            }
-          });
-        }
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    const item = crawlingSet[k];
+    const itemEvent = item && item?.event;
+
+    if (itemEvent && itemEvent?.concurrency > newLimit) {
+      const q = itemEvent.getQueue();
+      itemEvent.killAndDrain();
+      await itemEvent.drained(); // wait till drained
+      crawlingSet[k].event.concurrency = newLimit;
+      for (let j = 0; j < q.length; j++) {
+        await itemEvent.unshift(q[j]);
       }
-    });
-  });
+    } else if (itemEvent && itemEvent?.concurrency !== newLimit) {
+      crawlingSet[k].event.concurrency = newLimit;
+    }
+  }
 };
 
 // init crawling
 const crawlStart = (target) => {
-  rebindConcurrency();
-
-  setImmediate(() => {
+  setImmediate(async () => {
     const key = getKey(target.domain, target.pages, target.user_id);
     // set the item for tracking
     if (!crawlingSet[key]) {
-      crawlingSet[key] = {
-        total: 0,
-        current: 0,
-        crawling: true,
-        shutdown: false,
+      crawlingSet[key] = Object.assign({}, crawlDefault, {
         duration: performance.now(),
-        event: bindTaskQ(Math.max(Object.keys(crawlingSet).length, 1)),
-      };
+        event: bindTaskQ(Object.keys(crawlingSet).length + 1), // add 1 to include new item
+      });
+
+      rebindConcurrency();
     }
   });
 };
 
 // de-init crawling
+const deInit = async (key, target) => {
+  crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
+  const params = {
+    userId: target.user_id,
+    meta: {
+      extra: {
+        domain: extractHostname(target.domain),
+        duration: performance.now() - crawlingSet[key].duration,
+        shutdown: crawlingSet[key].shutdown,
+      },
+    },
+  };
+  crawlingSet = removeKey(key, crawlingSet);
+  rebindConcurrency(); // rebind event queue and increment limit
+  await qWebsiteWorker.push(params);
+};
+
+// complete crawl
 const crawlComplete = (target) => {
   setImmediate(async () => {
     const userId = target.user_id;
@@ -72,20 +108,7 @@ const crawlComplete = (target) => {
       crawlingSet[key].crawling = false;
 
       if (crawlingSet[key].current === crawlingSet[key].total) {
-        crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-        await qWebsiteWorker.push({
-          userId,
-          meta: {
-            extra: {
-              domain: extractHostname(target.domain),
-              duration: performance.now() - crawlingSet[key].duration,
-              shutdown: crawlingSet[key].shutdown,
-            },
-          },
-        });
-        crawlingSet = removeKey(key, crawlingSet); // remove after completion
-        // rebind event queue and increment limit
-        rebindConcurrency();
+        await deInit(key, target);
       }
     }
   });
@@ -103,18 +126,7 @@ const crawlProcessing = (call: ScanRpcCall) => {
       }
       if (crawlingSet[key].shutdown) {
         call.write({ message: "shutdown" });
-        crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-        await qWebsiteWorker.push({
-          userId: target.user_id,
-          meta: {
-            extra: {
-              domain: extractHostname(target.domain),
-              duration: performance.now() - crawlingSet[key].duration,
-              shutdown: true,
-            },
-          },
-        });
-        crawlingSet = removeKey(key, crawlingSet);
+        await deInit(key, target);
       }
     }
 
@@ -142,18 +154,7 @@ const crawlProcessed = (target) => {
         crawlingSet[key].current === crawlingSet[key].total &&
         !crawlingSet[key].crawling
       ) {
-        crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-        await qWebsiteWorker.push({
-          userId,
-          meta: {
-            extra: {
-              domain: extractHostname(target.domain),
-              duration: performance.now() - crawlingSet[key].duration,
-              shutdown: crawlingSet[key].shutdown,
-            },
-          },
-        });
-        crawlingSet = removeKey(key, crawlingSet); // Crawl completed
+        await deInit(key, target);
       }
     }
   });
@@ -174,5 +175,3 @@ export const establishCrawlTracking = () => {
   // track the amount of pages the website should have and determine if complete.
   crawlTrackingEmitter.on("crawl-processed", crawlProcessed);
 };
-
-export { crawlingSet };
