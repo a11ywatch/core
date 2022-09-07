@@ -38,7 +38,7 @@ import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken } from "./core/utils";
 import { retreiveUserByTokenWrapper } from "./core/utils/get-user-data";
 import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
-import { AnalyticsController } from "./core/controllers";
+import { AnalyticsController, UsersController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
 import { crawlStreamSlim } from "./core/streams/crawl-slim";
 import { crawlRest } from "./web/routes/crawl";
@@ -291,10 +291,38 @@ async function initServer(): Promise<HttpServer[]> {
   setAuthRoutes(app);
   // GITHUB
   setGithubActionRoutes(app);
+
   // ADMIN ROUTES
   app.post("/api/run-watcher", async (req, res) => {
     if ((req.body as any)?.password === process.env.ADMIN_PASSWORD) {
       setImmediate(crawlAllAuthedWebsitesCluster);
+      res.send(true);
+    } else {
+      res.send(false);
+    }
+  });
+
+  // todo: setup stripe web hook
+  app.post("/api/downgrade", async (req, res) => {
+    const body = req.body as any;
+
+    if (body?.password === process.env.ADMIN_PASSWORD) {
+      const userId = body?.userId;
+
+      if (typeof userId !== "undefined") {
+        setImmediate(async () => {
+          // todo: send user email account reset
+          // todo: downgrade stripe
+          await WebsitesController().removeWebsite({
+            userId: userId,
+            deleteMany: true,
+          });
+
+          await UsersController().cancelSubscription({
+            keyid: userId,
+          });
+        });
+      }
       res.send(true);
     } else {
       res.send(false);

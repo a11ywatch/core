@@ -12,7 +12,7 @@ import { validateUID } from "../../../../web/params/extracter";
 // remove a website or all website and related data.
 export const removeWebsite = async ({
   userId,
-  url,
+  url = "",
   domain = "",
   deleteMany = false,
 }) => {

@@ -19,9 +19,9 @@ export const getWebsite = async ({
     url,
     domain,
   });
+  const [collection] = await connect("Websites");
 
   try {
-    const [collection] = await connect("Websites");
     const website = (await collection.findOne(params)) as Website;
 
     return [website, collection];

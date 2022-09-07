@@ -28,15 +28,18 @@ export const addPaymentSubscription = async (
 
   return response;
 };
-export const cancelSubscription = async (_, { email }, context) => {
+
+// todo: handle email cancellation instead of token to send email to confirm
+export const cancelSubscription = async (_, { _email }, context) => {
   const { userId: keyid } = getPayLoad(context);
 
   let response;
 
+  // todo: if _email found send confirmation if token not found
+
   try {
     response = await UsersController().cancelSubscription({
       keyid,
-      email,
     });
 
     if (response?.user) {
