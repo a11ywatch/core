@@ -7,6 +7,7 @@ import { getUser } from "../../core/controllers/users";
 import { StatusCode } from "../messages/message";
 import type { FastifyInstance } from "fastify";
 import { validateUID } from "../params/extracter";
+import { limiter } from "../limiters";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -60,7 +61,7 @@ const onAuthGithub = (requestToken: string): Promise<any> => {
 
 // set all authentication routes
 export const setAuthRoutes = (app: FastifyInstance) => {
-  app.post("/api/register", async (req, res) => {
+  app.post("/api/register", limiter, async (req, res) => {
     try {
       const auth = await createUser(req.body);
 
@@ -73,7 +74,7 @@ export const setAuthRoutes = (app: FastifyInstance) => {
       });
     }
   });
-  app.post("/api/login", async (req, res) => {
+  app.post("/api/login", limiter, async (req, res) => {
     try {
       const auth = await verifyUser(req.body);
 
@@ -95,29 +96,31 @@ export const setAuthRoutes = (app: FastifyInstance) => {
 
   // A NEW INSTANCE OF THE APP BASIC PING (RUNS ONCE ON APP START)
   app.post("/api/ping", async (req, res) => {
-    const usr = getUserFromToken(req.cookies.jwt);
+    setImmediate(async () => {
+      const usr = getUserFromToken(req.cookies.jwt);
+      const id = usr?.payload?.keyid;
 
-    const id = usr?.payload?.keyid;
+      if (validateUID(id)) {
+        const [user, collection] = await getUser({ id });
 
-    if (validateUID(id)) {
-      const [user, collection] = await getUser({ id });
-
-      if (user) {
-        await collection.updateOne(
-          { id },
-          {
-            $set: {
-              lastLoginDate: new Date(),
-            },
-          }
-        );
+        if (user) {
+          await collection.updateOne(
+            { id },
+            {
+              $set: {
+                lastLoginDate: new Date(),
+              },
+            }
+          );
+        }
       }
-    }
+    });
 
     res.status(200).send();
   });
 
-  app.get("/github/callback", async (req, res) => {
+  // todo: whitelist only github domains
+  app.get("/github/callback", limiter, async (req, res) => {
     const requestToken = (req.query as any).code + "";
     let authentication;
 
