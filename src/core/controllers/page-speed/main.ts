@@ -20,20 +20,15 @@ export const getPageSpeedPaging = async (p, chain?: boolean) => {
     }
   }
 
-  try {
-    const items = await collection
-      .find(params)
-      .skip(offset)
-      .limit(limit)
-      .toArray();
+  const items = await collection
+    .find(params)
+    .skip(offset)
+    .limit(limit)
+    .toArray();
 
-    const pages = items ?? [];
+  const pages = items ?? [];
 
-    return chain ? [pages, collection] : pages;
-  } catch (e) {
-    console.error(e);
-    return chain ? [[], null] : [];
-  }
+  return chain ? [pages, collection] : pages;
 };
 
 // PageSpeed insights by lighthouse

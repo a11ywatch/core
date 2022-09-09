@@ -70,38 +70,25 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     const searchProps = websiteSearchParams({ pageUrl, userId });
     let scripts = null;
 
-    try {
-      if (Object.keys(searchProps).length) {
-        scripts = await collection.findOne(searchProps);
-      }
-
-      return chain ? [scripts, collection] : scripts;
-    } catch (e) {
-      console.error(e);
-      return chain ? [null, collection] : null;
+    if (Object.keys(searchProps).length) {
+      scripts = await collection.findOne(searchProps);
     }
+
+    return chain ? [scripts, collection] : scripts;
   },
   getScripts: async function ({ userId, pageUrl }) {
     const [collection] = await connect("Scripts");
     const searchProps = websiteSearchParams({ pageUrl, userId });
 
-    try {
-      return await collection.find(searchProps).limit(1000).toArray();
-    } catch (e) {
-      console.error(e);
-    }
+    return await collection.find(searchProps).limit(1000).toArray();
   },
   getWebsiteScripts: async function ({ userId, domain }) {
     const [collection] = await connect("Scripts");
     const searchProps = websiteSearchParams({ domain, userId });
     let scripts = [];
 
-    try {
-      if (Object.keys(searchProps).length) {
-        scripts = await collection.find(searchProps).limit(0).toArray();
-      }
-    } catch (e) {
-      console.error(e);
+    if (Object.keys(searchProps).length) {
+      scripts = await collection.find(searchProps).limit(0).toArray();
     }
 
     return scripts;
@@ -127,33 +114,29 @@ export const ScriptsController = ({ user } = { user: null }) => ({
       prevScript.scriptMeta = scriptMeta;
     }
 
-    try {
-      const script = (await controller.setScript({
-        script: prevScript,
-        editScript: !!editScript,
-        newScript: newScript,
-        url: decodeURIComponent(pageUrl),
-        userId,
-      })) as any;
+    const script = (await controller.setScript({
+      script: prevScript,
+      editScript: !!editScript,
+      newScript: newScript,
+      url: decodeURIComponent(pageUrl),
+      userId,
+    })) as any;
 
-      // the response
-      let updatedScript;
+    // the response
+    let updatedScript;
 
-      if (script) {
-        updatedScript = Object.assign({}, prevScript, script);
-      }
-
-      if (Object.keys(params).length) {
-        await collection.updateOne(params, {
-          $set: updatedScript,
-        });
-      }
-
-      return Object.assign({}, DEFAULT_RESPONSE, {
-        script: updatedScript,
-      });
-    } catch (e) {
-      console.error(e);
+    if (script) {
+      updatedScript = Object.assign({}, prevScript, script);
     }
+
+    if (Object.keys(params).length) {
+      await collection.updateOne(params, {
+        $set: updatedScript,
+      });
+    }
+
+    return Object.assign({}, DEFAULT_RESPONSE, {
+      script: updatedScript,
+    });
   },
 });

@@ -10,15 +10,7 @@ export const cleanUpDeprecatedFields = async (fields) => {
   const [collection] = await connect("Pages");
   const [websiteCollection] = await connect("Websites");
 
-  try {
-    await collection.updateMany({}, { $unset: fields });
-  } catch (e) {
-    console.error(e);
-  }
+  await collection.updateMany({}, { $unset: fields });
 
-  try {
-    await websiteCollection.updateMany({}, { $unset: fields });
-  } catch (e) {
-    console.error(e);
-  }
+  await websiteCollection.updateMany({}, { $unset: fields });
 };

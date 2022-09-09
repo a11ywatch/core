@@ -146,26 +146,22 @@ const sendMailMultiPage = async ({
 
     // if errors exist send email
     if (Number(totalIssues) >= 1) {
-      try {
-        await transporter.sendMail(
-          Object.assign({}, mailOptions, {
-            to: user.email,
-            subject: `[Report] ${totalIssues} ${pluralize(
-              totalIssues,
-              "issue"
-            )} found with ${domain}.`,
-            html: `
+      transporter.sendMail(
+        Object.assign({}, mailOptions, {
+          to: user.email,
+          subject: `[Report] ${totalIssues} ${pluralize(
+            totalIssues,
+            "issue"
+          )} found with ${domain}.`,
+          html: `
             <div style="margin-bottom: 12px; margin-top: 8px;">Login to see the full report.</div>
             ${issuesTable}<br />${footer.marketing({
-              userId,
-              email: user?.email,
-            })}`,
-          }),
-          sendMailCallback
-        );
-      } catch (e) {
-        console.error(e);
-      }
+            userId,
+            email: user?.email,
+          })}`,
+        }),
+        sendMailCallback
+      );
     }
   }
 };
@@ -178,18 +174,14 @@ export const emailMessager = {
     html,
   }: any) => {
     if (emailConfirmed && email && subject && html) {
-      try {
-        await transporter.sendMail(
-          Object.assign({}, mailOptions, {
-            to: email,
-            subject: subject,
-            html,
-          }),
-          sendMailCallback
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      transporter.sendMail(
+        Object.assign({}, mailOptions, {
+          to: email,
+          subject: subject,
+          html,
+        }),
+        sendMailCallback
+      );
     }
   },
   // send issues related to domain email report

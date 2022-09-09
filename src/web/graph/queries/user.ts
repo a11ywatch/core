@@ -8,14 +8,9 @@ export const user = async (_, { id, password }, ctx) => {
   });
 
   if (typeof userId !== undefined && userId !== null) {
-    let user;
-    try {
-      [user] = await UsersController().getUser({
-        id: userId,
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    const [user] = await UsersController().getUser({
+      id: userId,
+    });
 
     if (!user) {
       return null;

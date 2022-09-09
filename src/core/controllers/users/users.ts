@@ -126,80 +126,75 @@ export const UsersController: UserControllerType = (
   validateEmail,
   unsubscribeEmails,
   sendWebsiteOffline: async ({ id, domain }) => {
-    try {
-      const [user, collection] = await getUser({ id });
+    const [user, collection] = await getUser({ id });
 
-      if (user?.alertEnabled === false || !domain) {
-        return false;
-      }
+    if (user?.alertEnabled === false || !domain) {
+      return false;
+    }
 
-      const [website, websiteCollection] = await getWebsite({
-        userId: id,
-        domain,
-      });
+    const [website, websiteCollection] = await getWebsite({
+      userId: id,
+      domain,
+    });
 
-      if (website) {
-        await websiteCollection.findOneAndUpdate(
-          { userId: id, domain: domain },
-          {
-            $set: {
-              online: false,
-            },
-          }
-        );
-      }
-
-      let shouldEmail = false;
-
-      if (user?.downAlerts?.length) {
-        const newAlerts = user?.downAlerts?.map((item: any) => {
-          if (
-            item.domain === domain &&
-            isBefore(new Date(), new Date(item?.date))
-          ) {
-            shouldEmail = true;
-            item.date = new Date().toUTCString();
-          }
-          return item;
-        });
-        if (shouldEmail) {
-          await collection.findOneAndUpdate(
-            { id: id },
-            {
-              $set: {
-                downAlerts: newAlerts,
-              },
-            }
-          );
+    if (website) {
+      await websiteCollection.findOneAndUpdate(
+        { userId: id, domain: domain },
+        {
+          $set: {
+            online: false,
+          },
         }
-      } else {
-        const downAlerts = [{ domain, date: new Date().toUTCString() }];
-        shouldEmail = true;
+      );
+    }
+
+    let shouldEmail = false;
+
+    if (user?.downAlerts?.length) {
+      const newAlerts = user?.downAlerts?.map((item: any) => {
+        if (
+          item.domain === domain &&
+          isBefore(new Date(), new Date(item?.date))
+        ) {
+          shouldEmail = true;
+          item.date = new Date().toUTCString();
+        }
+        return item;
+      });
+      if (shouldEmail) {
         await collection.findOneAndUpdate(
           { id: id },
           {
             $set: {
-              downAlerts,
+              downAlerts: newAlerts,
             },
           }
         );
       }
-      if (shouldEmail) {
-        await transporter.sendMail(
-          {
-            ...mailOptions,
-            to: user.email,
-            subject: `${domain} is Offline.`,
-            html: `<h1>${domain} is currently offline.</h1><br /><p>Please check your server logs to see what happened if issues are difficult to figure out.</p><br />${footer.marketing(
-              { userId: id, email: user?.email }
-            )}`,
+    } else {
+      const downAlerts = [{ domain, date: new Date().toUTCString() }];
+      shouldEmail = true;
+      await collection.findOneAndUpdate(
+        { id: id },
+        {
+          $set: {
+            downAlerts,
           },
-          sendMailCallback
-        );
-      }
-    } catch (e) {
-      console.error(e);
-      return false;
+        }
+      );
+    }
+    if (shouldEmail) {
+      transporter.sendMail(
+        {
+          ...mailOptions,
+          to: user.email,
+          subject: `${domain} is Offline.`,
+          html: `<h1>${domain} is currently offline.</h1><br /><p>Please check your server logs to see what happened if issues are difficult to figure out.</p><br />${footer.marketing(
+            { userId: id, email: user?.email }
+          )}`,
+        },
+        sendMailCallback
+      );
     }
   },
   setPageSpeedKey: async ({ id, pageSpeedApiKey }) => {

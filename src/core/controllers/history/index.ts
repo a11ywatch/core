@@ -7,24 +7,14 @@ export const HistoryController = ({ user } = { user: null }) => ({
     url?: string;
     domain?: string;
   }) => {
-    try {
-      const [collection] = await connect("History");
-      const searchProps = websiteSearchParams(params);
-      const history = await collection.findOne(searchProps);
+    const [collection] = await connect("History");
+    const searchProps = websiteSearchParams(params);
+    const history = await collection.findOne(searchProps);
 
-      return [history, collection];
-    } catch (e) {
-      console.error(e);
-      return [null, null];
-    }
+    return [history, collection];
   },
   getHistory: async ({ userId }) => {
-    try {
-      const [collection] = await connect("History");
-      return await collection.find({ userId }).limit(100).toArray();
-    } catch (e) {
-      console.error(e);
-      return [null];
-    }
+    const [collection] = await connect("History");
+    return await collection.find({ userId }).limit(100).toArray();
   },
 });

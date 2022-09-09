@@ -51,11 +51,7 @@ export const updateApiUsage = async ({ id }) => {
 
   user.apiUsage = updateCollectionProps.apiUsage;
 
-  try {
-    await collection.updateOne({ id }, { $set: updateCollectionProps });
-  } catch (e) {
-    console.error(e);
-  }
+  await collection.updateOne({ id }, { $set: updateCollectionProps });
 
   return [user, collection, true];
 };

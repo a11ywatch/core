@@ -24,20 +24,16 @@ export const crawlMultiSiteWithEvent = (
   const { url, userId, subdomains, tld } = props;
 
   return new Promise(async (resolve) => {
-    try {
-      // start site-wide crawls
-      setImmediate(async () => {
-        await watcherCrawl({
-          url,
-          scan: false,
-          userId,
-          subdomains: !!subdomains,
-          tld: !!tld,
-        });
+    // start site-wide crawls
+    setImmediate(async () => {
+      await watcherCrawl({
+        url,
+        scan: false,
+        userId,
+        subdomains: !!subdomains,
+        tld: !!tld,
       });
-    } catch (e) {
-      console.error(e);
-    }
+    });
 
     let requestTimeout;
 

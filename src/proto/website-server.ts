@@ -10,13 +10,14 @@ import { loadProto } from "./website";
 
 let server: Server;
 
+// create a top level gRPC server
 export const createServer = async () => {
-  const websiteProto = await loadProto();
+  const websiteProto = await loadProto(); // crawler handling proto
   const coreProto = await loadProto("apicore.proto");
 
   server = new Server();
 
-  // crawl controll website service
+  // crawl control website service
   server.addService(
     websiteProto["website.WebsiteService"] as ServiceDefinition,
     {
@@ -47,8 +48,12 @@ export const createServer = async () => {
 
 export const killServer = async () => {
   const websiteProto = await loadProto();
+  const coreProto = await loadProto("apicore.proto");
+
   server.removeService(
     websiteProto["website.WebsiteService"] as ServiceDefinition
   );
+  server.removeService(coreProto["apicore.CoreService"] as ServiceDefinition);
+
   server.forceShutdown();
 };

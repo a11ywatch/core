@@ -27,6 +27,7 @@ export const getPages = async (
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
+    return chain ? [[], collection] : [];
   }
 };
 
@@ -42,28 +43,18 @@ export const getPage = async ({
   const [collection] = await connect("Pages");
   const searchProps = websiteSearchParams({ url, userId });
 
-  try {
-    const website = await collection.findOne(searchProps);
+  const website = await collection.findOne(searchProps);
 
-    return [website, collection];
-  } catch (e) {
-    console.error(e);
-    return [null, null];
-  }
+  return [website, collection];
 };
 
 // get all the pages in the database
 export const getAllPages = async () => {
   const [collection] = await connect("Pages");
 
-  try {
-    const websites = await collection.find({}).limit(0).toArray();
+  const websites = await collection.find({}).limit(0).toArray();
 
-    return [websites, collection];
-  } catch (e) {
-    console.error(e);
-    return [null];
-  }
+  return [websites, collection];
 };
 
 // get websites for a user with pagination offsets.
@@ -94,33 +85,27 @@ export const getPagesPaging = async (
     params = domainNameFind(params, domain);
   }
 
-  try {
-    const pages = await collection
-      .find(params)
-      .skip(offset)
-      .limit(limit)
-      .toArray();
+  const pages = await collection
+    .find(params)
+    .skip(offset)
+    .limit(limit)
+    .toArray();
 
-    // run with insight relationship
-    if (insights) {
-      for (let i = 0; i < pages.length; i++) {
-        const cp = pages[i];
+  // run with insight relationship
+  if (insights) {
+    for (let i = 0; i < pages.length; i++) {
+      const cp = pages[i];
 
-        const { json } =
-          (await PageSpeedController().getWebsite({
-            userId,
-            pageUrl: cp.url,
-          })) ?? {};
-        if (json) {
-          pages[i].insight = { json };
-        }
+      const { json } =
+        (await PageSpeedController().getWebsite({
+          userId,
+          pageUrl: cp.url,
+        })) ?? {};
+      if (json) {
+        pages[i].insight = { json };
       }
     }
-
-    return chain ? [pages, collection] : pages;
-  } catch (e) {
-    console.error(e);
-
-    return [null, null];
   }
+
+  return chain ? [pages, collection] : pages;
 };

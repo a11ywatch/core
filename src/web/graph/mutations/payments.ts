@@ -10,20 +10,14 @@ export const addPaymentSubscription = async (
 ) => {
   const { userId: keyid } = getPayLoad(context);
 
-  let response;
+  const response = await UsersController().addPaymentSubscription({
+    keyid,
+    stripeToken,
+    yearly,
+  });
 
-  try {
-    response = await UsersController().addPaymentSubscription({
-      keyid,
-      stripeToken,
-      yearly,
-    });
-
-    if (response?.user) {
-      context.res.cookie("jwt", response.user.jwt, cookieConfigs);
-    }
-  } catch (e) {
-    console.error(e);
+  if (response?.user) {
+    context.res.cookie("jwt", response.user.jwt, cookieConfigs);
   }
 
   return response;
@@ -37,17 +31,13 @@ export const cancelSubscription = async (_, { _email }, context) => {
 
   // todo: if _email found send confirmation if token not found
 
-  try {
-    response = await UsersController().cancelSubscription({
-      keyid,
-    });
+  response = await UsersController().cancelSubscription({
+    keyid,
+  });
 
-    if (response?.user) {
-      context.res.clearCookie("jwt");
-      context.res.cookie("jwt", response.user.jwt, cookieConfigs);
-    }
-  } catch (e) {
-    console.error(e);
+  if (response?.user) {
+    context.res.clearCookie("jwt");
+    context.res.cookie("jwt", response.user.jwt, cookieConfigs);
   }
 
   return response;

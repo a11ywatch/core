@@ -4,35 +4,33 @@ import { domainNameFind, websiteSearchParams } from "../../utils";
 // get analytics by domain for a user with pagination offsets.
 export const getAnalyticsPaging = async (params, chain?: boolean) => {
   const { userId, domain, limit = 20, offset = 0, all = false } = params ?? {};
+  const [collection] = await connect("Analytics");
+
+  let filters = {};
+
+  if (typeof userId !== "undefined") {
+    filters = { userId };
+  }
+
+  if (typeof domain !== "undefined" && domain) {
+    if (all) {
+      filters = domainNameFind(filters, domain);
+    } else {
+      filters = { ...filters, domain };
+    }
+  }
 
   try {
-    const [collection] = await connect("Analytics");
-
-    let params = {};
-
-    if (typeof userId !== "undefined") {
-      params = { userId };
-    }
-
-    if (typeof domain !== "undefined" && domain) {
-      if (all) {
-        params = domainNameFind(params, domain);
-      } else {
-        params = { ...params, domain };
-      }
-    }
-
-    const items = await collection
-      .find(params)
+    const pages = await collection
+      .find(filters)
       .skip(offset)
       .limit(limit)
       .toArray();
 
-    const pages = items ?? [];
-
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
+    return chain ? [null, collection] : [];
   }
 };
 
@@ -51,11 +49,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     let analytics;
 
     if (Object.keys(searchProps).length) {
-      try {
-        analytics = await collection.findOne(searchProps);
-      } catch (e) {
-        console.error(e);
-      }
+      analytics = await collection.findOne(searchProps);
     }
 
     return chain ? [analytics, collection] : analytics;

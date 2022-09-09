@@ -6,89 +6,76 @@ export const getIssue = async (
   { url, pageUrl, userId, noRetries }: any,
   chain?: boolean
 ) => {
-  try {
-    const [collection] = await connect("Issues");
-    const queryUrl = decodeURIComponent(String(url || pageUrl));
+  const [collection] = await connect("Issues");
 
-    const searchProps = websiteSearchParams({
-      pageUrl: queryUrl,
-      userId,
-    });
+  const queryUrl = decodeURIComponent(String(url || pageUrl));
 
-    let issue;
+  const searchProps = websiteSearchParams({
+    pageUrl: queryUrl,
+    userId,
+  });
 
-    // TODO: remove props and allow all
-    if (Object.keys(searchProps).length) {
-      issue = await collection.findOne(searchProps);
+  // todo: set default type
+  let issue;
 
-      // get issues from general bucket
-      if (!issue && !noRetries) {
-        issue = await collection.findOne({ pageUrl: queryUrl });
-      }
+  // TODO: remove props and allow all
+  if (Object.keys(searchProps).length) {
+    issue = await collection.findOne(searchProps);
 
-      if (!issue && !noRetries) {
-        issue = await collection.findOne({
-          domain: getHostName(queryUrl),
-        });
-      }
+    // get issues from general bucket
+    if (!issue && !noRetries) {
+      issue = await collection.findOne({ pageUrl: queryUrl });
     }
 
-    return chain ? [issue, collection] : issue;
-  } catch (e) {
-    console.error(e);
-    return [null, null];
+    if (!issue && !noRetries) {
+      issue = await collection.findOne({
+        domain: getHostName(queryUrl),
+      });
+    }
   }
+
+  return chain ? [issue, collection] : issue;
 };
 
-export const getIssues = async ({ userId, domain, pageUrl }: any) => {
-  try {
-    const [collection] = await connect("Issues");
+// query issue collection by limit
+export const getIssues = async (
+  {
+    userId,
+    domain,
+    pageUrl,
+  }: { userId: number; domain?: string; pageUrl?: string },
+  limit: number = 2000
+) => {
+  const [collection] = await connect("Issues");
+  const searchProps = websiteSearchParams({
+    domain: domain || getHostName(pageUrl),
+    userId,
+  });
 
-    const searchProps = websiteSearchParams({
-      domain: domain || getHostName(pageUrl),
-      userId,
-    });
-
-    // TODO: PAGINATION
-    return await collection
-      .find(searchProps)
-      .sort({ pageUrl: 1 })
-      .limit(2000)
-      .toArray();
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
+  // todo: PAGINATION
+  return await collection
+    .find(searchProps)
+    .sort({ pageUrl: 1 })
+    .limit(limit)
+    .toArray();
 };
 
 // get issues for a user with pagination offsets.
 export const getIssuesPaging = async (params) => {
-  try {
-    const [collection] = await connect("Issues");
-    const {
-      userId,
-      domain,
-      pageUrl,
-      limit = 20,
-      offset = 0,
-      all,
-    } = params ?? {};
+  const [collection] = await connect("Issues");
+  const { userId, domain, pageUrl, limit = 20, offset = 0, all } = params ?? {};
 
-    const searchParams = websiteSearchParams({
-      domain: domain || getHostName(pageUrl),
-      userId,
-      all,
-    });
+  const searchParams = websiteSearchParams({
+    domain: domain || getHostName(pageUrl),
+    userId,
+    all,
+  });
 
-    const issues = (await collection
-      .find(searchParams)
-      .skip(offset)
-      .limit(limit)
-      .toArray()) as Issue[];
+  const issues = (await collection
+    .find(searchParams)
+    .skip(offset)
+    .limit(limit)
+    .toArray()) as Issue[];
 
-    return issues;
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
+  return issues;
 };

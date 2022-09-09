@@ -41,16 +41,11 @@ export const getPageActionsPaging = async (
 
   let items = [];
 
-  try {
-    if (Object.keys(params).length) {
-      items = await collection.find(params).skip(offset).limit(limit).toArray();
-    }
-
-    const pages = items ?? [];
-
-    return chain ? [pages, collection] : pages;
-  } catch (e) {
-    console.error(e);
-    return [null, null];
+  if (Object.keys(params).length) {
+    items = await collection.find(params).skip(offset).limit(limit).toArray();
   }
+
+  const pages = items ?? [];
+
+  return chain ? [pages, collection] : pages;
 };

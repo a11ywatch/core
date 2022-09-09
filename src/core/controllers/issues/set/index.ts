@@ -7,14 +7,12 @@ export const addIssue = async ({ userId, url, issue }: any) => {
   if (!issueExist) {
     const id = await collection.countDocuments({ userId, url });
 
-    const newIssue = {
+    await collection.insertOne({
       userId,
       issue,
       id,
       url,
-    };
-
-    await collection.insertOne(newIssue);
+    });
   }
 
   return { code: 200, success: true, message: SUCCESS };

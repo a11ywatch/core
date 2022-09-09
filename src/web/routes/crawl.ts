@@ -26,30 +26,26 @@ export const crawlRest = async (
     return;
   }
 
-  try {
-    const userNext = await getUserFromApiScan(
-      req.headers.authorization,
-      req,
-      res
+  const userNext = await getUserFromApiScan(
+    req.headers.authorization,
+    req,
+    res
+  );
+
+  if (userNext) {
+    const { data, message } = await crawlMultiSiteWithEvent({
+      url,
+      userId: userNext.id,
+      subdomains: userNext?.role >= 1,
+      tld: userNext?.role >= 2,
+    });
+
+    res.send(
+      responseModel({
+        code: StatusCode.Ok,
+        data,
+        message,
+      })
     );
-
-    if (userNext) {
-      const { data, message } = await crawlMultiSiteWithEvent({
-        url,
-        userId: userNext.id,
-        subdomains: userNext?.role >= 1,
-        tld: userNext?.role >= 2,
-      });
-
-      res.send(
-        responseModel({
-          code: StatusCode.Ok,
-          data,
-          message,
-        })
-      );
-    }
-  } catch (e) {
-    console.error(e);
   }
 };
