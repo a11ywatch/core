@@ -32,8 +32,8 @@ export const watcherCrawl = async ({
     url: String(initUrl(url, true)),
     id: userId,
     robots,
-    subdomains: subdomains,
-    tld: tld,
+    subdomains,
+    tld,
   };
 
   let data;

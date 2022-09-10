@@ -35,6 +35,7 @@ export async function websiteWatch(
         true
       );
     } else {
+      // todo: chunk crawl via streams
       setImmediate(async () => {
         await watcherCrawl({
           url: url,
