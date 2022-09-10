@@ -360,6 +360,15 @@ export const crawlPage = async (
   return responseModel(responseData);
 };
 
+async function* entriesFromWebsite(
+  pages: string[],
+  userId: number
+): AsyncGenerator<[ResponseModel, string]> {
+  for (const url of pages) {
+    yield [await crawlPage({ url, userId }, false), url];
+  }
+}
+
 /*
  * Send request for crawl queue - Sends an email follow up on the crawl data. TODO: remove from file.
  * @return Promise<Websites | Pages>
@@ -367,19 +376,10 @@ export const crawlPage = async (
 export const crawlMultiSite = async (data) => {
   const { pages = [], userId: uid, user_id } = data;
   const userId = uid ?? user_id;
-  let responseData = [];
+  const responseData = [];
 
-  // get users for crawl job matching the urls
-  for (const url of pages) {
-    let scanResult;
-    try {
-      scanResult = await crawlPage({ url, userId }, false);
-    } catch (e) {
-      console.error(e);
-    }
-    if (scanResult?.data) {
-      responseData.push(scanResult.data);
-    }
+  for await (const [scanResult, url] of entriesFromWebsite(pages, userId)) {
+    responseData.push(scanResult.data ?? { url, online: scanResult.success });
   }
 
   return responseData;
