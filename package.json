@@ -34,7 +34,7 @@
     "graphql-redis-subscriptions": "^2.5.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-tag": "2.12.6",
-    "graphql-ws": "^5.10.0",
+    "graphql-ws": "^5.10.1",
     "ioredis": "^5.2.2",
     "jsonwebtoken": "8.5.1",
     "mongodb": "4.9.0",
