@@ -2,7 +2,7 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/e4ef08ad87b2fb9a2680/maintainability)](https://codeclimate.com/github/A11yWatch/a11ywatch-core/maintainability)
 
-Central API for A11yWatch available in REST, GraphQl, and GRPC.
+Central API for A11yWatch available in REST, GraphQl, and gRPC.
 
 ## Getting Started
 
@@ -18,6 +18,10 @@ or
 npm i
 npm run dev
 ```
+
+## Environmental variables
+
+Project configuration below:
 
 ### Emailing
 
@@ -38,6 +42,11 @@ SCRIPTS_ENABLED=true
 A11YWATCH_NO_STORE=false
 ```
 
+### Queue
+
+Set the limit to number of test in parallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.
+If you have kubernetes, docker swarm, or Fargate - you can increase this limit based on your chrome browser count.
+
 ## Testing
 
 In order to easily test the application we use [dagger](https://docs.dagger.io/)
@@ -45,10 +54,6 @@ In order to easily test the application we use [dagger](https://docs.dagger.io/)
 ```
 dagger do build
 ```
-
-## Queue
-
-Set the limit to number of test in parallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.
 
 ## LICENSE
 
