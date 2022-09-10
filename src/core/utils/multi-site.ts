@@ -1,4 +1,3 @@
-import { SUPER_MODE } from "../../config/config";
 import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
 import { crawlEmitter } from "../../event";
 import { domainName } from "./domain-name";
@@ -23,41 +22,23 @@ export const crawlMultiSiteWithEvent = (
 ): Promise<CrawlMultiSite> => {
   const { url, userId, subdomains, tld } = props;
 
-  return new Promise(async (resolve) => {
-    // start site-wide crawls
-    setImmediate(async () => {
-      await watcherCrawl({
-        url,
-        scan: false,
-        userId,
-        subdomains: !!subdomains,
-        tld: !!tld,
-      });
+  // start site-wide crawls
+  setImmediate(async () => {
+    await watcherCrawl({
+      url,
+      scan: false,
+      userId,
+      subdomains: !!subdomains,
+      tld: !!tld,
     });
+  });
 
-    let requestTimeout;
-
-    if (!SUPER_MODE) {
-      // Max limit 15mins. TODO: remove for full stream usage.
-      requestTimeout = setTimeout(() => {
-        resolve({
-          success: false,
-          data: null,
-          message:
-            "Scan exceeded timeout 15mins. Try to login and use the website for larger scans.",
-        });
-      }, 900000);
-    }
-
+  return new Promise(async (resolve) => {
     // wait for crawl event to finish.
     crawlEmitter.once(
       `crawl-${domainName(url)}-${userId || 0}`,
       (_target, data) => {
         const pageCount = data?.length ?? 0;
-
-        if (requestTimeout) {
-          clearTimeout(requestTimeout);
-        }
 
         resolve({
           data,

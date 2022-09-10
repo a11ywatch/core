@@ -6,15 +6,15 @@ export const getHostName = (url: string) => {
     return "";
   }
   let q = decodeURIComponent(url);
-  try {
-    if (!/^(http|https)/.test(q)) {
-      if (q.startsWith("://")) {
-        q = `https${q}`;
-      } else {
-        q = `https://${q}`;
-      }
+  if (!/^(http|https)/.test(q)) {
+    if (q.startsWith("://")) {
+      q = `https${q}`;
+    } else {
+      q = `https://${q}`;
     }
+  }
 
+  try {
     const { hostname } = new URL(q);
 
     return hostname;

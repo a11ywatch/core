@@ -408,20 +408,15 @@ const startServer = async (disableHttp?: boolean) => {
     await startGRPC();
 
     return new Promise(async (resolve, reject) => {
-      try {
-        if (disableHttp) {
-          serverReady = true;
-        } else {
-          [coreServer] = await initServer();
-          serverReady = true;
-        }
-        resolve([coreServer]);
-      } catch (e) {
-        console.error(["SERVER FAILED TO START", e]);
-        reject(e);
-      } finally {
-        appEmitter.emit("event:init", true);
+      if (disableHttp) {
+        serverReady = true;
+      } else {
+        [coreServer] = await initServer();
+        serverReady = true;
       }
+      appEmitter.emit("event:init", true);
+
+      resolve([coreServer]);
     });
   }
   return Promise.resolve();
@@ -440,18 +435,14 @@ const isReady = async () => {
 
 // shutdown the everything
 const killServer = async () => {
-  try {
-    await Promise.all([
-      coreServer?.close(),
-      closeDbConnection(),
-      closeRedisConnection(),
-      killGrpcServer(),
-    ]);
-    serverReady = false;
-    serverInited = false;
-  } catch (e) {
-    console.error("failed to shutdown server", e);
-  }
+  await Promise.all([
+    coreServer?.close(),
+    closeDbConnection(),
+    closeRedisConnection(),
+    killGrpcServer(),
+  ]);
+  serverReady = false;
+  serverInited = false;
 };
 
 export { coreServer, isReady, killServer, initServer, startServer };

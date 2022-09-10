@@ -192,13 +192,13 @@ export const Mutation = {
   toggleAlert: async (_, { alertEnabled }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
-    return await UsersController().toggleAlert({
+    return UsersController().toggleAlert({
       keyid,
       alertEnabled,
     });
   },
   toggleProfile: async (_, { profileVisible }, context) => {
-    return await UsersController().toggleProfile({
+    return UsersController().toggleProfile({
       keyid: context.user?.payload?.keyid,
       profileVisible,
     });

@@ -67,6 +67,7 @@ const downloadToExcel = async (
     res.status(StatusCode.Ok).send(buffer);
   } catch (e) {
     console.error(e);
+    res.status(StatusCode.Error).send();
   }
 };
 

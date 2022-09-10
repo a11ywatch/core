@@ -61,44 +61,39 @@ export const updateWebsite = async ({
     pageParams.ua = ua;
   }
 
-  try {
-    await collection.updateOne({ url, userId }, { $set: pageParams });
-  } catch (e) {
-    console.error(e);
-  }
+  await collection.updateOne({ url, userId }, { $set: pageParams });
 
   // store into actions collection TODO: validate actions
   if (actionsEnabled && actions) {
     const [actionsCollection] = await connect("PageActions");
     const domain = website.domain;
 
-    actions.forEach(async (action) => {
-      try {
-        const update = {
-          $set: {
-            ...action,
-            userId,
-            domain,
-          },
-        };
-        const path =
-          action.path && action.path[0] === "/"
-            ? action.path
-            : `/${action.path}`;
-
-        await actionsCollection.updateOne(
-          {
-            userId,
-            domain,
-            path,
-          },
-          update,
-          { upsert: true }
-        );
-      } catch (e) {
-        console.error(e);
+    for (let i = 0; i < actions.length; i++) {
+      // prevent large actions from running
+      if (i > 1000) {
+        break;
       }
-    });
+      const action = actions[i];
+      const update = {
+        $set: {
+          ...action,
+          userId,
+          domain,
+        },
+      };
+      const path =
+        action.path && action.path[0] === "/" ? action.path : `/${action.path}`;
+
+      await actionsCollection.updateOne(
+        {
+          userId,
+          domain,
+          path,
+        },
+        update,
+        { upsert: true }
+      );
+    }
   }
 
   return {
