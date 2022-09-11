@@ -1,8 +1,12 @@
 import { MongoClient, Collection } from "mongodb";
+import { EventEmitter } from "events";
 import { config } from "../config/config";
 
 let client: MongoClient; // shared client across application
 let connected = false; // is client connected
+let connectionState: "init" | "establishing" | "determined" = "init"; // determine connectivity detection state
+
+const dbEmitter = new (class DBEmitter extends EventEmitter {})();
 
 // create a mongodb client.
 const createClient = (dbconnection?: string): MongoClient => {
@@ -10,8 +14,9 @@ const createClient = (dbconnection?: string): MongoClient => {
 
   try {
     client = new MongoClient(dbconnection || config.DB_URL);
+    connected = true;
   } catch (_) {
-    console.info(
+    console.error(
       "MongoDB not established. Start mongo on port 27017 to persist data."
     );
   }
@@ -19,16 +24,17 @@ const createClient = (dbconnection?: string): MongoClient => {
   return client;
 };
 
+// establish top level db connection
 const initDbConnection = async (dbconnection?: string) => {
   client = createClient(dbconnection);
 
   if (client) {
-    try {
-      client = await client?.connect();
-      connected = true;
-    } catch (e) {
-      console.error("MongoDB failed to connected.");
-    }
+    client = await client.connect();
+  }
+
+  if (connectionState !== "determined") {
+    dbEmitter.emit("event:init");
+    connectionState = "determined";
   }
 };
 
@@ -36,46 +42,36 @@ const initDbConnection = async (dbconnection?: string) => {
 const connect = async (
   collectionType = "Websites"
 ): Promise<[Collection, MongoClient]> => {
-  let collection: Collection<any>;
-
-  try {
-    const db = await client?.db(config.DB_NAME);
-    collection = await db?.collection(collectionType);
-  } catch (e) {
-    console.error(e);
-  }
+  const db = await client?.db(config.DB_NAME);
+  const collection: Collection<any> = await db?.collection(collectionType);
 
   return [collection, client];
 };
 
 const closeDbConnection = async () => {
   if (connected) {
-    try {
-      await client?.close();
-      connected = false;
-    } catch (e) {
-      console.error(e);
-    }
+    await client.close();
+    connected = false;
   }
 };
 
-// pool status until connected max timeout of 80ms
+// determine connection status
 const pollTillConnected = async (): Promise<boolean> => {
   return new Promise((resolve) => {
-    if (connected) {
-      resolve(connected);
-    } else {
-      const maxTimer = setTimeout(() => {
-        clearInterval(timerr);
+    // if the connection state has not ran yet
+    if (connectionState !== "determined") {
+      const maxTimeout = setTimeout(() => {
         resolve(connected);
-      }, 80);
-      const timerr = setInterval(() => {
-        if (connected) {
-          clearInterval(timerr);
-          clearTimeout(maxTimer);
-          resolve(true);
+      }, 100);
+      connectionState = "establishing"; // mid state to determine extra reqs
+      dbEmitter.once("event:init", () => {
+        if (maxTimeout) {
+          clearTimeout(maxTimeout);
         }
-      }, 2);
+        resolve(connected);
+      });
+    } else {
+      resolve(connected);
     }
   });
 };

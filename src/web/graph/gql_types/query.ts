@@ -2,7 +2,6 @@ import gql from "graphql-tag";
 
 export const query = gql`
   type Query {
-    features: [Feature]
     websites: [Website]
     website(url: String): Website
     pages(filter: String): [Pages]
