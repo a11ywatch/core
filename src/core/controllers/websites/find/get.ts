@@ -70,9 +70,10 @@ export const getWebsitesPaginated = async (
 ): Promise<[Website[], any]> => {
   const [collection] = await connect("Websites");
 
+  // websites stored only contain users
   const data = await collection
-    .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
-    .sort({ order: 1 })
+    .find({ ...filter })
+    .sort({ order: 1 }) // todo: optional sorting
     .project({ url: 1, userId: 1, subdomains: 1, tld: 1 })
     .limit(limit)
     .skip(offset ?? limit * page)

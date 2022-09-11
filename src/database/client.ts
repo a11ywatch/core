@@ -59,7 +59,7 @@ const closeDbConnection = async () => {
   }
 };
 
-// pool status until connected max timeout of 50ms
+// pool status until connected max timeout of 80ms
 const pollTillConnected = async (): Promise<boolean> => {
   return new Promise((resolve) => {
     if (connected) {
@@ -79,6 +79,8 @@ const pollTillConnected = async (): Promise<boolean> => {
     }
   });
 };
+
+// todo: determine indexs on startup for application
 
 export {
   client,

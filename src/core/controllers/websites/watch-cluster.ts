@@ -2,23 +2,29 @@ import { getHours } from "date-fns";
 import { getWebsitesPaginated } from "../websites";
 import { websiteWatch } from "./watch-pages";
 
+// get users recursively
+const _getUsersUntil = async (
+  page: number = 0,
+  userFilter: Record<string, unknown>
+) => {
+  const [pages] = await getWebsitesPaginated(20, userFilter, page);
+
+  if (pages && pages?.length) {
+    await websiteWatch(pages);
+    return await _getUsersUntil(page + 2, userFilter);
+  }
+};
+
 // get all users and filter by morning or night and run website scans daily.
 export const crawlAllAuthedWebsitesCluster = async (): Promise<void> => {
   const morning = getHours(new Date()) === 11;
   const userFilter = morning ? { emailMorningOnly: { eq: true } } : {};
 
-  console.info(morning ? `Started: morning CRON` : "Started: night CRON");
+  console.info("CRON * running");
 
-  // get all websites by users batched async and run website scans.
-  const getUsersUntil = async (page = 0) => {
-    const [pages] = await getWebsitesPaginated(20, userFilter, page);
-    const hasPages = pages && pages?.length;
-
-    if (hasPages) {
-      await websiteWatch(pages);
-      return await getUsersUntil(page + 1);
-    }
-  };
-
-  await getUsersUntil();
+  // run even and odd async ops to gather users
+  await Promise.race([
+    _getUsersUntil(0, userFilter),
+    _getUsersUntil(1, userFilter),
+  ]);
 };

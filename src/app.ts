@@ -369,13 +369,11 @@ async function initServer(): Promise<HttpServer[]> {
       schema: gqlServerConfig.schema,
       execute,
       subscribe,
-      onConnect(_cnxnParams) {
-        const user = getUserFromToken(
-          _cnxnParams?.connectionParams?.authorization as string
-        );
-
+      onConnect(cnxnParams) {
         return {
-          userId: user?.payload?.keyid,
+          userId: getUserFromToken(
+            cnxnParams?.connectionParams?.authorization as string
+          )?.payload?.keyid,
         };
       },
     },
