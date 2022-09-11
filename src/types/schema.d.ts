@@ -281,7 +281,6 @@ export type PaymentSubScription = {
 
 export type Query = {
   __typename?: "Query";
-  features?: Maybe<Array<Maybe<Feature>>>;
   websites?: Maybe<Array<Maybe<Website>>>;
   website?: Maybe<Website>;
   pages?: Maybe<Array<Maybe<Pages>>>;

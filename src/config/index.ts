@@ -7,7 +7,6 @@ export {
   cookieConfigs,
   SUPER_MODE,
 } from "./config";
-export { features } from "./features";
 export {
   corsOptions,
   cronTimer,

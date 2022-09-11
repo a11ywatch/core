@@ -39,11 +39,24 @@ const cronTimer = DEV ? "0 1 * * *" : "0 16 * * *";
 
 const source = DEV ? "localhost" : ROOT_URL;
 
+// init server startup
 const logServerInit = (port, { graphqlPath = "/graphql" }) => {
+  // remove http/https:// from string
+  const _removeHttp = (url: string): string => {
+    const https = "https://";
+    if (url.startsWith(https)) {
+      return url.slice(https.length);
+    }
+    const http = "http://";
+    if (url.startsWith(http)) {
+      return url.slice(http.length);
+    }
+    return url;
+  };
   const uri = source.endsWith(port) ? source : `${source}:${port}`;
   console.log(`Server ready at ${uri}`);
-  console.log(`GraphQl Server ready at ${uri}${graphqlPath}`);
-  console.log(`Subscriptions ready at ws://${uri}${graphqlPath}`);
+  console.log(`GraphQL server ready at ${uri}${graphqlPath}`);
+  console.log(`Subscriptions ready at ws://${_removeHttp(uri)}${graphqlPath}`);
 };
 
 const fastifyConfig = {

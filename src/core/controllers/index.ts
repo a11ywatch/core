@@ -1,7 +1,6 @@
 export { WebsitesController } from "./websites";
 export { UsersController } from "./users";
 export { IssuesController } from "./issues";
-export { FeaturesController } from "./features";
 export { PagesController } from "./pages";
 export { HistoryController } from "./history";
 export { AnalyticsController } from "./analytics";

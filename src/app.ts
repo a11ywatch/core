@@ -405,13 +405,14 @@ const startServer = async (disableHttp?: boolean) => {
     // start the gRPC server
     await startGRPC();
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       if (disableHttp) {
         serverReady = true;
       } else {
         [coreServer] = await initServer();
         serverReady = true;
       }
+
       appEmitter.emit("event:init", true);
 
       resolve([coreServer]);
@@ -420,13 +421,13 @@ const startServer = async (disableHttp?: boolean) => {
   return Promise.resolve();
 };
 
-// determine if the server is completly ready
+// determine if the server is ready
 const isReady = async () => {
   return new Promise((resolve) => {
     if (serverReady) {
       resolve(true);
     } else {
-      appEmitter.once("event:init", resolve);
+      appEmitter.once("event:init", () => resolve(true));
     }
   });
 };
