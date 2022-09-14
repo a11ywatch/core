@@ -26,6 +26,7 @@ import {
 } from "./update";
 import { createUser } from "./set";
 import type { UserControllerType } from "./types";
+import { sendEmailConfirmation } from "./update/confirm-email";
 
 export const UsersController: UserControllerType = (
   { user: _user } = { user: null }
@@ -64,58 +65,110 @@ export const UsersController: UserControllerType = (
 
     throw new Error(GENERAL_ERROR);
   },
-  // TODO: Should be renamed update user password
-  updateUser: async ({ password, email, newPassword, stripeToken }) => {
-    const [user, collection] = await getUser({ email });
+  updateUser: async ({ password, email, newPassword, stripeToken, userId }) => {
+    const authed = typeof userId !== "undefined";
 
-    const salthash = saltHashPassword(password, user?.salt);
-    const authless = !user?.password && !user?.googleId;
+    const [user, collection] = await getUser(
+      authed ? { id: userId } : { email }
+    );
 
-    // TODO: SEPERATE PASSWORD RESETTING
-    if (
-      password &&
-      user?.password &&
-      user?.password !== salthash?.passwordHash
-    ) {
-      throw new Error(PASSWORD_ERROR);
-    }
     if (!user) {
       throw new Error("Error user not found.");
     }
 
-    if (
-      newPassword &&
-      (user?.password === salthash?.passwordHash || authless)
-    ) {
-      const jwt = await signJwt({
-        email,
-        role: user?.role,
-        keyid: user?.id,
-      });
-      const newSaltHash = saltHashPassword(newPassword);
+    let sendData = authed;
 
-      await collection.updateOne(
-        { email },
-        {
-          $set: {
-            jwt,
-            password: newSaltHash?.passwordHash,
-            salt: newSaltHash?.salt,
-            stripeToken,
-          },
-        }
-      );
+    // default props set to user defaults
+    let updateProps = {
+      jwt: user.jwt,
+      password: user.password,
+      salt: user.salt,
+      stripeToken: user?.stripeToken,
+      email: user.email,
+      emailConfirmed: user.emailConfirmed,
+    };
 
-      return {
-        user,
-        jwt,
-        code: 200,
-        success: true,
-        message: SUCCESS,
-      };
+    // update password
+    if (password) {
+      const salthash = saltHashPassword(password, user?.salt);
+      const authless = !user?.password && !user?.googleId;
+
+      if (user?.password && user.password !== salthash?.passwordHash) {
+        throw new Error(PASSWORD_ERROR);
+      }
+
+      // TODO: SEPERATE PASSWORD RESETTING
+      if (
+        newPassword &&
+        (user?.password === salthash?.passwordHash || authless)
+      ) {
+        const jwt = await signJwt({
+          email,
+          role: user?.role,
+          keyid: user?.id,
+        });
+        const newSaltHash = saltHashPassword(newPassword);
+
+        // set new auth props
+        updateProps = {
+          ...updateProps,
+          jwt,
+          password: newSaltHash?.passwordHash,
+          salt: newSaltHash?.salt,
+        };
+      }
+
+      sendData = true;
     }
 
-    throw new Error(GENERAL_ERROR);
+    // prevent invalid updates
+    if (sendData) {
+      // set new stripe token
+      if (stripeToken) {
+        updateProps = {
+          ...updateProps,
+          stripeToken,
+        };
+      }
+
+      // set new user email
+      if (email && email !== user.email) {
+        // send confirmation email
+        updateProps = {
+          ...updateProps,
+          email,
+          emailConfirmed: false,
+        };
+
+        await sendEmailConfirmation(user, collection);
+      }
+    }
+
+    await collection.updateOne(
+      { id: userId },
+      {
+        $set: updateProps,
+      }
+    );
+
+    return sendData
+      ? {
+          user: {
+            ...user,
+            ...updateProps,
+          },
+          jwt: updateProps.jwt, // todo: remove jwt from direct return for user.jwt
+          code: 200,
+          success: true,
+          message: SUCCESS,
+        }
+      : {
+          user: null,
+          jwt: "", // todo: remove jwt from direct return for user.jwt
+          code: 200,
+          success: false,
+          message: GENERAL_ERROR,
+        };
   },
   forgotPassword,
   resetPassword,

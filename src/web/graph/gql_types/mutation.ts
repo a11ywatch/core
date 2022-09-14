@@ -22,6 +22,7 @@ export const mutation = gql`
       password: String
       newPassword: String
       stripeToken: String
+      email: String
     ): UpdateUserMutationResponse
 
     toggleAlert(alertEnabled: Boolean): UpdateUserMutationResponse

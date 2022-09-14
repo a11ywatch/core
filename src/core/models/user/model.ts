@@ -26,6 +26,7 @@ const UserModel = {
   githubId: null,
   resetCode: null,
   pageSpeedApiKey: "",
+  stripeToken: "", // payments
 };
 
 // add defaults from user model and set the lastLoginDate to the current date
