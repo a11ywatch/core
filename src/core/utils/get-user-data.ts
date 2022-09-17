@@ -10,22 +10,15 @@ import { validateUID } from "../../web/params/extracter";
 
 // return a user from id
 export const getUserFromId = async (user, keyid) => {
-  let userData;
-  let collectionData;
-
   // a valid keyid required
   if (!validateUID(keyid)) {
     return [null, null];
   }
 
-  const [data, collection] = await UsersController({
+  // [data, collection]
+  return await UsersController({
     user,
   }).getUser({ id: keyid });
-
-  userData = data;
-  collectionData = collection;
-
-  return [userData, collectionData];
 };
 
 /*

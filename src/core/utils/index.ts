@@ -3,7 +3,6 @@ export { signJwt, decodeJwt, verifyJwt } from "./auth";
 export { transporter, mailOptions, sendMailCallback } from "./emailer";
 export { websiteSearchParams } from "./controller-filter";
 export { arrayAverage } from "./calculations";
-export { realUser } from "./getters";
 export { getUserFromToken, extractTokenKey } from "./get-user";
 export { usageExceededThreshold } from "./get-usage";
 export { getLastItemInCollection } from "./get-last-item-in-collection";

@@ -1,7 +1,6 @@
 import { isSameDay } from "date-fns";
 import { getUser } from "../controllers/users";
 import { getEmailAllowedForDay } from "../utils/filters";
-import { realUser } from "../utils";
 
 interface VerifySend {
   userId?: number;
@@ -18,8 +17,8 @@ export const verifyUserSend = async ({
   let userResponse;
   let collectionResponse;
 
-  // if the boolean is true the email send is allowed. TODO: remove from section.
-  if (sendEmail && realUser(userId)) {
+  // if the boolean is true the email send is allowed. todo: remove from section.
+  if (sendEmail) {
     const [user, collection] = await getUser({ id: userId });
     const userAlertsDisabled = !user || !user?.alertEnabled; // user alerts set to disabled.
     const confirmedOnlyUsers = confirmedOnly && !user?.emailConfirmed; // user email is not confirmed.
