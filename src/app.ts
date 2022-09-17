@@ -400,25 +400,25 @@ const startServer = async (disableHttp?: boolean) => {
     }
     // tracking event emitter
     establishCrawlTracking(); // quick setup all event emitters binding
-    // connect all clients
-    await connectClients();
-    // start the gRPC server
-    await startGRPC();
 
-    return new Promise(async (resolve) => {
-      if (disableHttp) {
-        serverReady = true;
-      } else {
-        [coreServer] = await initServer();
-        serverReady = true;
-      }
+    // gRPC startup
+    const [_, __, [hcore]] = await Promise.all([
+      connectClients(),
+      startGRPC(),
+      !disableHttp ? initServer() : Promise.resolve([]),
+    ]);
 
+    coreServer = hcore;
+    serverReady = true;
+
+    return new Promise((resolve) => {
       appEmitter.emit("event:init", true);
 
       resolve([coreServer]);
     });
   }
-  return Promise.resolve();
+
+  return Promise.resolve([]);
 };
 
 // determine if the server is ready
