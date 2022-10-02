@@ -15,12 +15,7 @@ import {
 } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
 import { getBaseParams, paramParser } from "./web/params/extracter";
-import {
-  CONFIRM_EMAIL,
-  IMAGE_CHECK,
-  ROOT,
-  UNSUBSCRIBE_EMAILS,
-} from "./core/routes";
+import { CONFIRM_EMAIL, IMAGE_CHECK, UNSUBSCRIBE_EMAILS } from "./core/routes";
 import {
   initDbConnection,
   closeDbConnection,
@@ -28,7 +23,7 @@ import {
   initRedisConnection,
   closeRedisConnection,
 } from "./database";
-import { confirmEmail, detectImage, root, unSubEmails } from "./web/routes";
+import { confirmEmail, detectImage, unSubEmails } from "./web/routes";
 import { statusBadge } from "./web/routes/resources/badge";
 import { scanSimple } from "./web/routes/scan";
 import { setGithubActionRoutes } from "./web/routes_groups/github-actions";
@@ -99,8 +94,6 @@ async function initServer(): Promise<HttpServer[]> {
   const fast: FastifyInstance = await fastify(fastifyConfig);
   await fast.register(await server.createHandler({ cors: corsOptions }));
   const app = await registerApp(fast);
-
-  app.get(ROOT, root); // root
 
   app.get("/status/:domain", statusBadge);
 
