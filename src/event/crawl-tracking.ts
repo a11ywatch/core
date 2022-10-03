@@ -126,11 +126,10 @@ const crawlProcessing = (call: ScanRpcCall) => {
       }
       if (crawlingSet[key].shutdown) {
         call.write({ message: "shutdown" });
+        call.end();
         await deInit(key, target);
       }
     }
-
-    call.end();
   });
 };
 

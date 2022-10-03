@@ -40,7 +40,6 @@ import { crawlRest } from "./web/routes/crawl";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
 import { updateWebsite } from "./core/controllers/websites/update";
-import { graphqlPlayground } from "./html";
 import { execute, subscribe } from "graphql";
 import { PageSpeedController } from "./core/controllers/page-speed/main";
 import { registerApp } from "./web/register";
@@ -95,21 +94,21 @@ async function initServer(): Promise<HttpServer[]> {
   await fast.register(await server.createHandler({ cors: corsOptions }));
   const app = await registerApp(fast);
 
-  app.get("/status/:domain", statusBadge);
+  app.get("/status/:domain", limiter, statusBadge);
 
   app.get("/playground", (_, res) => {
-    res.type("text/html").send(graphqlPlayground);
+    res.redirect("https://a11ywatch.com/playground");
   });
 
-  app.get("/grpc-docs", (_, res) => {
+  app.get("/grpc-docs", limiter, (_, res) => {
     res
       .type("text/html")
       .send(createReadStream(path.resolve("public/protodoc/index.html")));
   });
 
-  app.get("/api/iframe", createIframeEvent);
+  app.get("/api/iframe", limiter, createIframeEvent);
   // get a previus run report
-  app.get("/api/report", getWebsiteReport);
+  app.get("/api/report", limiter, getWebsiteReport);
   // retrieve a user from the database
   app.get("/api/user", async (req, res) => {
     const auth = req.headers.authorization;
@@ -187,7 +186,7 @@ async function initServer(): Promise<HttpServer[]> {
   app.post("/api/crawl-stream-slim", scanLimiter, crawlStreamSlim);
 
   // get base64 to image name
-  app.post(IMAGE_CHECK, detectImage);
+  app.post(IMAGE_CHECK, limiter, detectImage);
 
   /*
    * Update website configuration.

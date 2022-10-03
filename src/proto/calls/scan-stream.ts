@@ -13,10 +13,7 @@ export type ScanRpcCall = ServerWritableStream<ScanParams, {}>;
 
 // perform scan via streams enqueueing scan
 export const scanStream = async (call: ScanRpcCall) => {
-  process.nextTick(() => {
-    crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
-  });
+  crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
 
-  // TODO: remove queue for improved browser page handling puppeteer
   await crawlEnqueue(call.request); // queue to control output.
 };

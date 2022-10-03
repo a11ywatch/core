@@ -1,7 +1,7 @@
 import type { FastifyContext } from "apollo-server-fastify";
 import type { User } from "../../types/schema";
 import { UsersController } from "../controllers";
-import { RATE_EXCEEDED_ERROR } from "../strings";
+import { GENERAL_ERROR, RATE_EXCEEDED_ERROR } from "../strings";
 import { getUserFromToken, extractTokenKey } from "./get-user";
 import { config } from "../../config/config";
 import { frontendClientOrigin } from "./is-client";
@@ -50,7 +50,7 @@ export const getUserFromApi = async (
   const isClient = frontendClientOrigin(req.headers["origin"]);
 
   // auth required unless front-end client
-  if (!isClient && !token) {
+  if (!isClient && !authenticated) {
     res.send({
       data: null,
       message:
@@ -97,6 +97,61 @@ export const getUserFromApi = async (
   }
 
   return data;
+};
+
+/*
+ * Get the user if auth set or determine if request allowed.
+ * This method handles sending headers and will return void next action should not occur. [TODO: refactor]
+ * @return User
+ **/
+export const allowedNext = async (
+  token: string,
+  req: FastifyContext["request"],
+  res: FastifyContext["reply"],
+  mediaType?: "html" | "json"
+): Promise<User> => {
+  const jwt = extractTokenKey(token ? String(token).trim() : "");
+  const user = getUserFromToken(jwt);
+  const { keyid } = user?.payload ?? {};
+  const authenticated = typeof keyid !== "undefined";
+
+  // simply get the user and return [no updates on counters]
+  if (config.SUPER_MODE || authenticated) {
+    return {
+      id: keyid,
+    };
+  }
+
+  // check if origin is from front-end client simply allow rate limits or super mode
+  const isClient =
+    frontendClientOrigin(req.headers["origin"]) ||
+    frontendClientOrigin(req.headers["host"]) ||
+    frontendClientOrigin(req.headers["referer"]);
+
+  // auth required unless front-end client todo: determine application type
+  if (!isClient) {
+    if (mediaType === "html") {
+      res.type("text/html").send(`
+        <html>
+          <body>
+            <h1>${GENERAL_ERROR}</h1>
+          </body>
+        </html>
+      `);
+    } else {
+      res.send({
+        data: null,
+        message:
+          "Authentication required. Add your authentication header and try again.",
+        success: false,
+      });
+    }
+    return;
+  }
+
+  return {
+    id: keyid,
+  };
 };
 
 /*
