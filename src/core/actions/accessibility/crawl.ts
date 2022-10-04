@@ -154,14 +154,16 @@ export const crawlPage = async (
     const totalUptime = ttime + pastUptime;
 
     // check if scan has shut down
-    const updatedUser = {
-      ...userData,
-      scanInfo: {
-        ...userData?.scanInfo,
-        totalUptime,
-      },
-    };
-    shutdown = validateScanEnabled({ user: updatedUser }) === false;
+    shutdown =
+      validateScanEnabled({
+        user: {
+          role: userData?.role,
+          scanInfo: {
+            usageLimit: userData?.scanInfo?.usageLimit,
+            totalUptime,
+          },
+        },
+      }) === false;
     await collectionIncrement(
       {
         "scanInfo.totalUptime": ttime, // add new uptime to collection
@@ -237,7 +239,7 @@ export const crawlPage = async (
     setImmediate(async () => {
       // if ROOT domain for scan update Website Collection.
       if (rootPage) {
-        const { issuesInfo, ...updateProps } = updateWebsiteProps;
+        const { issuesInfo, issues, ...updateProps } = updateWebsiteProps;
 
         await collectionUpsert(
           updateProps,
@@ -256,13 +258,18 @@ export const crawlPage = async (
         );
 
         if (script) {
-          script.userId = userId;
-          // TODO: look into auto meta reason
-          if (!scripts?.scriptMeta) {
-            script.scriptMeta = {
-              skipContentEnabled: true,
-            };
-          }
+          script = Object.assign(
+            {},
+            script,
+            { userId },
+            {
+              scriptMeta: !scripts?.scriptMeta
+                ? {
+                    skipContentEnabled: true,
+                  }
+                : scripts.scriptMeta,
+            }
+          );
         }
       }
 
@@ -274,18 +281,20 @@ export const crawlPage = async (
           pageSpeedCollection,
           pageSpeed,
         ]); // PageInsights
-
-        const { issueMeta, ...analyticsProps } = issuesInfo;
+        const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
         await collectionUpsert(
-          {
-            pageUrl,
-            domain,
-            userId,
-            adaScore,
-            ...analyticsProps,
-          },
+          Object.assign(
+            {},
+            {
+              pageUrl,
+              domain,
+              userId,
+              adaScore,
+            },
+            analyticsProps
+          ),
           [analyticsCollection, analytics]
-        ); // ANALYTICS
+        ); // Analytics
 
         await collectionUpsert(
           newIssue,
@@ -293,7 +302,7 @@ export const crawlPage = async (
           {
             searchProps: { pageUrl, userId },
           }
-        ); // ISSUES COLLECTION
+        ); // Issues
       }
 
       // Pages
@@ -316,9 +325,8 @@ export const crawlPage = async (
 
   // Flatten issues with the array set results without meta.
   const responseData = {
-    data: updateWebsiteProps,
+    data: Object.assign({}, updateWebsiteProps, { issues: subIssues }),
   };
-  responseData.data.issues = subIssues;
 
   if (pageConstainsIssues) {
     sendSub &&
@@ -334,10 +342,7 @@ export const crawlPage = async (
     if (sendEmail && issuesInfo?.errorCount) {
       await emailMessager.sendMail({
         userId,
-        data: {
-          ...pageIssues,
-          issuesInfo,
-        },
+        data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
         confirmedOnly: true,
         sendEmail: true,
       });

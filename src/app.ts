@@ -1,5 +1,3 @@
-import { createReadStream } from "fs";
-import path from "path";
 import fastify, { FastifyInstance } from "fastify";
 import { ApolloServer } from "apollo-server-fastify";
 import { configureAgent } from "node-iframe";
@@ -101,9 +99,7 @@ async function initServer(): Promise<HttpServer[]> {
   });
 
   app.get("/grpc-docs", limiter, (_, res) => {
-    res
-      .type("text/html")
-      .send(createReadStream(path.resolve("public/protodoc/index.html")));
+    res.redirect("https://a11ywatch.com/grpc-docs");
   });
 
   app.get("/api/iframe", limiter, createIframeEvent);
