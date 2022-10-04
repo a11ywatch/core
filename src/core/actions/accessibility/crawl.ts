@@ -76,7 +76,7 @@ export const crawlPage = async (
   const sendSub: boolean = crawlConfig?.sendSub ?? true; // detect if redis is connected to send subs
   const userId = usr?.id ?? crawlConfig?.userId;
 
-  // get user role
+  // get user role [todo: use token only and collection set]
   const [userData, userCollection] = await UsersController().getUser({
     id: userId,
   });
@@ -164,13 +164,16 @@ export const crawlPage = async (
           },
         },
       }) === false;
-    await collectionIncrement(
-      {
-        "scanInfo.totalUptime": ttime, // add new uptime to collection
-      },
-      userCollection,
-      { id: userId }
-    ); // User
+
+    setImmediate(async () => {
+      await collectionIncrement(
+        {
+          "scanInfo.totalUptime": ttime, // add new uptime to collection
+        },
+        userCollection,
+        { id: userId }
+      ); // User
+    });
   }
 
   // TODO: SET PAGE OFFLINE DB
@@ -199,21 +202,10 @@ export const crawlPage = async (
     lighthouseData, // page insights
   } = extractPageData(dataSource);
 
-  const [newSite, pagesCollection] = await getPage({
-    userId,
-    url: pageUrl,
-  }); // PAGE COLLECTION
-
   const [issueExist, issuesCollection] = await IssuesController().getIssue(
     { pageUrl, userId, noRetries: true },
     true
   );
-
-  const [analytics, analyticsCollection] =
-    await AnalyticsController().getWebsite({ pageUrl, userId }, true);
-
-  const [pageSpeed, pageSpeedCollection] =
-    await PageSpeedController().getWebsite({ pageUrl, userId }, true);
 
   const newIssue = Object.assign({}, pageIssues, {
     domain,
@@ -231,9 +223,6 @@ export const crawlPage = async (
     userId,
   });
 
-  let scripts;
-  let scriptsCollection;
-
   // if website record exist update integrity of the data.
   if (website) {
     setImmediate(async () => {
@@ -250,14 +239,34 @@ export const crawlPage = async (
         );
       }
 
-      // if scripts enabled get collection
-      if (scriptsEnabled) {
-        [scripts, scriptsCollection] = await ScriptsController().getScript(
-          { pageUrl, userId, noRetries: true },
-          true
-        );
+      const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
 
-        if (script) {
+      // Add to Issues collection if page contains issues or if record should update/delete.
+      if (shouldUpsertCollections) {
+        const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
+
+        const [
+          [pageSpeed, pageSpeedCollection],
+          [analytics, analyticsCollection],
+          [newSite, pagesCollection],
+          [scripts, scriptsCollection],
+        ] = await Promise.all([
+          PageSpeedController().getWebsite({ pageUrl, userId }, true),
+          AnalyticsController().getWebsite({ pageUrl, userId }, true),
+          getPage({
+            userId,
+            url: pageUrl,
+          }),
+          scriptsEnabled
+            ? ScriptsController().getScript(
+                { pageUrl, userId, noRetries: true },
+                true
+              )
+            : Promise.resolve([null, null]),
+        ]);
+
+        // if scripts enabled get collection
+        if (scriptsEnabled && script) {
           script = Object.assign(
             {},
             script,
@@ -271,61 +280,55 @@ export const crawlPage = async (
             }
           );
         }
-      }
 
-      const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
-
-      // Add to Issues collection if page contains issues or if record should update/delete.
-      if (shouldUpsertCollections) {
-        await collectionUpsert(lighthouseData, [
-          pageSpeedCollection,
-          pageSpeed,
-        ]); // PageInsights
-        const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
-        await collectionUpsert(
-          Object.assign(
-            {},
-            {
-              pageUrl,
-              domain,
-              userId,
-              adaScore,
-            },
-            analyticsProps
+        await Promise.all([
+          // lighthouse
+          collectionUpsert(lighthouseData, [pageSpeedCollection, pageSpeed]),
+          // analytics
+          collectionUpsert(
+            Object.assign(
+              {},
+              {
+                pageUrl,
+                domain,
+                userId,
+                adaScore,
+              },
+              analyticsProps
+            ),
+            [analyticsCollection, analytics]
           ),
-          [analyticsCollection, analytics]
-        ); // Analytics
-
-        await collectionUpsert(
-          newIssue,
-          [issuesCollection, issueExist, !pageConstainsIssues],
-          {
-            searchProps: { pageUrl, userId },
-          }
-        ); // Issues
-      }
-
-      // Pages
-      if ((!newSite && shouldUpsertCollections) || newSite) {
-        await collectionUpsert(
-          updateWebsiteProps,
-          [pagesCollection, newSite, !pageConstainsIssues], // delete collection if issues do not exist
-          {
-            searchProps: { url: pageUrl, userId },
-          }
-        );
-      }
-
-      // Add script to collection
-      if (scriptsEnabled) {
-        await collectionUpsert(script, [scriptsCollection, scripts]);
+          // issues
+          collectionUpsert(
+            newIssue,
+            [issuesCollection, issueExist, !pageConstainsIssues],
+            {
+              searchProps: { pageUrl, userId },
+            }
+          ),
+          // pages
+          collectionUpsert(
+            updateWebsiteProps,
+            [pagesCollection, newSite, !pageConstainsIssues], // delete document if issues do not exist
+            {
+              searchProps: { url: pageUrl, userId },
+            }
+          ),
+          // scripts
+          scriptsEnabled
+            ? collectionUpsert(script, [scriptsCollection, scripts])
+            : Promise.resolve(),
+        ]);
       }
     });
   }
 
   // Flatten issues with the array set results without meta.
   const responseData = {
-    data: Object.assign({}, updateWebsiteProps, { issues: subIssues }),
+    data: Object.assign({}, updateWebsiteProps, {
+      issues: subIssues,
+      issuesInfo,
+    }),
   };
 
   if (pageConstainsIssues) {

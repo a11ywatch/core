@@ -1,3 +1,20 @@
+// const InfoModel = {
+//   issuesInfo: {
+//     adaScore: 0, // rename to score
+//     warningCount: 0,
+//     errorCount: 0,
+//     noticeCount: 0,
+//     adaScoreAverage: 0,
+//     issuesFixedByCdn: 0,
+//     possibleIssuesFixedByCdn: 0,
+//     totalIssues: 0,
+//     pageCount: 0,
+//     issueMeta: {
+//       skipContentIncluded: false,
+//     },
+//   },
+// };
+
 const WebsiteModel = {
   userId: undefined,
   url: "",
@@ -10,20 +27,6 @@ const WebsiteModel = {
     duration: 0,
     durationFormated: "",
     color: "",
-  },
-  issuesInfo: {
-    adaScore: 0, // rename to score
-    warningCount: 0,
-    errorCount: 0,
-    noticeCount: 0,
-    adaScoreAverage: 0,
-    issuesFixedByCdn: 0,
-    possibleIssuesFixedByCdn: 0,
-    totalIssues: 0,
-    pageCount: 0,
-    issueMeta: {
-      skipContentIncluded: false,
-    },
   },
   lastScanDate: "",
   online: true,

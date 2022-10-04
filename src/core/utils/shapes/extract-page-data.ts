@@ -8,17 +8,15 @@ export const extractPageData = (
   let warningCount;
   let noticeCount;
   let adaScore;
-  let issuesInfo;
   let lighthouseData;
 
   let { script, issues, webPage, userId } = dataSource;
 
   // pluck insight into its own collection
-  const { insight, ...website } = webPage ?? {};
+  const { insight, ...w } = webPage ?? {};
+  const { issuesInfo, ...website } = w;
 
   if (website) {
-    issuesInfo = website.issuesInfo;
-
     if (issuesInfo) {
       errorCount = issuesInfo.errorCount;
       warningCount = issuesInfo.warningCount;

@@ -2,6 +2,8 @@ import { generateWebsiteScore } from "../../controllers/pages/update";
 import { getWebsite } from "../../controllers/websites";
 import { CRAWL_COMPLETE } from "../../static";
 import { pubsub } from "../../../database/pubsub";
+import { connect } from "../../../database";
+
 import { collectionUpsert } from "../collection-upsert";
 
 export function setWebsiteScore(props: {
@@ -36,10 +38,19 @@ export async function setWebsiteScore({
 
   if (issuesInfo && website) {
     const dur = Number(Number.parseFloat(duration).toFixed(2));
+
+    const [analayticsCollection] = await connect("Analytics");
+
+    await collectionUpsert(issuesInfo, [analayticsCollection, !!website], {
+      searchProps: {
+        domain: website?.domain,
+        userId,
+      },
+    });
+
     await collectionUpsert(
       {
         ...website,
-        issuesInfo,
         crawlDuration: typeof dur === "number" ? dur : 0, // time it took to crawl the entire website in ms
         shutdown, // crawl did not complete - plan needs to be higher
       },

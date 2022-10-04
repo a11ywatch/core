@@ -80,4 +80,10 @@ export const Website = {
       domain,
     });
   },
+  issuesInfo: async ({ userId, domain }, _params) => {
+    return await AnalyticsController().getWebsite({
+      userId,
+      domain,
+    });
+  },
 };

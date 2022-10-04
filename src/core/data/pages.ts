@@ -1,3 +1,4 @@
+import { AnalyticsController } from "../controllers";
 import { IssuesController } from "../controllers/issues";
 
 export const Pages = {
@@ -7,5 +8,11 @@ export const Pages = {
       url,
     });
     return issueItem?.issues;
+  },
+  issuesInfo: async ({ userId, url }, _params) => {
+    return await AnalyticsController().getWebsite({
+      userId,
+      pageUrl: url,
+    });
   },
 };
