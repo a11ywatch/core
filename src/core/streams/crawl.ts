@@ -56,6 +56,10 @@ export const crawlStream = async (
     }
 
     res.raw.write("]");
-    res.raw.end();
+
+    // make sure request ends after completion callback
+    setImmediate(() => {
+      res.raw.end();
+    });
   }
 };

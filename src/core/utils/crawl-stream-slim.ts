@@ -42,7 +42,9 @@ export const crawlHttpStreamSlim = (
             data.pageLoadTime = null;
             data.issues = null;
           }
-          res.raw.write(`${JSON.stringify(data)},`);
+          if (!res.raw.writableEnded) {
+            res.raw.write(`${JSON.stringify(data)},`);
+          }
         }
       });
     };
@@ -53,11 +55,16 @@ export const crawlHttpStreamSlim = (
       setImmediate(() => {
         crawlTrackingEmitter.off(crawlEvent, crawlListener);
 
-        if (client && client.includes("a11ywatch_cli/")) {
+        if (
+          client &&
+          client.includes("a11ywatch_cli/") &&
+          !res.raw.writableEnded
+        ) {
           // send extra item for trailing comma handler
-          res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () => {
-            resolve(true);
-          });
+          res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () =>
+            resolve(true)
+          );
+          // res.raw.flushHeaders();
         } else {
           resolve(true);
         }
