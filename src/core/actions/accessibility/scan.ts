@@ -70,7 +70,7 @@ export const scanWebsite = async ({
   }
 
   const userFound = validateUID(userId);
-  const { script, issues, webPage } = extractPageData(dataSource);
+  const { script, issues, webPage, issuesInfo } = extractPageData(dataSource);
 
   // Issues.issues returned. Map against
   let currentIssues = issues?.issues;
@@ -89,10 +89,11 @@ export const scanWebsite = async ({
     timestamp: new Date().getTime(),
     script,
     issues: currentIssues,
+    issuesInfo,
   });
 
   // return limited count from scan
-  if (limitedCount) {
+  if (data.issuesInfo && limitedCount) {
     data.issuesInfo.limitedCount = currentIssues.length;
   }
 
