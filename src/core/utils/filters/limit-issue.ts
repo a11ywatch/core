@@ -4,7 +4,8 @@ import type { Issue } from "../../../types/types";
 // @return Issue['issues'][]
 export const limitIssue = (issues: Issue) => {
   const list =
-    issues?.issues && Array.isArray(issues.issues) ? [...issues?.issues] : [];
+    issues?.issues && Array.isArray(issues.issues) ? [...issues.issues] : [];
+
   const half = Math.ceil(list.length / 2);
 
   const tlist = list.slice(0, half);
@@ -18,5 +19,5 @@ export const limitIssue = (issues: Issue) => {
     blist.length - Math.max(Math.round(blist.length / 4), 2)
   );
 
-  return [...top, bottom];
+  return [...top, ...bottom];
 };

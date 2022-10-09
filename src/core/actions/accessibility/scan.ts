@@ -69,33 +69,21 @@ export const scanWebsite = async ({
     });
   }
 
-  const userFound = validateUID(userId);
   const { script, issues, webPage, issuesInfo } = extractPageData(dataSource);
 
-  // Issues.issues returned. Map against
-  let currentIssues = issues?.issues;
-  let limitedCount = false;
-
-  if (userFound) {
-    website.userId = userId;
-  }
-
-  if (!SUPER_MODE && !userFound) {
-    currentIssues = limitIssue(issues);
-    limitedCount = true;
-  }
+  // Limit if not super mode
+  const currentIssues =
+    !SUPER_MODE && !validateUID(userId) ? limitIssue(issues) : issues?.issues;
 
   const data = Object.assign({}, website, webPage, {
+    userId,
     timestamp: new Date().getTime(),
     script,
-    issues: currentIssues,
-    issuesInfo,
+    issues: currentIssues || [],
+    issuesInfo: Object.assign({}, issuesInfo, {
+      limitedCount: currentIssues.length,
+    }),
   });
-
-  // return limited count from scan
-  if (data.issuesInfo && limitedCount) {
-    data.issuesInfo.limitedCount = currentIssues.length;
-  }
 
   return responseModel({
     data,
