@@ -62,10 +62,10 @@ const logServerInit = (port, { graphqlPath = "/graphql" }) => {
 const fastifyConfig = {
   trustProxy: true,
   ignoreTrailingSlash: true,
+  http2: process.env.ENABLE_HTTP2 === "true",
   ...(process.env.ENABLE_SSL === "true" &&
     PRIVATE_KEY &&
     PUBLIC_KEY && {
-      http2: true,
       https: {
         allowHTTP1: true,
         key: PRIVATE_KEY,
