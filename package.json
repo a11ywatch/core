@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.133",
+  "version": "0.5.134",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -19,10 +19,10 @@
     "@fastify/rate-limit": "^6.0.1",
     "@graphql-tools/schema": "^8.5.1",
     "@grpc/grpc-js": "1.7.1",
-    "@grpc/proto-loader": "0.7.2",
-    "apollo-server": "3.10.2",
-    "apollo-server-core": "3.10.2",
-    "apollo-server-fastify": "3.10.2",
+    "@grpc/proto-loader": "0.7.3",
+    "apollo-server": "3.10.3",
+    "apollo-server-core": "3.10.3",
+    "apollo-server-fastify": "3.10.3",
     "cron": "2.1.0",
     "date-fns": "2.29.3",
     "exceljs": "4.3.0",
@@ -39,10 +39,10 @@
     "jsonwebtoken": "8.5.1",
     "mongodb": "4.10.0",
     "node-iframe": "1.8.5",
-    "nodemailer": "6.7.8",
+    "nodemailer": "6.8.0",
     "pb-util": "1.0.3",
     "stripe": "7.63.1",
-    "ws": "8.8.1"
+    "ws": "8.9.0"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "2.2.2",
