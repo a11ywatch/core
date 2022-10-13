@@ -11,7 +11,8 @@ export const crawlEnqueue = async (data: {
 }) => {
   const { pages = [], user_id } = data;
   const key = getKey(null, pages, user_id);
-  const event = crawlingSet[key] && crawlingSet[key].event;
+
+  const event = crawlingSet.has(key) && crawlingSet.get(key).event;
 
   // get users for crawl job matching the urls
   for (const url of pages) {

@@ -16,16 +16,17 @@ type CrawlSet = {
 };
 
 // track when a new website starts and determine page completion
-export let crawlingSet: Record<string, CrawlSet> = {};
+export const crawlingSet = new Map<string, CrawlSet>();
 
-const crawlDefault: CrawlSet = {
+// crawl default 
+const crawlDefault: CrawlSet = Object.freeze({
   total: 0,
   current: 0,
   crawling: true,
   shutdown: false,
   duration: 0,
   event: bindTaskQ(Object.keys(crawlingSet).length), // set to default to memo
-};
+});
 
 // handle hostname assign from domain or pages
 const extractHostname = (domain?: string, pages?: string[]) => {
@@ -37,29 +38,23 @@ const extractHostname = (domain?: string, pages?: string[]) => {
 export const getKey = (domain, pages, user_id) =>
   `${extractHostname(domain, pages)}-${user_id || 0}`;
 
-// remove key from object
-export const removeKey = (key, { [key]: _, ...rest }) => rest;
-
 // rebind the number of concurrency per object
 const rebindConcurrency = async () => {
-  const keys = Object.keys(crawlingSet);
-  const newLimit = getCWLimit(keys.length || 1);
+  const newLimit = getCWLimit(crawlingSet.size || 1);
 
-  for (let i = 0; i < keys.length; i++) {
-    const k = keys[i];
-    const item = crawlingSet[k];
+  for (const item of crawlingSet.values()) {
     const itemEvent = item && item?.event;
 
     if (itemEvent && itemEvent?.concurrency > newLimit) {
       const q = itemEvent.getQueue();
       itemEvent.killAndDrain();
       await itemEvent.drained(); // wait till drained
-      crawlingSet[k].event.concurrency = newLimit;
+      item.event.concurrency = newLimit;
       for (let j = 0; j < q.length; j++) {
         await itemEvent.unshift(q[j]);
       }
     } else if (itemEvent && itemEvent?.concurrency !== newLimit) {
-      crawlingSet[k].event.concurrency = newLimit;
+      item.event.concurrency = newLimit;
     }
   }
 };
@@ -69,13 +64,13 @@ const crawlStart = (target) => {
   setImmediate(async () => {
     const key = getKey(target.domain, target.pages, target.user_id);
     // set the item for tracking
-    if (!crawlingSet[key]) {
-      crawlingSet[key] = Object.assign({}, crawlDefault, {
+    if (!crawlingSet.has(key)) {
+      crawlingSet.set(key, Object.assign({}, crawlDefault, {
         duration: performance.now(),
         event: bindTaskQ(Object.keys(crawlingSet).length + 1), // add 1 to include new item
-      });
+      }));
 
-      rebindConcurrency();
+      await rebindConcurrency();
     }
   });
 };
@@ -83,18 +78,21 @@ const crawlStart = (target) => {
 // de-init crawling
 const deInit = async (key, target) => {
   crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
+  const item = crawlingSet.get(key)
+  
   const params = {
     userId: target.user_id,
     meta: {
       extra: {
         domain: extractHostname(target.domain),
-        duration: performance.now() - crawlingSet[key].duration,
-        shutdown: crawlingSet[key].shutdown,
+        duration: performance.now() - item.duration,
+        shutdown: item.shutdown,
       },
     },
   };
-  crawlingSet = removeKey(key, crawlingSet);
-  rebindConcurrency(); // rebind event queue and increment limit
+
+  crawlingSet.delete(key);
+  await rebindConcurrency(); // rebind event queue and increment limit
   await qWebsiteWorker.push(params);
 };
 
@@ -104,10 +102,11 @@ const crawlComplete = (target) => {
     const userId = target.user_id;
     const key = getKey(target.domain, target.pages, userId);
 
-    if (crawlingSet[key]) {
-      crawlingSet[key].crawling = false;
-
-      if (crawlingSet[key].current === crawlingSet[key].total) {
+    if (crawlingSet.has(key)) {
+      const item = crawlingSet.get(key)
+      item.crawling = false;
+      
+      if (item?.current === item?.total) {
         await deInit(key, target);
       }
     }
@@ -120,11 +119,13 @@ const crawlProcessing = (call: ScanRpcCall) => {
     const target = call.request;
     const key = getKey(target.domain, target.pages, target.user_id); // process a new item tracking count
 
-    if (crawlingSet[key]) {
-      if (crawlingSet[key].crawling) {
-        crawlingSet[key].total = crawlingSet[key].total + 1;
+    if (crawlingSet.has(key)) {
+      const item = crawlingSet.get(key)
+
+      if (item.crawling) {
+        item.total = item.total + 1;
       }
-      if (crawlingSet[key].shutdown) {
+      if (item.shutdown) {
         call.write({ message: "shutdown" });
         call.end();
         await deInit(key, target);
@@ -140,18 +141,20 @@ const crawlProcessed = (target) => {
     const userId = target.user_id;
     const key = getKey(target.domain, target.pages, userId);
 
-    if (crawlingSet[key]) {
-      crawlingSet[key].current = crawlingSet[key].current + 1;
+    if (crawlingSet.has(key)) {
+      const item = crawlingSet.get(key)
+
+      item.current = item.current + 1;
 
       // shutdown the events
       if (target.shutdown) {
-        crawlingSet[key].shutdown = true;
-        crawlingSet[key].crawling = false;
+        item.shutdown = true;
+        item.crawling = false;
       }
 
       if (
-        crawlingSet[key].current === crawlingSet[key].total &&
-        !crawlingSet[key].crawling
+        item.current === item.total &&
+        !item.crawling
       ) {
         await deInit(key, target);
       }
@@ -161,7 +164,6 @@ const crawlProcessed = (target) => {
 
 /*  Emit events to track crawling progress.
  *  This mainly tracks at a higher level the progress between the gRPC crawling across modules.
- *  TODO: allow configuring a url and passing in optional Promise handling.
  *  @param url: scope the events to track one domain
  */
 export const establishCrawlTracking = () => {
