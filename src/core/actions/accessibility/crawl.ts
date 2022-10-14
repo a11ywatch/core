@@ -44,19 +44,28 @@ const trackerProccess = (
   { domain, urlMap, userId, shutdown = false }: any,
   blockEvent?: boolean
 ) => {
-  process.nextTick(() => {
-    if (!blockEvent && data) {
-      crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
-    }
-    // determine crawl has been processed top level tracking
-    crawlTrackingEmitter.emit("crawl-processed", {
-      user_id: userId,
-      domain,
-      pages: [urlMap],
-      shutdown,
-    });
+  // determine crawl has been processed top level tracking
+  crawlTrackingEmitter.emit("crawl-processed", {
+    user_id: userId,
+    domain,
+    pages: [urlMap],
+    shutdown,
   });
+
+  if (!blockEvent && data) {
+    // event for handling streamed data
+    crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
+  }
 };
+
+// determine insights
+const getInsightsEnabled = ({
+  pageInsights,
+  insightsLocked,
+  pageSpeedApiKey,
+  rootPage,
+}) =>
+  insightsLocked && !pageSpeedApiKey ? pageInsights && rootPage : pageInsights;
 
 /**
  * Send to gRPC pagemind request. Stores data upon return into database.
@@ -72,8 +81,15 @@ export const crawlPage = async (
   sendEmail?: boolean, // determine if email should be sent based on results
   blockEvent?: boolean // block event from emitting
 ): Promise<ResponseModel> => {
-  const { url: urlMap, pageInsights = false, user: usr } = crawlConfig ?? {};
-  const sendSub: boolean = crawlConfig?.sendSub ?? true; // detect if redis is connected to send subs
+  const {
+    url: urlMap,
+    pageInsights = false,
+    user: usr,
+    sendSub: sub,
+  } = crawlConfig ?? {};
+
+  // detect if redis is connected to send subs
+  const sendSub: boolean = sub ?? true;
   const userId = usr?.id ?? crawlConfig?.userId;
 
   // get user role [todo: use token only and collection set]
@@ -84,7 +100,7 @@ export const crawlPage = async (
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
   // block scans from running
-  if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
+  if (!sendEmail && !validateScanEnabled({ user: userData })) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown: true },
@@ -105,29 +121,24 @@ export const crawlPage = async (
     userId,
   });
 
-  const freeAccount = !userData?.role || userData?.role == 0; // free account
+  const urole = userData?.role || 0;
+
+  const freeAccount = !urole; // free account
   const scriptsEnabled = SUPER_MODE ? SCRIPTS_ENABLED : !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
   const rootPage = pathname === "/"; // the url is the base domain index.
-  const insightsLocked = !SUPER_MODE && (freeAccount || userData?.role === 1);
 
-  let insightsEnabled = false;
-  let noStore = crawlConfig.noStore || DISABLE_STORE_SCRIPTS;
+  const insightsEnabled = getInsightsEnabled({
+    pageInsights: pageInsights || website?.pageInsights,
+    insightsLocked: !SUPER_MODE && (freeAccount || urole === 1),
+    pageSpeedApiKey: !!userData?.pageSpeedApiKey,
+    rootPage,
+  });
 
   // prevent storage on free accounts js scripts
-  if (!SUPER_MODE && !freeAccount) {
-    noStore = true;
-  }
-
-  if (website?.pageInsights || pageInsights) {
-    // only premium and above get lighthouse on all pages.
-    if (userData?.pageSpeedApiKey) {
-      insightsEnabled = true;
-    } else if (insightsLocked) {
-      insightsEnabled = rootPage;
-    } else {
-      insightsEnabled = pageInsights || website?.pageInsights;
-    }
-  }
+  const noStore =
+    !SUPER_MODE && freeAccount
+      ? true
+      : crawlConfig.noStore || DISABLE_STORE_SCRIPTS;
 
   const actions = await findPageActionsByPath({ userId, path: pathname });
 
@@ -141,7 +152,7 @@ export const crawlPage = async (
     ua: website?.ua,
     standard: website?.standard,
     actions,
-    cv: SUPER_MODE || userData?.role === 2,
+    cv: SUPER_MODE || urole === 2,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
     noStore,
   });
@@ -154,16 +165,15 @@ export const crawlPage = async (
     const totalUptime = ttime + pastUptime;
 
     // check if scan has shut down
-    shutdown =
-      validateScanEnabled({
-        user: {
-          role: userData?.role,
-          scanInfo: {
-            usageLimit: userData?.scanInfo?.usageLimit,
-            totalUptime,
-          },
+    shutdown = !validateScanEnabled({
+      user: {
+        role: urole,
+        scanInfo: {
+          usageLimit: userData?.scanInfo?.usageLimit,
+          totalUptime,
         },
-      }) === false;
+      },
+    });
 
     setImmediate(async () => {
       await collectionIncrement(
@@ -192,8 +202,7 @@ export const crawlPage = async (
     });
   }
 
-  // TODO: MOVE TO QUEUE
-  let {
+  const {
     script,
     issues: pageIssues,
     webPage,
@@ -239,7 +248,8 @@ export const crawlPage = async (
         );
       }
 
-      const shouldUpsertCollections = pageConstainsIssues || issueExist; // if issues exist prior or current update collection
+      // if issues exist prior or current update collection
+      const shouldUpsertCollections = pageConstainsIssues || issueExist;
 
       // Add to Issues collection if page contains issues or if record should update/delete.
       if (shouldUpsertCollections) {
@@ -264,22 +274,6 @@ export const crawlPage = async (
               )
             : Promise.resolve([null, null]),
         ]);
-
-        // if scripts enabled get collection
-        if (scriptsEnabled && script) {
-          script = Object.assign(
-            {},
-            script,
-            { userId },
-            {
-              scriptMeta: !scripts?.scriptMeta
-                ? {
-                    skipContentEnabled: true,
-                  }
-                : scripts.scriptMeta,
-            }
-          );
-        }
 
         await Promise.all([
           // lighthouse
@@ -315,21 +309,27 @@ export const crawlPage = async (
             }
           ),
           // scripts
-          scriptsEnabled
-            ? collectionUpsert(script, [scriptsCollection, scripts])
+          scriptsEnabled && script
+            ? collectionUpsert(
+                Object.assign(
+                  {},
+                  script,
+                  { userId },
+                  {
+                    scriptMeta: !scripts?.scriptMeta
+                      ? {
+                          skipContentEnabled: true,
+                        }
+                      : scripts.scriptMeta,
+                  }
+                ),
+                [scriptsCollection, scripts]
+              )
             : Promise.resolve(),
         ]);
       }
     });
   }
-
-  // Flatten issues with the array set results without meta.
-  const responseData = {
-    data: Object.assign({}, updateWebsiteProps, {
-      issues: subIssues,
-      issuesInfo,
-    }),
-  };
 
   if (pageConstainsIssues) {
     sendSub &&
@@ -343,27 +343,35 @@ export const crawlPage = async (
 
     // send email if issues of type error exist for the page. TODO: remove from layer.
     if (sendEmail && issuesInfo?.errorCount) {
-      await emailMessager.sendMail({
-        userId,
-        data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
-        confirmedOnly: true,
-        sendEmail: true,
+      setImmediate(async () => {
+        await emailMessager.sendMail({
+          userId,
+          data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
+          confirmedOnly: true,
+          sendEmail: true,
+        });
       });
     }
   }
 
-  if (!blockEvent) {
-    trackerProccess(
-      responseData,
-      {
-        domain,
-        urlMap,
-        userId,
-        shutdown,
-      },
-      blockEvent
-    );
-  }
+  // Flatten issues with the array set results without meta.
+  const responseData = {
+    data: Object.assign({}, updateWebsiteProps, {
+      issues: subIssues,
+      issuesInfo,
+    }),
+  };
+
+  trackerProccess(
+    responseData,
+    {
+      domain,
+      urlMap,
+      userId,
+      shutdown,
+    },
+    blockEvent
+  );
 
   return responseModel(responseData);
 };

@@ -22,10 +22,15 @@ const defaultPayload = {
   audience: undefined,
 };
 
-// TODO: move to limiter control file
+// TODO: move to limiter controll file
 const scanRateLimitConfig = {
   max: 2,
   window: "14s",
+};
+
+const defaultScanLimit = {
+  max: 3,
+  window: "10s",
 };
 
 export const Mutation = {
@@ -77,12 +82,7 @@ export const Mutation = {
     const { keyid } = context.user?.payload || defaultPayload;
     const unauth = typeof keyid === "undefined";
 
-    const rateLimitConfig = !unauth
-      ? {
-          max: 3,
-          window: "10s",
-        }
-      : scanRateLimitConfig;
+    const rateLimitConfig = !unauth ? defaultScanLimit : scanRateLimitConfig;
 
     let errorMessage;
 
@@ -113,17 +113,17 @@ export const Mutation = {
       throw new Error(errorMessage);
     }
 
-    let data;
+    let data = {};
 
     if (!unauth) {
-      data = (await crawlPage(
+      data = await crawlPage(
         {
           url,
           userId: keyid,
           sendSub: true,
         },
         false
-      )) as any;
+      );
     } else {
       data = await scanWebsite({
         url,
@@ -183,7 +183,7 @@ export const Mutation = {
       keyid,
     });
   },
-  resetPassword: async (_, { email, resetCode }, context) => {
+  resetPassword: async (_, { email, resetCode }, _context) => {
     return await UsersController().resetPassword({
       email,
       resetCode,

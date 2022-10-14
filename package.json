@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.137",
+  "version": "0.5.139",
   "description": "a11ywatch central api",
   "main": "./server.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "graphql-redis-subscriptions": "^2.5.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-tag": "2.12.6",
-    "graphql-ws": "^5.11.1",
+    "graphql-ws": "^5.11.2",
     "ioredis": "5.2.3",
     "jsonwebtoken": "8.5.1",
     "mongodb": "4.10.0",

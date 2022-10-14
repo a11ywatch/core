@@ -50,28 +50,23 @@ export const crawlStreaming = (
     });
   });
 
-  const domain = getHostName(url);
-  const crawlKey = `${domainName(domain)}-${userId || 0}`;
-  const crawlEvent = `crawl-${crawlKey}`;
-
   return new Promise((resolve) => {
-    const crawlListener = (source) => {
-      setImmediate(() => {
-        const data = source?.data;
+    const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
+    const crawlEvent = `crawl-${crawlKey}`;
 
-        if (data) {
-          data.pageLoadTime = null;
-          data.issues = null;
-          call.write({ data });
-        }
-      });
+    const crawlListener = (source) => {
+      const data = source?.data;
+
+      if (data) {
+        data.pageLoadTime = null;
+        data.issues = null;
+        call.write({ data });
+      }
     };
 
     const crawlCompleteListener = (data) => {
-      setImmediate(() => {
-        crawlEmitter.off(crawlEvent, crawlListener);
-        resolve(data);
-      });
+      crawlEmitter.off(crawlEvent, crawlListener);
+      resolve(data);
     };
 
     crawlEmitter.on(crawlEvent, crawlListener);

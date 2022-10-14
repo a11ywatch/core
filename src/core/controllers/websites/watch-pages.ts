@@ -16,9 +16,10 @@ export async function websiteWatch(
 ): Promise<void> {
   for (const website of pages) {
     const { userId, url, subdomains, tld } = website;
+
     const [user] = await getUser({ id: userId });
 
-    if (!user) {
+    if (!user || !url) {
       continue;
     }
 

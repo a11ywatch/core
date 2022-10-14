@@ -55,6 +55,8 @@ export const crawlHttpStream = (
       });
     };
 
+    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
+
     const crawlCompleteListener = () => {
       setImmediate(() => {
         crawlTrackingEmitter.off(crawlEvent, crawlListener);
@@ -77,8 +79,6 @@ export const crawlHttpStream = (
         }
       });
     };
-
-    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
 
     crawlEmitter.on(crawlEvent, crawlListener);
 

@@ -29,24 +29,20 @@ export const watcherCrawl = async ({
   tld = false,
 }: CrawlParams) => {
   const crawlParams = {
-    url: String(initUrl(url, true)),
+    url: initUrl(url, true),
     id: userId,
     robots,
     subdomains,
     tld,
   };
 
-  let data;
-
   try {
     if (scan) {
-      data = await controller.crawlerScan(crawlParams);
+      await controller.crawlerScan(crawlParams);
     } else {
-      data = await controller.crawlerCrawl(crawlParams);
+      await controller.crawlerCrawl(crawlParams);
     }
   } catch (e) {
     console.error(e);
   }
-
-  return data;
 };
