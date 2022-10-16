@@ -15,6 +15,7 @@ let transporter: Partial<Transporter<any>> = {
 if (EMAIL_CLIENT_KEY && EMAIL_CLIENT_ID && EMAIL_SERVICE_URL) {
   try {
     transporter = createTransport({
+      pool: true,
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
