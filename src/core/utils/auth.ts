@@ -57,10 +57,13 @@ export function signJwt({ email, role, keyid }, options = {}) {
 }
 
 export function verifyJwt(token, options = {}) {
-  return jwt.verify(
-    token,
-    publicKey,
-    Object.assign({}, signOptions, options, { algorithm: [algorithm] })
+  return (
+    token &&
+    jwt.verify(
+      token,
+      publicKey,
+      Object.assign({}, signOptions, options, { algorithm: [algorithm] })
+    )
   );
 }
 
