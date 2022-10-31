@@ -24,6 +24,7 @@ export const createUser = async ({
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
+
   const [user, collection] = await getUser({ email });
 
   // force number type
