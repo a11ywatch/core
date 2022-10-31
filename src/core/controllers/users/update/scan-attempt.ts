@@ -16,22 +16,32 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
   }
 
   if (user) {
+    const currentDate = new Date();
+
     const scanInfo = user?.scanInfo ?? {
-      lastScanDate: undefined as Date,
+      lastScanDate: null,
       totalUptime: 0,
       usageLimit: 0,
     };
 
-    const currentDate = new Date();
-
-    if (!isSameDay(scanInfo?.lastScanDate, currentDate)) {
+    if (
+      !scanInfo?.lastScanDate ||
+      !isSameDay(scanInfo?.lastScanDate, currentDate)
+    ) {
       scanInfo.totalUptime = 0;
     }
 
-    const canScan = validateScanEnabled({ user });
+    const canScan = validateScanEnabled({
+      user: {
+        role: user?.role,
+        scanInfo,
+      },
+    });
 
+    // update the scan attempt if next day
     if (canScan) {
       scanInfo.lastScanDate = currentDate;
+
       try {
         await collection.findOneAndUpdate(
           { id: user.id },
@@ -50,22 +60,71 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
 
 /*
  * @param {user: User}
- * determine if user can do any scans
+ * determine if user can do any scans returns true if can scan
  */
 export const validateScanEnabled = ({ user }) => {
   if (!SUPER_MODE) {
-    const totalUptime = user?.scanInfo?.totalUptime ?? 0;
-    const role = user?.role; // users role
+    let scanBlocked = false;
 
-    if (
-      !user ||
-      (role === 0 && totalUptime >= 30000) || // 30 seconds
-      (role === 1 && totalUptime >= 300000) || // base uptime 5 mins x10
-      (role === 2 && totalUptime >= 800000) || // premium 13 mins
-      (role == 3 && totalUptime >= (user?.scanInfo?.usageLimit || 13) * 60000)
-    ) {
-      return false;
+    const totalUptime = user?.scanInfo?.totalUptime ?? 0;
+    const role = user?.role ?? 0; // users role
+
+    switch (role) {
+      case 0: {
+        scanBlocked = totalUptime >= 30000;
+        break;
+      }
+      // normal plans
+      case 1: {
+        scanBlocked = totalUptime >= 500000;
+        break;
+      }
+      case 2: {
+        scanBlocked = totalUptime >= 1000000;
+        break;
+      }
+      case 3: {
+        scanBlocked = totalUptime >= 2000000;
+        break;
+      }
+      case 4: {
+        scanBlocked = totalUptime >= 5000000;
+        break;
+      }
+      case 5: {
+        scanBlocked = totalUptime >= 15000000;
+        break;
+      }
+      // high tier plans
+      case 6: {
+        scanBlocked = totalUptime >= 50000000;
+        break;
+      }
+      case 7: {
+        scanBlocked = totalUptime >= 100000000;
+        break;
+      }
+      case 8: {
+        scanBlocked = totalUptime >= 200000000;
+        break;
+      }
+      case 9: {
+        scanBlocked = totalUptime >= 300000000;
+        break;
+      }
+      case 10: {
+        scanBlocked = totalUptime >= 500000000;
+        break;
+      }
+      default: {
+        scanBlocked = true;
+        break;
+      }
     }
+
+    return !scanBlocked;
+    // todo: custom usagelimit
+    // user?.scanInfo?.usageLimit
   }
 
   return true;

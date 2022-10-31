@@ -100,7 +100,7 @@ export const crawlPage = async (
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
   // block scans from running
-  if (!sendEmail && !validateScanEnabled({ user: userData })) {
+  if (validateScanEnabled({ user: userData }) === false) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown: true },
@@ -129,7 +129,7 @@ export const crawlPage = async (
 
   const insightsEnabled = getInsightsEnabled({
     pageInsights: pageInsights || website?.pageInsights,
-    insightsLocked: !SUPER_MODE && (freeAccount || urole === 1),
+    insightsLocked: !SUPER_MODE && freeAccount,
     pageSpeedApiKey: !!userData?.pageSpeedApiKey,
     rootPage,
   });
@@ -152,7 +152,7 @@ export const crawlPage = async (
     ua: website?.ua,
     standard: website?.standard,
     actions,
-    cv: SUPER_MODE || urole === 2,
+    cv: SUPER_MODE || urole,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
     noStore,
   });
@@ -165,15 +165,16 @@ export const crawlPage = async (
     const totalUptime = ttime + pastUptime;
 
     // check if scan has shut down
-    shutdown = !validateScanEnabled({
-      user: {
-        role: urole,
-        scanInfo: {
-          usageLimit: userData?.scanInfo?.usageLimit,
-          totalUptime,
+    shutdown =
+      validateScanEnabled({
+        user: {
+          role: urole,
+          scanInfo: {
+            usageLimit: userData?.scanInfo?.usageLimit,
+            totalUptime,
+          },
         },
-      },
-    });
+      }) === false;
 
     setImmediate(async () => {
       await collectionIncrement(

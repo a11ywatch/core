@@ -73,21 +73,24 @@ export const getWebsiteReport = async (
     return;
   }
 
-  let userId;
-
   const [user] = await retreiveUserByToken(req.headers.authorization);
 
   if (user) {
-    userId = user.id;
+    let userId = user.id;
+
+    const query = initUrl(decodeURIComponent(slug + ""));
+
+    const report = await getReport(query, userId);
+
+    let data: Website = null;
+
+    if (report?.website) {
+      data = report.website;
+    }
+
+    res.send(data);
+  } else {
+    res.status(401);
+    res.send(false);
   }
-
-  const query = initUrl(decodeURIComponent(slug + ""));
-  const report = await getReport(query, userId);
-  let data: Website = null;
-
-  if (report?.website) {
-    data = report.website;
-  }
-
-  res.send(data);
 };

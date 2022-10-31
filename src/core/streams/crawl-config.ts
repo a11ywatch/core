@@ -13,6 +13,7 @@ export const getCrawlConfig = async ({
   let subdomainsEnabled = subdomains;
   let tldEnabled = tld;
 
+  // get website configuration [todo: remove]
   if (!subdomainsEnabled || !tldEnabled) {
     const [website] = await getWebsite({ userId: id, url });
     if (website) {
@@ -27,8 +28,8 @@ export const getCrawlConfig = async ({
 
   // bypass configurations
   if (!SUPER_MODE) {
-    subdomainsEnabled = subdomainsEnabled && role >= 1;
-    tldEnabled = tldEnabled && role >= 2;
+    subdomainsEnabled = subdomainsEnabled && role;
+    tldEnabled = tldEnabled && role;
   }
 
   return {

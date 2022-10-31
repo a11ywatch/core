@@ -27,8 +27,6 @@ export const mutation = gql`
 
     toggleAlert(alertEnabled: Boolean): UpdateUserMutationResponse
 
-    toggleProfile(toggleAlert: Boolean): UpdateUserMutationResponse
-
     """
     Update website configuration
     """

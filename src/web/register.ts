@@ -18,7 +18,7 @@ export const registerApp = async (app: FastifyInstance) => {
   // setup global rate limiting
   if (!SUPER_MODE) {
     await app.register(ratelimit, {
-      max: 100,
+      max: 50,
       timeWindow: "1 minute",
       redis: createRedisClient(),
     });

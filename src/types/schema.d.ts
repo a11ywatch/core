@@ -119,7 +119,6 @@ export type Mutation = {
   logout?: Maybe<BasicMutationResponse>;
   updateUser?: Maybe<UpdateUserMutationResponse>;
   toggleAlert?: Maybe<UpdateUserMutationResponse>;
-  toggleProfile?: Maybe<UpdateUserMutationResponse>;
   updateWebsite?: Maybe<UpdateWebSiteMutationResponse>;
   updateScript?: Maybe<UpdateScriptMutationResponse>;
   crawlWebsite?: Maybe<UpdateWebSiteMutationResponse>;

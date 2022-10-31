@@ -23,7 +23,7 @@ export const resetPassword = async ({ email, resetCode }) => {
     const signedToken = signJwt({
       email,
       keyid: user.id,
-      role: user.role || 0,
+      role: user.role,
     });
 
     await collection.findOneAndUpdate(

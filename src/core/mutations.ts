@@ -197,12 +197,6 @@ export const Mutation = {
       alertEnabled,
     });
   },
-  toggleProfile: async (_, { profileVisible }, context) => {
-    return UsersController().toggleProfile({
-      keyid: context.user?.payload?.keyid,
-      profileVisible,
-    });
-  },
   updateScript: async (
     _,
     { url, scriptMeta, editScript, newScript },
