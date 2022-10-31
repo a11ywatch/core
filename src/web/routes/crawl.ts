@@ -13,6 +13,9 @@ export const crawlRest = async (
 ) => {
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
+  const subdomains =
+    paramParser(req, "subdomains") || paramParser(req, "subdomains");
+  const tld = paramParser(req, "tld") || paramParser(req, "tld");
 
   if (!url) {
     res.status(StatusCode.BadRequest);
@@ -36,8 +39,8 @@ export const crawlRest = async (
     const { data, message } = await crawlMultiSiteWithEvent({
       url,
       userId: userNext.id,
-      subdomains: userNext?.role >= 1,
-      tld: userNext?.role >= 2,
+      subdomains: !!userNext?.role && subdomains,
+      tld: !!userNext?.role && tld,
     });
 
     res.send(

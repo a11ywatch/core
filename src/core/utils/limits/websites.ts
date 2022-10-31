@@ -4,7 +4,6 @@ import { SUPER_MODE } from "../../../config/config";
 export const blockWebsiteAdd = ({
   audience,
   collectionCount,
-  limit,
 }: any): boolean => {
   // if super mode allow all websites
   if (SUPER_MODE) {
@@ -16,19 +15,8 @@ export const blockWebsiteAdd = ({
     return true;
   }
 
-  // 3 website allowed
-  if (audience === 1 && collectionCount >= 3) {
-    return true;
-  }
-
-  // 8 website allowed
-  if (audience === 2 && collectionCount >= 8) {
-    return true;
-  }
-
-  const maxLimit = limit > 8 ? limit : 8;
-
-  if (audience === 3 && collectionCount >= maxLimit) {
+  // 50 website allowed
+  if (audience && collectionCount >= 50) {
     return true;
   }
 

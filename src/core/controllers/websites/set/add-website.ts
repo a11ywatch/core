@@ -61,7 +61,6 @@ export const addWebsite = async ({
     blockWebsiteAdd({
       audience: user?.role,
       collectionCount,
-      limit: user?.websiteLimit,
     })
   ) {
     throw new Error(ADD_FREE_MAX_ERROR);
@@ -75,8 +74,8 @@ export const addWebsite = async ({
 
   const actionsEnabled = actions && Array.isArray(actions) && actions.length;
 
-  const subdomainsEnabled = subdomains && (SUPER_MODE || user.role >= 1);
-  const tldEnabled = tld && (SUPER_MODE || user.role >= 2);
+  const subdomainsEnabled = subdomains && (SUPER_MODE || !!user.role);
+  const tldEnabled = tld && (SUPER_MODE || !!user.role);
 
   const website = makeWebsite({
     userId,

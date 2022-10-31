@@ -2,15 +2,10 @@ import { config } from "../../../../config";
 
 import { EMAIL_ERROR, SUCCESS } from "../../../strings";
 import { signJwt } from "../../../utils";
+import { roleHandler, stripeProductId } from "../../../utils/price-handler";
 import { getUser } from "../find";
 
-const {
-  STRIPE_KEY,
-  STRIPE_PREMIUM_PLAN,
-  STRIPE_PREMIUM_PLAN_YEARLY,
-  STRIPE_BASIC_PLAN,
-  STRIPE_BASIC_PLAN_YEARLY,
-} = config;
+const { STRIPE_KEY } = config;
 
 import Stripe from "stripe";
 
@@ -34,7 +29,7 @@ export const addPaymentSubscription = async ({
   const email = user?.email ?? emailP;
 
   if (user && stripeToken) {
-    let parsedToken;
+    let parsedToken = null;
 
     try {
       parsedToken = JSON.parse(stripeToken);
@@ -76,44 +71,27 @@ export const addPaymentSubscription = async ({
         source: parsedToken?.id,
       });
 
-      let plan = yearly ? STRIPE_BASIC_PLAN_YEARLY : STRIPE_BASIC_PLAN;
+      const plan = parsedToken?.plan;
 
-      if (parsedToken?.plan === 1) {
-        plan = yearly ? STRIPE_PREMIUM_PLAN_YEARLY : STRIPE_PREMIUM_PLAN;
-      }
+      const stripeProductPlan = stripeProductId(plan, yearly);
 
       const charge = await stripe.subscriptions.create({
         customer: stripeCustomer.customer,
         items: [
           {
-            plan,
+            plan: stripeProductPlan,
           },
         ],
       });
 
       if (charge) {
-        const chargeAmount = String(charge.plan.amount);
-        let role = user.role;
-        let websiteLimit = user.websiteLimit;
-
-        // TODO: determine another way off price
-        if ("999" === chargeAmount || "9999" === chargeAmount) {
-          role = 1;
-          websiteLimit = 4;
-        } else if ("1999" === chargeAmount || "19999" === chargeAmount) {
-          role = 2;
-          websiteLimit = 10;
-        }
-
+        const role = roleHandler(plan);
         const jwt = signJwt({ email, role, keyid: user.id });
 
         user.jwt = jwt;
         user.role = role;
         user.paymentSubscription = charge;
-
-        if (customer.id) {
-          user.stripeID = customer.id;
-        }
+        user.stripeID = customer.id;
 
         await collection.updateOne(
           { id: user.id },
@@ -124,7 +102,7 @@ export const addPaymentSubscription = async ({
               role,
               stripeID: customer.id,
               paymentSubscription: charge,
-              websiteLimit,
+              websiteLimit: 50,
             },
           }
         );

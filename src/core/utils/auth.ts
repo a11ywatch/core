@@ -48,7 +48,7 @@ export function signJwt({ email, role, keyid }, options = {}) {
     {
       subject: email,
       // TODO: audience should be domain -> move role to another prop or combine with subject
-      audience: role,
+      audience: role || 0,
       keyid,
     },
     privateKey,

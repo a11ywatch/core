@@ -23,7 +23,7 @@ export async function websiteWatch(
       continue;
     }
 
-    if (user.role === 0) {
+    if (!user.role) {
       await crawlPage(
         {
           url,

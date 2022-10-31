@@ -53,22 +53,69 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
  * determine if user can do any scans
  */
 export const validateScanEnabled = ({ user }) => {
+  let scanBlocked = false;
+
   if (!SUPER_MODE) {
     const totalUptime = user?.scanInfo?.totalUptime ?? 0;
     const role = user?.role; // users role
 
-    if (
-      !user ||
-      (role === 0 && totalUptime >= 30000) || // 30 seconds
-      (role === 1 && totalUptime >= 300000) || // base uptime 5 mins x10
-      (role === 2 && totalUptime >= 800000) || // premium 13 mins
-      (role == 3 && totalUptime >= (user?.scanInfo?.usageLimit || 13) * 60000)
-    ) {
-      return false;
+    switch (role) {
+      case 0: {
+        scanBlocked = totalUptime >= 30000;
+        break;
+      }
+      // normal plans
+      case 1: {
+        scanBlocked = totalUptime >= 500000;
+        break;
+      }
+      case 2: {
+        scanBlocked = totalUptime >= 1000000;
+        break;
+      }
+      case 3: {
+        scanBlocked = totalUptime >= 2000000;
+        break;
+      }
+      case 4: {
+        scanBlocked = totalUptime >= 5000000;
+        break;
+      }
+      case 5: {
+        scanBlocked = totalUptime >= 15000000;
+        break;
+      }
+      // high tier plans
+      case 6: {
+        scanBlocked = totalUptime >= 50000000;
+        break;
+      }
+      case 7: {
+        scanBlocked = totalUptime >= 100000000;
+        break;
+      }
+      case 8: {
+        scanBlocked = totalUptime >= 200000000;
+        break;
+      }
+      case 9: {
+        scanBlocked = totalUptime >= 300000000;
+        break;
+      }
+      case 10: {
+        scanBlocked = totalUptime >= 500000000;
+        break;
+      }
+      default: {
+        scanBlocked = false;
+        break;
+      }
     }
+    // todo: custom usagelimit
+    // user?.scanInfo?.usageLimit
   }
 
-  return true;
+  return scanBlocked;
 };
 
 /*
