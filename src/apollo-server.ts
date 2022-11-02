@@ -1,5 +1,5 @@
 import type { ApolloServerFastifyConfig } from "apollo-server-fastify";
-import { BYPASS_AUTH } from "./config";
+import { BYPASS_AUTH, SUPER_MODE } from "./config";
 import { getUserFromToken } from "./core/utils";
 import { createScheme } from "./core/schema";
 import { AUTH_ERROR } from "./core/strings";
@@ -11,7 +11,7 @@ const getServerConfig = (
 
   return {
     ...extra,
-    introspection: true,
+    introspection: SUPER_MODE,
     schema,
     cache: "bounded",
     csrfPrevention: true,
@@ -22,10 +22,13 @@ const getServerConfig = (
 
       const user = getUserFromToken(authentication);
 
-      const operation = body ? body?.operationName + "" : "";
+      const operation = body ? body?.operationName : "";
 
+      if (operation === "Logout" || operation === "logout") {
+        ctx?.reply?.clearCookie("jwt");
+      }
       // authentication error
-      if (!user && !BYPASS_AUTH.includes(operation) && operation) {
+      if (!user && operation && !BYPASS_AUTH.includes(operation)) {
         throw new Error(AUTH_ERROR);
       }
 

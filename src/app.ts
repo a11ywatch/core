@@ -358,10 +358,26 @@ async function initServer(): Promise<HttpServer[]> {
       execute,
       subscribe,
       onConnect(cnxnParams) {
+        const u = getUserFromToken(
+          cnxnParams?.connectionParams?.authorization as string
+        );
+
+        // allow passing userId to request
+        if (u) {
+          return {
+            userId: u?.payload?.keyid,
+          };
+        }
+
+        return false;
+      },
+      context: async (ctx) => {
+        const u = getUserFromToken(
+          ctx?.connectionParams?.authorization as string
+        );
+
         return {
-          userId: getUserFromToken(
-            cnxnParams?.connectionParams?.authorization as string
-          )?.payload?.keyid,
+          userId: u?.payload?.keyid ?? -1,
         };
       },
     },

@@ -5,10 +5,7 @@ import { pubsub } from "../../../database/pubsub";
 export const emailVerified = {
   subscribe: withFilter(
     () => pubsub.asyncIterator(EMAIL_VERIFIED),
-    (payload: any, variables: any, context: any) => {
-      const id = payload.emailVerified.userId;
-
-      return id === context?.userId || id === variables?.userId;
-    }
+    (payload: any, _: any, context: any) =>
+      payload?.emailVerified?.userId === context?.userId
   ),
 };
