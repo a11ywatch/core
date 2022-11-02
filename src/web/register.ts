@@ -15,6 +15,10 @@ export const registerApp = async (app: FastifyInstance) => {
     origin: true,
   });
 
+  await app.register(cookie, {
+    parseOptions: cookieConfigs,
+  });
+
   // setup global rate limiting
   if (!SUPER_MODE) {
     await app.register(ratelimit, {
@@ -23,9 +27,6 @@ export const registerApp = async (app: FastifyInstance) => {
       redis: createRedisClient(),
     });
   }
-  await app.register(cookie, {
-    parseOptions: cookieConfigs,
-  });
 
   return app;
 };

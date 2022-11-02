@@ -25,12 +25,12 @@ const defaultPayload = {
 // TODO: move to limiter controll file
 const scanRateLimitConfig = {
   max: 2,
-  window: "14s",
+  window: "10s",
 };
 
 const defaultScanLimit = {
   max: 3,
-  window: "10s",
+  window: "60s",
 };
 
 export const Mutation = {
@@ -51,9 +51,11 @@ export const Mutation = {
 
     const { keyid } = context.user?.payload || defaultPayload;
 
-    const canScan = await UsersController().updateScanAttempt({
-      userId: keyid,
-    });
+    const canScan = !SUPER_MODE
+      ? await UsersController().updateScanAttempt({
+          userId: keyid,
+        })
+      : true;
 
     if (canScan) {
       const [website] = await getWebsite({ userId: keyid, url });
@@ -86,31 +88,33 @@ export const Mutation = {
 
     let errorMessage;
 
-    const canScan = await UsersController().updateScanAttempt({
-      userId: keyid,
-    });
+    if (!SUPER_MODE) {
+      const canScan = await UsersController().updateScanAttempt({
+        userId: keyid,
+      });
 
-    // if the request did not come from the server update api usage
-    if (!canScan) {
-      errorMessage = RATE_EXCEEDED_ERROR;
-    }
+      // if the request did not come from the server update api usage
+      if (!canScan) {
+        errorMessage = RATE_EXCEEDED_ERROR;
+      }
 
-    // check rate limits for request. TODO: adjust r
-    if (!errorMessage && !SUPER_MODE) {
-      // apply rate limit on un-auth.
-      errorMessage = await gqlRateLimiter(
-        {
-          parent,
-          args,
-          context,
-          info,
-        },
-        rateLimitConfig
-      );
-    }
+      // check rate limits for request. TODO: adjust r
+      if (!errorMessage) {
+        // apply rate limit on un-auth.
+        errorMessage = await gqlRateLimiter(
+          {
+            parent,
+            args,
+            context,
+            info,
+          },
+          rateLimitConfig
+        );
+      }
 
-    if (errorMessage) {
-      throw new Error(errorMessage);
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      }
     }
 
     let data = {};

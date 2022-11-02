@@ -5,10 +5,7 @@ import { pubsub } from "../../../database/pubsub";
 export const crawlComplete = {
   subscribe: withFilter(
     () => pubsub.asyncIterator(CRAWL_COMPLETE),
-    (payload: any, variables: any, context: any) => {
-      const id = payload.crawlComplete.userId;
-
-      return id === context?.userId || id === variables?.userId;
-    }
+    (payload: any, _: any, context: any) =>
+      payload?.crawlComplete?.userId === context?.userId
   ),
 };
