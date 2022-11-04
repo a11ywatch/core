@@ -1,16 +1,4 @@
-# FROM pseudomuto/protoc-gen-doc AS generator
-
-# WORKDIR /usr/src/app
-
-# RUN apk add npm
-
-# RUN npm i @a11ywatch/protos
-
-# RUN mkdir ./doc && cp -R node_modules/@a11ywatch/protos proto
-
-# RUN protoc --doc_out=./doc --doc_opt=html,index.html proto/*.proto
-
-FROM node:18.10-alpine AS installer
+FROM node:19.0-alpine AS installer
 
 WORKDIR /usr/src/app
 
@@ -21,7 +9,7 @@ RUN apk upgrade --update-cache --available && \
 COPY . .
 RUN npm ci
 
-FROM node:18.10-alpine AS builder
+FROM node:19.0-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -32,7 +20,7 @@ RUN npm run build
 RUN rm -R ./node_modules
 RUN npm install --production
 
-FROM node:18.10-alpine
+FROM node:19.0-alpine
 
 WORKDIR /usr/src/app
 
@@ -43,7 +31,6 @@ RUN apk upgrade --update-cache --available && \
 # generic keys
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
-# COPY --from=generator /usr/src/app/doc ./public/protodoc
 
 ENV GRPC_HOST_PAGEMIND=pagemind:50052
 

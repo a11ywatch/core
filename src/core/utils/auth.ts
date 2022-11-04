@@ -14,6 +14,7 @@ let defaultKey;
 interface SignOnOptions {
   issuer: string;
   subject: string;
+  // role
   audience: string;
   expiresIn: string;
   algorithm?: string;

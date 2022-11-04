@@ -1,15 +1,3 @@
-# FROM pseudomuto/protoc-gen-doc AS generator
-
-# WORKDIR /usr/src/app
-
-# RUN apk add npm
-
-# RUN npm i @a11ywatch/protos
-
-# RUN mkdir ./doc && cp -R node_modules/@a11ywatch/protos proto
-
-# RUN protoc --doc_out=./doc --doc_opt=html,index.html proto/*.proto
-
 FROM node:18.10-alpine
 
 WORKDIR /usr/src/app
@@ -23,6 +11,5 @@ RUN apk upgrade --update-cache --available && \
 RUN npm ci
 
 COPY . .
-# COPY --from=generator /usr/src/app/doc ./public/protodoc
 
 CMD ["node_modules/ts-node-dev/lib/bin.js", "--no-experimental-fetch", "--transpile-only", "src/server.ts"]

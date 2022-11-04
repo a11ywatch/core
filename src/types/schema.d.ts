@@ -31,13 +31,6 @@ export type Analytic = {
   adaScore?: Maybe<Scalars["Float"]>;
 };
 
-export type ApiUsage = {
-  __typename?: "ApiUsage";
-  usage?: Maybe<Scalars["Int"]>;
-  usageLimit?: Maybe<Scalars["Int"]>;
-  lastScanDate?: Maybe<Scalars["String"]> | Date;
-};
-
 export type BasicMutationResponse = MutationResponse & {
   __typename?: "BasicMutationResponse";
   code: Scalars["String"];
@@ -456,7 +449,6 @@ export type User = {
   scripts?: Maybe<Array<Maybe<Script>>>;
   script?: Maybe<Script>;
   paymentSubscription?: Maybe<Stripe.subscriptions.ISubscription>;
-  apiUsage?: Maybe<ApiUsage>;
   websiteLimit?: Maybe<Scalars["Int"]>;
   downAlerts?: Maybe<Array<Maybe<Website>>>;
   emailExpDate?: Maybe<Scalars["String"]>;

@@ -49,7 +49,7 @@ export const getAnalyticsPaging = async (params, chain?: boolean) => {
 // Page analytics for simple error stats
 export const AnalyticsController = ({ user } = { user: null }) => ({
   getWebsite: async (
-    { pageUrl, userId, domain }: BaseParams,
+    { pageUrl, userId, domain, bypass }: BaseParams & { bypass?: boolean },
     chain?: boolean
   ) => {
     const [collection] = await connect("Analytics");
@@ -57,7 +57,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
 
     let analytics = null;
 
-    if (validateUID(userId)) {
+    if (validateUID(userId) || bypass) {
       analytics = await collection.findOne(searchProps);
     }
 

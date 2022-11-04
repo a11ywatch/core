@@ -11,7 +11,6 @@ import {
 import { getWebsite } from "../websites";
 import { getUser } from "./find";
 import {
-  updateApiUsage,
   updateScanAttempt,
   toggleAlert,
   verifyUser,
@@ -31,7 +30,6 @@ export const UsersController: UserControllerType = (
   { user: _user } = { user: null }
 ) => ({
   getUser,
-  updateApiUsage,
   verifyUser,
   createUser,
   addPaymentSubscription,

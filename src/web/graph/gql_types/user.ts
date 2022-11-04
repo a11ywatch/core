@@ -10,12 +10,6 @@ export const user = gql`
     lastScanDate: String
   }
 
-  type ApiUsage {
-    usage: Int
-    usageLimit: Int
-    lastScanDate: String
-  }
-
   """
   User of the application.
   """
@@ -42,7 +36,6 @@ export const user = gql`
     scripts(filter: String): [Script]
     script(filter: String, url: String): Script
     paymentSubscription: PaymentSubScription
-    apiUsage: ApiUsage
     websiteLimit: Int
     downAlerts: [Website]
     emailExpDate: String

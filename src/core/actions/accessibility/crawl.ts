@@ -100,7 +100,7 @@ export const crawlPage = async (
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
   // block scans from running
-  if (validateScanEnabled({ user: userData }) === false) {
+  if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown: true },
@@ -159,7 +159,7 @@ export const crawlPage = async (
 
   let shutdown = false;
 
-  if (!SUPER_MODE) {
+  if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = userData?.scanInfo?.totalUptime || 0;
     const totalUptime = ttime + pastUptime;

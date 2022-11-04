@@ -1,7 +1,7 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.5.160",
-  "description": "a11ywatch central api",
+  "version": "0.5.170",
+  "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
     "dev": "ts-node-dev --transpile-only src/server.ts",

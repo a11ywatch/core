@@ -11,7 +11,6 @@ export const startClientsGRPC = async (retried?: boolean) => {
       await createCrawlerClient();
       await createMavClient();
       await createPageMindClient();
-      console.log("gRPC clients connected - pagemind, crawler, and mav.");
     } catch (e) {
       if (!retried) {
         console.log("retrying gRPC client connections");
@@ -19,6 +18,7 @@ export const startClientsGRPC = async (retried?: boolean) => {
       }
       console.error(e);
     }
+    console.log("gRPC clients connected - pagemind, crawler, and mav.");
 
     resolve(true);
   });

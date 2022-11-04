@@ -10,26 +10,22 @@ export const getCrawlConfig = async ({
   subdomains,
   robots = true,
 }) => {
-  let subdomainsEnabled = subdomains;
-  let tldEnabled = tld;
+  let subdomainsEnabled = SUPER_MODE ? subdomains : role && subdomains;
+  let tldEnabled = SUPER_MODE ? tld : role && tld;
 
-  // get website configuration [todo: remove]
-  if (!subdomainsEnabled || !tldEnabled) {
-    const [website] = await getWebsite({ userId: id, url });
-    if (website) {
-      if (!subdomainsEnabled) {
-        subdomainsEnabled = website.subdomains;
-      }
-      if (!tldEnabled) {
-        tldEnabled = website.tld;
+  // determine active configuration on role
+  if (role) {
+    if (!subdomainsEnabled || !tldEnabled) {
+      const [website] = await getWebsite({ userId: id, url });
+      if (website) {
+        if (!subdomainsEnabled) {
+          subdomainsEnabled = !!website.subdomains;
+        }
+        if (!tldEnabled) {
+          tldEnabled = !!website.tld;
+        }
       }
     }
-  }
-
-  // bypass configurations
-  if (!SUPER_MODE) {
-    subdomainsEnabled = subdomainsEnabled && role;
-    tldEnabled = tldEnabled && role;
   }
 
   return {

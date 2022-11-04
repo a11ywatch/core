@@ -10,26 +10,25 @@ export const statusBadge = async (
 ) => {
   const domain = (req.params as any)?.domain?.replace(".svg", "");
   const page: Analytic = await AnalyticsController().getWebsite(
-    { domain },
+    { domain, bypass: true },
     false
   );
 
-  let score = 0;
+  const score = page?.adaScore ?? 0;
   let statusColor = "#000";
 
+  // validate score on page find
   if (page) {
-    score = page?.adaScore;
-    if (score && typeof score === "number") {
-      if (score >= 90) {
-        statusColor = "#3fb950";
-      } else if (score >= 70) {
-        statusColor = "#a4a61d";
-      } else {
-        statusColor = "#f85149";
-      }
+    if (score >= 90) {
+      statusColor = "#3fb950";
+    } else if (score >= 70) {
+      statusColor = "#a4a61d";
+    } else {
+      statusColor = "#f85149";
     }
   }
 
   res.header("Content-Type", "image/svg+xml");
+  res.header("Cache-Control", "max-age=604800, stale-while-revalidate=86400");
   res.send(rawStatusBadge({ statusColor, score }));
 };

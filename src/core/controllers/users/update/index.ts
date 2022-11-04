@@ -1,4 +1,3 @@
-export { updateApiUsage } from "./api-data";
 export { updateScanAttempt, getScanEnabled } from "./scan-attempt";
 export { toggleAlert } from "./alerts";
 export { verifyUser } from "./verify";

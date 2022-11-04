@@ -1,11 +1,15 @@
 import type { ServerWritableStream } from "@grpc/grpc-js";
-import { incrementApiByUser } from "../../core/controllers/users/find/get-api";
 import { getCrawlConfig } from "../../core/streams/crawl-config";
 import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
 import { domainName } from "../../core/utils/domain-name";
 import { getHostName } from "../../core/utils/get-host";
 import type { CrawlProps } from "../../core/utils/crawl-stream";
+import { getUserFromToken } from "../../core/utils";
+import { validateUID } from "../../web/params/extracter";
+import { SUPER_MODE } from "../../config";
+import { validateScanEnabled } from "../../core/controllers/users/update/scan-attempt";
+import { UsersController } from "../../core/controllers";
 
 type ServerCallStreaming = ServerWritableStream<
   { url: string; authorization: string; subdomains: boolean; tld: boolean },
@@ -15,17 +19,32 @@ type ServerCallStreaming = ServerWritableStream<
 // core multi page streaming gRPC
 export const coreCrawl = async (call: ServerCallStreaming) => {
   const { authorization, url, subdomains, tld } = call.request;
-  const userNext = await incrementApiByUser(authorization);
+  const userNext = getUserFromToken(authorization); // get current user
+  const userId = userNext?.payload?.keyid;
 
-  const crawlProps = await getCrawlConfig({
-    id: userNext.id,
-    url,
-    role: userNext.role,
-    subdomains,
-    tld,
-  });
+  if (validateUID(userId) || SUPER_MODE) {
+    // todo: get rate limits
+    if (!SUPER_MODE) {
+      const [user] = await UsersController().getUser({
+        id: userId,
+      });
 
-  await crawlStreaming(crawlProps, call);
+      // block scans from running
+      if (validateScanEnabled({ user }) === false) {
+        return call.end();
+      }
+    }
+
+    const crawlProps = await getCrawlConfig({
+      id: userId,
+      url,
+      role: userNext?.payload?.audience,
+      subdomains,
+      tld,
+    });
+
+    await crawlStreaming(crawlProps, call);
+  }
 
   call.end();
 };
@@ -50,19 +69,17 @@ export const crawlStreaming = (
     });
   });
 
+  const crawlListener = (source) => {
+    const data = source?.data;
+
+    if (data) {
+      call.write({ data });
+    }
+  };
+
   return new Promise((resolve) => {
     const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
     const crawlEvent = `crawl-${crawlKey}`;
-
-    const crawlListener = (source) => {
-      const data = source?.data;
-
-      if (data) {
-        data.pageLoadTime = null;
-        data.issues = null;
-        call.write({ data });
-      }
-    };
 
     const crawlCompleteListener = (data) => {
       crawlEmitter.off(crawlEvent, crawlListener);

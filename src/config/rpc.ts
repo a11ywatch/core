@@ -1,3 +1,4 @@
+export const GRPC_PORT_PUBLIC = 50050;
 export const GRPC_PORT = 50051;
 export const GRPC_PORT_PAGEMIND = 50052;
 export const GRPC_PORT_MAV = 50053;
@@ -5,6 +6,8 @@ export const GRPC_PORT_CRAWLER = 50055;
 
 // central server
 const GRPC_HOST = process.env.GRPC_HOST || `0.0.0.0:${GRPC_PORT}`;
+const GRPC_HOST_PUBLIC =
+  process.env.GRPC_HOST_PUBLIC || `0.0.0.0:${GRPC_PORT_PUBLIC}`;
 
 let GRPC_HOST_PAGEMIND =
   process.env.GRPC_HOST_PAGEMIND || `127.0.0.1:${GRPC_PORT_PAGEMIND}`;
@@ -25,4 +28,10 @@ if (process.env.DOCKER_CONTAINER) {
   }
 }
 
-export { GRPC_HOST, GRPC_HOST_PAGEMIND, GRPC_HOST_CRAWLER, GRPC_HOST_MAV };
+export {
+  GRPC_HOST,
+  GRPC_HOST_PUBLIC,
+  GRPC_HOST_PAGEMIND,
+  GRPC_HOST_CRAWLER,
+  GRPC_HOST_MAV,
+};

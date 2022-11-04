@@ -12,11 +12,7 @@ const UserModel = {
   profileVisible: false,
   lastLoginDate: "",
   passwordRequired: false,
-  apiUsage: {
-    lastScanDate: null,
-    usage: 0, // amount of API calls made per day
-    usageLimit: 3, // the limit to reset to after the day
-  },
+  // api usage
   scanInfo: {
     lastScanDate: null,
     totalUptime: 0, // total scan uptime

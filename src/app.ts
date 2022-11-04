@@ -12,7 +12,11 @@ import {
   WebsitesController,
 } from "./core/controllers/websites";
 import { createIframe as createIframeEvent } from "./core/controllers/iframe";
-import { getBaseParams, paramParser } from "./web/params/extracter";
+import {
+  getBaseParams,
+  paramParser,
+  validateUID,
+} from "./web/params/extracter";
 import { CONFIRM_EMAIL, IMAGE_CHECK, UNSUBSCRIBE_EMAILS } from "./core/routes";
 import {
   initDbConnection,
@@ -192,7 +196,7 @@ async function initServer(): Promise<HttpServer[]> {
     const usr = getUserFromToken(req.headers.authorization);
     const userId = usr?.payload?.keyid;
 
-    if (typeof userId === "undefined") {
+    if (!validateUID(userId)) {
       res.status(StatusCode.Unauthorized);
 
       return res.send({
@@ -297,7 +301,7 @@ async function initServer(): Promise<HttpServer[]> {
     if (body?.password === process.env.ADMIN_PASSWORD) {
       const userId = body?.userId;
 
-      if (typeof userId !== "undefined") {
+      if (validateUID(userId)) {
         setImmediate(async () => {
           // todo: send user email account reset
           // todo: downgrade stripe

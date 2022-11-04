@@ -46,7 +46,6 @@ export interface PaymentsParams extends AuthParams {
 export interface UserControllerMethodsType {
   createUser(params: Params, chain?: boolean): Promise<User>;
   getUser(params: Params): Promise<[User, any]>;
-  updateApiUsage(params: Params): Promise<any>;
   verifyUser(params: AuthParams): Promise<any>;
   confirmEmail(params: Params): Promise<any>;
   addPaymentSubscription(params: PaymentsParams): Promise<any>;

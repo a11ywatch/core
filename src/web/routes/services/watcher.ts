@@ -1,11 +1,7 @@
 import type { FastifyContext } from "apollo-server-fastify";
-import { UsersController } from "../../../core/controllers";
 import { getUserFromToken } from "../../../core/utils";
 import { imageDetect } from "../../../core/external";
-import {
-  TOKEN_EXPIRED_ERROR,
-  RATE_EXCEEDED_ERROR,
-} from "../../../core/strings";
+import { TOKEN_EXPIRED_ERROR } from "../../../core/strings";
 import { StatusCode } from "../../../web/messages/message";
 import { responseModel } from "../../../core/models";
 
@@ -36,21 +32,6 @@ const detectImage = async (
       message: req.headers?.authorization
         ? TOKEN_EXPIRED_ERROR
         : "USER NOT FOUND",
-      success: false,
-    });
-    return;
-  }
-
-  const { keyid } = user?.payload;
-
-  const [_, __, canScan] = await UsersController({
-    user,
-  }).updateApiUsage({ id: keyid });
-
-  if (!canScan) {
-    res.send({
-      data: null,
-      message: RATE_EXCEEDED_ERROR,
       success: false,
     });
     return;

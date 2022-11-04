@@ -61,39 +61,10 @@ export const getUserFromApi = async (
   }
 
   /// front-end domain allow all besides rate limits
-  if (isClient) {
-    if (authenticated) {
-      const [userData] = await getUserFromId(user, keyid);
+  if (authenticated) {
+    const [userData] = await getUserFromId(user, keyid);
 
-      data = userData;
-    }
-  } else {
-    const [userData, _, canScan] = await UsersController({
-      user,
-    }).updateApiUsage({ id: keyid });
-
-    if (jwt && !userData) {
-      res.send({
-        data: null,
-        message: "Error, API token is invalid. Please update your API token.",
-        success: false,
-      });
-      return;
-    }
-
-    // check usage limits
-    if (!canScan) {
-      res.send({
-        data: null,
-        message: RATE_EXCEEDED_ERROR,
-        success: false,
-      });
-      return;
-    }
-
-    if (userData) {
-      data = userData;
-    }
+    data = userData;
   }
 
   return data;
