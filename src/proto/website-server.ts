@@ -1,5 +1,5 @@
 import { Server, ServerCredentials, ServiceDefinition } from "@grpc/grpc-js";
-import { GRPC_HOST } from "../config/rpc";
+import { GRPC_HOST, GRPC_HOST_PUBLIC } from "../config/rpc";
 import { scanStart } from "./calls/scan-start";
 import { scanEnd } from "./calls/scan-end";
 import { scan } from "./calls/scan";
@@ -9,6 +9,7 @@ import { coreCrawl } from "./calls/core-crawl";
 import { loadProto } from "./website";
 
 let server: Server;
+let publicServer: Server;
 
 // create a top level gRPC server
 export const createServer = async () => {
@@ -16,6 +17,7 @@ export const createServer = async () => {
   const coreProto = await loadProto("apicore.proto");
 
   server = new Server();
+  publicServer = new Server();
 
   // crawl control website service
   server.addService(
@@ -32,18 +34,30 @@ export const createServer = async () => {
     }
   );
 
-  // core service
-  server.addService(coreProto["apicore.CoreService"] as ServiceDefinition, {
-    // single page scan and get results
-    scan: coreScan,
-    // scan multiple pages to stream
-    crawl: coreCrawl,
-  });
+  // core service - todo bind on open PORT for external usage
+  publicServer.addService(
+    coreProto["apicore.CoreService"] as ServiceDefinition,
+    {
+      // single page scan and get results
+      scan: coreScan,
+      // scan multiple pages to stream
+      crawl: coreCrawl,
+    }
+  );
 
   server.bindAsync(GRPC_HOST, ServerCredentials.createInsecure(), () => {
     server.start();
-    console.log("gRPC server running at http://0.0.0.0:50051");
+    console.log(`gRPC server running at ${GRPC_HOST}`);
   });
+
+  publicServer.bindAsync(
+    GRPC_HOST_PUBLIC,
+    ServerCredentials.createInsecure(),
+    () => {
+      publicServer.start();
+      console.log(`public - gRPC server running at ${GRPC_HOST_PUBLIC}`);
+    }
+  );
 };
 
 export const killServer = async () => {
@@ -53,7 +67,11 @@ export const killServer = async () => {
   server.removeService(
     websiteProto["website.WebsiteService"] as ServiceDefinition
   );
-  server.removeService(coreProto["apicore.CoreService"] as ServiceDefinition);
+
+  publicServer.removeService(
+    coreProto["apicore.CoreService"] as ServiceDefinition
+  );
 
   server.forceShutdown();
+  publicServer.forceShutdown();
 };

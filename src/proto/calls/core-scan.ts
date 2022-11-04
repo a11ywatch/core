@@ -1,8 +1,8 @@
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
-import { incrementApiByUser } from "../../core/controllers/users/find/get-api";
-import { scanWebsite, crawlPage } from "../../core/actions";
+import { crawlPage } from "../../core/actions";
+import { DISABLE_STORE_SCRIPTS, SUPER_MODE } from "../../config/config";
+import { getUserFromToken } from "../../core/utils";
 import { validateUID } from "../../web/params/extracter";
-import { DISABLE_STORE_SCRIPTS } from "../../config/config";
 
 // core single page scan with results
 export const coreScan = async (
@@ -13,15 +13,15 @@ export const coreScan = async (
   callback: sendUnaryData<any>
 ) => {
   const { authorization, url, pageInsights } = call.request;
-  const userNext = await incrementApiByUser(authorization); // get current user
+  const userNext = getUserFromToken(authorization); // get current user
+  const userId = userNext?.payload?.keyid;
 
-  let data = {};
+  if (validateUID(userId) || SUPER_MODE) {
+    const noStore = DISABLE_STORE_SCRIPTS || !userNext?.payload?.audience;
 
-  const userId = userNext?.id;
-  const noStore = DISABLE_STORE_SCRIPTS || !userNext?.role;
+    // todo: get rate limits
 
-  if (validateUID(userId)) {
-    const resData = await crawlPage(
+    const { data } = await crawlPage(
       {
         url,
         userId,
@@ -31,15 +31,10 @@ export const coreScan = async (
       },
       false
     );
-    data = resData?.data;
-  } else {
-    const resData = await scanWebsite({
-      url,
-      noStore,
-      pageInsights: !!pageInsights,
-    });
-    data = resData?.data;
-  }
 
-  callback(null, { data });
+    callback(null, { data });
+  } else {
+    // todo: add error messaging
+    callback(null, { data: null });
+  }
 };
