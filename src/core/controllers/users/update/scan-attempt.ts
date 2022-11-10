@@ -71,7 +71,8 @@ export const validateScanEnabled = ({ user }) => {
 
     switch (role) {
       case 0: {
-        scanBlocked = totalUptime >= 30000;
+        // 15 seconds daily
+        scanBlocked = totalUptime >= 15000;
         break;
       }
       // normal plans
