@@ -34,23 +34,16 @@ export const getUserFromApi = async (
   const jwt = extractTokenKey(token ? String(token).trim() : "");
   const user = getUserFromToken(jwt);
   const { keyid } = user?.payload ?? {};
-  const authenticated = typeof keyid !== "undefined";
-
-  // response return data
-  let data = {};
 
   // simply get the user and return [no updates on counters]
   if (config.SUPER_MODE) {
     const [userData] = await getUserFromId(user, keyid);
 
-    return userData ?? data;
+    return userData;
   }
 
-  // check if origin is from front-end client simply allow rate limits or super mode
-  const isClient = frontendClientOrigin(req.headers["origin"]);
-
   // auth required unless front-end client
-  if (!isClient && !authenticated) {
+  if (!validateUID(keyid)) {
     res.send({
       data: null,
       message:
@@ -60,14 +53,9 @@ export const getUserFromApi = async (
     return;
   }
 
-  /// front-end domain allow all besides rate limits
-  if (authenticated) {
-    const [userData] = await getUserFromId(user, keyid);
+  const [userData] = await getUserFromId(user, keyid);
 
-    data = userData;
-  }
-
-  return data;
+  return userData;
 };
 
 /*
@@ -75,19 +63,18 @@ export const getUserFromApi = async (
  * This method handles sending headers and will return void next action should not occur. [TODO: refactor]
  * @return User
  **/
-export const allowedNext = async (
+export const allowedNext = (
   token: string,
   req: FastifyContext["request"],
   res: FastifyContext["reply"],
   mediaType?: "html" | "json"
-): Promise<User> => {
+): void | { id: number } => {
   const jwt = extractTokenKey(token ? String(token).trim() : "");
   const user = getUserFromToken(jwt);
   const { keyid } = user?.payload ?? {};
-  const authenticated = typeof keyid !== "undefined";
 
   // simply get the user and return [no updates on counters]
-  if (config.SUPER_MODE || authenticated) {
+  if (config.SUPER_MODE || validateUID(keyid)) {
     return {
       id: keyid,
     };

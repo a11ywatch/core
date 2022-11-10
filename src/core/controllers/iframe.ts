@@ -24,7 +24,7 @@ const createIframe = async (
   }
 
   const allowed = await allowedNext(
-    req?.headers?.authorization,
+    req?.headers?.authorization || req.cookies.jwt,
     req,
     res,
     "html"

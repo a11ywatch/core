@@ -111,7 +111,7 @@ async function initServer(): Promise<HttpServer[]> {
   app.get("/api/report", limiter, getWebsiteReport);
   // retrieve a user from the database
   app.get("/api/user", async (req, res) => {
-    const auth = req.headers.authorization;
+    const auth = req.headers.authorization || req.cookies.jwt;
 
     await responseWrap(res, {
       callback: () => retreiveUserByTokenWrapper(auth),
@@ -193,7 +193,7 @@ async function initServer(): Promise<HttpServer[]> {
    * This sets the website configuration for crawling like user agents, headers, and etc.
    */
   app.put("/api/website", async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+    const usr = getUserFromToken(req.headers.authorization || req.cookies.jwt);
     const userId = usr?.payload?.keyid;
 
     if (!validateUID(userId)) {
@@ -235,7 +235,7 @@ async function initServer(): Promise<HttpServer[]> {
    * This sets the website configuration for crawling like user agents, headers, and etc.
    */
   app.post("/api/website", async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+    const usr = getUserFromToken(req.headers.authorization || req.cookies.jwt);
     const userId = usr?.payload?.keyid;
 
     await responseWrap(res, {
@@ -255,7 +255,7 @@ async function initServer(): Promise<HttpServer[]> {
    * This removes the website from the database it can be by a url, domain, or empty poping the db entry.
    */
   app.delete("/api/website", async (req, res) => {
-    const usr = getUserFromToken(req.headers.authorization);
+    const usr = getUserFromToken(req.headers.authorization || req.cookies.jwt);
     const userId = usr?.payload?.keyid;
 
     const url = paramParser(req, "url");

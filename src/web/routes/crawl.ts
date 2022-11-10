@@ -30,7 +30,7 @@ export const crawlRest = async (
   }
 
   const userNext = await getUserFromApiScan(
-    req.headers.authorization,
+    req?.headers?.authorization || req?.cookies?.jwt,
     req,
     res
   );

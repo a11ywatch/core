@@ -27,7 +27,7 @@ export const crawlStream = async (
     req.headers["x-request-client"]) as string;
 
   const userNext = await getUserFromApiScan(
-    req?.headers?.authorization,
+    req?.headers?.authorization || req?.cookies?.jwt,
     req,
     res
   );

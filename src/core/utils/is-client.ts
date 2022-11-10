@@ -18,9 +18,11 @@ export const frontendClientOrigin = (origin: string) => {
     return origin?.includes("localhost") || origin?.includes("127.0.0.1");
   }
 
-  if (containsTrailing(origin)) {
-    return origin === CLIENT_URL_T || origin === DOMAIN_T;
-  } else {
-    return origin === CLIENT_URL || origin === DOMAIN;
+  if (origin) {
+    if (containsTrailing(origin)) {
+      return origin.startsWith(CLIENT_URL_T) || origin.startsWith(DOMAIN_T);
+    } else {
+      return origin.startsWith(CLIENT_URL) || origin.startsWith(DOMAIN);
+    }
   }
 };

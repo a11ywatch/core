@@ -30,7 +30,11 @@ export const scanSimple = async (
   }
 
   // returns truthy if can continue
-  const userNext = await getUserFromApi(req?.headers?.authorization, req, res);
+  const userNext = await getUserFromApi(
+    req?.headers?.authorization || req?.cookies?.jwt,
+    req,
+    res
+  );
   const userId = userNext?.id;
   const pageInsights =
     paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
