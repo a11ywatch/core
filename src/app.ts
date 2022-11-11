@@ -27,7 +27,7 @@ import {
 } from "./database";
 import { confirmEmail, detectImage, unSubEmails } from "./web/routes";
 import { statusBadge } from "./web/routes/resources/badge";
-import { scanSimple } from "./web/routes/scan";
+import { scanAuthenticated, scanSimple } from "./web/routes/scan";
 import { setGithubActionRoutes } from "./web/routes_groups/github-actions";
 import { setAuthRoutes } from "./web/routes_groups/auth";
 import { startGRPC } from "./proto/init";
@@ -164,15 +164,29 @@ async function initServer(): Promise<HttpServer[]> {
   });
 
   /*
-   * Single page scan
+   * Single page scan - used for demos - limited response
    */
   app.post("/api/scan-simple", limiter, scanSimple);
+  /*
+   * Single page scan
+   */
+  app.post(
+    "/api/scan",
+    {
+      config: {
+        rateLimit: {
+          max: 15,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    scanAuthenticated
+  );
   /*
    * Site wide scan.
    * Uses Event based handling to get pages max timeout 15mins.
    */
   app.post("/api/crawl", scanLimiter, crawlRest);
-
   /*
    * Site wide scan handles via stream.
    * Uses Event based handling to extract pages.

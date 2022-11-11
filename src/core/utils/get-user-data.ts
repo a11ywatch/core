@@ -28,7 +28,7 @@ export const getUserFromId = async (user, keyid) => {
  **/
 export const getUserFromApi = async (
   token: string,
-  req: FastifyContext["request"],
+  _req: FastifyContext["request"],
   res: FastifyContext["reply"]
 ): Promise<User> => {
   const jwt = extractTokenKey(token ? String(token).trim() : "");
@@ -167,8 +167,7 @@ export const getUserFromApiScan = async (
 export const retreiveUserByToken = async (
   token: string
 ): Promise<[User, any]> => {
-  const jwt = extractTokenKey(token ? String(token).trim() : "");
-  const user = getUserFromToken(jwt);
+  const user = getUserFromToken(token);
   // the user id from the token
   const { keyid } = user?.payload ?? {};
 

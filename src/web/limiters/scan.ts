@@ -9,11 +9,12 @@ import {
 let limiter = {
   config: {
     rateLimit: {
-      max: 10,
+      max: 4,
       timeWindow: "1 minute",
     },
   },
 };
+
 // crawl limiter
 let scanLimiter = {
   config: {
