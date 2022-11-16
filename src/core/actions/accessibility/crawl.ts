@@ -333,14 +333,13 @@ export const crawlPage = async (
   }
 
   if (pageConstainsIssues) {
-    sendSub &&
-      setImmediate(async () => {
-        try {
-          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-        } catch (_) {
-          // silent pub sub errors
-        }
-      });
+    if (sendSub) {
+      try {
+        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+      } catch (_) {
+        // silent pub sub errors
+      }
+    }
 
     // send email if issues of type error exist for the page. TODO: remove from layer.
     if (sendEmail && issuesInfo?.errorCount) {

@@ -16,17 +16,24 @@ export const collectionUpsert = async (
   const userId = config?.searchProps?.userId ?? source?.userId;
   const pageUrl = config?.searchProps?.pageUrl || source?.pageUrl;
   const url = config?.searchProps?.url || source?.url;
+  const domain = config?.searchProps?.domain || source?.domain;
 
   let queryParams = {};
 
   if (typeof userId !== "undefined") {
     queryParams = { userId };
   }
-  if (pageUrl && typeof pageUrl !== "undefined") {
+
+  if (pageUrl) {
     queryParams = { ...queryParams, pageUrl };
   }
-  if (url && typeof url !== "undefined" && !pageUrl) {
+
+  if (url && !pageUrl) {
     queryParams = { ...queryParams, url };
+  }
+
+  if (domain) {
+    queryParams = { ...queryParams, domain };
   }
 
   if (shouldUpdate && shouldDelete) {

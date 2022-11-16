@@ -20,7 +20,7 @@ export async function setWebsiteScore({
   duration,
   shutdown = false,
 }) {
-  let [website, websiteCollection] = await getWebsite({
+  const [website, websiteCollection] = await getWebsite({
     domain,
     userId,
   });
@@ -28,22 +28,20 @@ export async function setWebsiteScore({
   const all = website?.subdomains || website?.tld;
   const targetDomain = website?.domain || domain;
 
-  const data = await generateWebsiteScore({
+  const { issuesInfo } = await generateWebsiteScore({
     domain: targetDomain,
     userId,
     all,
   });
-
-  const issuesInfo = data?.issuesInfo;
 
   if (issuesInfo && website) {
     const dur = Number(Number.parseFloat(duration).toFixed(2));
 
     const [analayticsCollection] = await connect("Analytics");
 
-    await collectionUpsert(issuesInfo, [analayticsCollection, !!website], {
+    await collectionUpsert(issuesInfo, [analayticsCollection, true], {
       searchProps: {
-        domain: website?.domain,
+        domain: targetDomain,
         userId,
       },
     });
@@ -57,25 +55,25 @@ export async function setWebsiteScore({
       [websiteCollection, !!website],
       {
         searchProps: {
-          domain: website?.domain,
+          domain: targetDomain,
           userId,
         },
       }
     );
   }
 
-  await pubsub
-    .publish(CRAWL_COMPLETE, {
+  try {
+    await pubsub.publish(CRAWL_COMPLETE, {
       crawlComplete: {
         userId,
         domain: website?.domain,
         adaScoreAverage: issuesInfo?.adaScoreAverage,
         shutdown,
       },
-    })
-    .catch((e) => {
-      console.error(e);
     });
+  } catch (e) {
+    console.error(e);
+  }
 
   return Promise.resolve(true);
 }

@@ -36,13 +36,14 @@ async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
 }
 
 let cwLimit = 4;
+
 if (
   process.env.CRAWL_QUEUE_LIMIT &&
   !Number.isNaN(Number(process.env.CRAWL_QUEUE_LIMIT))
 ) {
   cwLimit = Number(process.env.CRAWL_QUEUE_LIMIT);
 } else {
-  cwLimit = Math.max(5 * (cpus().length || 1), 4);
+  cwLimit = Math.max(Math.floor(4.5 * (cpus().length || 1)), 4);
 }
 
 // crawl queue handler
@@ -50,7 +51,7 @@ export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, cwLimit);
 
 // current worker limit
 export const getCWLimit = (limit: number = 1) =>
-  Math.max(Math.floor(cwLimit / (limit || 1)), 1);
+  Math.floor(cwLimit / (limit || 1)) || 1;
 
 // bind the fastq to a function
 export const bindTaskQ = (limit = 1): queueAsPromised<Task> =>

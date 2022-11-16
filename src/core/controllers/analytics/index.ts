@@ -16,7 +16,7 @@ export const getAnalyticsPaging = async (params, chain?: boolean) => {
 
   let filters = {};
 
-  if (typeof userId !== "undefined") {
+  if (validateUID(userId)) {
     filters = { userId };
   }
 
