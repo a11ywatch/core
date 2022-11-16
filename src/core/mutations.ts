@@ -1,4 +1,4 @@
-import { CRAWLER_FINISHED, RATE_EXCEEDED_ERROR } from "./strings";
+import { RATE_EXCEEDED_ERROR } from "./strings";
 import {
   updateUser,
   addWebsite,
@@ -16,6 +16,7 @@ import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";
 import { SUPER_MODE } from "../config/config";
+import { CRAWLER_COMMENCED } from "./strings/success";
 
 const defaultPayload = {
   keyid: undefined,
@@ -72,7 +73,7 @@ export const Mutation = {
         website: null,
         code: 200,
         success: true,
-        message: CRAWLER_FINISHED,
+        message: CRAWLER_COMMENCED,
       };
     } else {
       throw new Error(RATE_EXCEEDED_ERROR);
