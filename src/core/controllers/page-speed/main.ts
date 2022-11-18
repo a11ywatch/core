@@ -4,7 +4,7 @@ import { domainNameFind, websiteSearchParams } from "../../utils";
 // get analytics by domain for a user with pagination offsets.
 export const getPageSpeedPaging = async (p, chain?: boolean) => {
   const { userId, domain, limit = 20, offset = 0, all = false } = p ?? {};
-  const [collection] = await connect("PageSpeed");
+  const [collection] = connect("PageSpeed");
 
   let params = {};
 
@@ -43,7 +43,7 @@ export const PageSpeedController = () => ({
     }: { pageUrl?: string; userId?: number; domain?: string; all?: boolean },
     chain?: boolean
   ) => {
-    const [collection] = await connect("PageSpeed");
+    const [collection] = connect("PageSpeed");
     const searchProps = websiteSearchParams({
       pageUrl,
       userId,
@@ -67,7 +67,7 @@ export const PageSpeedController = () => ({
     userId?: number;
     domain?: string;
   }) => {
-    const [collection] = await connect("PageSpeed");
+    const [collection] = connect("PageSpeed");
     const searchProps = websiteSearchParams({ domain, userId });
 
     return await collection.findOne(searchProps);
@@ -79,7 +79,7 @@ export const PageSpeedController = () => ({
     userId?: number;
     pageUrl?: string;
   }) => {
-    const [collection] = await connect("PageSpeed");
+    const [collection] = connect("PageSpeed");
     const searchProps = websiteSearchParams({ pageUrl, userId });
     return await collection.find(searchProps).limit(20).toArray();
   },

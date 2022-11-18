@@ -6,7 +6,7 @@ export const sortWebsites = async ({ userId, order = [] }) => {
     throw new Error("Order required");
   }
 
-  const [collection] = await connect("Websites");
+  const [collection] = connect("Websites");
 
   if (order && order.length) {
     for (let i = 0; i < order.length; i++) {

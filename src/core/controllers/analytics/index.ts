@@ -12,7 +12,7 @@ type BaseParams = {
 // get analytics by domain for a user with pagination offsets.
 export const getAnalyticsPaging = async (params, chain?: boolean) => {
   const { userId, domain, limit = 20, offset = 0, all = false } = params ?? {};
-  const [collection] = await connect("Analytics");
+  const [collection] = connect("Analytics");
 
   let filters = {};
 
@@ -52,7 +52,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     { pageUrl, userId, domain, bypass }: BaseParams & { bypass?: boolean },
     chain?: boolean
   ) => {
-    const [collection] = await connect("Analytics");
+    const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId, domain });
 
     let analytics = null;
@@ -64,7 +64,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     return chain ? [analytics, collection] : analytics;
   },
   getWebsiteAnalytics: async ({ userId, domain }: BaseParams) => {
-    const [collection] = await connect("Analytics");
+    const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ domain, userId });
 
     return validateUID(userId)
@@ -72,7 +72,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
       : [];
   },
   getAnalytics: async ({ userId, pageUrl }: BaseParams) => {
-    const [collection] = await connect("Analytics");
+    const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId });
 
     return validateUID(userId)

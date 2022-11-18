@@ -6,7 +6,7 @@ export const getIssue = async (
   { url, pageUrl, userId, noRetries }: any,
   chain?: boolean
 ) => {
-  const [collection] = await connect("Issues");
+  const [collection] = connect("Issues");
 
   const queryUrl = decodeURIComponent(String(url || pageUrl));
 
@@ -46,7 +46,7 @@ export const getIssues = async (
   }: { userId: number; domain?: string; pageUrl?: string },
   limit: number = 2000
 ) => {
-  const [collection] = await connect("Issues");
+  const [collection] = connect("Issues");
   const searchProps = websiteSearchParams({
     domain: domain || getHostName(pageUrl),
     userId,
@@ -62,7 +62,7 @@ export const getIssues = async (
 
 // get issues for a user with pagination offsets.
 export const getIssuesPaging = async (params) => {
-  const [collection] = await connect("Issues");
+  const [collection] = connect("Issues");
   const { userId, domain, pageUrl, limit = 20, offset = 0, all } = params ?? {};
 
   const searchParams = websiteSearchParams({

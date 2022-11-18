@@ -37,7 +37,7 @@ export async function setWebsiteScore({
   if (issuesInfo && website) {
     const dur = Number(Number.parseFloat(duration).toFixed(2));
 
-    const [analayticsCollection] = await connect("Analytics");
+    const [analayticsCollection] = connect("Analytics");
 
     await collectionUpsert(issuesInfo, [analayticsCollection, true], {
       searchProps: {

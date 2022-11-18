@@ -90,4 +90,6 @@ if (DEV) {
   };
 }
 
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
 export { cookieConfigs, DEV, TEST_ENV, PRIVATE_KEY, PUBLIC_KEY };

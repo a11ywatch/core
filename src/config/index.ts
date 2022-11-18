@@ -6,6 +6,7 @@ export {
   PUBLIC_KEY,
   cookieConfigs,
   SUPER_MODE,
+  ADMIN_PASSWORD,
 } from "./config";
 export {
   corsOptions,

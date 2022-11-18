@@ -7,8 +7,8 @@ export const cleanUpDeprecatedFields = async (fields) => {
       "Fields requires a object with properties to remove."
     );
   }
-  const [collection] = await connect("Pages");
-  const [websiteCollection] = await connect("Websites");
+  const [collection] = connect("Pages");
+  const [websiteCollection] = connect("Websites");
 
   await collection.updateMany({}, { $unset: fields });
 

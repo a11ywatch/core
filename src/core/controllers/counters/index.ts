@@ -5,7 +5,7 @@ import { websiteSearchParams } from "../../utils";
 const getCounter = async ({
   _id,
 }): Promise<[WithId<Document>, Collection<Document>]> => {
-  const [collection] = await connect("Counters");
+  const [collection] = connect("Counters");
   const counter = await collection.findOne({ _id });
 
   return [counter, collection];
@@ -40,7 +40,7 @@ const getNextSequenceValue = async (sequenceName) => {
 
 const CountersController = ({ user } = { user: null }) => ({
   fixCounters: async (_, chain) => {
-    const [collection] = await connect("Counters");
+    const [collection] = connect("Counters");
     const counters = await collection.find().limit(150).toArray();
 
     return chain ? [counters, collection] : counters;
@@ -48,7 +48,7 @@ const CountersController = ({ user } = { user: null }) => ({
   getCounter,
   getNextSequenceValue,
   getCounters: async ({ userId, pageUrl, url }) => {
-    const [collection] = await connect("Counters");
+    const [collection] = connect("Counters");
     return await collection
       .find(websiteSearchParams({ pageUrl, userId }))
       .limit(20)

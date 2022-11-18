@@ -19,7 +19,7 @@ export const getPageActionsPaging = async (
   },
   chain?: boolean
 ) => {
-  const [collection] = await connect("PageActions");
+  const [collection] = connect("PageActions");
   let params = {};
 
   if (typeof userId !== "undefined") {

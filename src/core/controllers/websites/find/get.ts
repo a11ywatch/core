@@ -19,7 +19,7 @@ export const getWebsite = async ({
     url,
     domain,
   });
-  const [collection] = await connect("Websites");
+  const [collection] = connect("Websites");
 
   const website = (await collection.findOne(params)) as Website;
 
@@ -43,7 +43,7 @@ export const getWebsitesWithUsers = async (
   userLimit = 20,
   filter = {}
 ): Promise<[Website[], any]> => {
-  const [collection] = await connect("Websites");
+  const [collection] = connect("Websites");
   return [
     await collection
       .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
@@ -68,7 +68,7 @@ export const getWebsitesPaginated = async (
   page = 0, // page in collection
   offset?: number // use offset to skip
 ): Promise<[Website[], any]> => {
-  const [collection] = await connect("Websites");
+  const [collection] = connect("Websites");
 
   // websites stored only contain users
   const data = await collection
@@ -87,7 +87,7 @@ export const getWebsitesPaging = async (
   { userId, limit = 3, offset = 0, insights = false },
   chain?: boolean
 ) => {
-  const [collection] = await connect("Websites");
+  const [collection] = connect("Websites");
   const webPages = await collection
     .find(validateUID(userId) ? { userId } : undefined)
     .sort({ order: 1 })
@@ -115,7 +115,7 @@ export const getWebsitesPaging = async (
 
 // return a list of websites for the user by 20
 export const getWebsites = async ({ userId }, chain?: boolean) => {
-  const [collection] = await connect("Websites");
+  const [collection] = connect("Websites");
 
   const websites = await collection.find({ userId }).limit(20).toArray();
 

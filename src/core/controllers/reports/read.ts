@@ -53,8 +53,8 @@ export const getReport = async (url: string, userId?: number) => {
     };
   }
 
-  const [issueCollection] = await connect("Issues");
-  const [domainCollection] = await connect(pageCollection);
+  const [issueCollection] = connect("Issues");
+  const [domainCollection] = connect(pageCollection);
 
   try {
     website = await domainCollection.findOne(websiteFindBy);

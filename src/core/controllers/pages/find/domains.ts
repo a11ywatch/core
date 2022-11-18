@@ -11,7 +11,7 @@ export const getPages = async (
   { domain, userId, url }: { domain?: string; userId?: number; url?: string },
   chain?: boolean
 ) => {
-  const [collection] = await connect("Pages");
+  const [collection] = connect("Pages");
   const searchProps = websiteSearchParams({
     userId,
     domain: domain || (url && getHostName(url)),
@@ -40,7 +40,7 @@ export const getPage = async ({
   userId?: number;
   url?: string;
 }) => {
-  const [collection] = await connect("Pages");
+  const [collection] = connect("Pages");
   const searchProps = websiteSearchParams({ url, userId });
 
   const website = await collection.findOne(searchProps);
@@ -50,7 +50,7 @@ export const getPage = async ({
 
 // get all the pages in the database
 export const getAllPages = async () => {
-  const [collection] = await connect("Pages");
+  const [collection] = connect("Pages");
 
   const websites = await collection.find({}).limit(0).toArray();
 
@@ -74,7 +74,7 @@ export const getPagesPaging = async (
   },
   chain?: boolean
 ) => {
-  const [collection] = await connect("Pages");
+  const [collection] = connect("Pages");
 
   let params = {};
 

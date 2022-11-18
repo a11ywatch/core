@@ -14,7 +14,7 @@ async function getUser({
   id,
   emailConfirmCode,
 }: GetUserParams): Promise<[User | null, any]> {
-  const [collection] = await connect("Users");
+  const [collection] = connect("Users");
   const block = !email && !emailConfirmCode && typeof id === "undefined";
 
   // prevent user find on empty queries

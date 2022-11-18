@@ -23,7 +23,7 @@ export const getScriptsPaging = async (
   { userId, domain, limit = 5, offset = 0, all = false }: Params,
   chain?: boolean
 ) => {
-  const [collection] = await connect("Scripts");
+  const [collection] = connect("Scripts");
 
   let params = {};
 
@@ -66,7 +66,7 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     },
     chain?: boolean
   ) {
-    const [collection] = await connect("Scripts");
+    const [collection] = connect("Scripts");
     const searchProps = websiteSearchParams({ pageUrl, userId });
     let scripts = null;
 
@@ -77,13 +77,13 @@ export const ScriptsController = ({ user } = { user: null }) => ({
     return chain ? [scripts, collection] : scripts;
   },
   getScripts: async function ({ userId, pageUrl }) {
-    const [collection] = await connect("Scripts");
+    const [collection] = connect("Scripts");
     const searchProps = websiteSearchParams({ pageUrl, userId });
 
     return await collection.find(searchProps).limit(1000).toArray();
   },
   getWebsiteScripts: async function ({ userId, domain }) {
-    const [collection] = await connect("Scripts");
+    const [collection] = connect("Scripts");
     const searchProps = websiteSearchParams({ domain, userId });
     let scripts = [];
 

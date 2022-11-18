@@ -1,10 +1,11 @@
-import { MongoClient, Collection } from "mongodb";
+import { MongoClient, Collection, Db } from "mongodb";
 import { EventEmitter } from "events";
 import { config } from "../config/config";
 
 let client: MongoClient; // shared client across application
 let connected = false; // is client connected
 let connectionState: "init" | "establishing" | "determined" = "init"; // determine connectivity detection state
+let db: Db = null;
 
 const dbEmitter = new (class DBEmitter extends EventEmitter {})();
 
@@ -32,6 +33,7 @@ const initDbConnection = async (dbconnection?: string) => {
 
   if (client) {
     client = await client.connect();
+    db = client.db(config.DB_NAME);
   }
 
   if (connectionState !== "determined") {
@@ -40,15 +42,11 @@ const initDbConnection = async (dbconnection?: string) => {
   }
 };
 
-// @return [collection, client]  a MongoDb Collection to use and the top level client? TODO: refactor
-const connect = async (
-  collectionType = "Websites"
-): Promise<[Collection, MongoClient]> => {
-  const db = await client?.db(config.DB_NAME);
-  const collection: Collection<any> = await db?.collection(collectionType);
-
-  return [collection, client];
-};
+// @return [collection, client]  a MongoDb Collection to use and the top level client
+const connect = (collectionType = "Websites"): [Collection, MongoClient] => [
+  db.collection(collectionType),
+  client,
+];
 
 const closeDbConnection = async () => {
   if (connected) {

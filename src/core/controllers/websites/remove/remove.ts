@@ -16,15 +16,15 @@ export const removeWebsite = async ({
   domain = "",
   deleteMany = false,
 }) => {
-  const [scriptsCollection] = await connect("Scripts");
-  const [analyticsCollection] = await connect("Analytics");
-  const [pagesCollection] = await connect("Pages");
-  const [issuesCollection] = await connect("Issues");
-  const [actionsCollection] = await connect("PageActions");
-  const [pageSpeedCollection] = await connect("PageSpeed");
+  const [scriptsCollection] = connect("Scripts");
+  const [analyticsCollection] = connect("Analytics");
+  const [pagesCollection] = connect("Pages");
+  const [issuesCollection] = connect("Issues");
+  const [actionsCollection] = connect("PageActions");
+  const [pageSpeedCollection] = connect("PageSpeed");
 
   if (deleteMany) {
-    const [webcollection] = await connect("Websites");
+    const [webcollection] = connect("Websites");
     await webcollection.deleteMany({ userId });
     await scriptsCollection.deleteMany({ userId });
     await analyticsCollection.deleteMany({ userId });

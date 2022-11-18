@@ -7,14 +7,14 @@ export const HistoryController = ({ user } = { user: null }) => ({
     url?: string;
     domain?: string;
   }) => {
-    const [collection] = await connect("History");
+    const [collection] = connect("History");
     const searchProps = websiteSearchParams(params);
     const history = await collection.findOne(searchProps);
 
     return [history, collection];
   },
   getHistory: async ({ userId }) => {
-    const [collection] = await connect("History");
+    const [collection] = connect("History");
     return await collection.find({ userId }).limit(100).toArray();
   },
 });

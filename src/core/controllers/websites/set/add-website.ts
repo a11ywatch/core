@@ -97,7 +97,7 @@ export const addWebsite = async ({
   setImmediate(async () => {
     // store into actions collection
     if (actionsEnabled) {
-      const [actionsCollection] = await connect("PageActions");
+      const [actionsCollection] = connect("PageActions");
 
       // add actions to collection
       actions.forEach(async (action) => {
