@@ -1,3 +1,5 @@
+import Stripe from "stripe";
+
 import { config } from "../../../../config";
 
 import { EMAIL_ERROR, SUCCESS } from "../../../strings";
@@ -5,12 +7,18 @@ import { signJwt } from "../../../utils";
 import { roleHandler, stripeProductId } from "../../../utils/price-handler";
 import { getUser } from "../find";
 
-const { STRIPE_KEY } = config;
+type AddPaymentProps = {
+  keyid?: number;
+  email?: string;
+  stripeToken: string; // returned from client upon success credit card submit [todo: convert object]
+  yearly?: boolean;
+};
 
-import Stripe from "stripe";
+const { STRIPE_KEY } = config;
 
 export const stripe = new Stripe(STRIPE_KEY, {
   telemetry: false,
+  apiVersion: "2022-11-15",
 });
 
 // add payment subscription between basic and premium plans. Does not work with entrprise.
@@ -19,12 +27,7 @@ export const addPaymentSubscription = async ({
   email: emailP,
   stripeToken,
   yearly,
-}: {
-  keyid?: number;
-  email?: string;
-  stripeToken: string; // returned from client upon success credit card submit
-  yearly?: boolean;
-}) => {
+}: AddPaymentProps) => {
   const [user, collection] = await getUser({ email: emailP, id: keyid });
   const email = user?.email ?? emailP;
 
@@ -46,13 +49,26 @@ export const addPaymentSubscription = async ({
       };
     }
 
-    let customer = !user.stripeID
-      ? await stripe.customers.create({
+    // params used to create the user
+    const createParams = parsedToken?.referral
+      ? {
           email,
-        })
-      : { id: user.stripeID };
+          metadata: {
+            referral: parsedToken.referral,
+          },
+        }
+      : {
+          email,
+          metadata: null,
+        };
 
-    if (user.stripeID) {
+    let customer = { id: user.stripeID };
+
+    // create the new stripe customer
+    if (!user.stripeID) {
+      customer = await stripe.customers.create(createParams);
+    } else {
+      // get the customer from stripe
       try {
         customer = await stripe.customers.retrieve(user.stripeID);
       } catch (e) {
@@ -60,23 +76,22 @@ export const addPaymentSubscription = async ({
       }
       // if customer not found on re-sub re-create user
       if (!customer) {
-        customer = await stripe.customers.create({
-          email,
-        });
+        customer = await stripe.customers.create(createParams);
       }
     }
 
+    // customer created continue with source
     if (customer) {
-      const stripeCustomer = await stripe.customers.createSource(customer.id, {
-        source: parsedToken?.id,
+      // todo: use customer returned from source
+      await stripe.customers.createSource(customer.id, {
+        source: parsedToken.id,
       });
 
-      const plan = parsedToken?.plan;
-
+      const plan = parsedToken.plan;
       const stripeProductPlan = stripeProductId(plan, yearly);
 
       const charge = await stripe.subscriptions.create({
-        customer: stripeCustomer.customer,
+        customer: customer.id,
         items: [
           {
             plan: stripeProductPlan,
@@ -88,6 +103,7 @@ export const addPaymentSubscription = async ({
         const role = roleHandler(plan);
         const jwt = signJwt({ email, role, keyid: user.id });
 
+        // todo: prevent mutation
         user.jwt = jwt;
         user.role = role;
         user.paymentSubscription = charge;
@@ -128,13 +144,14 @@ export const cancelSubscription = async ({ keyid }) => {
   }
 
   if (user?.stripeID) {
-    const customer = await stripe.customers.retrieve(user.stripeID);
-    if (
-      customer &&
-      customer.subscriptions &&
-      customer.subscriptions.data.length
-    ) {
-      const deletedSubscription = customer.subscriptions.data.every((item) => {
+    const customer = await stripe.subscriptions.list({
+      customer: user.stripeID,
+    });
+
+    const subscriptions = customer?.data;
+
+    if (subscriptions && subscriptions.length) {
+      const deletedSubscription = subscriptions.every((item) => {
         return stripe.subscriptions.del(item.id);
       });
 
