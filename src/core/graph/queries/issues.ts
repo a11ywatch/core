@@ -7,7 +7,7 @@ export const issue = async (_, { url: pageUrl, ...props }, context) => {
 
   return await IssuesController().getIssue({
     userId,
-    pageUrl: decodeURIComponent(pageUrl),
+    pageUrl: pageUrl,
   });
 };
 
@@ -17,6 +17,6 @@ export const issues = async (_, { url: pageUrl, ...props }, context) => {
 
   return await IssuesController().getIssues({
     userId,
-    pageUrl: decodeURIComponent(pageUrl),
+    pageUrl: pageUrl,
   });
 };

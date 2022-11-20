@@ -17,7 +17,7 @@ export const Website = {
 
     const issues = await IssuesController().getIssuesPaging({
       userId,
-      pageUrl: decodeURIComponent(url || pageUrl),
+      pageUrl: url || pageUrl,
       ...pagination,
     });
 

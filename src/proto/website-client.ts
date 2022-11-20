@@ -11,37 +11,24 @@ let crawlerClient: Service["WebsiteService"]["service"];
 let mavClient: Service["WebsiteService"]["service"];
 
 const createPageMindClient = async () => {
-  try {
-    const { Pagemind } = await getProto("pagemind.proto");
-    pageMindClient = new Pagemind(
-      GRPC_HOST_PAGEMIND,
-      credentials.createInsecure()
-    );
-  } catch (e) {
-    console.error(e);
-  }
+  const { Pagemind } = await getProto("pagemind.proto");
+  pageMindClient = new Pagemind(
+    GRPC_HOST_PAGEMIND,
+    credentials.createInsecure()
+  );
 };
 
 const createCrawlerClient = async () => {
-  try {
-    const { crawler } = await getProto("crawler.proto");
-
-    crawlerClient = new crawler.Crawler(
-      GRPC_HOST_CRAWLER,
-      credentials.createInsecure()
-    );
-  } catch (e) {
-    console.error(e);
-  }
+  const { crawler } = await getProto("crawler.proto");
+  crawlerClient = new crawler.Crawler(
+    GRPC_HOST_CRAWLER,
+    credentials.createInsecure()
+  );
 };
 
 const createMavClient = async () => {
-  try {
-    const { Mav } = await getProto("mav.proto");
-    mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
-  } catch (e) {
-    console.error(e);
-  }
+  const { Mav } = await getProto("mav.proto");
+  mavClient = new Mav(GRPC_HOST_MAV, credentials.createInsecure());
 };
 
 export const killClient = () => {

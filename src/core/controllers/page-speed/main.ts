@@ -20,13 +20,11 @@ export const getPageSpeedPaging = async (p, chain?: boolean) => {
     }
   }
 
-  const items = await collection
+  const pages = await collection
     .find(params)
     .skip(offset)
     .limit(limit)
     .toArray();
-
-  const pages = items ?? [];
 
   return chain ? [pages, collection] : pages;
 };
@@ -51,7 +49,7 @@ export const PageSpeedController = () => ({
       all,
     });
 
-    let insights;
+    let insights = null;
 
     if (Object.keys(searchProps).length) {
       insights = await collection.findOne(searchProps);
@@ -81,7 +79,8 @@ export const PageSpeedController = () => ({
   }) => {
     const [collection] = connect("PageSpeed");
     const searchProps = websiteSearchParams({ pageUrl, userId });
-    return await collection.find(searchProps).limit(20).toArray();
+
+    return await collection.find(searchProps).limit(10).toArray();
   },
   getPageSpeedPaging,
 });

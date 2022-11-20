@@ -32,6 +32,4 @@ RUN apk upgrade --update-cache --available && \
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 
-ENV GRPC_HOST_PAGEMIND=pagemind:50052
-
 CMD [ "node", "--no-experimental-fetch", "./dist/server.js" ]
