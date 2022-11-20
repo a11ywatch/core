@@ -8,7 +8,7 @@ import {
   login,
   register,
   logout,
-} from "../web/graph/mutations";
+} from "./graph/mutations";
 import { watcherCrawl } from "./actions/accessibility/watcher_crawl";
 import { scanWebsite, crawlPage } from "../core/actions";
 import { gqlRateLimiter } from "../web/limiters/scan";

@@ -1,6 +1,20 @@
 import type { Struct } from "pb-util/build";
 import { jsonParse } from "../../../core/utils";
 
+// handle lighthouse extracting
+export const extractLighthouse = ({domain, pageUrl, userId, insight}) => {
+    const parsedInsight: Record<string, unknown> = jsonParse(
+      insight as Struct
+    );
+
+    return {
+      userId,
+      domain,
+      pageUrl,
+      json: JSON.stringify(parsedInsight),
+  };
+}
+
 export const extractPageData = (
   dataSource: any = { script: null, issues: null, webPage: null }
 ) => {
@@ -30,16 +44,12 @@ export const extractPageData = (
       );
 
       if (parsedInsight) {
-        try {
-          lighthouseData = {
-            userId,
-            domain: website.domain,
-            pageUrl: website.pageUrl || website.url,
-            json: JSON.stringify(parsedInsight), // TODO: prevent having to stringify
-          };
-        } catch (e) {
-          console.error(e);
-        }
+        lighthouseData = extractLighthouse({
+          userId,
+          domain: website.domain,
+          pageUrl: website.pageUrl || website.url,
+          insight, // TODO: prevent having to stringify
+        });
       }
     }
   }

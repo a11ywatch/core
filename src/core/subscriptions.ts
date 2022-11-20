@@ -4,7 +4,8 @@ import {
   websiteAdded,
   websiteRemoved,
   crawlComplete,
-} from "../web/graph/subscriptions";
+  lightHouseResult
+} from "./graph/subscriptions";
 
 export const Subscription = {
   emailVerified,
@@ -12,4 +13,5 @@ export const Subscription = {
   websiteAdded,
   websiteRemoved,
   crawlComplete,
+  lightHouseResult
 };

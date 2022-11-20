@@ -1,6 +1,7 @@
 import gql from "graphql-tag";
 
-export const subdomain = gql`
+// todo: rename from pages to Page
+export const page = gql`
   """
   Pages that have issues.
   """

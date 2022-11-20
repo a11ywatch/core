@@ -1,5 +1,5 @@
-import { IssuesController } from "../../../core/controllers";
-import { getPayLoad } from "../../../core/utils/query-payload";
+import { IssuesController } from "../../controllers";
+import { getPayLoad } from "../../utils/query-payload";
 
 // single issue
 export const issue = async (_, { url: pageUrl, ...props }, context) => {

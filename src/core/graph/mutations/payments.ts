@@ -1,6 +1,6 @@
-import { UsersController } from "../../../core/controllers";
+import { UsersController } from "../../controllers";
 import { cookieConfigs } from "../../../config";
-import { getPayLoad } from "../../../core/utils/query-payload";
+import { getPayLoad } from "../../utils/query-payload";
 
 // add a payment subscription for a plan
 export const addPaymentSubscription = async (

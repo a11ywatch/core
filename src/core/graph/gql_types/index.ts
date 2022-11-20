@@ -2,7 +2,7 @@ export { user } from "./user";
 export { feature } from "./feature";
 export { website } from "./website";
 export { issue } from "./issue";
-export { subdomain } from "./sub-domain";
+export { page } from "./page";
 export { history } from "./history";
 export { analytic } from "./analytic";
 export { script } from "./script";

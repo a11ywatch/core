@@ -8,7 +8,7 @@ import {
   feature,
   website,
   issue,
-  subdomain,
+  page,
   query,
   mutation,
   subscription,
@@ -19,7 +19,7 @@ import {
   meta,
   input,
   invoice,
-} from "../web/graph/gql_types";
+} from "./graph/gql_types";
 import { getGqlRateLimitDirective } from "../web/limiters";
 
 const typeDefs = gql`
@@ -38,7 +38,7 @@ const typeDefs = gql`
   ${user}
   ${feature}
   ${website}
-  ${subdomain}
+  ${page}
   ${issue}
   ${script}
   ${analytic}

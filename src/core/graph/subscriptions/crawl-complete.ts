@@ -1,5 +1,5 @@
 import { withFilter } from "graphql-subscriptions";
-import { CRAWL_COMPLETE } from "../../../core/static";
+import { CRAWL_COMPLETE } from "../../static";
 import { pubsub } from "../../../database/pubsub";
 
 export const crawlComplete = {

@@ -1,5 +1,5 @@
-import { UsersController, WebsitesController } from "../../../core/controllers";
-import { getPayLoad } from "../../../core/utils/query-payload";
+import { UsersController, WebsitesController } from "../../controllers";
+import { getPayLoad } from "../../utils/query-payload";
 
 export const addWebsite = async (
   _,

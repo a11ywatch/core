@@ -1,5 +1,5 @@
-import { UsersController } from "../../../core/controllers";
-import { getPayLoad } from "../../../core/utils/query-payload";
+import { UsersController } from "../../controllers";
+import { getPayLoad } from "../../utils/query-payload";
 
 export const user = async (_, { id, password }, ctx) => {
   const { userId, audience } = getPayLoad(ctx, {
