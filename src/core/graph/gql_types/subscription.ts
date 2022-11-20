@@ -10,6 +10,6 @@ export const subscription = gql`
     emailVerified: User
     crawlComplete: CrawlStatus
     websiteRemoved: Website
-    lightHouseResult: Pages
+    lighthouseResult: Pages
   }
 `;

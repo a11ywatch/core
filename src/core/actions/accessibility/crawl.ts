@@ -20,7 +20,6 @@ import {
   DISABLE_STORE_SCRIPTS,
 } from "../../../config/config";
 import { findPageActionsByPath } from "../../controllers/page-actions/find";
-import { PageSpeedController } from "../../controllers/page-speed/main";
 import { validateScanEnabled } from "../../controllers/users/update/scan-attempt";
 import { RATE_EXCEEDED_ERROR } from "../../strings";
 import { collectionIncrement } from "../../utils/collection-upsert";
@@ -158,7 +157,7 @@ export const crawlPage = async (
   });
 
   let shutdown = false;
-
+  
   if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = userData?.scanInfo?.totalUptime || 0;
@@ -209,7 +208,6 @@ export const crawlPage = async (
     webPage,
     adaScore,
     issuesInfo,
-    lighthouseData, // page insights
   } = extractPageData(dataSource);
 
   const [issueExist, issuesCollection] = await IssuesController().getIssue(
@@ -257,12 +255,10 @@ export const crawlPage = async (
         const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
 
         const [
-          [pageSpeed, pageSpeedCollection],
           [analytics, analyticsCollection],
           [newSite, pagesCollection],
           [scripts, scriptsCollection],
         ] = await Promise.all([
-          PageSpeedController().getWebsite({ pageUrl, userId }, true),
           AnalyticsController().getWebsite({ pageUrl, userId }, true),
           getPage({
             userId,
@@ -277,8 +273,6 @@ export const crawlPage = async (
         ]);
 
         await Promise.all([
-          // lighthouse
-          collectionUpsert(lighthouseData, [pageSpeedCollection, pageSpeed]),
           // analytics
           collectionUpsert(
             Object.assign(

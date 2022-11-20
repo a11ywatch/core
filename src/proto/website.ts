@@ -30,21 +30,13 @@ const protoConfig = {
 };
 
 export const loadProto = async (target: string = "website.proto") => {
-  try {
-    return await load(`node_modules/@a11ywatch/protos/${target}`, protoConfig);
-  } catch (e) {
-    console.error(e);
-  }
+  return await load(`node_modules/@a11ywatch/protos/${target}`, protoConfig);
 };
 
 export const getProto = async (
   target: string = "website.proto"
 ): Promise<Service & GRPC> => {
-  try {
-    const packageDef = await loadProto(target);
+  const packageDef = await loadProto(target);
 
-    return loadPackageDefinition(packageDef);
-  } catch (e) {
-    console.error(e);
-  }
+  return loadPackageDefinition(packageDef);
 };

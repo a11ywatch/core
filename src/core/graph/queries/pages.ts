@@ -7,6 +7,6 @@ export const pages = async (_, { domain, ...props }, context) => {
 
   return await PagesController().getPages({
     userId,
-    domain: decodeURIComponent(domain),
+    domain: domain,
   });
 };

@@ -10,9 +10,8 @@ export const pageUpdate = async (
   call: ServerWritableStream<{ domain: string; url:string; user_id: number; insight: any }, {}>,
   callback: sendUnaryData<any>
 ) => {
-    // handle data after connection
+    // handle lighthouse data into db and send sub
     setImmediate(async () => {
-      // handle lighthouse data into db and send sub
       const { user_id: userId, url: pageUrl, domain, insight } = call.request;
       const lighthouseResults = extractLighthouse({ userId, domain, pageUrl, insight });
       const [pageSpeed, pageSpeedCollection] = await PageSpeedController().getWebsite({ pageUrl, userId }, true);
@@ -21,11 +20,18 @@ export const pageUpdate = async (
       await collectionUpsert(lighthouseResults, [pageSpeedCollection, pageSpeed]);
 
       try {
-          await pubsub.publish(LIGHTHOUSE, { lighthouseResult: lighthouseResults });
+          await pubsub.publish(LIGHTHOUSE, { 
+          lighthouseResult: {
+            userId: lighthouseResults.userId,
+            domain: lighthouseResults.domain,
+            url: lighthouseResults.pageUrl, // remove trailing for exact match handling [todo: setting for global handling]
+            insight: { json: lighthouseResults.json }
+          }
+        });
       } catch (_) {
           // silent pub sub errors
       }
-    })
+   })
 
-   callback(null, {});
+  callback(null, {});
 };

@@ -16,21 +16,20 @@ export const getIssue = async (
   });
 
   // todo: set default type
-  let issue;
+  let issue = null;
 
   // TODO: remove props and allow all
   if (Object.keys(searchProps).length) {
     issue = await collection.findOne(searchProps);
 
-    // get issues from general bucket
+    // get issues from general bucket [marketing]
     if (!issue && !noRetries) {
       issue = await collection.findOne({ pageUrl: queryUrl });
-    }
-
-    if (!issue && !noRetries) {
-      issue = await collection.findOne({
-        domain: getHostName(queryUrl),
-      });
+      if (!issue) {
+        issue = await collection.findOne({
+          domain: getHostName(queryUrl),
+        });
+      }
     }
   }
 
@@ -63,7 +62,7 @@ export const getIssues = async (
 // get issues for a user with pagination offsets.
 export const getIssuesPaging = async (params) => {
   const [collection] = connect("Issues");
-  const { userId, domain, pageUrl, limit = 20, offset = 0, all } = params ?? {};
+  const { userId, domain, pageUrl, limit = 10, offset = 0, all } = params ?? {};
 
   const searchParams = websiteSearchParams({
     domain: domain || getHostName(pageUrl),
@@ -71,11 +70,9 @@ export const getIssuesPaging = async (params) => {
     all,
   });
 
-  const issues = (await collection
+  return (await collection
     .find(searchParams)
     .skip(offset)
     .limit(limit)
     .toArray()) as Issue[];
-
-  return issues;
 };

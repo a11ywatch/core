@@ -63,7 +63,7 @@ export const getWebsitesWithUsers = async (
  * [Promise]: Partial<Website[]>
  */
 export const getWebsitesPaginated = async (
-  limit: number = 20,
+  limit: number = 10,
   filter = {},
   page = 0, // page in collection
   offset?: number // use offset to skip
@@ -117,7 +117,7 @@ export const getWebsitesPaging = async (
 export const getWebsites = async ({ userId }, chain?: boolean) => {
   const [collection] = connect("Websites");
 
-  const websites = await collection.find({ userId }).limit(20).toArray();
+  const websites = await collection.find({ userId }).limit(10).toArray();
 
   return chain ? [websites, collection] : websites;
 };
