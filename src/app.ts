@@ -173,9 +173,10 @@ async function initServer(): Promise<HttpServer[]> {
   });
 
   /*
-   * Single page scan - used for demos - limited response
+   * Single page scan
    */
   app.post("/api/scan-simple", limiter, scanSimple);
+
   /*
    * Single page scan
    */

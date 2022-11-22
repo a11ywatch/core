@@ -34,11 +34,12 @@ export const scanSimple = async (
     frontendClientOrigin(req.headers["host"]) ||
     frontendClientOrigin(req.headers["referer"]);
 
+  const user = getUserFromToken(
+    req?.headers?.authorization || req?.cookies?.jwt
+  );
+  
+  // only allow client authed requests
   if (!isClient) {
-    const user = getUserFromToken(
-      req?.headers?.authorization || req?.cookies?.jwt
-    );
-
     // validate user creds
     if (!user) {
       res.status(403);
@@ -58,8 +59,9 @@ export const scanSimple = async (
 
   const resData = await scanWebsite({
     url,
-    noStore: true,
+    noStore: true, // only store if domain exists for user todo -
     pageInsights,
+    userId: user?.payload?.keyid
   });
 
   res.send(resData);
@@ -87,6 +89,9 @@ export const scanAuthenticated = async (
     return;
   }
 
+  const pageInsights =
+  paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
+
   // returns truthy if can continue
   const userNext = await getUserFromApi(
     req?.headers?.authorization || req?.cookies?.jwt,
@@ -94,8 +99,6 @@ export const scanAuthenticated = async (
     res
   );
   const userId = userNext?.id;
-  const pageInsights =
-    paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
 
   let resData = {};
 
@@ -107,7 +110,8 @@ export const scanAuthenticated = async (
         pageInsights,
         sendSub: false,
       },
-      false
+      false,
+      true
     );
   }
 

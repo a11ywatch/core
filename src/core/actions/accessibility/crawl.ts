@@ -78,7 +78,7 @@ const getInsightsEnabled = ({
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean, // determine if email should be sent based on results
-  blockEvent?: boolean // block event from emitting
+  blockEvent?: boolean // block event from emitting to protect crawl interfere
 ): Promise<ResponseModel> => {
   const {
     url: urlMap,
