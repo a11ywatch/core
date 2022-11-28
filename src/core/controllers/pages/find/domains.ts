@@ -100,6 +100,7 @@ export const getPagesPaging = async (
         (await PageSpeedController().getWebsite({
           userId,
           pageUrl: cp.url,
+          domain
         })) ?? {};
       if (json) {
         pages[i].insight = { json };

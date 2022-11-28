@@ -48,7 +48,7 @@ export const PageSpeedController = () => ({
       domain,
       all,
     });
-
+    
     let insights = null;
 
     if (Object.keys(searchProps).length) {
@@ -61,12 +61,14 @@ export const PageSpeedController = () => ({
   getWebsitePageSpeed: async ({
     userId,
     domain,
+    pageUrl
   }: {
     userId?: number;
     domain?: string;
+    pageUrl?: string;
   }) => {
     const [collection] = connect("PageSpeed");
-    const searchProps = websiteSearchParams({ domain, userId });
+    const searchProps = websiteSearchParams({ pageUrl, domain, userId });
 
     return await collection.findOne(searchProps);
   },

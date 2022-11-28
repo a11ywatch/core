@@ -74,16 +74,18 @@ export const Website = {
       ...params,
     });
   },
-  insight: async ({ userId, domain }, _params) => {
+  insight: async ({ userId, domain, url }, _params) => {
     return await PageSpeedController().getWebsitePageSpeed({
       userId,
       domain,
+      pageUrl: url
     });
   },
-  issuesInfo: async ({ userId, domain }, _params) => {
+  issuesInfo: async ({ userId, domain, url }, _params) => {
     return await AnalyticsController().getWebsite({
       userId,
       domain,
+      pageUrl: url
     });
   },
 };

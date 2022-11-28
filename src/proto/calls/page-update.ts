@@ -17,10 +17,10 @@ export const pageUpdate = async (
       const lighthouseResults = extractLighthouse({ userId, domain, pageUrl, insight });
 
       // validate the website exist
-      const [website] = await WebsitesController().getWebsite({ domain });
+      const [website] = await WebsitesController().getWebsite({ domain, userId });
 
       if(website) {
-        const [pageSpeed, pageSpeedCollection] = await PageSpeedController().getWebsite({ pageUrl, userId }, true);
+        const [pageSpeed, pageSpeedCollection] = await PageSpeedController().getWebsite({ pageUrl: lighthouseResults.pageUrl, userId }, true);
   
         // upsert lightouse data
         await collectionUpsert(lighthouseResults, [pageSpeedCollection, pageSpeed]);

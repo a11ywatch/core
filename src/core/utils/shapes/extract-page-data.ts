@@ -1,3 +1,4 @@
+import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import type { Struct } from "pb-util/build";
 import { jsonParse } from "../../../core/utils";
 
@@ -10,7 +11,7 @@ export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
     return {
       userId,
       domain,
-      pageUrl,
+      pageUrl: removeTrailingSlash(pageUrl),
       json: parsedInsight ? JSON.stringify(parsedInsight) : "",
   };
 }
@@ -42,7 +43,7 @@ export const extractPageData = (
       lighthouseData = extractLighthouse({
         userId,
         domain: website.domain,
-        pageUrl: website.pageUrl || website.url,
+        pageUrl: removeTrailingSlash(website.pageUrl || website.url),
         insight, // TODO: prevent having to stringify
       });
     }

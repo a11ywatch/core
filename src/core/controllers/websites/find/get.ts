@@ -1,7 +1,6 @@
 import { connect } from "../../../../database";
 import { websiteSearchParams } from "../../../utils";
 import { PageSpeedController } from "../../page-speed/main";
-import { validateUID } from "../../../../web/params/extracter";
 import type { Website } from "../../../../types/types";
 
 /*
@@ -89,7 +88,7 @@ export const getWebsitesPaging = async (
 ) => {
   const [collection] = connect("Websites");
   const webPages = await collection
-    .find(validateUID(userId) ? { userId } : undefined)
+    .find({ userId })
     .sort({ order: 1 })
     .skip(offset)
     .limit(limit)
@@ -101,8 +100,9 @@ export const getWebsitesPaging = async (
       const { json } =
         (await PageSpeedController().getWebsite({
           userId,
-          ...webPages[i],
-        })) ?? {};
+          pageUrl: webPages[i].url,
+          domain: webPages[i].domain
+        }, false)) ?? {};
 
       if (json) {
         webPages[i].insight = { json };
