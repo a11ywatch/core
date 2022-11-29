@@ -74,11 +74,13 @@ const getInsightsEnabled = ({
  *     await crawlPage({ url: "https://a11ywatch.com" });
  *     await crawlPage({ url: "https://a11ywatch.com", sendSub: true }); // send pub sub to front-end client
  *     await crawlPage({ url: "https://a11ywatch.com", userId: 122, pageInsights: true }); // run request with lighthouse
+ *     await crawlPage({ url: "https://a11ywatch.com", userId: 122, pageInsights: true }, true); // send email with config
  */
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean, // determine if email should be sent based on results
-  blockEvent?: boolean // block event from emitting to protect crawl interfere
+  blockEvent?: boolean, // block event from emitting to protect crawl interfere
+  crawlJob?: boolean
 ): Promise<ResponseModel> => {
   const {
     url: urlMap,
@@ -99,7 +101,7 @@ export const crawlPage = async (
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
   // block scans from running
-  if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
+  if (!crawlJob && validateScanEnabled({ user: userData }) === false) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown: true },
@@ -158,7 +160,7 @@ export const crawlPage = async (
 
   let shutdown = false;
   
-  if (!sendEmail && !SUPER_MODE) {
+  if (!crawlJob && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = userData?.scanInfo?.totalUptime || 0;
     const totalUptime = ttime + pastUptime;
@@ -187,7 +189,7 @@ export const crawlPage = async (
   }
 
   // TODO: SET PAGE OFFLINE DB
-  if (!dataSource || !dataSource?.webPage) {
+  if (!dataSource || !dataSource?.webPage?.issuesInfo) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown },

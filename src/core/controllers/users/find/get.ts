@@ -1,6 +1,7 @@
 import { userParams } from "../../../utils/controller-filter";
 import { connect } from "../../../../database";
 import type { User } from "../../../../types/types";
+import { validateUID } from "../../../../web/params/extracter";
 
 type GetUserParams = {
   email?: string;
@@ -11,11 +12,11 @@ type GetUserParams = {
 // get a user from the database by email, id, or emailConfirmCode
 async function getUser({
   email,
-  id,
   emailConfirmCode,
+  id,
 }: GetUserParams): Promise<[User | null, any]> {
   const [collection] = connect("Users");
-  const block = !email && !emailConfirmCode && typeof id === "undefined";
+  const block = !email && !emailConfirmCode && !validateUID(id);
 
   // prevent user find on empty queries
   if (block) {

@@ -16,6 +16,7 @@ export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
   };
 }
 
+// generic page format
 export const extractPageData = (
   dataSource: any = { script: null, issues: null, webPage: null }
 ) => {
@@ -29,24 +30,13 @@ export const extractPageData = (
 
   // pluck insight into its own collection
   const { insight, ...w } = webPage ?? {};
-  const { issuesInfo, ...website } = w;
+  const { issuesInfo, ...website } = w ?? {};
 
-  if (website) {
-    if (issuesInfo) {
-      errorCount = issuesInfo.errorCount;
-      warningCount = issuesInfo.warningCount;
-      adaScore = issuesInfo.adaScore;
-      noticeCount = issuesInfo.noticeCount;
-    }
-
-    if (insight) {
-      lighthouseData = extractLighthouse({
-        userId,
-        domain: website.domain,
-        pageUrl: removeTrailingSlash(website.pageUrl || website.url),
-        insight, // TODO: prevent having to stringify
-      });
-    }
+  if (website && issuesInfo) {
+    errorCount = issuesInfo.errorCount;
+    warningCount = issuesInfo.warningCount;
+    adaScore = issuesInfo.adaScore;
+    noticeCount = issuesInfo.noticeCount;
   }
 
   return {
