@@ -8,7 +8,7 @@ const websiteFormatter = (source: any) => {
   const webPage = data ? data : website;
 
   // pluck issues from respone [TODO: shape gql issues]
-  const { issues, ...websiteData } = webPage;
+  const { issues, ...websiteData } = webPage ?? {};
 
   if (websiteData) {
     // remap to issue to prevent gql resolver gql 'issues'

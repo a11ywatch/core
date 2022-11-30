@@ -18,15 +18,15 @@ export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
 
 // generic page format
 export const extractPageData = (
-  dataSource: any = { script: null, issues: null, webPage: null }
+  dataSource
 ) => {
+  const { script, issues, webPage, userId } = dataSource ?? { script: null, issues: null, webPage: null };
+
   let errorCount;
   let warningCount;
   let noticeCount;
   let adaScore;
   let lighthouseData;
-
-  let { script, issues, webPage, userId } = dataSource;
 
   // pluck insight into its own collection
   const { insight, ...w } = webPage ?? {};

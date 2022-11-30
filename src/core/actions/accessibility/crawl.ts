@@ -80,7 +80,6 @@ export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean, // determine if email should be sent based on results
   blockEvent?: boolean, // block event from emitting to protect crawl interfere
-  crawlJob?: boolean
 ): Promise<ResponseModel> => {
   const {
     url: urlMap,
@@ -93,7 +92,7 @@ export const crawlPage = async (
   const sendSub: boolean = sub ?? true;
   const userId = usr?.id ?? crawlConfig?.userId;
 
-  // get user role [todo: use token only and collection set]
+  // todo: use prior user params if found
   const [userData, userCollection] = await UsersController().getUser({
     id: userId,
   });
@@ -101,7 +100,7 @@ export const crawlPage = async (
   const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
 
   // block scans from running
-  if (!crawlJob && validateScanEnabled({ user: userData }) === false) {
+  if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown: true },
@@ -160,7 +159,7 @@ export const crawlPage = async (
 
   let shutdown = false;
   
-  if (!crawlJob && !SUPER_MODE) {
+  if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = userData?.scanInfo?.totalUptime || 0;
     const totalUptime = ttime + pastUptime;
@@ -248,12 +247,9 @@ export const crawlPage = async (
           }
         );
       }
-
       // if issues exist prior or current update collection
-      const shouldUpsertCollections = pageConstainsIssues || issueExist;
-
       // Add to Issues collection if page contains issues or if record should update/delete.
-      if (shouldUpsertCollections) {
+      if (pageConstainsIssues || issueExist) {
         const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
 
         const [

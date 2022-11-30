@@ -18,6 +18,11 @@ export async function websiteWatch(
     const { userId, url, subdomains, tld } = website;
     const [user] = await getUser({ id: userId });
 
+    // prevent unconfirmed emails from job
+    if (!user || user && !user?.emailConfirmed || !url) {
+      continue;
+    }
+
     if (!user.role) {
       await crawlPage(
         {
@@ -28,11 +33,9 @@ export async function websiteWatch(
           user,
         },
         user.alertEnabled,
-        true,
         true
       );
     } else {
-      // todo: chunk crawl via streams
       setImmediate(async () => {
         await watcherCrawl({
           url: url,
