@@ -63,24 +63,22 @@ const sendMail = async ({
       !findUser?.role
     )}`;
 
-    try {
-      await transporter?.sendMail(
-        Object.assign({}, mailOptions, {
-          to: findUser.email,
-          subject: `[Report] ${totalIssues} ${pluralize(
-            totalIssues,
-            "issue"
-          )} found with ${pageUrl || domain}.`,
-          html: `${issuesTable}<br />${footer.marketing({
-            userId,
-            email: findUser.email,
-          })}`,
-        }),
-        sendMailCallback
-      );
-    } catch (e) {
-      console.error(e);
-    }
+      transporter?.sendMail(
+      {
+        from: mailOptions.from,
+        to: findUser.email,
+        text: mailOptions.text,
+        subject: `[Report] ${totalIssues} ${pluralize(
+          totalIssues,
+          "issue"
+        )} found with ${pageUrl || domain}.`,
+        html: `${issuesTable}<br />${footer.marketing({
+          userId,
+          email: findUser.email,
+        })}`,
+      },
+      sendMailCallback
+    );
   }
 };
 
@@ -103,18 +101,14 @@ const sendMailMultiPage = async ({
   });
 
   if (user) {
-    try {
-      await updateLastAlertDate(userId, userCollection);
-    } catch (e) {
-      console.error(e);
-    }
+    await updateLastAlertDate(userId, userCollection);
 
     let total = 0;
     let totalWarnings = 0;
     let totalIssues = 0;
     // let totalNotices = 0;
     let issuesTable = "";
-
+    // page url domain base [todo: change name]
     let pageUrl = "";
 
     for (const page of data) {
@@ -147,7 +141,9 @@ const sendMailMultiPage = async ({
     // if errors exist send email
     if (Number(totalIssues) >= 1) {
       transporter.sendMail(
-        Object.assign({}, mailOptions, {
+        {
+          from: mailOptions.from,
+          text: mailOptions.text,
           to: user.email,
           subject: `[Report] ${totalIssues} ${pluralize(
             totalIssues,
@@ -159,7 +155,7 @@ const sendMailMultiPage = async ({
             userId,
             email: user?.email,
           })}`,
-        }),
+        },
         sendMailCallback
       );
     }

@@ -235,7 +235,8 @@ export const UsersController: UserControllerType = (
     if (shouldEmail) {
       transporter.sendMail(
         {
-          ...mailOptions,
+          from: mailOptions.from,
+          text: mailOptions.text,
           to: user.email,
           subject: `${domain} is Offline.`,
           html: `<h1>${domain} is currently offline.</h1><br /><p>Please check your server logs to see what happened if issues are difficult to figure out.</p><br />${footer.marketing(

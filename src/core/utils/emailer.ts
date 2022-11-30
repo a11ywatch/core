@@ -25,6 +25,9 @@ if (EMAIL_CLIENT_KEY && EMAIL_CLIENT_ID && EMAIL_SERVICE_URL) {
         serviceClient: String(EMAIL_CLIENT_ID),
         privateKey: String(EMAIL_CLIENT_KEY),
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
   } catch (e) {
     console.error("Email transport creation failed", e);

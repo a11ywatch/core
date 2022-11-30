@@ -1,7 +1,7 @@
 // determine the price for a plan
 export const priceHandler = (plan: string, yearly?: boolean) => {
+  const q = (plan && typeof plan === "string" && plan.toUpperCase()) || "";
   let price = 0;
-  let q = (plan && typeof plan === "string" && plan.toUpperCase()) || "";
 
   switch (q) {
     case "L1": {
@@ -61,7 +61,7 @@ export const priceHandler = (plan: string, yearly?: boolean) => {
 
 // get the product id for stripe [todo: use object dip]
 export const stripeProductId = (plan: string, yearly?: boolean) => {
-  let q = (plan && typeof plan === "string" && plan.toUpperCase()) || "";
+  const q = (plan && typeof plan === "string" && plan.toUpperCase()) || "";
   let product = "";
 
   switch (q) {
@@ -161,7 +161,7 @@ export const stripeProductId = (plan: string, yearly?: boolean) => {
 
 // determine the role of the user
 export const roleHandler = (plan: string) => {
-  let q = (plan && typeof plan === "string" && plan.toUpperCase()) || "";
+  const q = (plan && typeof plan === "string" && plan.toUpperCase()) || "";
   let role = 0;
 
   switch (q) {

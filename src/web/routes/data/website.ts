@@ -76,11 +76,9 @@ export const getWebsiteReport = async (
   const [user] = await retreiveUserByToken(req.headers.authorization);
 
   if (user) {
-    let userId = user.id;
-
     const query = initUrl(decodeURIComponent(slug + ""));
 
-    const report = await getReport(query, userId);
+    const report = await getReport(query, user.id);
 
     let data: Website = null;
 

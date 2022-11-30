@@ -6,7 +6,7 @@ import {
   getGraphQLRateLimiter,
 } from "graphql-rate-limit";
 
-let limiter = {
+const limiter = {
   config: {
     rateLimit: {
       max: 4,
@@ -16,7 +16,7 @@ let limiter = {
 };
 
 // crawl limiter
-let scanLimiter = {
+const scanLimiter = {
   config: {
     rateLimit: {
       max: 3,

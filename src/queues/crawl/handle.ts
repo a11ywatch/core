@@ -50,7 +50,7 @@ if (
 export const q: queueAsPromised<Task> = fastq.promise(asyncWorker, cwLimit);
 
 // current worker limit
-export const getCWLimit = (limit: number = 1) =>
+export const getCWLimit = (limit = 1) =>
   Math.floor(cwLimit / (limit || 1)) || 1;
 
 // bind the fastq to a function

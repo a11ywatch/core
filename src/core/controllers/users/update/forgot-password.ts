@@ -20,7 +20,8 @@ export const forgotPassword = async ({ email }) => {
     await collection.findOneAndUpdate({ id: user.id }, { $set: { resetCode } });
     transporter.sendMail(
       {
-        ...mailOptions,
+        from: mailOptions.from,
+        text: mailOptions.text,
         to: user.email,
         subject: `A11yWatch - Password reset.`,
         html: `${logoSvg}<br />
