@@ -60,7 +60,7 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
 
 /*
  * @param {user: User}
- * determine if user can do any scans returns true if can scan
+ * determine if user can do any scans returns true if can scan [todo: x 30 for month usage]
  */
 export const validateScanEnabled = ({ user }) => {
   if (!SUPER_MODE) {
@@ -71,50 +71,50 @@ export const validateScanEnabled = ({ user }) => {
 
     switch (role) {
       case 0: {
-        // 15 seconds daily
-        scanBlocked = totalUptime >= 15000;
+        // 10 seconds daily
+        scanBlocked = totalUptime >= 10000;
         break;
       }
       // normal plans
       case 1: {
-        scanBlocked = totalUptime >= 500000;
+        scanBlocked = totalUptime >= 300000;
         break;
       }
       case 2: {
-        scanBlocked = totalUptime >= 1000000;
+        scanBlocked = totalUptime >= 600000;
         break;
       }
       case 3: {
-        scanBlocked = totalUptime >= 2000000;
+        scanBlocked = totalUptime >= 1400000;
         break;
       }
       case 4: {
-        scanBlocked = totalUptime >= 5000000;
+        scanBlocked = totalUptime >= 2000000;
         break;
       }
       case 5: {
-        scanBlocked = totalUptime >= 15000000;
+        scanBlocked = totalUptime >= 4000000;
         break;
       }
       // high tier plans
       case 6: {
-        scanBlocked = totalUptime >= 50000000;
+        scanBlocked = totalUptime >= 5000000;
         break;
       }
       case 7: {
-        scanBlocked = totalUptime >= 100000000;
+        scanBlocked = totalUptime >= 10000000;
         break;
       }
       case 8: {
-        scanBlocked = totalUptime >= 200000000;
+        scanBlocked = totalUptime >= 20000000;
         break;
       }
       case 9: {
-        scanBlocked = totalUptime >= 300000000;
+        scanBlocked = totalUptime >= 35000000;
         break;
       }
       case 10: {
-        scanBlocked = totalUptime >= 500000000;
+        scanBlocked = totalUptime >= 60000000;
         break;
       }
       default: {
