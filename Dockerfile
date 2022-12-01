@@ -3,7 +3,7 @@ FROM node:19.2-alpine AS installer
 WORKDIR /usr/src/app
 
 RUN apk upgrade --update-cache --available && \
-	apk add openssl python3 make g++ && \
+	apk add python3 make g++ && \
 	rm -rf /var/cache/apk/*
 
 COPY . .
