@@ -49,7 +49,7 @@ const makeWebsite = (
     {
       url,
       domain,
-      lastScanDate: new Date().toUTCString(),
+      lastScanDate: new Date().toISOString(),
     },
     extra
   );

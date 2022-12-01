@@ -14,7 +14,7 @@ dagger.#Plan & {
 				path: "."
 			}
 			pull: docker.#Pull & {
-				source: "node:18.6.0"
+				source: "node:19.2.0"
 			}
 			copy: docker.#Copy & {
 				input:    pull.output
