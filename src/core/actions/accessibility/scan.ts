@@ -68,7 +68,7 @@ export const scanWebsite = async ({
       message: SCAN_TIMEOUT,
     });
   }
-
+  
   const { script, issues, webPage, issuesInfo } = extractPageData(dataSource);
 
   // Limit if not super mode
