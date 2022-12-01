@@ -35,6 +35,7 @@ const createIframe = async (
       const frame = await fetchFrame({
         url,
         baseHref: !!req.query["baseHref"],
+        retry: 2
       });
 
       res.type("text/html").send(frame);

@@ -9,7 +9,6 @@ import { DISABLE_STORE_SCRIPTS, SUPER_MODE } from "../../../config/config";
 import { WEBSITE_NOT_FOUND } from "../../strings";
 import { StatusCode } from "../../../web/messages/message";
 import { SCAN_TIMEOUT } from "../../strings/errors";
-import { validateUID } from "../../../web/params/extracter";
 import type { PageMindScanResponse } from "../../../types/schema";
 
 type ScanParams = {
@@ -71,15 +70,14 @@ export const scanWebsite = async ({
   
   const { script, issues, webPage, issuesInfo } = extractPageData(dataSource);
 
-  // Limit if not super mode
-  const currentIssues =
-    !SUPER_MODE && !validateUID(userId) ? limitIssue(issues) : issues?.issues;
+  // limited scan endpoint
+  const currentIssues = limitIssue(issues);
 
   const data = Object.assign({}, website, webPage, {
     userId,
     timestamp: new Date().getTime(),
     script,
-    issues: currentIssues || [],
+    issues: currentIssues,
     issuesInfo: Object.assign({}, issuesInfo, {
       limitedCount: currentIssues.length,
     }),
