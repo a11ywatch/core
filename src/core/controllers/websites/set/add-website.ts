@@ -17,6 +17,9 @@ import { watcherCrawl } from "../../../actions/accessibility/watcher_crawl";
 import { connect } from "../../../../database";
 import { SUPER_MODE } from "../../../../config/config";
 
+// allowed standards
+const allowedStandards = ["WCAG2A", "WCAG2AA", "WCAG2AAA", "Section508"];
+
 // used on mutations performs a website created following a multi-site scan if enabled
 export const addWebsite = async ({
   userId,
@@ -68,7 +71,7 @@ export const addWebsite = async ({
 
   let wcagStandard: string | undefined = undefined;
 
-  if (standard && ["WCAG2A", "WCAG2AA", "WCAG2AAAA"].includes(standard)) {
+  if (standard && allowedStandards.includes(standard)) {
     wcagStandard = standard;
   }
 
