@@ -25,18 +25,15 @@ export async function setWebsiteScore({
     userId,
   });
 
-  const all = website?.subdomains || website?.tld;
   const targetDomain = website?.domain || domain;
 
   const { issuesInfo } = await generateWebsiteScore({
     domain: targetDomain,
     userId,
-    all,
+    all: website?.subdomains || website?.tld,
   });
 
   if (issuesInfo && website) {
-    const dur = Number(Number.parseFloat(duration).toFixed(2));
-
     const [analayticsCollection] = connect("Analytics");
 
     await collectionUpsert(issuesInfo, [analayticsCollection, true], {
@@ -49,7 +46,7 @@ export async function setWebsiteScore({
     await collectionUpsert(
       {
         ...website,
-        crawlDuration: typeof dur === "number" ? dur : 0, // time it took to crawl the entire website in ms
+        crawlDuration: duration, // time it took to crawl the entire website in ms
         shutdown, // crawl did not complete - plan needs to be higher
       },
       [websiteCollection, !!website],

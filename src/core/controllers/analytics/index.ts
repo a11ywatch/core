@@ -31,13 +31,11 @@ export const getAnalyticsPaging = async (params, chain?: boolean) => {
   let pages = [];
 
   try {
-    if (validateUID(userId)) {
-      pages = await collection
-        .find(filters)
-        .skip(offset)
-        .limit(limit)
-        .toArray();
-    }
+    pages = await collection
+      .find(filters)
+      .skip(offset)
+      .limit(limit)
+      .toArray();
 
     return chain ? [pages, collection] : pages;
   } catch (e) {

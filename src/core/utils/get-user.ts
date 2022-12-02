@@ -13,7 +13,7 @@ export const getUserFromToken = (
       payload: Partial<Jwt["payload"] & { keyid: number; audience?: number }>;
     }) => {
   const token =
-    typeof bearerToken === "string" ? extractTokenKey(bearerToken.trim()) : "";
+    bearerToken && typeof bearerToken === "string" ? extractTokenKey(bearerToken.trim()) : "";
 
   if (token) {
     try {

@@ -35,9 +35,9 @@ export const scanSimple = async (
     frontendClientOrigin(req.headers["referer"]);
 
   const user = getUserFromToken(
-    req?.headers?.authorization || req?.cookies?.jwt
+    req.headers['authorization'] || req?.cookies?.jwt
   );
-  
+
   // only allow client authed requests
   if (!isClient) {
     // validate user creds
@@ -54,8 +54,7 @@ export const scanSimple = async (
     }
   }
 
-  const pageInsights =
-    paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
+  const pageInsights = paramParser(req, "pageInsights");
 
   const resData = await scanWebsite({
     url,
@@ -89,8 +88,7 @@ export const scanAuthenticated = async (
     return;
   }
 
-  const pageInsights =
-  paramParser(req, "pageInsights") || paramParser(req, "pageInsights");
+  const pageInsights = paramParser(req, "pageInsights");
 
   // returns truthy if can continue
   const userNext = await getUserFromApi(
@@ -102,6 +100,7 @@ export const scanAuthenticated = async (
 
   let resData = {};
 
+  // only allow valid users to crawl
   if (validateUID(userId)) {
     resData = await crawlPage(
       {

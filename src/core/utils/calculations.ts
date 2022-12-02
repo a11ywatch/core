@@ -3,5 +3,5 @@ export function arrayAverage(arr: any[] = []): number {
   for (const i in arr) {
     sum += arr[i];
   }
-  return sum / (arr?.length || 1);
+  return sum / (arr.length || 1);
 }

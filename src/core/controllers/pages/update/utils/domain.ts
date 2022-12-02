@@ -44,6 +44,7 @@ const getDataUntil = async (
   prevIssuesInfo?: any
 ): Promise<void> => {
   const { domain, perfectScore, userId, all, resolve } = baseProps;
+
   const pages = await getAnalyticsPaging(
     {
       domain,
@@ -107,7 +108,7 @@ const getDataUntil = async (
   const averageItems = arrayAverage(adaScores);
 
   const avgScore = Math.round(
-    isNaN(averageItems) || perfectScore ? 100 : averageItems
+    (isNaN(averageItems) || perfectScore) ? 100 : averageItems
   );
 
   const issuesInfo = {
@@ -136,6 +137,6 @@ export const generateWebsiteScore = async (
   props: ScoreProps
 ): Promise<{ issuesInfo: IssuesInfo }> => {
   return new Promise(async (resolve) => {
-    await getDataUntil({ ...props, resolve });
+    return await getDataUntil({ ...props, resolve });
   });
 };
