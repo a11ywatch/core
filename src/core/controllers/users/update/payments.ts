@@ -109,7 +109,6 @@ export const addPaymentSubscription = async ({
               role,
               stripeID: customer.id,
               paymentSubscription: charge,
-              websiteLimit: 50,
             },
           }
         );
