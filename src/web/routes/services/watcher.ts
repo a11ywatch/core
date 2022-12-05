@@ -22,14 +22,14 @@ const detectImage = async (
   }
 
   // TODO: MOVE TO MIDDLEWARE
-  const user = getUserFromToken(req?.headers?.authorization);
+  const user = getUserFromToken(req.headers.authorization);
 
   if (!user) {
     res.status(StatusCode.Unauthorized);
 
     res.send({
       data: null,
-      message: req.headers?.authorization
+      message: req.headers.authorization
         ? TOKEN_EXPIRED_ERROR
         : "USER NOT FOUND",
       success: false,

@@ -48,7 +48,7 @@ export const PageSpeedController = () => ({
       domain,
       all,
     });
-    
+
     let insights = null;
 
     if (Object.keys(searchProps).length) {
@@ -61,7 +61,7 @@ export const PageSpeedController = () => ({
   getWebsitePageSpeed: async ({
     userId,
     domain,
-    pageUrl
+    pageUrl,
   }: {
     userId?: number;
     domain?: string;

@@ -35,7 +35,7 @@ export const scanSimple = async (
     frontendClientOrigin(req.headers["referer"]);
 
   const user = getUserFromToken(
-    req.headers['authorization'] || req?.cookies?.jwt
+    req.headers["authorization"] || req?.cookies?.jwt
   );
 
   // only allow client authed requests
@@ -60,7 +60,7 @@ export const scanSimple = async (
     url,
     noStore: true, // only store if domain exists for user todo -
     pageInsights,
-    userId: user?.payload?.keyid
+    userId: user?.payload?.keyid,
   });
 
   res.send(resData);

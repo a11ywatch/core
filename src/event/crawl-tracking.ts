@@ -18,7 +18,7 @@ type CrawlSet = {
 // track when a new website starts and determine page completion
 export const crawlingSet = new Map<string, CrawlSet>();
 
-// crawl default 
+// crawl default
 const crawlDefault: CrawlSet = Object.freeze({
   total: 0,
   current: 0,
@@ -65,10 +65,13 @@ const crawlStart = (target) => {
     const key = getKey(target.domain, target.pages, target.user_id);
     // set the item for tracking
     if (!crawlingSet.has(key)) {
-      crawlingSet.set(key, Object.assign({}, crawlDefault, {
-        duration: performance.now(),
-        event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
-      }));
+      crawlingSet.set(
+        key,
+        Object.assign({}, crawlDefault, {
+          duration: performance.now(),
+          event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
+        })
+      );
 
       await rebindConcurrency();
     }
@@ -78,8 +81,8 @@ const crawlStart = (target) => {
 // de-init crawling
 const deInit = async (key, target) => {
   crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-  const item = crawlingSet.get(key)
-  
+  const item = crawlingSet.get(key);
+
   const params = {
     userId: target.user_id,
     meta: {
@@ -103,9 +106,9 @@ const crawlComplete = (target) => {
     const key = getKey(target.domain, target.pages, userId);
 
     if (crawlingSet.has(key)) {
-      const item = crawlingSet.get(key)
+      const item = crawlingSet.get(key);
       item.crawling = false;
-      
+
       if (item?.current === item?.total) {
         await deInit(key, target);
       }
@@ -120,7 +123,7 @@ const crawlProcessing = (call: ScanRpcCall) => {
     const key = getKey(target.domain, target.pages, target.user_id); // process a new item tracking count
 
     if (crawlingSet.has(key)) {
-      const item = crawlingSet.get(key)
+      const item = crawlingSet.get(key);
 
       if (item.crawling) {
         item.total = item.total + 1;
@@ -142,7 +145,7 @@ const crawlProcessed = (target) => {
     const key = getKey(target.domain, target.pages, userId);
 
     if (crawlingSet.has(key)) {
-      const item = crawlingSet.get(key)
+      const item = crawlingSet.get(key);
 
       item.current = item.current + 1;
 
@@ -152,10 +155,7 @@ const crawlProcessed = (target) => {
         item.crawling = false;
       }
 
-      if (
-        item.current === item.total &&
-        !item.crawling
-      ) {
+      if (item.current === item.total && !item.crawling) {
         await deInit(key, target);
       }
     }

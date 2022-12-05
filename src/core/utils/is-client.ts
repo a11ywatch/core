@@ -8,7 +8,7 @@ const DOMAIN = containsTrailing(config.DOMAIN)
 
 const bypassall = SUPER_MODE || config.DEV;
 
-const DOMAINT = DOMAIN.replace(/^https?:\/\//, '');
+const DOMAINT = DOMAIN.replace(/^https?:\/\//, "");
 
 // determine if the path is the front-end client for the hast - default to false
 export const frontendClientOrigin = (origin: string) => {

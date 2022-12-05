@@ -78,14 +78,14 @@ export const Website = {
     return await PageSpeedController().getWebsitePageSpeed({
       userId,
       domain,
-      pageUrl: url
+      pageUrl: url,
     });
   },
   issuesInfo: async ({ userId, domain, url }, _params) => {
     return await AnalyticsController().getWebsite({
       userId,
       domain,
-      pageUrl: url
+      pageUrl: url,
     });
   },
 };

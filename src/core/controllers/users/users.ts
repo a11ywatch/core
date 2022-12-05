@@ -21,6 +21,7 @@ import {
   validateEmail,
   addPaymentSubscription,
   cancelSubscription,
+  downgradeStripeUserValues,
 } from "./update";
 import { createUser } from "./set";
 import type { UserControllerType } from "./types";
@@ -34,6 +35,7 @@ export const UsersController: UserControllerType = (
   createUser,
   addPaymentSubscription,
   cancelSubscription,
+  downgradeStripeUserValues,
   updateFilterEmailDates: async ({
     id,
     emailFilteredDates,

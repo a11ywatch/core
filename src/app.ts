@@ -63,6 +63,7 @@ import { responseModel } from "./core/models";
 import { limiter, scanLimiter } from "./web/limiters";
 import { appEmitter } from "./event/emitters/control";
 import { frontendClientOrigin } from "./core/utils/is-client";
+import { setStripeRoutes } from "./web/routes_groups/stripe";
 
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
@@ -105,16 +106,9 @@ async function initServer(): Promise<HttpServer[]> {
   await fast.register(await server.createHandler({ cors: corsOptions }));
   const app = await registerApp(fast);
 
+  // report badges
   app.get("/status/:domain", limiter, statusBadge);
-
-  app.get("/playground", (_, res) => {
-    res.redirect("https://a11ywatch.com/playground");
-  });
-
-  app.get("/grpc-docs", limiter, (_, res) => {
-    res.redirect("https://a11ywatch.com/grpc-docs");
-  });
-
+  // domain renderer [todo?: handle at edge]
   app.get("/api/iframe", limiter, createIframeEvent);
   // get a previus run report
   app.get("/api/report", limiter, getWebsiteReport);
@@ -349,12 +343,10 @@ async function initServer(): Promise<HttpServer[]> {
     res.status(403).send(false);
   });
 
-  // Paginated List Routes
   setListRoutes(app);
-  // AUTH ROUTES
   setAuthRoutes(app);
-  // GITHUB
   setGithubActionRoutes(app);
+  setStripeRoutes(app);
 
   // ADMIN ROUTES
   app.post("/api/run-watcher", async (req, res) => {
@@ -375,8 +367,6 @@ async function initServer(): Promise<HttpServer[]> {
 
       if (validateUID(userId)) {
         setImmediate(async () => {
-          // todo: send user email account reset
-          // todo: downgrade stripe
           await WebsitesController().removeWebsite({
             userId: userId,
             deleteMany: true,
@@ -401,7 +391,7 @@ async function initServer(): Promise<HttpServer[]> {
   app.get(CONFIRM_EMAIL, confirmEmail);
   app.post(CONFIRM_EMAIL, confirmEmail);
 
-  // INTERNAL
+  // INTERNAL [todo: whitelist]
   app.get("/_internal_/healthcheck", (_, res) => {
     res.send({
       status: "healthy",

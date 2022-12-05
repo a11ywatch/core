@@ -98,11 +98,14 @@ export const getWebsitesPaging = async (
   if (insights) {
     for (let i = 0; i < webPages.length; i++) {
       const { json } =
-        (await PageSpeedController().getWebsite({
-          userId,
-          pageUrl: webPages[i].url,
-          domain: webPages[i].domain
-        }, false)) ?? {};
+        (await PageSpeedController().getWebsite(
+          {
+            userId,
+            pageUrl: webPages[i].url,
+            domain: webPages[i].domain,
+          },
+          false
+        )) ?? {};
 
       if (json) {
         webPages[i].insight = { json };

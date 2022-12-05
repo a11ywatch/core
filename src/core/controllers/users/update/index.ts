@@ -6,4 +6,8 @@ export { confirmEmail } from "./confirm-email";
 export { unsubscribeEmails } from "./unsubscribe-emails";
 export { resetPassword } from "./reset-password";
 export { validateEmail } from "./validate-email";
-export { cancelSubscription, addPaymentSubscription } from "./payments";
+export {
+  cancelSubscription,
+  addPaymentSubscription,
+  downgradeStripeUserValues,
+} from "./payments";

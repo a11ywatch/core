@@ -1,11 +1,9 @@
-import Stripe from "stripe";
-
-import { config } from "../../../../config";
-
 import { EMAIL_ERROR, SUCCESS } from "../../../strings";
 import { signJwt } from "../../../utils";
 import { roleHandler, stripeProductId } from "../../../utils/price-handler";
 import { getUser } from "../find";
+import { stripe } from "../../../external/stripe";
+import type { User } from "../../../../types/schema";
 
 type AddPaymentProps = {
   keyid?: number;
@@ -13,13 +11,6 @@ type AddPaymentProps = {
   stripeToken: string; // returned from client upon success credit card submit [todo: convert object]
   yearly?: boolean;
 };
-
-const { STRIPE_KEY } = config;
-
-export const stripe = new Stripe(STRIPE_KEY, {
-  telemetry: false,
-  apiVersion: "2022-11-15",
-});
 
 // add payment subscription between basic and premium plans. Does not work with entrprise.
 export const addPaymentSubscription = async ({
@@ -213,4 +204,32 @@ export const viewUpcomingInvoice = async ({ userId }) => {
 
     return invoice;
   }
+};
+
+// perform a user downgrade does not perform outside collection side effects
+// @params {user, collection} prior user and collection
+export const downgradeStripeUserValues = async ({
+  user,
+  collection,
+}: {
+  user: User;
+  collection: any;
+}) => {
+  const email = user.email;
+  const jwt = signJwt({
+    email,
+    role: 0,
+    keyid: user.id,
+  });
+  await collection.updateOne(
+    { email },
+    {
+      $set: {
+        jwt,
+        role: 0,
+        lastRole: user.role,
+        paymentSubscription: false,
+      },
+    }
+  );
 };

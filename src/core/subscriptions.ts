@@ -4,7 +4,7 @@ import {
   websiteAdded,
   websiteRemoved,
   crawlComplete,
-  lighthouseResult
+  lighthouseResult,
 } from "./graph/subscriptions";
 
 export const Subscription = {
@@ -13,5 +13,5 @@ export const Subscription = {
   websiteAdded,
   websiteRemoved,
   crawlComplete,
-  lighthouseResult
+  lighthouseResult,
 };

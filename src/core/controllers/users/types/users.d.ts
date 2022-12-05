@@ -1,4 +1,4 @@
-import type { User } from "../../types/types";
+import type { User } from "../../../../types/types";
 
 export interface AuthParams {
   userId?: number;
@@ -60,6 +60,10 @@ export interface UserControllerMethodsType {
   sendWebsiteOffline(params: Params): Promise<any>;
   setPageSpeedKey(params: Params): Promise<any>;
   updateFilterEmailDates(params: AlertParams): Promise<any>;
+  downgradeStripeUserValues(params: {
+    user: User;
+    collection: any;
+  }): Promise<any>;
 }
 
 export interface UserControllerType {

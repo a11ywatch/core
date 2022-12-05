@@ -19,7 +19,7 @@ export async function websiteWatch(
     const [user] = await getUser({ id: userId });
 
     // prevent unconfirmed emails from job
-    if (!user || user && !user?.emailConfirmed || !url) {
+    if (!user || (user && !user?.emailConfirmed) || !url) {
       continue;
     }
 

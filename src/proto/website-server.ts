@@ -5,7 +5,7 @@ import { scanEnd } from "./calls/scan-end";
 import { scan } from "./calls/scan";
 import { scanStream } from "./calls/scan-stream";
 import { coreScan } from "./calls/core-scan";
-import { pageUpdate } from './calls/page-update'
+import { pageUpdate } from "./calls/page-update";
 import { coreCrawl } from "./calls/core-crawl";
 import { loadProto } from "./website";
 
@@ -33,7 +33,7 @@ export const createServer = async () => {
       // scan website for issues that pushes task into queues.
       scanStream,
       // update a page directly after long batch job
-      pageSet: pageUpdate
+      pageSet: pageUpdate,
     }
   );
 
@@ -44,7 +44,7 @@ export const createServer = async () => {
       // single page scan and get results
       scan: coreScan,
       // scan multiple pages to stream
-      crawl: coreCrawl
+      crawl: coreCrawl,
     }
   );
 

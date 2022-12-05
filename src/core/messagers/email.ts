@@ -63,7 +63,7 @@ const sendMail = async ({
       !findUser?.role
     )}`;
 
-      transporter?.sendMail(
+    transporter?.sendMail(
       {
         from: mailOptions.from,
         to: findUser.email,

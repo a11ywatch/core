@@ -79,7 +79,7 @@ const getInsightsEnabled = ({
 export const crawlPage = async (
   crawlConfig: CrawlConfig,
   sendEmail?: boolean, // determine if email should be sent based on results
-  blockEvent?: boolean, // block event from emitting to protect crawl interfere
+  blockEvent?: boolean // block event from emitting to protect crawl interfere
 ): Promise<ResponseModel> => {
   const {
     url: urlMap,
@@ -124,7 +124,7 @@ export const crawlPage = async (
   const urole = userData?.role || 0;
 
   const freeAccount = !urole; // free account
-  const scriptsEnabled = SUPER_MODE ? SCRIPTS_ENABLED : !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+  const scriptsEnabled = SCRIPTS_ENABLED && !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
   const rootPage = pathname === "/"; // the url is the base domain index.
 
   const insightsEnabled = getInsightsEnabled({
@@ -136,9 +136,9 @@ export const crawlPage = async (
 
   // prevent storage on free accounts js scripts
   const noStore =
-    !SUPER_MODE && freeAccount
-      ? true
-      : crawlConfig.noStore || DISABLE_STORE_SCRIPTS;
+    (!SUPER_MODE && freeAccount) ||
+    DISABLE_STORE_SCRIPTS ||
+    crawlConfig.noStore;
 
   const actions = await findPageActionsByPath({ userId, path: pathname });
 
@@ -152,13 +152,13 @@ export const crawlPage = async (
     ua: website?.ua,
     standard: website?.standard,
     actions,
-    cv: SUPER_MODE || urole,
+    cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
-    noStore,
+    noStore: !!noStore,
   });
 
   let shutdown = false;
-  
+
   if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = userData?.scanInfo?.totalUptime || 0;

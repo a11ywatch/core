@@ -108,7 +108,7 @@ const getDataUntil = async (
   const averageItems = arrayAverage(adaScores);
 
   const avgScore = Math.round(
-    (isNaN(averageItems) || perfectScore) ? 100 : averageItems
+    isNaN(averageItems) || perfectScore ? 100 : averageItems
   );
 
   const issuesInfo = {

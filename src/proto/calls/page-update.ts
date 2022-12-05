@@ -8,37 +8,52 @@ import { WebsitesController } from "../../core/controllers";
 
 // lighthouse page updating
 export const pageUpdate = async (
-  call: ServerWritableStream<{ domain: string; url:string; user_id: number; insight: any }, {}>,
+  call: ServerWritableStream<
+    { domain: string; url: string; user_id: number; insight: any },
+    {}
+  >,
   callback: sendUnaryData<any>
 ) => {
-    // handle lighthouse data into db and send sub
-    setImmediate(async () => {
-      const { user_id: userId, url: pageUrl, domain, insight } = call.request;
-      const lighthouseResults = extractLighthouse({ userId, domain, pageUrl, insight });
+  // handle lighthouse data into db and send sub
+  setImmediate(async () => {
+    const { user_id: userId, url: pageUrl, domain, insight } = call.request;
+    const lighthouseResults = extractLighthouse({
+      userId,
+      domain,
+      pageUrl,
+      insight,
+    });
 
-      // validate the website exist
-      const [website] = await WebsitesController().getWebsite({ domain, userId });
+    // validate the website exist
+    const [website] = await WebsitesController().getWebsite({ domain, userId });
 
-      if(website) {
-        const [pageSpeed, pageSpeedCollection] = await PageSpeedController().getWebsite({ pageUrl: lighthouseResults.pageUrl, userId }, true);
-  
-        // upsert lightouse data
-        await collectionUpsert(lighthouseResults, [pageSpeedCollection, pageSpeed]);
-  
-        try {
-            await pubsub.publish(LIGHTHOUSE, { 
-            lighthouseResult: {
-              userId: lighthouseResults.userId,
-              domain: lighthouseResults.domain,
-              url: lighthouseResults.pageUrl, // remove trailing for exact match handling [todo: setting for global handling]
-              insight: { json: lighthouseResults.json }
-            }
-          });
-        } catch (_) {
-            // silent pub sub errors
-        }
+    if (website) {
+      const [pageSpeed, pageSpeedCollection] =
+        await PageSpeedController().getWebsite(
+          { pageUrl: lighthouseResults.pageUrl, userId },
+          true
+        );
+
+      // upsert lightouse data
+      await collectionUpsert(lighthouseResults, [
+        pageSpeedCollection,
+        pageSpeed,
+      ]);
+
+      try {
+        await pubsub.publish(LIGHTHOUSE, {
+          lighthouseResult: {
+            userId: lighthouseResults.userId,
+            domain: lighthouseResults.domain,
+            url: lighthouseResults.pageUrl, // remove trailing for exact match handling [todo: setting for global handling]
+            insight: { json: lighthouseResults.json },
+          },
+        });
+      } catch (_) {
+        // silent pub sub errors
       }
-   })
+    }
+  });
 
   callback(null, {});
 };

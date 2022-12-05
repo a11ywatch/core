@@ -27,7 +27,7 @@ export const getBaseParams = (req: FastifyContext["request"]) => {
 // get the base params for a standard collection retrieval by userId, domain, and url, with pagination
 export const getBaseParamsList = (req: FastifyContext["request"]) => {
   const { userId, domain, pageUrl } = getBaseParams(req);
-  const query = req.query as { offset?: number, limit?: number };
+  const query = req.query as { offset?: number; limit?: number };
 
   let offset;
 

@@ -4,7 +4,7 @@ import { config } from "../../../../config";
 import { EMAIL_ERROR, GENERAL_ERROR, SUCCESS } from "../../../strings";
 import { transporter, mailOptions, sendMailCallback } from "../../../utils";
 import { getUser } from "../find";
-import { User } from "src/types/schema";
+import { User } from "../../../../types/schema";
 
 const { ROOT_URL } = config;
 

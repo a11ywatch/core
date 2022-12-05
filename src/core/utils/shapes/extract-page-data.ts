@@ -4,23 +4,25 @@ import { jsonParse } from "../../../core/utils";
 
 // handle lighthouse extracting
 export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
-    const parsedInsight: Record<string, unknown> = insight ? jsonParse(
-      insight as Struct
-    ) : null;
+  const parsedInsight: Record<string, unknown> = insight
+    ? jsonParse(insight as Struct)
+    : null;
 
-    return {
-      userId,
-      domain,
-      pageUrl: removeTrailingSlash(pageUrl),
-      json: parsedInsight ? JSON.stringify(parsedInsight) : "",
+  return {
+    userId,
+    domain,
+    pageUrl: removeTrailingSlash(pageUrl),
+    json: parsedInsight ? JSON.stringify(parsedInsight) : "",
   };
-}
+};
 
 // generic page format
-export const extractPageData = (
-  dataSource
-) => {
-  const { script, issues, webPage, userId } = dataSource ?? { script: null, issues: null, webPage: null };
+export const extractPageData = (dataSource) => {
+  const { script, issues, webPage, userId } = dataSource ?? {
+    script: null,
+    issues: null,
+    webPage: null,
+  };
 
   let errorCount;
   let warningCount;
