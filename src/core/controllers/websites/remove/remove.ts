@@ -25,6 +25,7 @@ export const removeWebsite = async ({
 
   if (deleteMany) {
     const [webcollection] = connect("Websites");
+    // todo: get all websites and send request to cdn server for assets removal
     await webcollection.deleteMany({ userId });
     await scriptsCollection.deleteMany({ userId });
     await analyticsCollection.deleteMany({ userId });
@@ -35,6 +36,8 @@ export const removeWebsite = async ({
 
     return { code: 200, success: true, message: SUCCESS_DELETED_ALL };
   }
+
+  // todo: send request to cdn to delete assets
 
   const [siteExist, collection] = await getWebsite({ userId, url, domain });
 
