@@ -12,6 +12,8 @@ type AddPaymentProps = {
   yearly?: boolean;
 };
 
+const trialPeriod = process.env.TRIAL_PERIOD ? parseInt(process.env.TRIAL_PERIOD, 10): 14;
+
 // add payment subscription between basic and premium plans. Does not work with entrprise.
 export const addPaymentSubscription = async ({
   keyid,
@@ -88,6 +90,7 @@ export const addPaymentSubscription = async ({
             plan: stripeProductPlan,
           },
         ],
+        trial_period_days: trialPeriod
       });
 
       if (charge) {
