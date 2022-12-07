@@ -23,7 +23,8 @@ export const user = async (_, { id, password }, ctx) => {
       ...props,
       emailConfirmed: !!emailConfirmed, // temp fix
       keyid: userId,
-      activeSubscription: user?.paymentSubscription?.status === "active",
+      // ?.status === "active"
+      activeSubscription: !!user?.paymentSubscription,
       loggedIn: !!ctx.user,
       accountType: audience + "" || "",
       passwordRequired: !user?.password && !googleId && !githubId, // password not found [TODO: change to simply check not password]

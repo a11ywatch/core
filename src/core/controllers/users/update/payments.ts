@@ -12,7 +12,9 @@ type AddPaymentProps = {
   yearly?: boolean;
 };
 
-const trialPeriod = process.env.TRIAL_PERIOD ? parseInt(process.env.TRIAL_PERIOD, 10): 14;
+const trialPeriod = process.env.TRIAL_PERIOD
+  ? parseInt(process.env.TRIAL_PERIOD, 10)
+  : 14;
 
 // add payment subscription between basic and premium plans. Does not work with entrprise.
 export const addPaymentSubscription = async ({
@@ -83,15 +85,32 @@ export const addPaymentSubscription = async ({
       const plan = parsedToken.plan;
       const stripeProductPlan = stripeProductId(plan, yearly);
 
-      const charge = await stripe.subscriptions.create({
-        customer: customer.id,
-        items: [
-          {
-            plan: stripeProductPlan,
-          },
-        ],
-        trial_period_days: trialPeriod
-      });
+      let charge = null;
+
+      const activeSub = user?.paymentSubscription;
+
+      // remove prior subscriptions
+      if (!!activeSub) {
+          charge = await stripe.subscriptions.update(activeSub.id, {
+            proration_behavior: activeSub?.status === "trialing" ? "always_invoice" : 'create_prorations',
+            cancel_at_period_end: true,
+            items: [
+              {
+                price: stripeProductPlan,
+              },
+            ],
+          });
+      } else {
+        charge = await stripe.subscriptions.create({
+          customer: customer.id,
+          items: [
+            {
+              plan: stripeProductPlan,
+            },
+          ],
+          trial_period_days: !activeSub ? trialPeriod : undefined,
+        });
+      }
 
       if (charge) {
         const role = roleHandler(plan);
@@ -137,39 +156,29 @@ export const cancelSubscription = async ({ keyid }) => {
   }
 
   if (user?.stripeID) {
-    const customer = await stripe.subscriptions.list({
-      customer: user.stripeID,
-    });
+    const deletedSubscription = await removeUserSubscriptions(user.stripeID);
 
-    const subscriptions = customer?.data;
-
-    if (subscriptions && subscriptions.length) {
-      const deletedSubscription = subscriptions.every((item) => {
-        return stripe.subscriptions.del(item.id);
+    if (deletedSubscription) {
+      const jwt = signJwt({
+        email: user?.email,
+        role: 0,
+        keyid: user.id,
       });
 
-      if (deletedSubscription) {
-        const jwt = signJwt({
-          email: user?.email,
-          role: 0,
-          keyid: user.id,
-        });
+      user.jwt = jwt;
+      user.role = 0;
 
-        user.jwt = jwt;
-        user.role = 0;
-
-        await collection.updateOne(
-          { email: user?.email },
-          {
-            $set: {
-              jwt,
-              role: 0,
-              lastRole: user.role,
-              paymentSubscription: false,
-            },
-          }
-        );
-      }
+      await collection.updateOne(
+        { email: user?.email },
+        {
+          $set: {
+            jwt,
+            role: 0,
+            lastRole: user.role,
+            paymentSubscription: false,
+          },
+        }
+      );
     }
   }
 
@@ -234,4 +243,25 @@ export const downgradeStripeUserValues = async ({
       },
     }
   );
+};
+
+// delete stripe subs by user
+const removeUserSubscriptions = async (stripeID: string) => {
+  const customer = await stripe.subscriptions.list({
+    customer: stripeID,
+  });
+  const subscriptions = customer?.data;
+
+  let deletedSubscription = false;
+  if (subscriptions && subscriptions.length) {
+    deletedSubscription = subscriptions.every(async (item) => {
+      try {
+        return await stripe.subscriptions.del(item.id);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
+
+  return deletedSubscription;
 };
