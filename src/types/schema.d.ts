@@ -47,7 +47,7 @@ export type Feature = {
   __typename?: "Feature";
   id?: Maybe<Scalars["ID"]>;
   feature?: Maybe<Scalars["String"]>;
-  enabled?: Maybe<Scalars["Boolean"]>;
+  enabled?: boolean;
   user?: Maybe<Array<Maybe<User>>>;
   accountType?: Maybe<Scalars["String"]>;
 };
@@ -61,10 +61,10 @@ export type History = {
   pages?: Maybe<Array<Maybe<Pages>>>;
   userId?: Maybe<Scalars["Int"]>;
   domain?: Maybe<Scalars["String"]>;
-  cdnConnected?: Maybe<Scalars["Boolean"]>;
+  cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issuesInfo?: Maybe<IssueMeta>;
-  pageInsights?: Maybe<Scalars["Boolean"]>;
+  pageInsights?: boolean;
   insight?: Maybe<PageInsights>;
 };
 
@@ -98,8 +98,8 @@ export type IssueMeta = {
   issuesFixedByCdn?: Maybe<Scalars["Int"]>;
   possibleIssuesFixedByCdn?: Maybe<Scalars["Int"]>;
   totalIssues?: Maybe<Scalars["Int"]>;
-  cdnConnected?: Maybe<Scalars["Boolean"]>;
-  skipContentIncluded?: Maybe<Scalars["Boolean"]>;
+  cdnConnected?: boolean;
+  skipContentIncluded?: boolean;
   errorCount?: Maybe<Scalars["Int"]>;
   warningCount?: Maybe<Scalars["Int"]>;
   limitedCount?: Maybe<Scalars["Int"]>;
@@ -147,23 +147,23 @@ export type MutationUpdateUserArgs = {
 };
 
 export type MutationToggleAlertArgs = {
-  alertEnabled?: Maybe<Scalars["Boolean"]>;
+  alertEnabled?: boolean;
 };
 
 export type MutationToggleProfileArgs = {
-  toggleAlert?: Maybe<Scalars["Boolean"]>;
+  toggleAlert?: boolean;
 };
 
 export type MutationUpdateWebsiteArgs = {
   url?: Maybe<Scalars["String"]>;
   customHeaders?: Maybe<Array<Maybe<CreatePageHeaders>>>;
-  pageInsights?: Maybe<Scalars["Boolean"]>;
+  pageInsights?: boolean;
 };
 
 export type MutationUpdateScriptArgs = {
   url?: Maybe<Scalars["String"]>;
   scriptMeta?: Maybe<ScriptMetaInput>;
-  editScript?: Maybe<Scalars["Boolean"]>;
+  editScript?: boolean;
   newScript?: Maybe<Scalars["String"]>;
 };
 
@@ -192,7 +192,7 @@ export type MutationResetPasswordArgs = {
 export type MutationAddWebsiteArgs = {
   url: Scalars["String"];
   customHeaders?: Maybe<Array<Maybe<CreatePageHeaders>>>;
-  pageInsights?: Maybe<Scalars["Boolean"]>;
+  pageInsights?: boolean;
 };
 
 export type MutationFilterEmailDatesArgs = {
@@ -201,13 +201,13 @@ export type MutationFilterEmailDatesArgs = {
 
 export type MutationRemoveWebsiteArgs = {
   url?: Maybe<Scalars["String"]>;
-  deleteMany?: Maybe<Scalars["Boolean"]>;
+  deleteMany?: boolean;
 };
 
 export type MutationAddPaymentSubscriptionArgs = {
   email?: Maybe<Scalars["String"]>;
   stripeToken?: Maybe<Scalars["String"]>;
-  yearly?: Maybe<Scalars["Boolean"]>;
+  yearly?: boolean;
 };
 
 export type MutationCancelSubscriptionArgs = {
@@ -242,7 +242,7 @@ export type PaymentPlan = {
   __typename?: "PaymentPlan";
   id?: Maybe<Scalars["String"]>;
   object?: Maybe<Scalars["String"]>;
-  active?: Maybe<Scalars["Boolean"]>;
+  active?: boolean;
   amount?: Maybe<Scalars["Int"]>;
   amount_decimal?: Maybe<Scalars["String"]>;
   nickname?: Maybe<Scalars["String"]>;
@@ -257,7 +257,7 @@ export type PaymentSubScription = {
   object?: Maybe<Scalars["String"]>;
   application_fee_percent?: Maybe<Scalars["Int"]>;
   billing_cycle_anchor?: Maybe<Scalars["Int"]>;
-  cancel_at_period_end?: Maybe<Scalars["Boolean"]>;
+  cancel_at_period_end?: boolean;
   customer?: Maybe<Scalars["String"]>;
   ended_at?: Maybe<Scalars["String"]>;
   canceled_at?: Maybe<Scalars["String"]>;
@@ -337,20 +337,20 @@ export type Script = {
   script?: Maybe<Scalars["String"]>;
   cdnUrl?: Maybe<Scalars["String"]>;
   cdnUrlMinified?: Maybe<Scalars["String"]>;
-  cdnConnected?: Maybe<Scalars["Boolean"]>;
+  cdnConnected?: boolean;
   issueMeta?: Maybe<IssueMeta>;
   scriptMeta?: Maybe<ScriptMeta>;
 };
 
 export type ScriptMeta = {
   __typename?: "ScriptMeta";
-  skipContentEnabled?: Maybe<Scalars["Boolean"]>;
-  translateEnabled?: Maybe<Scalars["Boolean"]>;
+  skipContentEnabled?: boolean;
+  translateEnabled?: boolean;
 };
 
 export type ScriptMetaInput = {
-  skipContentEnabled?: Maybe<Scalars["Boolean"]>;
-  translateEnabled?: Maybe<Scalars["Boolean"]>;
+  skipContentEnabled?: boolean;
+  translateEnabled?: boolean;
 };
 
 export type Pages = {
@@ -360,11 +360,11 @@ export type Pages = {
   user?: Maybe<User>;
   domain?: Maybe<Scalars["String"]>;
   userId?: Maybe<Scalars["Int"]>;
-  cdnConnected?: Maybe<Scalars["Boolean"]>;
+  cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   issuesInfo?: Maybe<IssueMeta>;
-  pageInsights?: Maybe<Scalars["Boolean"]>;
+  pageInsights?: boolean;
   insight?: Maybe<PageInsights>;
 };
 
@@ -410,8 +410,8 @@ export type UpdateUserMutationResponse = MutationResponse & {
   success: Scalars["Boolean"];
   message: Scalars["String"];
   user?: Maybe<User>;
-  alertEnabled?: Maybe<Scalars["Boolean"]>;
-  profileVisible?: Maybe<Scalars["Boolean"]>;
+  alertEnabled?: boolean;
+  profileVisible?: boolean;
 };
 
 export type UpdateWebSiteMutationResponse = MutationResponse & {
@@ -429,20 +429,20 @@ export type User = {
   password?: Maybe<Scalars["String"]>;
   jwt?: Maybe<Scalars["String"]>;
   salt?: Maybe<Scalars["String"]>;
-  loggedIn?: Maybe<Scalars["Boolean"]>;
-  passwordRequired?: Maybe<Scalars["Boolean"]>;
-  alertEnabled?: Maybe<Scalars["Boolean"]>;
+  loggedIn?: boolean;
+  passwordRequired?: boolean;
+  alertEnabled?: boolean;
   lastAlertSent?: Maybe<Scalars["Int"]>;
   lastAlertDateStamp?: Maybe<Scalars["Int"]>;
   stripeToken?: Maybe<Scalars["String"]>;
   googleId?: Maybe<Scalars["String"]>;
   githubId?: Maybe<Scalars["Int"]>;
   role?: Maybe<Scalars["Int"]>;
-  activeSubscription?: Maybe<Scalars["Boolean"]>;
-  emailConfirmed?: Maybe<Scalars["Boolean"]>;
+  activeSubscription?: boolean;
+  emailConfirmed?: boolean;
   emailFilteredDates?: Maybe<Array<Maybe<Scalars["Int"]>>>;
   websites?: Maybe<Array<Maybe<Website>>>;
-  profileVisible?: Maybe<Scalars["Boolean"]>;
+  profileVisible?: boolean;
   history?: Maybe<Array<Maybe<History>>>;
   scanInfo?: Maybe<ScanInformation>;
   analytics?: Maybe<Array<Maybe<Analytic>>>;
@@ -477,7 +477,7 @@ export type Website = {
   user?: Maybe<User>;
   userId?: Maybe<Scalars["Int"]>;
   domain?: Maybe<Scalars["String"]>;
-  cdnConnected?: Maybe<Scalars["Boolean"]>;
+  cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   issue?: Maybe<Array<Maybe<Issue>>>;
@@ -488,15 +488,16 @@ export type Website = {
   documentTitle?: Maybe<Scalars["String"]>;
   cdn?: Maybe<Scalars["String"]>;
   pageHeaders?: Maybe<Array<Maybe<PageHeaders>>>;
-  online?: Maybe<Scalars["Boolean"]>;
+  online?: boolean;
   timestamp?: Maybe<Scalars["String"]>;
-  pageInsights?: Maybe<Scalars["Boolean"]>;
+  pageInsights?: boolean;
   insight?: Maybe<PageInsights>;
-  mobile?: Maybe<Scalars["Boolean"]>;
+  mobile?: boolean;
   standard?: Maybe<Scalars["String"]>;
   ua?: Maybe<Scalars["String"]>;
-  subdomains?: Maybe<Scalars["Boolean"]>;
-  tld?: Maybe<Scalars["Boolean"]>;
+  subdomains?: boolean;
+  tld?: boolean;
+  verified?: boolean; // dns verified by user
 };
 
 export type WebsiteIssuesArgs = {

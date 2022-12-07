@@ -42,8 +42,23 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
     // check to see if dns if verified
     if (validateUID(userId)) {
       const domain = paramParser(req, "domain");
+
+      if (!domain) {
+        return res.status(422).send({
+          data: { verifed: false },
+          message: `Website params missing :domain`,
+        });
+      }
+
       const [collection] = connect("Websites");
       const website = await collection.findOne({ domain, userId });
+
+      if (!website) {
+        return res.status(404).send({
+          data: { verifed: false },
+          message: `Website not found`,
+        });
+      }
 
       res.send({
         data: { verifed: website.verified },
@@ -51,7 +66,7 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
       });
     }
 
-    res.send({ message: AUTH_ERROR, data: null });
+    res.status(401).send({ message: AUTH_ERROR, data: null });
   });
 
   // get dns code for verification
@@ -62,8 +77,22 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
       const domain = paramParser(req, "domain");
       const [collection] = connect("Websites");
 
+      if (!domain) {
+        return res.status(422).send({
+          data: { verifed: false },
+          message: `Website body missing :domain`,
+        });
+      }
+
       const params = { domain, userId };
       const website = await collection.findOne(params);
+
+      if (!website) {
+        return res.status(404).send({
+          data: { verifed: false },
+          message: `Website not found`,
+        });
+      }
 
       const verificationCode =
         website.verificationCode || randomBytes(4).toString("hex");
@@ -71,11 +100,11 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
       if (!website.verified) {
         if (!website.verificationCode) {
           await collection.updateOne(params, {
-            verificationCode,
+            $set: { verificationCode },
           });
         } else if (await resolveDnsRecord(domain, website.verificationCode)) {
           await collection.updateOne(params, {
-            verified: true,
+            $set: { verified: true },
             // verificationCode: "" todo unset property
           });
 
@@ -91,7 +120,7 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
       }
     }
 
-    res.status(403).send({ message: AUTH_ERROR });
+    res.status(401).send({ message: AUTH_ERROR });
   });
 };
 

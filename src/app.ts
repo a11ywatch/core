@@ -294,11 +294,6 @@ async function initServer(): Promise<HttpServer[]> {
   // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
   app.get("/api/get-website", getWebsiteAPI);
 
-  // verify dns
-  app.post("/api/website/verify", limiter, (req, res) => {
-    res.send([]);
-  });
-
   setDnsVerifyRoutes(app);
   setAdsRoutes(app);
   setListRoutes(app);

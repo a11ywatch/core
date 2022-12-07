@@ -147,14 +147,14 @@ export const crawlPage = async (
     url: urlMap,
     userId,
     pageInsights: insightsEnabled,
-    scriptsEnabled,
+    scriptsEnabled: (website?.verified && !SUPER_MODE) && scriptsEnabled,
     mobile: website?.mobile,
     ua: website?.ua,
     standard: website?.standard,
     actions,
     cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
-    noStore: !website || !!noStore,
+    noStore: !website || (!SUPER_MODE && !website?.verified) || !!noStore,
   });
 
   let shutdown = false;
@@ -224,7 +224,7 @@ export const crawlPage = async (
 
   // issues array
   const subIssues: Issue[] = pageIssues?.issues ?? [];
-  const pageConstainsIssues = subIssues?.length;
+  const issueCount = subIssues?.length;
 
   // // TODO: MERGE ISSUES FROM ALL PAGES
   const updateWebsiteProps: Website = Object.assign({}, webPage, {
@@ -249,7 +249,7 @@ export const crawlPage = async (
       }
       // if issues exist prior or current update collection
       // Add to Issues collection if page contains issues or if record should update/delete.
-      if (pageConstainsIssues || issueExist) {
+      if (issueCount || issueExist) {
         const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
 
         const [
@@ -288,7 +288,7 @@ export const crawlPage = async (
           // issues
           collectionUpsert(
             newIssue,
-            [issuesCollection, issueExist, !pageConstainsIssues],
+            [issuesCollection, issueExist, !issueCount],
             {
               searchProps: { pageUrl, userId },
             }
@@ -296,7 +296,7 @@ export const crawlPage = async (
           // pages
           collectionUpsert(
             updateWebsiteProps,
-            [pagesCollection, newSite, !pageConstainsIssues], // delete document if issues do not exist
+            [pagesCollection, newSite, !issueCount], // delete document if issues do not exist
             {
               searchProps: { url: pageUrl, userId },
             }
@@ -324,7 +324,7 @@ export const crawlPage = async (
     });
   }
 
-  if (pageConstainsIssues) {
+  if (issueCount) {
     if (sendSub) {
       try {
         await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });

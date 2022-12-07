@@ -43,6 +43,7 @@ export const website = gql`
     standard: String
     ua: String
     verified: Boolean
+    verificationCode: String
     actionsEnabled: Boolean
     robots: Boolean
     subdomains: Boolean
