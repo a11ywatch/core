@@ -147,7 +147,7 @@ export const crawlPage = async (
     url: urlMap,
     userId,
     pageInsights: insightsEnabled,
-    scriptsEnabled: (website?.verified && !SUPER_MODE) && scriptsEnabled,
+    scriptsEnabled: website?.verified && !SUPER_MODE && scriptsEnabled,
     mobile: website?.mobile,
     ua: website?.ua,
     standard: website?.standard,

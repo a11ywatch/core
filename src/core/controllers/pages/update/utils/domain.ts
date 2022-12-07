@@ -56,18 +56,18 @@ const getDataUntil = async (
     false
   );
 
-  let websiteErrors = prevIssuesInfo?.errorCount ?? 0;
-  let websiteWarnings = prevIssuesInfo?.warningCount ?? 0;
-  let websiteNotices = prevIssuesInfo?.noticeCount ?? 0;
-  let websiteIssuesFixedByCdn = prevIssuesInfo?.issuesFixedByCdn ?? 0;
+  let websiteErrors = prevIssuesInfo?.errorCount || 0;
+  let websiteWarnings = prevIssuesInfo?.warningCount || 0;
+  let websiteNotices = prevIssuesInfo?.noticeCount || 0;
+  let websiteIssuesFixedByCdn = prevIssuesInfo?.issuesFixedByCdn || 0;
   let websitePossibleIssuesFixedByCdn =
-    prevIssuesInfo?.possibleIssuesFixedByCdn ?? 0;
+    prevIssuesInfo?.possibleIssuesFixedByCdn || 0;
 
   const adaScores: number[] = [];
 
-  const pageCounter = pages?.length ?? 0;
+  const pageCounter = pages?.length || 0;
 
-  const pageCount = (prevIssuesInfo?.pageCount ?? 0) + pageCounter;
+  const pageCount = (prevIssuesInfo?.pageCount || 0) + pageCounter;
 
   for (const page of pages) {
     // collect website stats by iterating through pages.

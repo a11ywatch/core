@@ -2,7 +2,6 @@ import { generateWebsiteScore } from "../../controllers/pages/update";
 import { getWebsite } from "../../controllers/websites";
 import { CRAWL_COMPLETE } from "../../static";
 import { pubsub } from "../../../database/pubsub";
-import { connect } from "../../../database";
 
 import { collectionUpsert } from "../collection-upsert";
 
@@ -34,18 +33,10 @@ export async function setWebsiteScore({
   });
 
   if (issuesInfo && website) {
-    const [analayticsCollection] = connect("Analytics");
-
-    await collectionUpsert(issuesInfo, [analayticsCollection, true], {
-      searchProps: {
-        domain: targetDomain,
-        userId,
-      },
-    });
-
     await collectionUpsert(
       {
         ...website,
+        issuesInfo, // each website gets top level issues related to page
         crawlDuration: duration, // time it took to crawl the entire website in ms
         shutdown, // crawl did not complete - plan needs to be higher
       },

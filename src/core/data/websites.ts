@@ -81,11 +81,4 @@ export const Website = {
       pageUrl: url,
     });
   },
-  issuesInfo: async ({ userId, domain, url }, _params) => {
-    return await AnalyticsController().getWebsite({
-      userId,
-      domain,
-      pageUrl: url,
-    });
-  },
 };
