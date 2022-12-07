@@ -52,7 +52,7 @@ export interface UserControllerMethodsType {
   cancelSubscription(params: Params): Promise<any>;
   updateUser(params: Params, chain?: boolean): Promise<any>;
   forgotPassword(params: Params, chain?: boolean): Promise<any>;
-  toggleAlert(params: Params, chain?: boolean): Partial<User>; // async background db updates
+  toggleAlert(params: Params, chain?: boolean): Promise<Partial<User>>; // async background db updates
   resetPassword(params: Params, chain?: boolean): Promise<any>;
   updateScanAttempt(params: Params): Promise<any>;
   validateEmail(params: Params, chain?: boolean): Promise<any>;

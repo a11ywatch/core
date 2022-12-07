@@ -12,7 +12,6 @@ import {
   fastifyConfig,
   corsOptions,
   ADMIN_PASSWORD,
-  SUPER_MODE,
 } from "./config";
 import {
   crawlAllAuthedWebsitesCluster,
@@ -31,7 +30,6 @@ import {
   createPubSub,
   initRedisConnection,
   closeRedisConnection,
-  connect,
 } from "./database";
 import { confirmEmail, detectImage, unSubEmails } from "./web/routes";
 import { statusBadge } from "./web/routes/resources/badge";
@@ -43,7 +41,7 @@ import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken } from "./core/utils";
 import { retreiveUserByTokenWrapper } from "./core/utils/get-user-data";
 import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
-import { AnalyticsController, UsersController } from "./core/controllers";
+import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
 import { crawlStreamSlim } from "./core/streams/crawl-slim";
 import { crawlRest } from "./web/routes/crawl";
@@ -62,8 +60,8 @@ import { getWebsiteWrapper } from "./core/controllers/websites/find/get";
 import { responseModel } from "./core/models";
 import { limiter, scanLimiter } from "./web/limiters";
 import { appEmitter } from "./event/emitters/control";
-import { frontendClientOrigin } from "./core/utils/is-client";
 import { setStripeRoutes } from "./web/routes_groups/stripe";
+import { setAdsRoutes } from "./web/routes_groups/ads";
 
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
@@ -295,54 +293,12 @@ async function initServer(): Promise<HttpServer[]> {
   // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
   app.get("/api/get-website", getWebsiteAPI);
 
-  // get ad ref network
-  app.get("/ads/refs", async (req, res) => {
-    const isClient =
-      frontendClientOrigin(req.headers["origin"]) ||
-      frontendClientOrigin(req.headers["host"]) ||
-      frontendClientOrigin(req.headers["referer"]);
-
-    // soft quick check if user has auth flags
-    const softAuth = req.headers.authorization || req.cookies.jwt;
-
-    if (isClient && (SUPER_MODE || softAuth)) {
-      const [collection] = connect("Ads");
-
-      const ad = await collection
-        .aggregate([{ $sample: { size: 3 } }])
-        .toArray();
-
-      res.send(ad);
-    }
-
+  // verify dns
+  app.post("/api/website/verify", limiter, (req, res) => {
     res.send([]);
   });
 
-  // native ad handling [todo: remove endpoint] ins ad ref network
-  app.post("/ads/refs", async (req, res) => {
-    if ((req.body as any)?.password === ADMIN_PASSWORD) {
-      const [collection] = connect("Ads");
-
-      const title = paramParser(req, "title");
-      const description = paramParser(req, "description");
-      const imgSrc = paramParser(req, "imgSrc");
-      const url = paramParser(req, "url");
-
-      const ad = {
-        title,
-        description,
-        imgSrc,
-        url,
-      };
-
-      collection.insertOne(ad);
-
-      res.send(ad);
-    }
-
-    res.status(403).send(false);
-  });
-
+  setAdsRoutes(app);
   setListRoutes(app);
   setAuthRoutes(app);
   setGithubActionRoutes(app);
@@ -352,31 +308,6 @@ async function initServer(): Promise<HttpServer[]> {
   app.post("/api/run-watcher", async (req, res) => {
     if ((req.body as any)?.password === ADMIN_PASSWORD) {
       setImmediate(crawlAllAuthedWebsitesCluster);
-      res.send(true);
-    } else {
-      res.send(false);
-    }
-  });
-
-  // todo: setup stripe web hook
-  app.post("/api/downgrade", async (req, res) => {
-    const body = req.body as any;
-
-    if (body?.password === ADMIN_PASSWORD) {
-      const userId = body?.userId;
-
-      if (validateUID(userId)) {
-        setImmediate(async () => {
-          await WebsitesController().removeWebsite({
-            userId: userId,
-            deleteMany: true,
-          });
-
-          await UsersController().cancelSubscription({
-            keyid: userId,
-          });
-        });
-      }
       res.send(true);
     } else {
       res.send(false);
@@ -437,7 +368,7 @@ async function initServer(): Promise<HttpServer[]> {
 
         return false;
       },
-      context: async (ctx) => {
+      context(ctx) {
         const u = getUserFromToken(
           ctx?.connectionParams?.authorization as string
         );

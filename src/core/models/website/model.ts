@@ -1,20 +1,3 @@
-// const InfoModel = {
-//   issuesInfo: {
-//     adaScore: 0, // rename to score
-//     warningCount: 0,
-//     errorCount: 0,
-//     noticeCount: 0,
-//     adaScoreAverage: 0,
-//     issuesFixedByCdn: 0,
-//     possibleIssuesFixedByCdn: 0,
-//     totalIssues: 0,
-//     pageCount: 0,
-//     issueMeta: {
-//       skipContentIncluded: false,
-//     },
-//   },
-// };
-
 const WebsiteModel = {
   userId: undefined,
   url: "",
@@ -38,6 +21,7 @@ const WebsiteModel = {
   subdomains: false, // allow subdomains to joinscope
   tld: false, // allow tld to join scope
   order: 0, // the sort order
+  verified: false, // website verified
 };
 
 const makeWebsite = (

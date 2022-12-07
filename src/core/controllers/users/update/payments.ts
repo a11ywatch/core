@@ -91,15 +91,18 @@ export const addPaymentSubscription = async ({
 
       // remove prior subscriptions
       if (!!activeSub) {
-          charge = await stripe.subscriptions.update(activeSub.id, {
-            proration_behavior: activeSub?.status === "trialing" ? "always_invoice" : 'create_prorations',
-            cancel_at_period_end: true,
-            items: [
-              {
-                price: stripeProductPlan,
-              },
-            ],
-          });
+        charge = await stripe.subscriptions.update(activeSub.id, {
+          proration_behavior:
+            activeSub?.status === "trialing"
+              ? "always_invoice"
+              : "create_prorations",
+          cancel_at_period_end: true,
+          items: [
+            {
+              price: stripeProductPlan,
+            },
+          ],
+        });
       } else {
         charge = await stripe.subscriptions.create({
           customer: customer.id,

@@ -42,6 +42,7 @@ export const website = gql`
     mobile: Boolean
     standard: String
     ua: String
+    verified: Boolean
     actionsEnabled: Boolean
     robots: Boolean
     subdomains: Boolean

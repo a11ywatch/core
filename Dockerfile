@@ -15,10 +15,8 @@ WORKDIR /usr/src/app
 
 COPY . .
 COPY --from=installer /usr/src/app/node_modules ./node_modules
-RUN npm run build
 # remove all dev modules
-RUN rm -R ./node_modules
-RUN npm install --production
+RUN npm run build && rm -R ./node_modules && npm install --production
 
 FROM node:19.2-alpine
 

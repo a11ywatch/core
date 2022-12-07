@@ -23,7 +23,7 @@ const defaultPayload = {
   audience: undefined,
 };
 
-// TODO: move to limiter controll file
+// TODO: move to limiter control file
 const scanRateLimitConfig = {
   max: 2,
   window: "10s",
@@ -34,6 +34,7 @@ const defaultScanLimit = {
   window: "60s",
 };
 
+// [Deprecated]: Move all to OpenAPI | gRPC
 export const Mutation = {
   updateUser,
   login,
@@ -197,7 +198,7 @@ export const Mutation = {
   toggleAlert: async (_, { alertEnabled }, context) => {
     const { keyid } = context.user?.payload || defaultPayload;
 
-    return UsersController().toggleAlert({
+    return await UsersController().toggleAlert({
       keyid,
       alertEnabled,
     });

@@ -1,3 +1,3 @@
-# graph
+# graphQL
 
-graphql setup
+graphQL setup files live here
