@@ -22,6 +22,7 @@ const WebsiteModel = {
   tld: false, // allow tld to join scope
   order: 0, // the sort order
   verified: false, // website verified
+  verificationCode: "", // code to validate website record
 };
 
 const makeWebsite = (

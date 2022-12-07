@@ -62,6 +62,7 @@ import { limiter, scanLimiter } from "./web/limiters";
 import { appEmitter } from "./event/emitters/control";
 import { setStripeRoutes } from "./web/routes_groups/stripe";
 import { setAdsRoutes } from "./web/routes_groups/ads";
+import { setDnsVerifyRoutes } from "./web/routes_groups/dns-verify";
 
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
@@ -298,6 +299,7 @@ async function initServer(): Promise<HttpServer[]> {
     res.send([]);
   });
 
+  setDnsVerifyRoutes(app);
   setAdsRoutes(app);
   setListRoutes(app);
   setAuthRoutes(app);
