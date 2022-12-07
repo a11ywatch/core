@@ -20,28 +20,31 @@ const trialPeriod = process.env.TRIAL_PERIOD
 export const addPaymentSubscription = async ({
   keyid,
   email: emailP,
-  stripeToken,
+  stripeToken, // contains the plan for the mutation - todo: split param off the stripe token
   yearly,
 }: AddPaymentProps) => {
   const [user, collection] = await getUser({ email: emailP, id: keyid });
   const email = user?.email ?? emailP;
 
+  // todo: make stripe token optional and prevent storing to db
   if (user && stripeToken) {
     let parsedToken = null;
 
-    try {
-      parsedToken = JSON.parse(stripeToken);
-    } catch (e) {
-      console.error(e);
-    }
-
-    if (!parsedToken) {
-      return {
-        user,
-        code: 400,
-        success: false,
-        message: "Error invalid stripe token.",
-      };
+    if(stripeToken) {
+      try {
+        parsedToken = JSON.parse(stripeToken);
+      } catch (e) {
+        console.error(e);
+      }
+  
+      if (!parsedToken && !user.stripeID) {
+        return {
+          user,
+          code: 400,
+          success: false,
+          message: "Error invalid stripe token.",
+        };
+      }  
     }
 
     // params used to create the user
@@ -77,17 +80,22 @@ export const addPaymentSubscription = async ({
 
     // customer created continue with source
     if (customer) {
-      // todo: use customer returned from source
-      await stripe.customers.createSource(customer.id, {
-        source: parsedToken.id,
-      });
+      // collecting the card for first time card re-uses do not return id in object
+      if (parsedToken?.id) {
+        try {
+          await stripe.customers.createSource(customer.id, {
+            source: parsedToken.id,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
 
-      const plan = parsedToken.plan;
+      const plan = parsedToken?.plan;
       const stripeProductPlan = stripeProductId(plan, yearly);
+      const activeSub = user?.paymentSubscription;
 
       let charge = null;
-
-      const activeSub = user?.paymentSubscription;
 
       // remove prior subscriptions
       if (!!activeSub) {
@@ -129,7 +137,6 @@ export const addPaymentSubscription = async ({
           { id: user.id },
           {
             $set: {
-              stripeToken,
               jwt,
               role,
               stripeID: customer.id,

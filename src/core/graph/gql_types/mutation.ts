@@ -21,7 +21,6 @@ export const mutation = gql`
     updateUser(
       password: String
       newPassword: String
-      stripeToken: String
       email: String
     ): UpdateUserMutationResponse
 

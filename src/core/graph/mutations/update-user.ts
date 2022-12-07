@@ -3,7 +3,7 @@ import { getPayLoad } from "../../utils/query-payload";
 
 export const updateUser = async (
   _,
-  { email, password, newPassword, stripeToken },
+  { email, password, newPassword },
   context
 ) => {
   // get authenticated user for request
@@ -13,7 +13,6 @@ export const updateUser = async (
     email,
     password,
     newPassword,
-    stripeToken,
     userId,
   });
 };

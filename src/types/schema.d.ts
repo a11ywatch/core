@@ -143,7 +143,6 @@ export type MutationLoginArgs = {
 export type MutationUpdateUserArgs = {
   password?: Maybe<Scalars["String"]>;
   newPassword?: Maybe<Scalars["String"]>;
-  stripeToken?: Maybe<Scalars["String"]>;
 };
 
 export type MutationToggleAlertArgs = {
@@ -434,7 +433,6 @@ export type User = {
   alertEnabled?: boolean;
   lastAlertSent?: Maybe<Scalars["Int"]>;
   lastAlertDateStamp?: Maybe<Scalars["Int"]>;
-  stripeToken?: Maybe<Scalars["String"]>;
   googleId?: Maybe<Scalars["String"]>;
   githubId?: Maybe<Scalars["Int"]>;
   role?: Maybe<Scalars["Int"]>;

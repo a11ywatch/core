@@ -16,7 +16,6 @@ export interface Params extends AuthParams {
   emailConfirmCode?: string;
   email?: string;
   keyid?: number;
-  stripeToken?: string;
   role?: number;
   alertEnabled?: boolean;
   code?: string;

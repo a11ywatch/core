@@ -64,7 +64,7 @@ export const UsersController: UserControllerType = (
 
     throw new Error(GENERAL_ERROR);
   },
-  updateUser: async ({ password, email, newPassword, stripeToken, userId }) => {
+  updateUser: async ({ password, email, newPassword, userId }) => {
     const authed = typeof userId !== "undefined";
 
     const [user, collection] = await getUser(
@@ -82,7 +82,6 @@ export const UsersController: UserControllerType = (
       jwt: user.jwt,
       password: user.password,
       salt: user.salt,
-      stripeToken: user?.stripeToken,
       email: user.email,
       emailConfirmed: user.emailConfirmed,
     };
@@ -122,14 +121,6 @@ export const UsersController: UserControllerType = (
 
     // prevent invalid updates
     if (sendData) {
-      // set new stripe token
-      if (stripeToken) {
-        updateProps = {
-          ...updateProps,
-          stripeToken,
-        };
-      }
-
       // set new user email
       if (email && email !== user.email) {
         // send confirmation email

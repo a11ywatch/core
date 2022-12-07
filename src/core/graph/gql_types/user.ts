@@ -23,7 +23,6 @@ export const user = gql`
     passwordRequired: Boolean
     alertEnabled: Boolean
     lastAlertSent: Int
-    stripeToken: String
     role: Int
     activeSubscription: Boolean
     emailConfirmed: Boolean
