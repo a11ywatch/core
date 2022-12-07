@@ -124,7 +124,7 @@ export const crawlPage = async (
   const urole = userData?.role || 0;
 
   const freeAccount = !urole; // free account
-  const scriptsEnabled = SCRIPTS_ENABLED && !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+  const scriptsEnabled = website && SCRIPTS_ENABLED && !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
   const rootPage = pathname === "/"; // the url is the base domain index.
 
   const insightsEnabled = getInsightsEnabled({
@@ -154,7 +154,7 @@ export const crawlPage = async (
     actions,
     cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
-    noStore: !!noStore,
+    noStore: !website || !!noStore,
   });
 
   let shutdown = false;

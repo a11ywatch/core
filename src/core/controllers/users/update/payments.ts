@@ -148,6 +148,7 @@ export const addPaymentSubscription = async ({
   return { code: 404, success: false, message: EMAIL_ERROR };
 };
 
+// revert account to basic
 export const cancelSubscription = async ({ keyid }) => {
   const [user, collection] = await getUser({ id: keyid });
 
@@ -175,7 +176,7 @@ export const cancelSubscription = async ({ keyid }) => {
             jwt,
             role: 0,
             lastRole: user.role,
-            paymentSubscription: false,
+            paymentSubscription: false, // set to false to determine was active
           },
         }
       );
