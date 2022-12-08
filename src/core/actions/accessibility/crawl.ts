@@ -35,6 +35,7 @@ export type CrawlConfig = {
   sendSub?: boolean; // use pub sub
   user?: User; // optional pass user
   noStore?: boolean; // when enabled - do not store data to fs for js scripts etc
+  html?: string; // raw html to validate
 };
 
 // track the crawl events between crawls
@@ -86,6 +87,7 @@ export const crawlPage = async (
     pageInsights = false,
     user: usr,
     sendSub: sub,
+    html
   } = crawlConfig ?? {};
 
   // detect if redis is connected to send subs
@@ -124,7 +126,7 @@ export const crawlPage = async (
   const urole = userData?.role || 0;
 
   const freeAccount = !urole; // free account
-  const scriptsEnabled = website && SCRIPTS_ENABLED && !freeAccount; // scripts for and storing via aws for paid members [TODO: enable if CLI or env var]
+  const scriptsEnabled = website && SCRIPTS_ENABLED && !freeAccount; // scripts for and storing JS scripts
   const rootPage = pathname === "/"; // the url is the base domain index.
 
   const insightsEnabled = getInsightsEnabled({
@@ -155,8 +157,9 @@ export const crawlPage = async (
     cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
     noStore: !website || (!SUPER_MODE && !website?.verified) || !!noStore,
+    html
   });
-
+  
   let shutdown = false;
 
   if (!sendEmail && !SUPER_MODE) {
@@ -232,117 +235,120 @@ export const crawlPage = async (
     userId,
   });
 
-  // if website record exist update integrity of the data.
-  if (website) {
-    setImmediate(async () => {
-      // if ROOT domain for scan update Website Collection.
-      if (rootPage) {
-        const { issuesInfo, issues, ...updateProps } = updateWebsiteProps;
-
-        await collectionUpsert(
-          updateProps,
-          [websiteCollection, !!updateWebsiteProps],
-          {
-            searchProps: { url: pageUrl, userId },
-          }
-        );
-      }
-      // if issues exist prior or current update collection
-      // Add to Issues collection if page contains issues or if record should update/delete.
-      if (issueCount || issueExist) {
-        const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
-
-        const [
-          [analytics, analyticsCollection],
-          [newSite, pagesCollection],
-          [scripts, scriptsCollection],
-        ] = await Promise.all([
-          AnalyticsController().getWebsite({ pageUrl, userId }, true),
-          getPage({
-            userId,
-            url: pageUrl,
-          }),
-          scriptsEnabled
-            ? ScriptsController().getScript(
-                { pageUrl, userId, noRetries: true },
-                true
-              )
-            : Promise.resolve([null, null]),
-        ]);
-
-        await Promise.all([
-          // analytics
-          collectionUpsert(
-            Object.assign(
-              {},
-              {
-                pageUrl,
-                domain,
-                userId,
-                adaScore,
-              },
-              analyticsProps
-            ),
-            [analyticsCollection, analytics]
-          ),
-          // issues
-          collectionUpsert(
-            newIssue,
-            [issuesCollection, issueExist, !issueCount],
-            {
-              searchProps: { pageUrl, userId },
-            }
-          ),
-          // pages
-          collectionUpsert(
-            updateWebsiteProps,
-            [pagesCollection, newSite, !issueCount], // delete document if issues do not exist
+  // if HTML passed and from crawler or valid content enable storing
+  if (html && urlMap || !html) {
+    // if website record exist update integrity of the data.
+    if (website) {
+      setImmediate(async () => {
+        // if ROOT domain for scan update Website Collection.
+        if (rootPage) {
+          const { issuesInfo, issues, ...updateProps } = updateWebsiteProps;
+  
+          await collectionUpsert(
+            updateProps,
+            [websiteCollection, !!updateWebsiteProps],
             {
               searchProps: { url: pageUrl, userId },
             }
-          ),
-          // scripts
-          scriptsEnabled && script
-            ? collectionUpsert(
-                Object.assign(
-                  {},
-                  script,
-                  { userId },
-                  {
-                    scriptMeta: !scripts?.scriptMeta
-                      ? {
-                          skipContentEnabled: true,
-                        }
-                      : scripts.scriptMeta,
-                  }
-                ),
-                [scriptsCollection, scripts]
-              )
-            : Promise.resolve(),
-        ]);
-      }
-    });
-  }
-
-  if (issueCount) {
-    if (sendSub) {
-      try {
-        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-      } catch (_) {
-        // silent pub sub errors
-      }
-    }
-
-    // send email if issues of type error exist for the page. TODO: remove from layer.
-    if (sendEmail && issuesInfo?.errorCount) {
-      setImmediate(async () => {
-        await emailMessager.sendMail({
-          userId,
-          data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
-          confirmedOnly: true,
-          sendEmail: true,
-        });
+          );
+        }
+        // if issues exist prior or current update collection
+        // Add to Issues collection if page contains issues or if record should update/delete.
+        if (issueCount || issueExist) {
+          const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
+  
+          const [
+            [analytics, analyticsCollection],
+            [newSite, pagesCollection],
+            [scripts, scriptsCollection],
+          ] = await Promise.all([
+            AnalyticsController().getWebsite({ pageUrl, userId }, true),
+            getPage({
+              userId,
+              url: pageUrl,
+            }),
+            scriptsEnabled
+              ? ScriptsController().getScript(
+                  { pageUrl, userId, noRetries: true },
+                  true
+                )
+              : Promise.resolve([null, null]),
+          ]);
+  
+          await Promise.all([
+            // analytics
+            collectionUpsert(
+              Object.assign(
+                {},
+                {
+                  pageUrl,
+                  domain,
+                  userId,
+                  adaScore,
+                },
+                analyticsProps
+              ),
+              [analyticsCollection, analytics]
+            ),
+            // issues
+            collectionUpsert(
+              newIssue,
+              [issuesCollection, issueExist, !issueCount],
+              {
+                searchProps: { pageUrl, userId },
+              }
+            ),
+            // pages
+            collectionUpsert(
+              updateWebsiteProps,
+              [pagesCollection, newSite, !issueCount], // delete document if issues do not exist
+              {
+                searchProps: { url: pageUrl, userId },
+              }
+            ),
+            // scripts
+            scriptsEnabled && script
+              ? collectionUpsert(
+                  Object.assign(
+                    {},
+                    script,
+                    { userId },
+                    {
+                      scriptMeta: !scripts?.scriptMeta
+                        ? {
+                            skipContentEnabled: true,
+                          }
+                        : scripts.scriptMeta,
+                    }
+                  ),
+                  [scriptsCollection, scripts]
+                )
+              : Promise.resolve(),
+          ]);
+        }
       });
+    }
+  
+    if (issueCount) {
+      if (sendSub) {
+        try {
+          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        } catch (_) {
+          // silent pub sub errors
+        }
+      }
+  
+      // send email if issues of type error exist for the page. TODO: remove from layer.
+      if (sendEmail && issuesInfo?.errorCount) {
+        setImmediate(async () => {
+          await emailMessager.sendMail({
+            userId,
+            data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
+            confirmedOnly: true,
+            sendEmail: true,
+          });
+        });
+      }
     }
   }
 

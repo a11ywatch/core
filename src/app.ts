@@ -166,7 +166,7 @@ async function initServer(): Promise<HttpServer[]> {
   });
 
   /*
-   * Single page scan
+   * Single page scan nostore - example with limited response for domain
    */
   app.post("/api/scan-simple", limiter, scanSimple);
 
@@ -178,7 +178,7 @@ async function initServer(): Promise<HttpServer[]> {
     {
       config: {
         rateLimit: {
-          max: 15,
+          max: 8,
           timeWindow: "1 minute",
         },
       },

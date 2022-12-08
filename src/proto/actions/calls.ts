@@ -15,6 +15,7 @@ export interface ScanRpcParams {
   actions?: string[]; // perform actions before testing
   cv?: boolean; // can use computer vision
   pageSpeedApiKey?: string; // the PageSpeed api key to use for request
+  html?: string; // raw HTML to validate
 }
 
 // perform scan to gRPC -> pagemind for website issues

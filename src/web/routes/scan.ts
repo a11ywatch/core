@@ -74,9 +74,11 @@ export const scanAuthenticated = async (
   res: FastifyContext["reply"]
 ) => {
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
+  const html = paramParser(req, "html");
+
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
 
-  if (!url) {
+  if (!url && !html) {
     res.status(400);
     res.send(
       responseModel({
@@ -108,6 +110,7 @@ export const scanAuthenticated = async (
         userId,
         pageInsights,
         sendSub: false,
+        html
       },
       false,
       true
