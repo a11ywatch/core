@@ -8,13 +8,13 @@ import { crawlPage } from "./crawl";
  *  @returns response model defaults {success: true}
  */
 export const crawlWebsite = async (params, sendEmail?: boolean) => {
-  const { userId: uid, user_id, url: urlMap } = params ?? {};
+  const { userId: uid, user_id, url: urlMap, html } = params ?? {};
   const userId = uid ?? user_id;
 
-  if (!getHostName(urlMap)) {
+  if (!html && !getHostName(urlMap)) {
     return responseModel({ message: WEBSITE_NOT_FOUND });
   }
-
+  
   await crawlPage(
     { ...params, url: urlMap, userId: Number(userId) },
     sendEmail

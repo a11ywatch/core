@@ -47,7 +47,6 @@ const sendMailCallback = (er: any, _info: any, cb?: () => any) => {
   if (er) {
     console.error(er);
   }
-  // console.info("Email sent: " + _info?.response);
   if (cb && typeof cb === "function") {
     cb();
   }

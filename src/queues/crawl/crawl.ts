@@ -8,8 +8,9 @@ import { q } from "./handle";
 export const crawlEnqueue = async (data: {
   pages: string[];
   user_id: number;
+  html?: string;
 }) => {
-  const { pages = [], user_id } = data;
+  const { pages = [], user_id, html } = data;
   const key = getKey(null, pages, user_id);
 
   const event = crawlingSet.has(key) && crawlingSet.get(key).event;
@@ -20,11 +21,13 @@ export const crawlEnqueue = async (data: {
       await event.unshift({
         url,
         userId: user_id,
+        html
       });
     } else {
       await q.unshift({
         url,
         userId: user_id,
+        html
       });
     }
   }

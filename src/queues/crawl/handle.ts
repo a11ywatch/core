@@ -14,6 +14,7 @@ interface Meta {
 type Task = {
   userId: number; // make sure user id is sent
   url?: string;
+  html?: string; // html to audit
   meta?: Meta;
 };
 
@@ -43,7 +44,7 @@ if (
 ) {
   cwLimit = Number(process.env.CRAWL_QUEUE_LIMIT);
 } else {
-  cwLimit = Math.max(Math.floor(6 * (cpus().length || 1)), 4);
+  cwLimit = Math.max(Math.floor(5 * (cpus().length || 1)), 4);
 }
 
 // crawl queue handler

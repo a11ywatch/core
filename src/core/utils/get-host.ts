@@ -15,9 +15,7 @@ export const getHostName = (url: string) => {
   }
 
   try {
-    const { hostname } = new URL(q);
-
-    return hostname;
+    return new URL(q).hostname;
   } catch (e) {
     console.error(`invalid url ${q} \n ${e}`);
   }
