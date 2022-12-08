@@ -36,6 +36,7 @@ export type CrawlConfig = {
   user?: User; // optional pass user
   noStore?: boolean; // when enabled - do not store data to fs for js scripts etc
   html?: string; // raw html to validate
+  standard?: string // accessibility standard
 };
 
 // track the crawl events between crawls
@@ -87,7 +88,8 @@ export const crawlPage = async (
     pageInsights = false,
     user: usr,
     sendSub: sub,
-    html
+    html,
+    standard
   } = crawlConfig ?? {};
 
   // detect if redis is connected to send subs
@@ -152,7 +154,7 @@ export const crawlPage = async (
     scriptsEnabled: website?.verified && !SUPER_MODE && scriptsEnabled,
     mobile: website?.mobile,
     ua: website?.ua,
-    standard: website?.standard,
+    standard: standard || website?.standard,
     actions,
     cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: userData?.pageSpeedApiKey,
@@ -229,7 +231,6 @@ export const crawlPage = async (
   const subIssues: Issue[] = pageIssues?.issues ?? [];
   const issueCount = subIssues?.length;
 
-  // // TODO: MERGE ISSUES FROM ALL PAGES
   const updateWebsiteProps: Website = Object.assign({}, webPage, {
     online: true,
     userId,

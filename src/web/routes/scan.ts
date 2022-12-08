@@ -75,7 +75,6 @@ export const scanAuthenticated = async (
 ) => {
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
   const html = paramParser(req, "html");
-
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
 
   if (!url && !html) {
@@ -90,8 +89,6 @@ export const scanAuthenticated = async (
     return;
   }
 
-  const pageInsights = paramParser(req, "pageInsights");
-
   // returns truthy if can continue
   const userNext = await getUserFromApi(
     req?.headers?.authorization || req?.cookies?.jwt,
@@ -104,12 +101,16 @@ export const scanAuthenticated = async (
 
   // only allow valid users to crawl
   if (validateUID(userId)) {
+    const pageInsights = paramParser(req, "pageInsights");
+    const standard = paramParser(req, "standard");
+
     resData = await crawlPage(
       {
         url,
         userId,
         pageInsights,
         sendSub: false,
+        standard,
         html
       },
       false,
