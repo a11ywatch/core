@@ -30,13 +30,13 @@ export const addPaymentSubscription = async ({
   if (user && stripeToken) {
     let parsedToken = null;
 
-    if(stripeToken) {
+    if (stripeToken) {
       try {
         parsedToken = JSON.parse(stripeToken);
       } catch (e) {
         console.error(e);
       }
-  
+
       if (!parsedToken && !user.stripeID) {
         return {
           user,
@@ -44,7 +44,7 @@ export const addPaymentSubscription = async ({
           success: false,
           message: "Error invalid stripe token.",
         };
-      }  
+      }
     }
 
     // params used to create the user

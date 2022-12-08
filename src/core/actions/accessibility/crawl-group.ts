@@ -14,7 +14,7 @@ export const crawlWebsite = async (params, sendEmail?: boolean) => {
   if (!html && !getHostName(urlMap)) {
     return responseModel({ message: WEBSITE_NOT_FOUND });
   }
-  
+
   await crawlPage(
     { ...params, url: urlMap, userId: Number(userId) },
     sendEmail

@@ -21,13 +21,13 @@ export const crawlEnqueue = async (data: {
       await event.unshift({
         url,
         userId: user_id,
-        html
+        html,
       });
     } else {
       await q.unshift({
         url,
         userId: user_id,
-        html
+        html,
       });
     }
   }

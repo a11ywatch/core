@@ -20,7 +20,10 @@ export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
 export const extractPageData = (dataSource) => {
   const { script, issues, webPage, userId } = dataSource ?? {
     script: null,
-    issues: null,
+    // todo: rename top level collection
+    issues: {
+      issues: [],
+    },
     webPage: null,
   };
 

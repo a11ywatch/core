@@ -111,7 +111,7 @@ export const scanAuthenticated = async (
         pageInsights,
         sendSub: false,
         standard,
-        html
+        html,
       },
       false,
       true

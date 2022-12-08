@@ -40,13 +40,6 @@ export const scanWebsite = async ({
     return responseModel({ message: WEBSITE_NOT_FOUND });
   }
 
-  if (
-    process.env.NODE_ENV === "production" &&
-    pageUrl.includes("http://localhost:")
-  ) {
-    throw new Error("Cannot use localhost, please use a valid web url.");
-  }
-
   const website = makeWebsite({ url: pageUrl, domain });
 
   const dataSource: PageMindScanResponse = await fetchPageIssues({

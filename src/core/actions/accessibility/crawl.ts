@@ -36,7 +36,7 @@ export type CrawlConfig = {
   user?: User; // optional pass user
   noStore?: boolean; // when enabled - do not store data to fs for js scripts etc
   html?: string; // raw html to validate
-  standard?: string // accessibility standard
+  standard?: string; // accessibility standard
 };
 
 // track the crawl events between crawls
@@ -89,7 +89,7 @@ export const crawlPage = async (
     user: usr,
     sendSub: sub,
     html,
-    standard
+    standard,
   } = crawlConfig ?? {};
 
   // detect if redis is connected to send subs
@@ -125,16 +125,24 @@ export const crawlPage = async (
     userId,
   });
 
-  const urole = userData?.role || 0;
+  const { role: urole, pageSpeedApiKey, scanInfo } = userData ?? {};
+  const {
+    verified,
+    standard: websiteStandard,
+    pageHeaders,
+    pageInsights: websitePageInsights,
+    mobile,
+    ua,
+  } = website ?? {};
 
   const freeAccount = !urole; // free account
   const scriptsEnabled = website && SCRIPTS_ENABLED && !freeAccount; // scripts for and storing JS scripts
   const rootPage = pathname === "/"; // the url is the base domain index.
 
   const insightsEnabled = getInsightsEnabled({
-    pageInsights: pageInsights || website?.pageInsights,
+    pageInsights: pageInsights || websitePageInsights,
     insightsLocked: !SUPER_MODE && freeAccount,
-    pageSpeedApiKey: !!userData?.pageSpeedApiKey,
+    pageSpeedApiKey: !!pageSpeedApiKey,
     rootPage,
   });
 
@@ -147,26 +155,26 @@ export const crawlPage = async (
   const actions = await findPageActionsByPath({ userId, path: pathname });
 
   const dataSource = await fetchPageIssues({
-    pageHeaders: website?.pageHeaders,
+    pageHeaders,
     url: urlMap,
     userId,
     pageInsights: insightsEnabled,
-    scriptsEnabled: website?.verified && !SUPER_MODE && scriptsEnabled,
-    mobile: website?.mobile,
-    ua: website?.ua,
-    standard: standard || website?.standard,
+    scriptsEnabled: verified && !SUPER_MODE && scriptsEnabled,
+    mobile,
+    ua,
+    standard: standard || websiteStandard,
     actions,
     cv: SUPER_MODE || !!urole,
-    pageSpeedApiKey: userData?.pageSpeedApiKey,
-    noStore: !website || (!SUPER_MODE && !website?.verified) || !!noStore,
-    html
+    pageSpeedApiKey: pageSpeedApiKey,
+    noStore: !website || (!SUPER_MODE && !verified) || !!noStore,
+    html,
   });
-  
+
   let shutdown = false;
 
   if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
-    const pastUptime = userData?.scanInfo?.totalUptime || 0;
+    const pastUptime = scanInfo?.totalUptime || 0;
     const totalUptime = ttime + pastUptime;
 
     // check if scan has shut down
@@ -175,7 +183,7 @@ export const crawlPage = async (
         user: {
           role: urole,
           scanInfo: {
-            usageLimit: userData?.scanInfo?.usageLimit,
+            usageLimit: scanInfo?.usageLimit,
             totalUptime,
           },
         },
@@ -216,11 +224,6 @@ export const crawlPage = async (
     issuesInfo,
   } = extractPageData(dataSource);
 
-  const [issueExist, issuesCollection] = await IssuesController().getIssue(
-    { pageUrl, userId, noRetries: true },
-    true
-  );
-
   const newIssue = Object.assign({}, pageIssues, {
     domain,
     userId,
@@ -228,8 +231,8 @@ export const crawlPage = async (
   });
 
   // issues array
-  const subIssues: Issue[] = pageIssues?.issues ?? [];
-  const issueCount = subIssues?.length;
+  const { issues: subIssues = [] }: { issues: Issue[] } = pageIssues ?? {};
+  const issueCount = subIssues.length;
 
   const updateWebsiteProps: Website = Object.assign({}, webPage, {
     online: true,
@@ -237,14 +240,14 @@ export const crawlPage = async (
   });
 
   // if HTML passed and from crawler or valid content enable storing
-  if (html && urlMap || !html) {
+  if ((html && urlMap) || !html) {
     // if website record exist update integrity of the data.
     if (website) {
       setImmediate(async () => {
         // if ROOT domain for scan update Website Collection.
         if (rootPage) {
           const { issuesInfo, issues, ...updateProps } = updateWebsiteProps;
-  
+
           await collectionUpsert(
             updateProps,
             [websiteCollection, !!updateWebsiteProps],
@@ -253,11 +256,18 @@ export const crawlPage = async (
             }
           );
         }
+
+        const [issueExist, issuesCollection] =
+          await IssuesController().getIssue(
+            { pageUrl, userId, noRetries: true },
+            true
+          );
+
         // if issues exist prior or current update collection
         // Add to Issues collection if page contains issues or if record should update/delete.
         if (issueCount || issueExist) {
           const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
-  
+
           const [
             [analytics, analyticsCollection],
             [newSite, pagesCollection],
@@ -275,7 +285,7 @@ export const crawlPage = async (
                 )
               : Promise.resolve([null, null]),
           ]);
-  
+
           await Promise.all([
             // analytics
             collectionUpsert(
@@ -326,29 +336,25 @@ export const crawlPage = async (
                 )
               : Promise.resolve(),
           ]);
+
+          // send email if issues of type error exist for the page. TODO: remove from layer.
+          if (sendEmail && issuesInfo?.errorCount) {
+            await emailMessager.sendMail({
+              userId,
+              data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
+              confirmedOnly: true,
+              sendEmail: true,
+            });
+          }
         }
       });
     }
-  
-    if (issueCount) {
-      if (sendSub) {
-        try {
-          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-        } catch (_) {
-          // silent pub sub errors
-        }
-      }
-  
-      // send email if issues of type error exist for the page. TODO: remove from layer.
-      if (sendEmail && issuesInfo?.errorCount) {
-        setImmediate(async () => {
-          await emailMessager.sendMail({
-            userId,
-            data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
-            confirmedOnly: true,
-            sendEmail: true,
-          });
-        });
+
+    if (issueCount && sendSub) {
+      try {
+        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+      } catch (_) {
+        // silent pub sub errors
       }
     }
   }
@@ -375,6 +381,7 @@ export const crawlPage = async (
   return responseModel(responseData);
 };
 
+// async generator for large jobs
 async function* entriesFromWebsite(
   pages: string[],
   userId: number
