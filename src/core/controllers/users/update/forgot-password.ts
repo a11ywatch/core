@@ -1,8 +1,12 @@
-import { randomBytes } from "crypto";
 import { logoSvg } from "../../../../html";
 
 import { EMAIL_ERROR, GENERAL_ERROR } from "../../../strings";
-import { transporter, mailOptions, sendMailCallback } from "../../../utils";
+import {
+  transporter,
+  mailOptions,
+  sendMailCallback,
+  asyncRandomGenerate,
+} from "../../../utils";
 import { getUser } from "../find";
 
 export const forgotPassword = async ({ email }) => {
@@ -16,7 +20,7 @@ export const forgotPassword = async ({ email }) => {
   });
 
   if (user) {
-    const resetCode = randomBytes(4).toString("hex");
+    const resetCode = await asyncRandomGenerate();
     await collection.findOneAndUpdate({ id: user.id }, { $set: { resetCode } });
     transporter.sendMail(
       {

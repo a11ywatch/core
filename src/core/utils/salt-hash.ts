@@ -1,10 +1,5 @@
-import { randomBytes, createHmac } from "crypto";
-
-function genRandomString(length: number) {
-  return randomBytes(Math.ceil(length / 2))
-    .toString("hex")
-    .slice(0, length);
-}
+import { createHmac } from "crypto";
+import { asyncRandomGenerate } from "./generate";
 
 function sha512(password, salt) {
   const hash = createHmac("sha512", salt);
@@ -20,10 +15,11 @@ interface HashType {
   salt?: string;
 }
 
-export function saltHashPassword(
+// soft salt hash password - todo: use bcrypt
+export async function saltHashPassword(
   userpassword: string,
   saltIncluded?: string
-): HashType {
-  const salt = saltIncluded || genRandomString(16);
+): Promise<HashType> {
+  const salt = saltIncluded || (await asyncRandomGenerate(16));
   return sha512(userpassword, salt);
 }

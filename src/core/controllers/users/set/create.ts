@@ -36,7 +36,7 @@ export const createUser = async ({
 
   const emailConfirmed = !!googleId || !!githubId;
 
-  const salthash = password && saltHashPassword(password, user?.salt);
+  const salthash = password && (await saltHashPassword(password, user?.salt));
   const passwordMatch = user?.password === salthash?.passwordHash;
 
   const shouldValidatePassword = user?.password && !googleId && !githubId;

@@ -1,15 +1,19 @@
 import { addMinutes } from "date-fns";
-import { randomBytes } from "crypto";
 import { config } from "../../../../config";
 import { EMAIL_ERROR, GENERAL_ERROR, SUCCESS } from "../../../strings";
-import { transporter, mailOptions, sendMailCallback } from "../../../utils";
+import {
+  transporter,
+  mailOptions,
+  sendMailCallback,
+  asyncRandomGenerate,
+} from "../../../utils";
 import { getUser } from "../find";
 import { User } from "../../../../types/schema";
 
 const { ROOT_URL } = config;
 
 export const sendEmailConfirmation = async (user: User, collection) => {
-  const emailConfirmCode = randomBytes(4).toString("hex");
+  const emailConfirmCode = await asyncRandomGenerate();
   const confirmLink = `${ROOT_URL}/api/confirmEmail?code=${emailConfirmCode}`;
   const emailExpDate = addMinutes(Date.now(), 30);
   await collection.findOneAndUpdate(

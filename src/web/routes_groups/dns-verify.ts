@@ -1,10 +1,9 @@
-import { randomBytes } from "crypto";
 import dns from "dns";
 import { paramParser, validateUID } from "../params/extracter";
 import { frontendClientOrigin } from "../../core/utils/is-client";
 import { connect } from "../../database/index";
 import { SUPER_MODE } from "../../config";
-import { getUserFromToken } from "../../core/utils";
+import { getUserFromToken, asyncRandomGenerate } from "../../core/utils";
 import { AUTH_ERROR } from "../../core/strings";
 import type { FastifyInstance } from "fastify";
 import type { FastifyContext } from "apollo-server-fastify";
@@ -95,7 +94,7 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
       }
 
       const verificationCode =
-        website.verificationCode || randomBytes(4).toString("hex");
+        website.verificationCode || (await asyncRandomGenerate());
 
       if (!website.verified) {
         if (!website.verificationCode) {

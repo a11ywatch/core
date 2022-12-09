@@ -1,5 +1,3 @@
-import { randomBytes } from "crypto";
-
 import { EMAIL_ERROR, GENERAL_ERROR } from "../../../strings";
 import {
   transporter,
@@ -7,6 +5,7 @@ import {
   saltHashPassword,
   signJwt,
   sendMailCallback,
+  asyncRandomGenerate,
 } from "../../../utils";
 import { getUser } from "../find";
 
@@ -17,8 +16,8 @@ export const resetPassword = async ({ email, resetCode }) => {
   const [user, collection] = await getUser({ email });
 
   if (user?.resetCode === resetCode) {
-    const resetCode = randomBytes(4).toString("hex");
-    const salthash = saltHashPassword(resetCode);
+    const resetCode = await asyncRandomGenerate();
+    const salthash = await saltHashPassword(resetCode);
 
     const signedToken = signJwt({
       email,

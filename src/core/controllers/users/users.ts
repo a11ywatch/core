@@ -88,7 +88,7 @@ export const UsersController: UserControllerType = (
 
     // update password
     if (password) {
-      const salthash = saltHashPassword(password, user?.salt);
+      const salthash = await saltHashPassword(password, user?.salt);
       const authless = !user?.password && !user?.googleId;
 
       if (user?.password && user.password !== salthash?.passwordHash) {
@@ -105,7 +105,7 @@ export const UsersController: UserControllerType = (
           role: user?.role,
           keyid: user?.id,
         });
-        const newSaltHash = saltHashPassword(newPassword);
+        const newSaltHash = await saltHashPassword(newPassword);
 
         // set new auth props
         updateProps = {

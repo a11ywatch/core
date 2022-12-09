@@ -25,7 +25,7 @@ const verifyUser = async ({
   }
 
   // password validation
-  const salthash = password && saltHashPassword(password, user?.salt);
+  const salthash = password && (await saltHashPassword(password, user?.salt));
   const passwordMatch = user?.password === salthash?.passwordHash;
   const shouldValidatePassword = !passwordMatch && !googleId && !githubId;
 
