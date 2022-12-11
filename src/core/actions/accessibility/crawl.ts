@@ -171,7 +171,7 @@ export const crawlPage = async (
   });
 
   let shutdown = false;
-
+  
   if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = scanInfo?.totalUptime || 0;

@@ -1,4 +1,5 @@
 import { isSameDay } from "date-fns";
+import { getUsageLimitsMs } from "@a11ywatch/website-source-builder";
 import { getUser } from "../find";
 import { SUPER_MODE } from "../../../../config/config";
 
@@ -64,68 +65,10 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
  */
 export const validateScanEnabled = ({ user }) => {
   if (!SUPER_MODE) {
-    let scanBlocked = false;
-
     const totalUptime = user?.scanInfo?.totalUptime ?? 0;
     const role = user?.role ?? 0; // users role
 
-    switch (role) {
-      case 0: {
-        // 10 seconds daily
-        scanBlocked = totalUptime >= 10000;
-        break;
-      }
-      // normal plans
-      case 1: {
-        scanBlocked = totalUptime >= 300000;
-        break;
-      }
-      case 2: {
-        scanBlocked = totalUptime >= 600000;
-        break;
-      }
-      case 3: {
-        scanBlocked = totalUptime >= 1400000;
-        break;
-      }
-      case 4: {
-        scanBlocked = totalUptime >= 2000000;
-        break;
-      }
-      case 5: {
-        scanBlocked = totalUptime >= 4000000;
-        break;
-      }
-      // high tier plans
-      case 6: {
-        scanBlocked = totalUptime >= 5000000;
-        break;
-      }
-      case 7: {
-        scanBlocked = totalUptime >= 10000000;
-        break;
-      }
-      case 8: {
-        scanBlocked = totalUptime >= 20000000;
-        break;
-      }
-      case 9: {
-        scanBlocked = totalUptime >= 35000000;
-        break;
-      }
-      case 10: {
-        scanBlocked = totalUptime >= 60000000;
-        break;
-      }
-      default: {
-        scanBlocked = true;
-        break;
-      }
-    }
-
-    return !scanBlocked;
-    // todo: custom usagelimit
-    // user?.scanInfo?.usageLimit
+    return totalUptime <= getUsageLimitsMs(role);
   }
 
   return true;
