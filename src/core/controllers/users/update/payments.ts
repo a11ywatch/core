@@ -104,7 +104,6 @@ export const addPaymentSubscription = async ({
             activeSub?.status === "trialing"
               ? "always_invoice"
               : "create_prorations",
-          cancel_at_period_end: true,
           items: [
             {
               price: stripeProductPlan,
