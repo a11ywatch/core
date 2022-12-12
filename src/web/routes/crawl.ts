@@ -6,7 +6,7 @@ import { paramParser } from "../params/extracter";
 import { WEBSITE_URL_ERROR } from "../../core/strings";
 import { StatusCode } from "../messages/message";
 
-// perform a website crawl coming from fastify
+// perform a website crawl
 export const crawlRest = async (
   req: FastifyContext["request"],
   res: FastifyContext["reply"]

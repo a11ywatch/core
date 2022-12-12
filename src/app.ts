@@ -63,6 +63,7 @@ import { appEmitter } from "./event/emitters/control";
 import { setStripeRoutes } from "./web/routes_groups/stripe";
 import { setAdsRoutes } from "./web/routes_groups/ads";
 import { setDnsVerifyRoutes } from "./web/routes_groups/dns-verify";
+import { backgroundSync } from "./web/routes/sync";
 
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
@@ -190,6 +191,10 @@ async function initServer(): Promise<HttpServer[]> {
    * Uses Event based handling to get pages max timeout 15mins.
    */
   app.post("/api/crawl", scanLimiter, crawlRest);
+  /*
+   * All websites site wide scan background sync.
+   */
+  app.post("/api/websites-sync", scanLimiter, backgroundSync);
   /*
    * Site wide scan handles via stream.
    * Uses Event based handling to extract pages.

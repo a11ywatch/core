@@ -85,14 +85,14 @@ export const getWebsitesPaginated = async (
 export const getWebsitesPaging = async (
   { userId, limit = 3, offset = 0, insights = false },
   chain?: boolean
-) => {
+): Promise<Website[] | [Website[], any]> => {
   const [collection] = connect("Websites");
-  const webPages = await collection
+  const webPages = (await collection
     .find({ userId })
     .sort({ order: 1 })
     .skip(offset)
     .limit(limit)
-    .toArray();
+    .toArray()) as Website[];
 
   // run with insight relationship
   if (insights) {

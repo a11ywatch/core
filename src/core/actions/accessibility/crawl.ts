@@ -27,6 +27,7 @@ import { SCAN_TIMEOUT } from "../../strings/errors";
 import { StatusCode } from "../../../web/messages/message";
 import type { User, Website } from "../../../types/types";
 import type { Issue } from "../../../types/schema";
+import { watcherCrawl } from "./watcher_crawl";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -171,7 +172,7 @@ export const crawlPage = async (
   });
 
   let shutdown = false;
-  
+
   if (!sendEmail && !SUPER_MODE) {
     const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
     const pastUptime = scanInfo?.totalUptime || 0;
@@ -388,6 +389,15 @@ async function* entriesFromWebsite(
 ): AsyncGenerator<[ResponseModel, string]> {
   for (const url of pages) {
     yield [await crawlPage({ url, userId }, false), url];
+  }
+}
+
+// async generator for full site wide scans
+export async function* entriesFromWebsiteSync(
+  pages: Website[]
+): AsyncGenerator<[void, string]> {
+  for (const { url, userId, subdomains, tld } of pages) {
+    yield [await watcherCrawl({ url, subdomains, tld, userId }), url];
   }
 }
 

@@ -21,46 +21,46 @@ export type Scalars = {
 
 export type Analytic = {
   __typename?: "Analytic";
-  id?: Maybe<Scalars["ID"]>;
-  pageUrl?: Maybe<Scalars["String"]>;
-  errorCount?: Maybe<Scalars["Int"]>;
-  warningCount?: Maybe<Scalars["Int"]>;
-  noticeCount?: Maybe<Scalars["Int"]>;
-  userId?: Maybe<Scalars["Int"]>;
-  domain?: Maybe<Scalars["String"]>;
+  id?: string;
+  pageUrl?: string;
+  errorCount?: number;
+  warningCount?: number;
+  noticeCount?: number;
+  userId?: number;
+  domain?: string;
   adaScore?: Maybe<Scalars["Float"]>;
 };
 
 export type BasicMutationResponse = MutationResponse & {
   __typename?: "BasicMutationResponse";
-  code: Scalars["String"];
-  success: Scalars["Boolean"];
-  message: Scalars["String"];
+  code: string;
+  success: boolean;
+  message: string;
 };
 
 export type CreatePageHeaders = {
-  key: Scalars["String"];
-  value: Scalars["String"];
+  key: string;
+  value: string;
 };
 
 export type Feature = {
   __typename?: "Feature";
-  id?: Maybe<Scalars["ID"]>;
-  feature?: Maybe<Scalars["String"]>;
+  id?: string;
+  feature?: string;
   enabled?: boolean;
   user?: Maybe<Array<Maybe<User>>>;
-  accountType?: Maybe<Scalars["String"]>;
+  accountType?: string;
 };
 
 export type History = {
   __typename?: "History";
-  id?: Maybe<Scalars["ID"]>;
-  url?: Maybe<Scalars["String"]>;
+  id?: string;
+  url?: string;
   user?: Maybe<User>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   pages?: Maybe<Array<Maybe<Pages>>>;
-  userId?: Maybe<Scalars["Int"]>;
-  domain?: Maybe<Scalars["String"]>;
+  userId?: number;
+  domain?: string;
   cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issuesInfo?: Maybe<IssueMeta>;
@@ -69,40 +69,40 @@ export type History = {
 };
 
 export type HistoryIssuesArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type Issue = {
   __typename?: "Issue";
-  documentTitle?: Maybe<Scalars["String"]>;
-  code?: Maybe<Scalars["String"]>;
-  type?: Maybe<Scalars["String"]>;
-  typeCode?: Maybe<Scalars["Int"]>;
-  message?: Maybe<Scalars["String"]>;
-  context?: Maybe<Scalars["String"]>;
-  selector?: Maybe<Scalars["String"]>;
-  runner?: Maybe<Scalars["String"]>;
+  documentTitle?: string;
+  code?: string;
+  type?: string;
+  typeCode?: number;
+  message?: string;
+  context?: string;
+  selector?: string;
+  runner?: string;
   issue?: Maybe<Issue>;
   issues?: Maybe<Array<Maybe<Issue>>>;
-  url?: Maybe<Scalars["String"]>;
-  domain?: Maybe<Scalars["String"]>;
-  pageUrl?: Maybe<Scalars["String"]>;
+  url?: string;
+  domain?: string;
+  pageUrl?: string;
 };
 
 export type IssueIssuesArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type IssueMeta = {
   __typename?: "IssueMeta";
-  issuesFixedByCdn?: Maybe<Scalars["Int"]>;
-  possibleIssuesFixedByCdn?: Maybe<Scalars["Int"]>;
-  totalIssues?: Maybe<Scalars["Int"]>;
+  issuesFixedByCdn?: number;
+  possibleIssuesFixedByCdn?: number;
+  totalIssues?: number;
   cdnConnected?: boolean;
   skipContentIncluded?: boolean;
-  errorCount?: Maybe<Scalars["Int"]>;
-  warningCount?: Maybe<Scalars["Int"]>;
-  limitedCount?: Maybe<Scalars["Int"]>;
+  errorCount?: number;
+  warningCount?: number;
+  limitedCount?: number;
 };
 
 export type Mutation = {
@@ -127,22 +127,22 @@ export type Mutation = {
 };
 
 export type MutationRegisterArgs = {
-  email: Scalars["String"];
-  password?: Maybe<Scalars["String"]>;
-  googleId?: Maybe<Scalars["String"]>;
-  githubId?: Maybe<Scalars["Int"]>;
+  email: string;
+  password?: string;
+  googleId?: string;
+  githubId?: number;
 };
 
 export type MutationLoginArgs = {
-  email: Scalars["String"];
-  password?: Maybe<Scalars["String"]>;
-  googleId?: Maybe<Scalars["String"]>;
-  githubId?: Maybe<Scalars["Int"]>;
+  email: string;
+  password?: string;
+  googleId?: string;
+  githubId?: number;
 };
 
 export type MutationUpdateUserArgs = {
-  password?: Maybe<Scalars["String"]>;
-  newPassword?: Maybe<Scalars["String"]>;
+  password?: string;
+  newPassword?: string;
 };
 
 export type MutationToggleAlertArgs = {
@@ -154,120 +154,120 @@ export type MutationToggleProfileArgs = {
 };
 
 export type MutationUpdateWebsiteArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
   customHeaders?: Maybe<Array<Maybe<CreatePageHeaders>>>;
   pageInsights?: boolean;
 };
 
 export type MutationUpdateScriptArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
   scriptMeta?: Maybe<ScriptMetaInput>;
   editScript?: boolean;
-  newScript?: Maybe<Scalars["String"]>;
+  newScript?: string;
 };
 
 export type MutationCrawlWebsiteArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
 };
 
 export type MutationScanWebsiteArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
 };
 
 export type MutationForgotPasswordArgs = {
-  email?: Maybe<Scalars["String"]>;
+  email?: string;
 };
 
 export type MutationConfirmEmailArgs = {
-  email?: Maybe<Scalars["String"]>;
+  email?: string;
 };
 
 export type MutationResetPasswordArgs = {
-  email?: Maybe<Scalars["String"]>;
-  resetCode?: Maybe<Scalars["String"]>;
-  jwt?: Maybe<Scalars["String"]>;
+  email?: string;
+  resetCode?: string;
+  jwt?: string;
 };
 
 export type MutationAddWebsiteArgs = {
-  url: Scalars["String"];
-  customHeaders?: Maybe<Array<Maybe<CreatePageHeaders>>>;
+  url: string;
+  customHeaders?: CreatePageHeaders[];
   pageInsights?: boolean;
 };
 
 export type MutationFilterEmailDatesArgs = {
-  emailFilteredDates?: Maybe<Array<Maybe<Scalars["Int"]>>>;
+  emailFilteredDates?: Maybe<Array<number>>;
 };
 
 export type MutationRemoveWebsiteArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
   deleteMany?: boolean;
 };
 
 export type MutationAddPaymentSubscriptionArgs = {
-  email?: Maybe<Scalars["String"]>;
-  stripeToken?: Maybe<Scalars["String"]>;
+  email?: string;
+  stripeToken?: string;
   yearly?: boolean;
 };
 
 export type MutationCancelSubscriptionArgs = {
-  email?: Maybe<Scalars["String"]>;
+  email?: string;
 };
 
 export type MutationResponse = {
-  code: Scalars["String"];
-  success: Scalars["Boolean"];
-  message: Scalars["String"];
+  code: string;
+  success: boolean;
+  message: string;
 };
 
 export type PageHeaders = {
   __typename?: "PageHeaders";
-  key?: Maybe<Scalars["String"]>;
-  value?: Maybe<Scalars["String"]>;
+  key?: string;
+  value?: string;
 };
 
 export type PageInsights = {
   __typename?: "PageInsights";
-  json?: Maybe<Scalars["String"]>; // rest api receivves json
+  json?: string; // rest api receivves json
 };
 
 export type PageLoadTimeMeta = {
   __typename?: "PageLoadTimeMeta";
-  duration?: Maybe<Scalars["Int"]>;
-  durationFormated?: Maybe<Scalars["String"]>;
-  color?: Maybe<Scalars["String"]>;
+  duration?: number;
+  durationFormated?: string;
+  color?: string;
 };
 
 export type PaymentPlan = {
   __typename?: "PaymentPlan";
-  id?: Maybe<Scalars["String"]>;
-  object?: Maybe<Scalars["String"]>;
+  id?: string;
+  object?: string;
   active?: boolean;
-  amount?: Maybe<Scalars["Int"]>;
-  amount_decimal?: Maybe<Scalars["String"]>;
-  nickname?: Maybe<Scalars["String"]>;
-  currency?: Maybe<Scalars["String"]>;
-  interval?: Maybe<Scalars["String"]>;
-  product?: Maybe<Scalars["String"]>;
+  amount?: number;
+  amount_decimal?: string;
+  nickname?: string;
+  currency?: string;
+  interval?: string;
+  product?: string;
 };
 
 export type PaymentSubScription = {
   __typename?: "PaymentSubScription";
-  id?: Maybe<Scalars["String"]>;
-  object?: Maybe<Scalars["String"]>;
-  application_fee_percent?: Maybe<Scalars["Int"]>;
-  billing_cycle_anchor?: Maybe<Scalars["Int"]>;
+  id?: string;
+  object?: string;
+  application_fee_percent?: number;
+  billing_cycle_anchor?: number;
   cancel_at_period_end?: boolean;
-  customer?: Maybe<Scalars["String"]>;
-  ended_at?: Maybe<Scalars["String"]>;
-  canceled_at?: Maybe<Scalars["String"]>;
-  status?: Maybe<Scalars["String"]>;
-  start_date?: Maybe<Scalars["String"]>;
+  customer?: string;
+  ended_at?: string;
+  canceled_at?: string;
+  status?: string;
+  start_date?: string;
   plan?: Maybe<PaymentPlan>;
-  days_until_due?: Maybe<Scalars["String"]>;
-  current_period_end?: Maybe<Scalars["String"]>;
-  current_period_start?: Maybe<Scalars["String"]>;
-  created?: Maybe<Scalars["String"]>;
-  collection_method?: Maybe<Scalars["String"]>;
+  days_until_due?: string;
+  current_period_end?: string;
+  current_period_start?: string;
+  created?: string;
+  collection_method?: string;
 };
 
 export type Query = {
@@ -285,57 +285,57 @@ export type Query = {
 };
 
 export type QueryWebsitesArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type QueryWebsiteArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
 };
 
 export type QuerySubDomainsArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type QueryIssuesArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type QueryHistoryArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type QueryAnalyticsArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type QueryScriptsArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type QueryScriptArgs = {
-  filter?: Maybe<Scalars["String"]>;
-  url?: Maybe<Scalars["String"]>;
+  filter?: string;
+  url?: string;
 };
 
 export type QueryIssueArgs = {
-  url?: Maybe<Scalars["String"]>;
+  url?: string;
 };
 
 export type ScanInformation = {
   __typename?: "ScanInformation";
   lastScanDate?: Maybe<Scalars["Date"]>;
-  totalUptime?: Maybe<Scalars["Int"]>;
-  usageLimit?: Maybe<Scalars["Int"]>;
+  totalUptime?: number;
+  usageLimit?: number;
 };
 
 export type Script = {
   __typename?: "Script";
-  id?: Maybe<Scalars["ID"]>;
-  pageUrl?: Maybe<Scalars["String"]>;
-  domain?: Maybe<Scalars["String"]>;
-  script?: Maybe<Scalars["String"]>;
-  cdnUrl?: Maybe<Scalars["String"]>;
-  cdnUrlMinified?: Maybe<Scalars["String"]>;
+  id?: string;
+  pageUrl?: string;
+  domain?: string;
+  script?: string;
+  cdnUrl?: string;
+  cdnUrlMinified?: string;
   cdnConnected?: boolean;
   issueMeta?: Maybe<IssueMeta>;
   scriptMeta?: Maybe<ScriptMeta>;
@@ -354,11 +354,11 @@ export type ScriptMetaInput = {
 
 export type Pages = {
   __typename?: "Pages";
-  id?: Maybe<Scalars["ID"]>;
-  url?: Maybe<Scalars["String"]>;
+  id?: string;
+  url?: string;
   user?: Maybe<User>;
-  domain?: Maybe<Scalars["String"]>;
-  userId?: Maybe<Scalars["Int"]>;
+  domain?: string;
+  userId?: number;
   cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;
@@ -368,7 +368,7 @@ export type Pages = {
 };
 
 export type SubDomainIssuesArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type Subscription = {
@@ -380,34 +380,34 @@ export type Subscription = {
 };
 
 export type SubscriptionWebsiteAddedArgs = {
-  userId?: Maybe<Scalars["Int"]>;
+  userId?: number;
 };
 
 export type SubscriptionIssueAddedArgs = {
-  userId?: Maybe<Scalars["Int"]>;
+  userId?: number;
 };
 
 export type SubscriptionSubDomainAddedArgs = {
-  userId?: Maybe<Scalars["Int"]>;
+  userId?: number;
 };
 
 export type SubscriptionEmailVerifiedArgs = {
-  userId?: Maybe<Scalars["Int"]>;
+  userId?: number;
 };
 
 export type UpdateScriptMutationResponse = MutationResponse & {
   __typename?: "UpdateScriptMutationResponse";
-  code: Scalars["String"];
-  success: Scalars["Boolean"];
-  message: Scalars["String"];
+  code: string;
+  success: boolean;
+  message: string;
   script?: Maybe<Script>;
 };
 
 export type UpdateUserMutationResponse = MutationResponse & {
   __typename?: "UpdateUserMutationResponse";
-  code: Scalars["String"];
-  success: Scalars["Boolean"];
-  message: Scalars["String"];
+  code: string;
+  success: boolean;
+  message: string;
   user?: Maybe<User>;
   alertEnabled?: boolean;
   profileVisible?: boolean;
@@ -415,30 +415,30 @@ export type UpdateUserMutationResponse = MutationResponse & {
 
 export type UpdateWebSiteMutationResponse = MutationResponse & {
   __typename?: "UpdateWebSiteMutationResponse";
-  code: Scalars["String"];
-  success: Scalars["Boolean"];
-  message: Scalars["String"];
+  code: string;
+  success: boolean;
+  message: string;
   website?: Maybe<Website>;
 };
 
 export type User = {
   __typename?: "User";
-  id?: Maybe<Scalars["Int"]>;
-  email?: Maybe<Scalars["String"]>;
-  password?: Maybe<Scalars["String"]>;
-  jwt?: Maybe<Scalars["String"]>;
-  salt?: Maybe<Scalars["String"]>;
+  id?: number;
+  email?: string;
+  password?: string;
+  jwt?: string;
+  salt?: string;
   loggedIn?: boolean;
   passwordRequired?: boolean;
   alertEnabled?: boolean;
-  lastAlertSent?: Maybe<Scalars["Int"]>;
-  lastAlertDateStamp?: Maybe<Scalars["Int"]>;
-  googleId?: Maybe<Scalars["String"]>;
-  githubId?: Maybe<Scalars["Int"]>;
-  role?: Maybe<Scalars["Int"]>;
+  lastAlertSent?: number;
+  lastAlertDateStamp?: number;
+  googleId?: string;
+  githubId?: number;
+  role?: number;
   activeSubscription?: boolean;
   emailConfirmed?: boolean;
-  emailFilteredDates?: Maybe<Array<Maybe<Scalars["Int"]>>>;
+  emailFilteredDates?: Maybe<Array<number>>;
   websites?: Maybe<Array<Maybe<Website>>>;
   profileVisible?: boolean;
   history?: Maybe<Array<Maybe<History>>>;
@@ -447,34 +447,34 @@ export type User = {
   scripts?: Maybe<Array<Maybe<Script>>>;
   script?: Maybe<Script>;
   paymentSubscription?: Maybe<Stripe.subscriptions.ISubscription>;
-  websiteLimit?: Maybe<Scalars["Int"]>;
+  websiteLimit?: number;
   downAlerts?: Maybe<Array<Maybe<Website>>>;
-  emailExpDate?: Maybe<Scalars["String"]>;
-  resetCode?: Maybe<Scalars["String"]>;
-  stripeID?: Maybe<Scalars["String"]>;
-  pageSpeedApiKey?: Maybe<Scalars["String"]>;
+  emailExpDate?: string;
+  resetCode?: string;
+  stripeID?: string;
+  pageSpeedApiKey?: string;
 };
 
 export type UserAnalyticsArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type UserScriptsArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 export type UserScriptArgs = {
-  filter?: Maybe<Scalars["String"]>;
-  url?: Maybe<Scalars["String"]>;
+  filter?: string;
+  url?: string;
 };
 
 export type Website = {
   __typename?: "Website";
-  id?: Maybe<Scalars["ID"]>;
-  url?: Maybe<Scalars["String"]>;
+  id?: string;
+  url?: string;
   user?: Maybe<User>;
-  userId?: Maybe<Scalars["Int"]>;
-  domain?: Maybe<Scalars["String"]>;
+  userId?: number;
+  domain?: string;
   cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;
@@ -482,24 +482,24 @@ export type Website = {
   issuesInfo?: Maybe<IssueMeta>;
   pages?: Maybe<Array<Maybe<Pages>>>;
   script?: Maybe<Script>;
-  lastScanDate?: Maybe<Scalars["String"]>;
-  documentTitle?: Maybe<Scalars["String"]>;
-  cdn?: Maybe<Scalars["String"]>;
+  lastScanDate?: string;
+  documentTitle?: string;
+  cdn?: string;
   pageHeaders?: Maybe<Array<Maybe<PageHeaders>>>;
   online?: boolean;
-  timestamp?: Maybe<Scalars["String"]>;
+  timestamp?: string;
   pageInsights?: boolean;
   insight?: Maybe<PageInsights>;
   mobile?: boolean;
-  standard?: Maybe<Scalars["String"]>;
-  ua?: Maybe<Scalars["String"]>;
+  standard?: string;
+  ua?: string;
   subdomains?: boolean;
   tld?: boolean;
   verified?: boolean; // dns verified by user
 };
 
 export type WebsiteIssuesArgs = {
-  filter?: Maybe<Scalars["String"]>;
+  filter?: string;
 };
 
 // response from pagemind gRPC request to gather website insight
