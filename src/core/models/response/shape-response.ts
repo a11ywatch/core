@@ -1,21 +1,19 @@
 import { HttpMessage, StatusCode } from "../../../web/messages/message";
 import { ResponseParamsModel, ResponseModel } from "./types";
 
-// response model for HTTP request [todo: remove]
-const responseModel = (params?: ResponseParamsModel): ResponseModel => {
+// response model based on exact params
+export const shapeResponse = (params?: ResponseParamsModel): ResponseModel => {
   let {
     success = true,
     message,
     code = StatusCode.Ok,
-    ...extra
+    data
   } = params ?? {};
 
   // determine success on code
   if (code >= StatusCode.BadRequest) {
     success = false;
   }
-
-  const { data = null, ...n } = extra ?? {};
 
   // TODO: remove for actually messages being used
   if (typeof message === "number") {
@@ -24,12 +22,9 @@ const responseModel = (params?: ResponseParamsModel): ResponseModel => {
 
   // proper shape
   return {
-    ...n,
     data,
     success,
     code,
     message,
   };
 };
-
-export { responseModel };

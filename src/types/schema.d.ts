@@ -507,4 +507,6 @@ export type PageMindScanResponse = {
   webPage?: Website;
   issues?: Issue[];
   script?: Script;
+  userId?: number;
+  usage?: number;
 };

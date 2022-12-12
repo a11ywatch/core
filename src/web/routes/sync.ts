@@ -22,7 +22,7 @@ export const backgroundSync = async (
         userId: userNext.id,
         limit: 50,
         offset: 0,
-        insights: true, // TODO: make insights optional
+        insights: false,
       });
 
       for await (const [_, _url] of entriesFromWebsiteSync(websites)) {

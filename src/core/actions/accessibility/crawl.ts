@@ -2,7 +2,6 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { emailMessager } from "../../messagers";
 import { pubsub } from "../../../database/pubsub";
 import { ISSUE_ADDED } from "../../static";
-import { responseModel } from "../../models";
 import { collectionUpsert, domainName } from "../../utils";
 import { IssuesController } from "../../controllers/issues";
 import { ScriptsController } from "../../controllers/scripts";
@@ -28,6 +27,7 @@ import { StatusCode } from "../../../web/messages/message";
 import type { User, Website } from "../../../types/types";
 import type { Issue } from "../../../types/schema";
 import { watcherCrawl } from "./watcher_crawl";
+import { shapeResponse } from "../../models/response/shape-response";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -112,7 +112,7 @@ export const crawlPage = async (
       blockEvent
     );
 
-    return responseModel({
+    return shapeResponse({
       data: null,
       code: 300,
       success: false,
@@ -174,7 +174,7 @@ export const crawlPage = async (
   let shutdown = false;
 
   if (!sendEmail && !SUPER_MODE) {
-    const ttime = dataSource?.webPage?.pageLoadTime?.duration || 0;
+    const ttime = dataSource?.usage || 0;
     const pastUptime = scanInfo?.totalUptime || 0;
     const totalUptime = ttime + pastUptime;
 
@@ -209,7 +209,7 @@ export const crawlPage = async (
       blockEvent
     );
 
-    return responseModel({
+    return shapeResponse({
       data: null,
       code: StatusCode.BadRequest,
       success: false,
@@ -379,7 +379,7 @@ export const crawlPage = async (
     blockEvent
   );
 
-  return responseModel(responseData);
+  return shapeResponse(responseData);
 };
 
 // async generator for large jobs
