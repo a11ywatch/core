@@ -16,7 +16,6 @@ export const meta = gql`
     errorCount: Int
     warningCount: Int
     noticeCount: Int
-    limitedCount: Int
     pageCount: Int
   }
 

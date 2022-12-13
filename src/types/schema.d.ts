@@ -102,7 +102,6 @@ export type IssueMeta = {
   skipContentIncluded?: boolean;
   errorCount?: number;
   warningCount?: number;
-  limitedCount?: number;
 };
 
 export type Mutation = {

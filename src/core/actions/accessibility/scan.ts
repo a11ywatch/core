@@ -65,18 +65,14 @@ export const scanWebsite = async ({
 
   // limited scan endpoint
   const currentIssues = limitIssue(issues);
-
-  const data = Object.assign({}, website, webPage, {
-    userId,
-    timestamp: new Date().getTime(),
-    script,
-    issues: currentIssues,
-    issuesInfo: Object.assign({}, issuesInfo, {
-      limitedCount: currentIssues.length,
-    }),
-  });
-
+  
   return responseModel({
-    data,
+    data: Object.assign({}, website, webPage, {
+      userId,
+      timestamp: new Date().getTime(),
+      script,
+      issues: currentIssues,
+      issuesInfo,
+    }),
   });
 };
