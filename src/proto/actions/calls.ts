@@ -1,4 +1,9 @@
-import { pageMindClient, crawlerClient, mavClient } from "../website-client";
+import {
+  pageMindClient,
+  crawlerClient,
+  mavClient,
+  cdnClient,
+} from "../website-client";
 import type { PageMindScanResponse } from "../../types/schema";
 
 // params to perform website scans
@@ -85,10 +90,23 @@ const parseImg = (img = {}) => {
   });
 };
 
+const removeScript = (website = {}) => {
+  return new Promise((resolve, reject) => {
+    cdnClient.removeScript(website, (error, res) => {
+      if (!error) {
+        resolve(res);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+
 export const controller = {
   scan,
   crawlerScan,
   crawlerCrawl,
   setScript,
   parseImg,
+  removeScript,
 };

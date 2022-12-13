@@ -3,6 +3,7 @@ export const GRPC_PORT = 50051;
 export const GRPC_PORT_PAGEMIND = 50052;
 export const GRPC_PORT_MAV = 50053;
 export const GRPC_PORT_CRAWLER = 50055;
+export const GRRPC_PORT_CDN = 50054;
 
 // central server
 const GRPC_HOST = process.env.GRPC_HOST || `0.0.0.0:${GRPC_PORT}`;
@@ -14,6 +15,7 @@ let GRPC_HOST_PAGEMIND =
 let GRPC_HOST_CRAWLER =
   process.env.GRPC_HOST_CRAWLER || `127.0.0.1:${GRPC_PORT_CRAWLER}`;
 let GRPC_HOST_MAV = process.env.GRPC_HOST_MAV || `127.0.0.1:${GRPC_PORT_MAV}`;
+let GRPC_HOST_CDN = process.env.GRPC_HOST_CDN || `127.0.0.1:${GRRPC_PORT_CDN}`;
 
 // target the docker container names
 if (process.env.DOCKER_CONTAINER) {
@@ -26,6 +28,9 @@ if (process.env.DOCKER_CONTAINER) {
   if (!process.env.GRPC_HOST_MAV) {
     GRPC_HOST_MAV = `mav:${GRPC_PORT_MAV}`;
   }
+  if (!process.env.GRPC_HOST_CDN) {
+    GRPC_HOST_CDN = `cdn-server:${GRRPC_PORT_CDN}`;
+  }
 }
 
 export {
@@ -34,4 +39,5 @@ export {
   GRPC_HOST_PAGEMIND,
   GRPC_HOST_CRAWLER,
   GRPC_HOST_MAV,
+  GRPC_HOST_CDN,
 };

@@ -65,7 +65,8 @@ export const getWebsitesPaginated = async (
   limit: number = 10,
   filter = {},
   page = 0, // page in collection
-  offset?: number // use offset to skip
+  offset?: number, // use offset to skip
+  project?: Record<string, 0 | 1>
 ): Promise<[Website[], any]> => {
   const [collection] = connect("Websites");
 
@@ -73,7 +74,7 @@ export const getWebsitesPaginated = async (
   const data = await collection
     .find({ ...filter })
     .sort({ order: 1 }) // todo: optional sorting
-    .project({ url: 1, userId: 1, subdomains: 1, tld: 1 })
+    .project(project ?? { url: 1, userId: 1, subdomains: 1, tld: 1 })
     .limit(limit)
     .skip(offset ?? limit * page)
     .toArray();

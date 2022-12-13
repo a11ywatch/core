@@ -148,10 +148,10 @@ export const crawlPage = async (
   });
 
   // prevent storage on free accounts js scripts
-  let noStore = freeAccount || crawlConfig.noStore || !verified
+  let noStore = freeAccount || crawlConfig.noStore || !verified;
 
-  if(SUPER_MODE && !DISABLE_STORE_SCRIPTS) {
-    noStore = false
+  if (SUPER_MODE && !DISABLE_STORE_SCRIPTS) {
+    noStore = false;
   }
 
   const actions = await findPageActionsByPath({ userId, path: pathname });
@@ -161,14 +161,15 @@ export const crawlPage = async (
     url: urlMap,
     userId,
     pageInsights: insightsEnabled,
-    scriptsEnabled: verified && scriptsEnabled || SUPER_MODE && scriptsEnabled, // bypass verification on SUPER_MODE
+    scriptsEnabled:
+      (verified && scriptsEnabled) || (SUPER_MODE && scriptsEnabled), // bypass verification on SUPER_MODE
     mobile,
     ua,
     standard: standard || websiteStandard,
     actions,
     cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: pageSpeedApiKey,
-    noStore: !website || noStore,
+    noStore: !website ? true : noStore, // prevent storing content if not target page
     html,
   });
 
