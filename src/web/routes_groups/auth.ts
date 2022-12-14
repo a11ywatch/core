@@ -119,17 +119,18 @@ export const setAuthRoutes = (app: FastifyInstance) => {
     res.status(200).send();
   });
 
-  // todo: whitelist only github domains
   app.get("/github/callback", limiter, async (req, res) => {
     const requestToken = (req.query as any).code + "";
     const plan = (req.query as any).plan;
 
     let authentication = null;
 
-    try {
-      authentication = await onAuthGithub(requestToken);
-    } catch (e) {
-      console.error(e);
+    if(requestToken) {
+      try {
+        authentication = await onAuthGithub(requestToken);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     res.redirect(
