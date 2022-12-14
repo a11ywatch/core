@@ -31,7 +31,7 @@ const onAuthGithub = (requestToken: string): Promise<any> => {
           "Content-Type": "application/json",
           "Content-Length": data.length,
         },
-        path: `/login/oauth/access_token`,
+        path: '/login/oauth/access_token',
       },
       (res) => {
         res.setEncoding("utf8");
@@ -51,7 +51,6 @@ const onAuthGithub = (requestToken: string): Promise<any> => {
     req.write(data);
 
     req.on("error", (err) => {
-      console.error("Error: ", err.message);
       reject(err);
     });
 
