@@ -4,7 +4,7 @@ export const EMAIL_ERROR =
   "Please check your email and password and try again.";
 export const ISSUE_EXIST_ERROR = "Issue, already exist.";
 export const AUTH_ERROR = "Error, please sign in to continue.";
-export const GENERAL_ERROR = "Error, an issue has occured.";
+export const GENERAL_ERROR = "Error, an issue has occurred.";
 export const TOKEN_EXPIRED_ERROR =
   "JWT: expired please sign in again to continue";
 export const WEBSITE_EXIST_ERROR =
