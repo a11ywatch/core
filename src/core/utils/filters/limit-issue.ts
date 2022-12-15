@@ -2,9 +2,9 @@ import type { Issue } from "../../../types/types";
 
 // limit the issue records to 1/4th
 // @return Issue['issues'][]
-export const limitIssue = ({issues}: Issue) => {
+export const limitIssue = ({ issues }: Issue) => {
   if (!issues.length) {
-    return []
+    return [];
   }
 
   const half = Math.ceil(issues.length / 2);

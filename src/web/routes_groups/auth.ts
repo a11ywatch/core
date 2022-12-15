@@ -31,7 +31,7 @@ const onAuthGithub = (requestToken: string): Promise<any> => {
           "Content-Type": "application/json",
           "Content-Length": data.length,
         },
-        path: '/login/oauth/access_token',
+        path: "/login/oauth/access_token",
       },
       (res) => {
         res.setEncoding("utf8");
@@ -95,25 +95,29 @@ export const setAuthRoutes = (app: FastifyInstance) => {
 
   // A NEW INSTANCE OF THE APP BASIC PING (RUNS ONCE ON APP START)
   app.post("/api/ping", async (req, res) => {
-    setImmediate(async () => {
-      const usr = getUserFromToken(req.cookies.jwt);
-      const id = usr?.payload?.keyid;
+    if (req.cookies.jwt || req.headers.authorization) {
+      setImmediate(async () => {
+        const usr = getUserFromToken(
+          req.cookies.jwt || req.headers.authorization
+        );
+        const id = usr?.payload?.keyid;
 
-      if (validateUID(id)) {
-        const [user, collection] = await getUser({ id });
+        if (validateUID(id)) {
+          const [user, collection] = await getUser({ id });
 
-        if (user) {
-          await collection.updateOne(
-            { id },
-            {
-              $set: {
-                lastLoginDate: new Date(),
-              },
-            }
-          );
+          if (user) {
+            await collection.updateOne(
+              { id },
+              {
+                $set: {
+                  lastLoginDate: new Date(),
+                },
+              }
+            );
+          }
         }
-      }
-    });
+      });
+    }
 
     res.status(200).send();
   });
@@ -124,7 +128,7 @@ export const setAuthRoutes = (app: FastifyInstance) => {
 
     let authentication = null;
 
-    if(requestToken) {
+    if (requestToken) {
       try {
         authentication = await onAuthGithub(requestToken);
       } catch (e) {
