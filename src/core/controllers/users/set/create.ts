@@ -51,20 +51,23 @@ export const createUser = async ({
     throw new Error("Password of atleast 6 chars required to register.");
   }
 
+  // user account found! validate request
   if (user) {
     user.emailConfirmed = emailConfirmed;
 
-    if (!googleId && !githubId && !user?.password) {
+    if (!googleId && !githubId && password && !user?.password) {
       throw new Error(
         user.googleId || user.githubId
           ? "Password not found, try using your google login or reset the password."
           : "Account reset password required, please reset the password by going to https://a11ywatch.com/reset-password to continue."
       );
     }
+
     if (googleId && user?.googleId && user?.googleId !== googleId) {
       throw new Error("GoogleID is not tied to any user.");
     }
     if (
+      !googleId &&
       typeof githubId !== "undefined" &&
       user?.githubId &&
       user?.githubId !== githubId
@@ -73,19 +76,21 @@ export const createUser = async ({
     }
   }
 
+  // validate allowed new user
   if ((user && user?.salt) || googleAuthed || githubAuthed) {
     if (passwordMatch || googleId || githubId) {
       let keyid = user?.id;
       let updateCollectionProps = {};
 
+      // create a new user
       if (typeof user?.id === "undefined" || user?.id === null) {
         keyid = await getNextSequenceValue("Users");
         updateCollectionProps = { id: keyid };
       }
 
       const jwt = signJwt({
-        email: user?.email,
-        role: user?.role || 0,
+        email: user?.email || email,
+        role: user?.role || role || 0,
         keyid,
       });
 
@@ -94,7 +99,7 @@ export const createUser = async ({
         jwt,
         lastLoginDate: new Date(),
       };
-
+      // google auth
       if (googleId) {
         updateCollectionProps = {
           ...updateCollectionProps,
@@ -102,7 +107,7 @@ export const createUser = async ({
           emailConfirmed,
         };
       }
-
+      // github auth
       if (githubId) {
         updateCollectionProps = {
           ...updateCollectionProps,
