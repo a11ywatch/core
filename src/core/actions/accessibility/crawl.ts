@@ -28,7 +28,7 @@ import type { User, Website } from "../../../types/types";
 import type { Issue } from "../../../types/schema";
 import { watcherCrawl } from "./watcher_crawl";
 import { shapeResponse } from "../../models/response/shape-response";
-import { crawlingSet } from "../../../event/crawl-tracking";
+import { crawlingSet, getKey } from "../../../event/crawl-tracking";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -399,9 +399,9 @@ async function* entriesFromWebsite(
 export async function* entriesFromWebsiteSync(
   pages: Website[]
 ): AsyncGenerator<[void, string]> {
-  for (const { url, userId, subdomains, tld, domain } of pages) {
+  for (const { url, userId, subdomains, tld } of pages) {
     yield [
-      !crawlingSet.has(domain) &&
+      !crawlingSet.has(getKey(url, [], userId)) &&
         (await watcherCrawl({ url, subdomains, tld, userId })),
       url,
     ];

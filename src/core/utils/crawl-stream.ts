@@ -34,7 +34,7 @@ export const crawlHttpStream = (
 
   return new Promise((resolve) => {
     const domain = getHostName(url);
-    
+
     const crawlListener = (source) => {
       setImmediate(() => {
         const data = source?.data;

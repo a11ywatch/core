@@ -1,5 +1,5 @@
 import type { FastifyContext } from "apollo-server-fastify";
-import { crawlingSet } from "../../event/crawl-tracking";
+import { crawlingSet, getKey } from "../../event/crawl-tracking";
 import { StatusCode } from "../../web/messages/message";
 import { crawlHttpStream } from "../utils/crawl-stream";
 import { crawlHttpStreamSlim } from "../utils/crawl-stream-slim";
@@ -33,16 +33,9 @@ export const crawlStream = async (
     res
   );
 
-  if (userNext) {
-    let hostname = "";
-    try {
-      hostname = new URL(url).hostname;
-    } catch (e) {
-      console.error(e);
-    }
-
+  if (userNext) {    
     // block active crawl
-    if (crawlingSet.has(hostname)) {
+    if (crawlingSet.has(getKey(url, [], userNext.id))) {
       res.status(StatusCode.Accepted);
       return res.send([]);
     }

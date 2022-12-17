@@ -17,7 +17,7 @@ import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";
 import { SUPER_MODE } from "../config/config";
 import { CRAWLER_COMMENCED } from "./strings/success";
-import { crawlingSet } from "../event/crawl-tracking";
+import { crawlingSet, getKey } from "../event/crawl-tracking";
 import { StatusCode } from "../web/messages/message";
 
 const defaultPayload = {
@@ -64,7 +64,7 @@ export const Mutation = {
     if (canScan) {
       const [website] = await getWebsite({ userId: keyid, url });
 
-      if (crawlingSet.has(website.domain)) {
+      if (crawlingSet.has(getKey(url, [], keyid))) {
         return {
           website: null,
           code: StatusCode.Accepted,

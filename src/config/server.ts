@@ -54,9 +54,11 @@ const logServerInit = (port, { graphqlPath = "/graphql" }) => {
     return url;
   };
   const uri = source.endsWith(port) ? source : `${source}:${port}`;
-  console.log(`Server ready at ${uri}`);
-  console.log(`GraphQL server ready at ${uri}${graphqlPath}`);
-  console.log(`Subscriptions ready at ws://${_removeHttp(uri)}${graphqlPath}`);
+  console.log(
+    `Server ready at ${uri}\nGraphQL server ready at ${uri}${graphqlPath}\nSubscriptions ready at ws://${_removeHttp(
+      uri
+    )}${graphqlPath}`
+  );
 };
 
 const fastifyConfig = {

@@ -11,7 +11,7 @@ import type { CrawlProps } from "./crawl-stream";
 export const crawlHttpStreamSlim = (
   props: CrawlProps,
   res: FastifyContext["reply"],
-  client?: string,
+  client?: string
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld, robots } = props;
 

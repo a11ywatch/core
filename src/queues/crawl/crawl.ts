@@ -2,7 +2,7 @@ import { crawlingSet, getKey } from "../../event/crawl-tracking";
 import { q } from "./handle";
 
 /*
- * Send request for crawl to memory queue.
+ * Send request for crawl to memory queue. [todo: send domain from crawler to avoid hostname parsing per url]
  * @return Promise<void>
  */
 export const crawlEnqueue = async (data: {
