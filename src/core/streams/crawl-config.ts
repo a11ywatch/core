@@ -1,3 +1,4 @@
+import { validateUID } from "../../web/params/extracter";
 import { SUPER_MODE } from "../../config/config";
 import { getWebsite } from "../controllers/websites";
 
@@ -14,7 +15,7 @@ export const getCrawlConfig = async ({
   let tldEnabled = SUPER_MODE ? tld : role && tld;
 
   // determine active configuration on role
-  if (role) {
+  if (role && validateUID(id)) {
     if (!subdomainsEnabled || !tldEnabled) {
       const [website] = await getWebsite({ userId: id, url });
       if (website) {

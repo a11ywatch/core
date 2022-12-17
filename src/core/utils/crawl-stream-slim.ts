@@ -12,7 +12,6 @@ export const crawlHttpStreamSlim = (
   props: CrawlProps,
   res: FastifyContext["reply"],
   client?: string,
-  onlyData?: boolean // remove issues and other data from stream
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld, robots } = props;
 
@@ -37,11 +36,6 @@ export const crawlHttpStreamSlim = (
 
         // only send when true
         if (data) {
-          // trim data for sending minimally
-          if (onlyData) {
-            data.pageLoadTime = null;
-            data.issues = null;
-          }
           if (!res.raw.writableEnded) {
             res.raw.write(`${JSON.stringify(data)},`);
           }
@@ -55,6 +49,7 @@ export const crawlHttpStreamSlim = (
       setImmediate(() => {
         crawlTrackingEmitter.off(crawlEvent, crawlListener);
 
+        // back compat support old cli
         if (
           client &&
           client.includes("a11ywatch_cli/") &&
@@ -64,7 +59,6 @@ export const crawlHttpStreamSlim = (
           res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () =>
             resolve(true)
           );
-          // res.raw.flushHeaders();
         } else {
           resolve(true);
         }

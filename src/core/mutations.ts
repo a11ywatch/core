@@ -17,6 +17,8 @@ import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";
 import { SUPER_MODE } from "../config/config";
 import { CRAWLER_COMMENCED } from "./strings/success";
+import { crawlingSet } from "../event/crawl-tracking";
+import { StatusCode } from "../web/messages/message";
 
 const defaultPayload = {
   keyid: undefined,
@@ -45,7 +47,7 @@ export const Mutation = {
     if (!url) {
       return {
         website: null,
-        code: 404,
+        code: StatusCode.NotFound,
         success: true,
         message: "A valid Url is required.",
       };
@@ -61,6 +63,16 @@ export const Mutation = {
 
     if (canScan) {
       const [website] = await getWebsite({ userId: keyid, url });
+
+      if (crawlingSet.has(website.domain)) {
+        return {
+          website: null,
+          code: StatusCode.Accepted,
+          success: true,
+          message: "Scan already in progress...",
+        };
+      }
+
       setImmediate(async () => {
         await watcherCrawl({
           url: url,

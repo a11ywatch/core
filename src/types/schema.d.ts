@@ -494,6 +494,7 @@ export type Website = {
   ua?: string;
   subdomains?: boolean;
   tld?: boolean;
+  robots?: boolean;
   verified?: boolean; // dns verified by user
 };
 

@@ -1,4 +1,5 @@
 import type { FastifyContext } from "apollo-server-fastify";
+import { crawlingSet } from "../../event/crawl-tracking";
 import { StatusCode } from "../../web/messages/message";
 import { crawlHttpStream } from "../utils/crawl-stream";
 import { crawlHttpStreamSlim } from "../utils/crawl-stream-slim";
@@ -33,6 +34,19 @@ export const crawlStream = async (
   );
 
   if (userNext) {
+    let hostname = "";
+    try {
+      hostname = new URL(url).hostname;
+    } catch (e) {
+      console.error(e);
+    }
+
+    // block active crawl
+    if (crawlingSet.has(hostname)) {
+      res.status(StatusCode.Accepted);
+      return res.send([]);
+    }
+
     res.raw.writeHead(StatusCode.Ok, {
       "Content-Type": "application/json",
       "Transfer-Encoding": "chunked",

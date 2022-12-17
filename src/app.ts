@@ -44,7 +44,6 @@ import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
 import { crawlStreamSlim } from "./core/streams/crawl-slim";
-import { crawlRest } from "./web/routes/crawl";
 import { getServerConfig } from "./apollo-server";
 import { establishCrawlTracking } from "./event";
 import { updateWebsite } from "./core/controllers/websites/update";
@@ -187,11 +186,6 @@ async function initServer(): Promise<HttpServer[]> {
     scanAuthenticated
   );
   /*
-   * Site wide scan.
-   * Uses Event based handling to get pages max timeout 15mins.
-   */
-  app.post("/api/crawl", scanLimiter, crawlRest);
-  /*
    * All websites site wide scan background sync.
    */
   app.post("/api/websites-sync", scanLimiter, backgroundSync);
@@ -199,6 +193,7 @@ async function initServer(): Promise<HttpServer[]> {
    * Site wide scan handles via stream.
    * Uses Event based handling to extract pages.
    */
+  app.post("/api/crawl", scanLimiter, crawlStream);
   app.post("/api/crawl-stream", scanLimiter, crawlStream);
 
   /*

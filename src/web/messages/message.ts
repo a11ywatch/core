@@ -11,9 +11,11 @@ export enum HttpMessage {
 // valid status codes
 export enum StatusCode {
   Ok = 200,
+  Accepted = 202,
   NoContent = 203,
   BadRequest = 400,
   Unauthorized = 401,
+  NotFound = 404,
   ToManyRequest = 429,
   Error = 500,
 }
