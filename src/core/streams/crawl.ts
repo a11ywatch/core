@@ -33,7 +33,7 @@ export const crawlStream = async (
     res
   );
 
-  if (userNext) {    
+  if (userNext) {
     // block active crawl
     if (crawlingSet.has(getKey(url, [], userNext.id))) {
       res.status(StatusCode.Accepted);

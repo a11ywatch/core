@@ -6,5 +6,5 @@ export { HistoryController } from "./history";
 export { AnalyticsController } from "./analytics";
 export { ScriptsController } from "./scripts";
 export { CountersController } from "./counters";
-export * as ReportsController from "./reports";
+export { getReport } from "./reports";
 export { createIframe } from "./iframe";

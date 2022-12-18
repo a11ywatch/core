@@ -18,16 +18,6 @@ type CrawlSet = {
 // track when a new website starts and determine page completion
 export const crawlingSet = new Map<string, CrawlSet>();
 
-// crawl default
-const crawlDefault: CrawlSet = Object.freeze({
-  total: 0,
-  current: 0,
-  crawling: true,
-  shutdown: false,
-  duration: 0,
-  event: bindTaskQ(crawlingSet.size), // set to default to memo
-});
-
 // handle hostname assign from domain or pages
 const extractHostname = (domain?: string, pages?: string[]) => {
   const target = pages && pages.length === 1 ? pages[0] : domain;
@@ -67,10 +57,14 @@ const crawlStart = (target) => {
     if (!crawlingSet.has(key)) {
       crawlingSet.set(
         key,
-        Object.assign({}, crawlDefault, {
+        {
+          total: 0,
+          current: 0,
+          crawling: true,
+          shutdown: false,
           duration: performance.now(),
           event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
-        })
+        }
       );
 
       await rebindConcurrency();
