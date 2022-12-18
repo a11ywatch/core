@@ -342,7 +342,7 @@ export const crawlPage = async (
           ]);
 
           // send email if issues of type error exist for the page. TODO: remove from layer.
-          if (sendEmail && issuesInfo?.errorCount) {
+          if (sendEmail && issuesInfo?.errorCount && userData?.emailConfirmed) {
             await emailMessager.sendMail({
               userId,
               data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
