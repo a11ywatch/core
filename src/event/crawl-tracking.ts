@@ -55,17 +55,14 @@ const crawlStart = (target) => {
     const key = getKey(target.domain, target.pages, target.user_id);
     // set the item for tracking
     if (!crawlingSet.has(key)) {
-      crawlingSet.set(
-        key,
-        {
-          total: 0,
-          current: 0,
-          crawling: true,
-          shutdown: false,
-          duration: performance.now(),
-          event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
-        }
-      );
+      crawlingSet.set(key, {
+        total: 0,
+        current: 0,
+        crawling: true,
+        shutdown: false,
+        duration: performance.now(),
+        event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
+      });
 
       await rebindConcurrency();
     }

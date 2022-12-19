@@ -94,23 +94,45 @@ export const addPaymentSubscription = async ({
       const plan = parsedToken?.plan;
       const stripeProductPlan = stripeProductId(plan, yearly);
       const activeSub = user?.paymentSubscription;
+      const upgradeAccount =
+        activeSub?.status === "trialing" || activeSub?.status === "active";
 
       let charge = null;
 
       // remove prior subscriptions
-      if (!!activeSub) {
-        charge = await stripe.subscriptions.update(activeSub.id, {
-          proration_behavior:
-            activeSub?.status === "trialing"
-              ? "always_invoice"
-              : "create_prorations",
-          items: [
-            {
-              price: stripeProductPlan,
-            },
-          ],
-        });
-      } else {
+      if (upgradeAccount) {
+        try {
+          if (activeSub?.status === "trialing") {
+            charge = await stripe.subscriptions.update(activeSub.id, {
+              proration_behavior: "always_invoice",
+              cancel_at_period_end: false,
+              items: [
+                {
+                  id: activeSub.items.data[0].id,
+                  price: stripeProductPlan,
+                },
+              ],
+              trial_end: "now",
+            });
+          } else {
+            charge = await stripe.subscriptions.update(activeSub.id, {
+              proration_behavior: "create_prorations",
+              cancel_at_period_end: false,
+              items: [
+                {
+                  id: activeSub.items.data[0].id,
+                  price: stripeProductPlan,
+                },
+              ],
+            });
+          }
+        } catch(e) {
+          console.error(e)
+        }
+      }
+
+      // create new sub
+      if(!charge) {
         charge = await stripe.subscriptions.create({
           customer: customer.id,
           items: [
