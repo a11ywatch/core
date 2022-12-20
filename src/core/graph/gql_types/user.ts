@@ -26,6 +26,7 @@ export const user = gql`
     role: Int
     activeSubscription: Boolean
     emailConfirmed: Boolean
+    emailMorningOnly: Boolean
     emailFilteredDates: [Int]
     websites(limit: Int = 0, offset: Int = 0): [Website]
     profileVisible: Boolean
