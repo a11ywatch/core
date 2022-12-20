@@ -6,7 +6,7 @@ const expiresIn = "365 days";
 let algorithm = "RS256";
 
 const subject = "user@.com";
-const audience = "http://adahelpalerts.com";
+const audience = "http://adahelpalerts.com"; // fix this with valid domain
 const keyid = "";
 
 let defaultKey;

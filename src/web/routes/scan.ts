@@ -6,6 +6,7 @@ import { responseModel } from "../../core/models";
 import { StatusCode } from "../messages/message";
 import { frontendClientOrigin } from "../../core/utils/is-client";
 import type { FastifyContext } from "apollo-server-fastify";
+import { SUPER_MODE } from "../../config/config";
 
 /*
  * SCAN -> PAGEMIND: Single page [does not store values to cdn]
@@ -100,7 +101,7 @@ export const scanAuthenticated = async (
   let resData = {};
 
   // only allow valid users to crawl
-  if (validateUID(userId)) {
+  if (validateUID(userId) || SUPER_MODE) {
     const pageInsights = paramParser(req, "pageInsights");
     const standard = paramParser(req, "standard");
 

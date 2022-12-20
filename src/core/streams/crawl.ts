@@ -1,4 +1,5 @@
 import type { FastifyContext } from "apollo-server-fastify";
+import { validateUID } from "../../web/params/extracter";
 import { crawlingSet, getKey } from "../../event/crawl-tracking";
 import { StatusCode } from "../../web/messages/message";
 import { crawlHttpStream } from "../utils/crawl-stream";
@@ -35,7 +36,7 @@ export const crawlStream = async (
 
   if (userNext) {
     // block active crawl
-    if (crawlingSet.has(getKey(url, [], userNext.id))) {
+    if (validateUID(userNext?.id) && crawlingSet.has(getKey(url, [], userNext.id))) {
       res.status(StatusCode.Accepted);
       return res.send([]);
     }
@@ -46,9 +47,9 @@ export const crawlStream = async (
     });
 
     const crawlProps = await getCrawlConfig({
-      id: userNext.id,
+      id: userNext?.id,
       url,
-      role: userNext.role,
+      role: userNext?.role,
       subdomains: body.subdomains,
       tld: body.tld,
       robots: body.robots,
