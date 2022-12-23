@@ -1,8 +1,11 @@
 import { request } from "https";
 import { createUser } from "../../core/controllers/users/set";
-import { verifyUser } from "../../core/controllers/users/update";
+import {
+  updateScanAttempt,
+  verifyUser,
+} from "../../core/controllers/users/update";
 import { getUserFromToken } from "../../core/utils";
-import { config, cookieConfigs } from "../../config";
+import { config, cookieConfigs, SUPER_MODE } from "../../config";
 import { getUser } from "../../core/controllers/users";
 import { StatusCode } from "../messages/message";
 import type { FastifyInstance } from "fastify";
@@ -106,14 +109,23 @@ export const setAuthRoutes = (app: FastifyInstance) => {
           const [user, collection] = await getUser({ id });
 
           if (user) {
-            await collection.updateOne(
-              { id },
-              {
-                $set: {
-                  lastLoginDate: new Date(),
-                },
-              }
-            );
+            const validScanning = await updateScanAttempt({
+              user,
+              collection,
+              ping: true,
+            });
+
+            // fallback to normal login date set
+            if (!validScanning && !SUPER_MODE) {
+              await collection.updateOne(
+                { id },
+                {
+                  $set: {
+                    lastLoginDate: new Date(),
+                  },
+                }
+              );
+            }
           }
         }
       });

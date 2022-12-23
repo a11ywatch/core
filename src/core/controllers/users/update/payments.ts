@@ -126,13 +126,13 @@ export const addPaymentSubscription = async ({
               ],
             });
           }
-        } catch(e) {
-          console.error(e)
+        } catch (e) {
+          console.error(e);
         }
       }
 
       // create new sub
-      if(!charge) {
+      if (!charge) {
         charge = await stripe.subscriptions.create({
           customer: customer.id,
           items: [

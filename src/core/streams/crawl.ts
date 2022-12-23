@@ -36,7 +36,10 @@ export const crawlStream = async (
 
   if (userNext) {
     // block active crawl
-    if (validateUID(userNext?.id) && crawlingSet.has(getKey(url, [], userNext.id))) {
+    if (
+      validateUID(userNext?.id) &&
+      crawlingSet.has(getKey(url, [], userNext.id))
+    ) {
       res.status(StatusCode.Accepted);
       return res.send([]);
     }

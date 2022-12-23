@@ -2,10 +2,21 @@ import { isSameDay } from "date-fns";
 import { getUsageLimitsMs } from "@a11ywatch/website-source-builder";
 import { getUser } from "../find";
 import { SUPER_MODE } from "../../../../config/config";
+import { User } from "../../../../types/schema";
 
 // Determine if user can perform web accessibility scanning
 // @returns Promise<boolean>
-export const updateScanAttempt = async ({ userId, user, collection }) => {
+export const updateScanAttempt = async ({
+  userId,
+  user,
+  collection,
+  ping,
+}: {
+  userId?: number;
+  collection: any;
+  user: User;
+  ping?: boolean;
+}) => {
   // if SUPER_MODE always return truthy
   if (SUPER_MODE) {
     return true;
@@ -43,10 +54,14 @@ export const updateScanAttempt = async ({ userId, user, collection }) => {
     if (canScan) {
       scanInfo.lastScanDate = currentDate;
 
+      const updateProps = ping
+        ? { scanInfo, lastLoginDate: new Date() }
+        : { scanInfo };
+
       try {
         await collection.findOneAndUpdate(
           { id: user.id },
-          { $set: { scanInfo } }
+          { $set: updateProps }
         );
       } catch (e) {
         console.error(e);

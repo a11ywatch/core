@@ -11,7 +11,6 @@ import {
   logServerInit,
   fastifyConfig,
   corsOptions,
-  ADMIN_PASSWORD,
 } from "./config";
 import {
   crawlAllAuthedWebsitesCluster,
@@ -300,16 +299,6 @@ async function initServer(): Promise<HttpServer[]> {
   setAuthRoutes(app);
   setGithubActionRoutes(app);
   setStripeRoutes(app);
-
-  // ADMIN ROUTES
-  app.post("/api/run-watcher", async (req, res) => {
-    if ((req.body as any)?.password === ADMIN_PASSWORD) {
-      setImmediate(crawlAllAuthedWebsitesCluster);
-      res.send(true);
-    } else {
-      res.send(false);
-    }
-  });
 
   // EMAIL
   // unsubscribe to emails or Alerts.
