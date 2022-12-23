@@ -402,7 +402,7 @@ export async function* entriesFromWebsiteSync(
   for (const { url, userId, subdomains, tld } of pages) {
     yield [
       !crawlingSet.has(getKey(url, [], userId)) &&
-        (await watcherCrawl({ url, subdomains, tld, userId })),
+        (await watcherCrawl({ url, subdomains, tld, userId, scan: true })),
       url,
     ];
   }

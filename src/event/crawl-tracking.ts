@@ -19,10 +19,7 @@ type CrawlSet = {
 export const crawlingSet = new Map<string, CrawlSet>();
 
 // handle hostname assign from domain or pages
-const extractHostname = (domain?: string, pages?: string[]) => {
-  const target = pages && pages.length === 1 ? pages[0] : domain;
-  return domainName(getHostName(target));
-};
+const extractHostname = (domain?: string, pages?: string[]) => domainName(getHostName(pages && pages.length === 1 ? pages[0] : domain));
 
 // get a key for the event based on domain and uid.
 export const getKey = (domain, pages, user_id) =>
