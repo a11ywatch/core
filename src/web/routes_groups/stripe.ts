@@ -7,14 +7,13 @@ import { UsersController, WebsitesController } from "../../core/controllers";
 export const setStripeRoutes = (app: FastifyInstance) => {
   app.post("/api/stripes/event", async (req, res) => {
     const body: any = req.body;
-    const sig = req.headers["stripe-signature"];
 
     let event;
 
     try {
-      event = stripe.webhooks.constructEvent(
-        body,
-        sig,
+      event = await stripe.webhooks.constructEventAsync(
+        body ? Buffer.from(JSON.stringify(body)) : null,
+        req.headers["stripe-signature"],
         config.STRIPE_WH_SECRET
       );
     } catch (err) {
