@@ -1,3 +1,4 @@
+import { Website } from "../../../../types/schema";
 import { WEBSITE_NOT_FOUND, SUCCESS } from "../../../../core/strings";
 import { connect } from "../../../../database";
 import { getWebsite } from "../find";
@@ -11,9 +12,11 @@ export const updateWebsite = async ({
   mobile,
   standard,
   ua,
-  actions = null,
+  actions,
   robots = true,
-}) => {
+  tld,
+  subdomains,
+}: Partial<Website> & {actions?: Record<string, unknown>[]}) => {
   const [website, collection] = await getWebsite({ userId, url });
 
   if (!website) {
@@ -25,12 +28,14 @@ export const updateWebsite = async ({
   // params prior - we mutate this on update
   const pageParams = {
     pageHeaders: website.pageHeaders,
-    pageInsights: website?.pageInsights ? true : false,
-    mobile: website?.mobile ? true : false,
-    standard: website.standard ? website.standard : undefined,
+    pageInsights: website.pageInsights,
+    mobile: website.mobile,
+    standard: website.standard,
     ua: website.ua ? website.ua : undefined,
     actionsEnabled,
     robots,
+    subdomains: !!website.subdomains,
+    tld: !!website.tld,
   };
 
   // if page headers are sent add them
@@ -59,6 +64,16 @@ export const updateWebsite = async ({
   // if user agent is defined
   if (typeof ua !== "undefined") {
     pageParams.ua = ua;
+  }
+
+  // if user agent is defined
+  if (typeof tld !== "undefined") {
+    pageParams.tld = tld;
+  }
+
+  // if user agent is defined
+  if (typeof subdomains !== "undefined") {
+    pageParams.subdomains = subdomains;
   }
 
   await collection.updateOne({ url, userId }, { $set: pageParams });

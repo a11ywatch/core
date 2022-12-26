@@ -36,6 +36,8 @@ export const mutation = gql`
       mobile: Boolean
       standard: String
       ua: String
+      tld: Boolean
+      subdomains: Boolean
       actions: [PageActionsInput]
     ): UpdateWebSiteMutationResponse
 

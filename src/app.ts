@@ -6,12 +6,7 @@ import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import type { Server as HttpServer } from "http";
 
-import {
-  config,
-  logServerInit,
-  fastifyConfig,
-  corsOptions,
-} from "./config";
+import { config, logServerInit, fastifyConfig, corsOptions } from "./config";
 import {
   crawlAllAuthedWebsitesCluster,
   WebsitesController,
@@ -228,6 +223,8 @@ async function initServer(): Promise<HttpServer[]> {
     const ua = paramParser(req, "ua");
     const standard = paramParser(req, "standard");
     const actions = paramParser(req, "actions");
+    const subdomains = paramParser(req, "subdomains");
+    const tld = paramParser(req, "tld");
 
     const { website } = await updateWebsite({
       userId,
@@ -238,6 +235,8 @@ async function initServer(): Promise<HttpServer[]> {
       ua,
       standard,
       actions,
+      subdomains,
+      tld,
     });
 
     return res.send({
