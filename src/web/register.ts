@@ -19,6 +19,14 @@ export const registerApp = async (app: FastifyInstance) => {
     parseOptions: cookieConfigs,
   });
 
+  await app.register(import('fastify-raw-body'), {
+    field: 'rawBody',
+    global: false,
+    encoding: false,
+    runFirst: true,
+    routes: ["/api/stripes/event"] 
+  })
+
   // setup global rate limiting
   if (!SUPER_MODE) {
     await app.register(ratelimit, {
