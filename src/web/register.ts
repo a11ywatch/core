@@ -4,6 +4,7 @@ import cors from "@fastify/cors";
 import ratelimit from "@fastify/rate-limit";
 import { createRedisClient } from "../database/memory-client";
 import { cookieConfigs, SUPER_MODE } from "../config/config";
+import { stripeHook } from "./routes_groups/stripe";
 
 /*
  * fastify application register addons
@@ -19,13 +20,29 @@ export const registerApp = async (app: FastifyInstance) => {
     parseOptions: cookieConfigs,
   });
 
-  await app.register(import('fastify-raw-body'), {
-    field: 'rawBody',
-    global: false,
-    encoding: false,
-    runFirst: true,
-    routes: ["/api/stripes/event"] 
-  })
+  // stripe web hooks
+  await app.register((fastify, _opts, next) => {
+    fastify.addContentTypeParser(
+      "application/json",
+      { parseAs: "buffer" },
+      function (req, body, done) {
+        try {
+          done(null, {
+            raw: body,
+          });
+        } catch (error) {
+          error.statusCode = 400;
+          done(error, undefined);
+        }
+      }
+    );
+
+    fastify.post("/api/stripes/event", {
+      handler: stripeHook,
+    });
+
+    next();
+  });
 
   // setup global rate limiting
   if (!SUPER_MODE) {

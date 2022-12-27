@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.6.68",
+  "version": "0.6.69",
   "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
@@ -28,7 +28,6 @@
     "date-fns": "2.29.3",
     "exceljs": "4.3.0",
     "fastify": "^3.29.4",
-    "fastify-raw-body": "^3.0.0",
     "fastq": "1.14.0",
     "graphql": "^15.5.0",
     "graphql-middleware": "^6.1.33",

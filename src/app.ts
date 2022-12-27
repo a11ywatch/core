@@ -53,7 +53,6 @@ import { getWebsiteWrapper } from "./core/controllers/websites/find/get";
 import { responseModel } from "./core/models";
 import { limiter, scanLimiter } from "./web/limiters";
 import { appEmitter } from "./event/emitters/control";
-import { setStripeRoutes } from "./web/routes_groups/stripe";
 import { setAdsRoutes } from "./web/routes_groups/ads";
 import { setDnsVerifyRoutes } from "./web/routes_groups/dns-verify";
 import { backgroundSync } from "./web/routes/sync";
@@ -297,7 +296,6 @@ async function initServer(): Promise<HttpServer[]> {
   setListRoutes(app);
   setAuthRoutes(app);
   setGithubActionRoutes(app);
-  setStripeRoutes(app);
 
   // EMAIL
   // unsubscribe to emails or Alerts.

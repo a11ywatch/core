@@ -16,7 +16,7 @@ export const updateWebsite = async ({
   robots = true,
   tld,
   subdomains,
-}: Partial<Website> & {actions?: Record<string, unknown>[]}) => {
+}: Partial<Website> & { actions?: Record<string, unknown>[] }) => {
   const [website, collection] = await getWebsite({ userId, url });
 
   if (!website) {

@@ -172,7 +172,18 @@ export const Mutation = {
   },
   updateWebsite: async (
     _,
-    { userId, url, customHeaders, pageInsights, mobile, standard, ua, robots, subdomains, tld },
+    {
+      userId,
+      url,
+      customHeaders,
+      pageInsights,
+      mobile,
+      standard,
+      ua,
+      robots,
+      subdomains,
+      tld,
+    },
     context
   ) => {
     const { keyid } = context.user?.payload || defaultPayload;
@@ -187,7 +198,7 @@ export const Mutation = {
       ua,
       robots,
       subdomains,
-      tld
+      tld,
     });
   },
   forgotPassword: async (_, { email }, _context) => {
