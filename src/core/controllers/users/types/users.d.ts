@@ -40,6 +40,7 @@ export interface PaymentsParams extends AuthParams {
   user?: User; // allow passing entire user
   yearly?: boolean; // yearly sub
   stripeToken?: string; // stripe token for user card
+  paymentPlan?: string;
 }
 
 export interface UserControllerMethodsType {

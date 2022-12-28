@@ -34,7 +34,7 @@ import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
 import { getUserFromToken } from "./core/utils";
 import { retreiveUserByTokenWrapper } from "./core/utils/get-user-data";
-import { getWebsiteAPI, getWebsiteReport } from "./web/routes/data/website";
+import { getWebsiteReport } from "./web/routes/data/website";
 import { AnalyticsController } from "./core/controllers";
 import { crawlStream } from "./core/streams/crawl";
 import { crawlStreamSlim } from "./core/streams/crawl-slim";
@@ -56,6 +56,7 @@ import { appEmitter } from "./event/emitters/control";
 import { setAdsRoutes } from "./web/routes_groups/ads";
 import { setDnsVerifyRoutes } from "./web/routes_groups/dns-verify";
 import { backgroundSync } from "./web/routes/sync";
+import { priceConfig } from "@a11ywatch/website-source-builder";
 
 // configure one app-wide setting for user agents on node-iframe request
 configureAgent();
@@ -288,9 +289,23 @@ async function initServer(): Promise<HttpServer[]> {
     });
   });
 
-  // used for reports on client-side Front-end. TODO: remove for /reports/ endpoint.
-  app.get("/api/get-website", getWebsiteAPI);
+  // get the list of plans available that can use the `title` property for upgrading
+  app.get("/api/plans", (_, res) => {
+    res.send({
+      data: priceConfig,
+    });
+  });
 
+  // send the client secret to enable building ontop of infrastructure.
+  app.get("/api/client-key", (_, res) => {
+    res.send({
+      data: {
+        client_secret: process.env.STRIPE_CLIENT_KEY,
+      },
+    });
+  });
+
+  // get the stripe client key
   setDnsVerifyRoutes(app);
   setAdsRoutes(app);
   setListRoutes(app);

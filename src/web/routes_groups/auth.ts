@@ -6,7 +6,7 @@ import {
 } from "../../core/controllers/users/update";
 import { getUserFromToken } from "../../core/utils";
 import { config, cookieConfigs, SUPER_MODE } from "../../config";
-import { getUser } from "../../core/controllers/users";
+import { getUser, UsersController } from "../../core/controllers/users";
 import { StatusCode } from "../messages/message";
 import type { FastifyInstance } from "fastify";
 import { validateUID } from "../params/extracter";
@@ -134,6 +134,7 @@ export const setAuthRoutes = (app: FastifyInstance) => {
     res.status(200).send();
   });
 
+  // only used for github redirects non external for a11ywatch.com
   app.get("/github/callback", limiter, async (req, res) => {
     const requestToken = (req.query as any).code + "";
     const plan = (req.query as any).plan;
@@ -155,5 +156,86 @@ export const setAuthRoutes = (app: FastifyInstance) => {
           }`
         : config.DOMAIN
     );
+  });
+
+  // upgrade user account
+  app.post("/api/upgrade", async (req, res) => {
+    const body: any = req.body;
+
+    if (req.cookies.jwt || req.headers.authorization) {
+      const usr = getUserFromToken(
+        req.cookies.jwt || req.headers.authorization
+      );
+      const id = usr?.payload?.keyid;
+
+      if (body && validateUID(id)) {
+        try {
+          const response = await UsersController().addPaymentSubscription({
+            keyid: id,
+            stripeToken: body.stripeToken,
+            yearly: body.yearly,
+            paymentPlan: body.paymentPlan,
+          });
+
+          if (response?.user) {
+            res.setCookie("jwt", response.user.jwt, cookieConfigs).send({
+              message: response.message,
+              data: response.user,
+              success: response.success,
+            });
+          } else {
+            res.status(StatusCode.BadRequest);
+            res.send({
+              data: null,
+              message: "Plan was incorrect or price associated to plan.",
+            });
+          }
+        } catch (e) {
+          res.status(StatusCode.BadRequest);
+          res.send({
+            data: null,
+            message: e?.message,
+          });
+        }
+        return;
+      }
+    }
+
+    res.status(200).send();
+  });
+
+  // cancel account subscription
+  app.post("/api/cancel-subscription", async (req, res) => {
+    // catch the stripe token incase of invalid usage
+    if (req.cookies.jwt || req.headers.authorization) {
+      const usr = getUserFromToken(
+        req.cookies.jwt || req.headers.authorization
+      );
+      const id = usr?.payload?.keyid;
+
+      if (validateUID(id)) {
+        try {
+          const response = await UsersController().cancelSubscription({
+            keyid: id,
+          });
+          res.setCookie("jwt", "", cookieConfigs);
+          res.clearCookie("jwt");
+          res.send({
+            message: response.message,
+            data: response.user,
+            success: response.success,
+          });
+        } catch (e) {
+          res.status(StatusCode.BadRequest);
+          res.send({
+            data: null,
+            message: e?.message,
+          });
+        }
+        return;
+      }
+    }
+
+    res.status(200).send();
   });
 };

@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.6.69",
+  "version": "0.6.72",
   "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.3.9",
-    "@a11ywatch/website-source-builder": "^0.0.34",
+    "@a11ywatch/website-source-builder": "^0.0.35",
     "@fastify/cookie": "^6.0.0",
     "@fastify/cors": "^7.0.0",
     "@fastify/rate-limit": "^6.0.1",

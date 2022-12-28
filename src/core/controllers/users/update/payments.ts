@@ -10,31 +10,37 @@ type AddPaymentProps = {
   email?: string;
   stripeToken: string; // returned from client upon success credit card submit [todo: convert object]
   yearly?: boolean;
+  paymentPlan?: string; // valid payment plan
 };
 
 const trialPeriod = process.env.TRIAL_PERIOD
   ? parseInt(process.env.TRIAL_PERIOD, 10)
   : 14;
 
-// add payment subscription between basic and premium plans. Does not work with entrprise.
+// add payment subscription between basic and premium plans.
 export const addPaymentSubscription = async ({
   keyid,
   email: emailP,
   stripeToken, // contains the plan for the mutation - todo: split param off the stripe token
   yearly,
+  paymentPlan,
 }: AddPaymentProps) => {
   const [user, collection] = await getUser({ email: emailP, id: keyid });
   const email = user?.email ?? emailP;
 
-  // todo: make stripe token optional and prevent storing to db
   if (user && stripeToken) {
     let parsedToken = null;
 
     if (stripeToken) {
-      try {
-        parsedToken = JSON.parse(stripeToken);
-      } catch (e) {
-        console.error(e);
+      // parse token string
+      if (typeof stripeToken === "string") {
+        try {
+          parsedToken = JSON.parse(stripeToken);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        parsedToken = stripeToken;
       }
 
       if (!parsedToken && !user.stripeID) {
@@ -91,7 +97,8 @@ export const addPaymentSubscription = async ({
         }
       }
 
-      const plan = parsedToken?.plan;
+      // todo: remove plan from token
+      const plan = parsedToken?.plan ?? paymentPlan;
       const stripeProductPlan = stripeProductId(plan, yearly);
       const activeSub = user?.paymentSubscription;
       const upgradeAccount =
