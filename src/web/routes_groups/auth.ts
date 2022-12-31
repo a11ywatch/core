@@ -11,6 +11,8 @@ import { StatusCode } from "../messages/message";
 import type { FastifyInstance } from "fastify";
 import { validateUID } from "../params/extracter";
 import { limiter } from "../limiters";
+import { User } from "../../types/schema";
+import { SUCCESS } from "../../core/strings";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -61,13 +63,47 @@ const onAuthGithub = (requestToken: string): Promise<any> => {
   });
 };
 
+// explicit valid props to send over the API for USER data
+const cleanUserProps = ({
+  alertEnabled,
+  email,
+  emailConfirmed,
+  githubId,
+  id,
+  jwt,
+  lastLoginDate,
+  pageSpeedApiKey,
+  role,
+  scanInfo,
+  stripeID,
+  websiteLimit,
+}: User) => {
+  return {
+    alertEnabled,
+    email,
+    emailConfirmed,
+    githubId,
+    id,
+    jwt,
+    lastLoginDate,
+    pageSpeedApiKey,
+    role,
+    scanInfo,
+    stripeID,
+    websiteLimit,
+  };
+};
+
 // set all authentication routes
 export const setAuthRoutes = (app: FastifyInstance) => {
   app.post("/api/register", limiter, async (req, res) => {
     try {
       const auth = await createUser(req.body);
 
-      res.setCookie("jwt", auth.jwt, cookieConfigs).send(auth);
+      res.setCookie("jwt", auth.jwt, cookieConfigs).send({
+        data: cleanUserProps(auth),
+        message: SUCCESS,
+      });
     } catch (e) {
       res.status(StatusCode.BadRequest);
       res.send({
@@ -80,7 +116,10 @@ export const setAuthRoutes = (app: FastifyInstance) => {
     try {
       const auth = await verifyUser(req.body);
 
-      res.setCookie("jwt", auth.jwt, cookieConfigs).send(auth);
+      res.setCookie("jwt", auth.jwt, cookieConfigs).send({
+        data: cleanUserProps(auth),
+        message: SUCCESS,
+      });
     } catch (e) {
       res.status(StatusCode.BadRequest);
       res.send({
@@ -180,7 +219,7 @@ export const setAuthRoutes = (app: FastifyInstance) => {
           if (response?.user) {
             res.setCookie("jwt", response.user.jwt, cookieConfigs).send({
               message: response.message,
-              data: response.user,
+              data: cleanUserProps(response.user),
               success: response.success,
             });
           } else {

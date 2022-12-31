@@ -296,12 +296,18 @@ async function initServer(): Promise<HttpServer[]> {
     });
   });
 
+  const STRIPE_KEY = process.env.STRIPE_CLIENT_KEY;
+  const stripeMessage = STRIPE_KEY
+    ? "Set the Stripe key with stripe.js"
+    : "Stripe key not found";
+
   // send the client secret to enable building ontop of infrastructure.
   app.get("/api/client-key", (_, res) => {
     res.send({
       data: {
-        client_secret: process.env.STRIPE_CLIENT_KEY,
+        client_secret: STRIPE_KEY,
       },
+      message: stripeMessage,
     });
   });
 
