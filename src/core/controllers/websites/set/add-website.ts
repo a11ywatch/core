@@ -137,6 +137,7 @@ export const addWebsite = async ({
         subdomains: subdomainsEnabled,
         tld: tldEnabled,
         scan: true,
+        agent: ua,
       });
     }
   });

@@ -1,4 +1,7 @@
-import { watcherCrawl } from "../actions/accessibility/watcher_crawl";
+import {
+  watcherCrawl,
+  CrawlParams,
+} from "../actions/accessibility/watcher_crawl";
 import { crawlEmitter } from "../../event";
 import { domainName } from "./domain-name";
 
@@ -9,18 +12,11 @@ type CrawlMultiSite = {
   success?: boolean;
 };
 
-type CrawlProps = {
-  url: string;
-  userId?: number;
-  subdomains?: boolean;
-  tld?: boolean;
-};
-
 // crawl website and wait for finished emit event to continue @return Website[] use for testing and via sidecar.
 export const crawlMultiSiteWithEvent = (
-  props: CrawlProps
+  props: CrawlParams
 ): Promise<CrawlMultiSite> => {
-  const { url, userId, subdomains, tld } = props;
+  const { url, userId, subdomains, tld, agent } = props;
 
   // start site-wide crawls
   setImmediate(async () => {
@@ -30,6 +26,7 @@ export const crawlMultiSiteWithEvent = (
       userId,
       subdomains: !!subdomains,
       tld: !!tld,
+      agent,
     });
   });
 

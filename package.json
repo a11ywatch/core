@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.6.76",
+  "version": "0.6.78",
   "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
@@ -76,6 +76,10 @@
     "WCAG",
     "server"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a11ywatch/core.git"
+  },
   "cacheDirectories": [
     "./node_modules/.cache/mongodb-memory-server/mongodb-binaries"
   ],

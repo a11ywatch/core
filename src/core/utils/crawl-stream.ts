@@ -1,25 +1,20 @@
 import type { FastifyContext } from "apollo-server-fastify";
-import { watcherCrawl } from "../actions/accessibility/watcher_crawl";
+import {
+  watcherCrawl,
+  CrawlParams,
+} from "../actions/accessibility/watcher_crawl";
 import { getKey } from "../../event/crawl-tracking";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
 import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
 
-export type CrawlProps = {
-  url: string;
-  userId?: number;
-  subdomains?: boolean;
-  tld?: boolean;
-  robots?: boolean; // prevent robots txt
-};
-
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlHttpStream = (
-  props: CrawlProps,
+  props: CrawlParams,
   res: FastifyContext["reply"],
   client?: string
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld, robots = true } = props;
+  const { url, userId, subdomains, tld, robots = true, agent } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -29,6 +24,7 @@ export const crawlHttpStream = (
       tld: !!tld,
       scan: true,
       robots,
+      agent,
     });
   });
 

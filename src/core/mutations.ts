@@ -73,13 +73,17 @@ export const Mutation = {
         };
       }
 
+      // todo: validate website exist for crawl?
+      const { subdomains, tld, ua } = website ?? {};
+
       setImmediate(async () => {
         await watcherCrawl({
           url: url,
           userId: keyid,
-          subdomains: website?.subdomains,
-          tld: website?.tld,
+          subdomains: subdomains,
+          tld: tld,
           scan: true,
+          agent: ua,
         });
       });
       return {

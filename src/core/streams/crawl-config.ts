@@ -13,6 +13,7 @@ export const getCrawlConfig = async ({
 }) => {
   let subdomainsEnabled = SUPER_MODE ? subdomains : role && subdomains;
   let tldEnabled = SUPER_MODE ? tld : role && tld;
+  let agent = "";
 
   // determine active configuration on role
   if (role && validateUID(id)) {
@@ -25,6 +26,9 @@ export const getCrawlConfig = async ({
         if (!tldEnabled) {
           tldEnabled = !!website.tld;
         }
+        if (website.ua) {
+          agent = website.ua;
+        }
       }
     }
   }
@@ -35,5 +39,6 @@ export const getCrawlConfig = async ({
     subdomains: subdomainsEnabled,
     tld: tldEnabled,
     robots,
+    agent,
   };
 };

@@ -1,10 +1,12 @@
 import type { ServerWritableStream } from "@grpc/grpc-js";
 import { getCrawlConfig } from "../../core/streams/crawl-config";
-import { watcherCrawl } from "../../core/actions/accessibility/watcher_crawl";
+import {
+  watcherCrawl,
+  CrawlParams,
+} from "../../core/actions/accessibility/watcher_crawl";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
 import { domainName } from "../../core/utils/domain-name";
 import { getHostName } from "../../core/utils/get-host";
-import type { CrawlProps } from "../../core/utils/crawl-stream";
 import { getUserFromToken } from "../../core/utils";
 import { validateUID } from "../../web/params/extracter";
 import { SUPER_MODE } from "../../config";
@@ -51,7 +53,7 @@ export const coreCrawl = async (call: ServerCallStreaming) => {
 
 // crawl website slim and wait for finished emit event to continue @return Website[].
 export const crawlStreaming = (
-  props: CrawlProps & {
+  props: CrawlParams & {
     norobo?: boolean;
   },
   call: ServerCallStreaming

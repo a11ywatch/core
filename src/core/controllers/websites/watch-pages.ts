@@ -8,6 +8,7 @@ type Page = {
   url: string;
   subdomains?: boolean;
   tld?: boolean;
+  ua?: string; // user agent
 };
 
 // run a set of websites and get issues [DAILY CRON]
@@ -15,7 +16,7 @@ export async function websiteWatch(
   pages: Page[] | Website[] = []
 ): Promise<void> {
   for (const website of pages) {
-    const { userId, url, subdomains, tld } = website;
+    const { userId, url, subdomains, tld, ua } = website;
     const [user] = await getUser({ id: userId });
 
     // prevent unconfirmed emails from job
@@ -43,6 +44,7 @@ export async function websiteWatch(
           scan: false,
           subdomains,
           tld,
+          agent: ua,
         });
       });
     }

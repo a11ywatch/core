@@ -399,10 +399,17 @@ async function* entriesFromWebsite(
 export async function* entriesFromWebsiteSync(
   pages: Website[]
 ): AsyncGenerator<[void, string]> {
-  for (const { url, userId, subdomains, tld } of pages) {
+  for (const { url, userId, subdomains, tld, ua } of pages) {
     yield [
       !crawlingSet.has(getKey(url, [], userId)) &&
-        (await watcherCrawl({ url, subdomains, tld, userId, scan: true })),
+        (await watcherCrawl({
+          url,
+          subdomains,
+          tld,
+          userId,
+          scan: true,
+          agent: ua,
+        })),
       url,
     ];
   }
