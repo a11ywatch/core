@@ -10,7 +10,7 @@ import { getUser, UsersController } from "../../core/controllers/users";
 import { StatusCode } from "../messages/message";
 import type { FastifyInstance } from "fastify";
 import { validateUID } from "../params/extracter";
-import { limiter } from "../limiters";
+import { limiter, registerLimiter } from "../limiters";
 import { User } from "../../types/schema";
 import { SUCCESS } from "../../core/strings";
 
@@ -96,7 +96,7 @@ const cleanUserProps = ({
 
 // set all authentication routes
 export const setAuthRoutes = (app: FastifyInstance) => {
-  app.post("/api/register", limiter, async (req, res) => {
+  app.post("/api/register", registerLimiter, async (req, res) => {
     try {
       const auth = await createUser(req.body);
 

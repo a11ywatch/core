@@ -15,6 +15,15 @@ const limiter = {
   },
 };
 
+const registerLimiter = {
+  config: {
+    rateLimit: {
+      max: 4,
+      timeWindow: "30 minutes",
+    },
+  },
+};
+
 // crawl limiter
 const scanLimiter = {
   config: {
@@ -47,4 +56,4 @@ const getGqlRateLimitDirective = () => {
   }
 };
 
-export { gqlRateLimiter, limiter, scanLimiter, getGqlRateLimitDirective };
+export { gqlRateLimiter, limiter, registerLimiter, scanLimiter, getGqlRateLimitDirective };
