@@ -37,6 +37,7 @@ export const crawlHttpStream = (
         if (data) {
           const issuesFound = data?.issues?.length;
 
+          // raw json string building
           res.raw.write(
             `${JSON.stringify({
               data,

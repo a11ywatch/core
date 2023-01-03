@@ -18,6 +18,7 @@ const confirmEmail = async (req, res) => {
   );
 };
 
+// unsub from emails if id matches emails
 const unSubEmails = async (req, res) => {
   const email = paramParser(req, "email") + "";
   const id = paramParser(req, "id") || paramParser(req, "userId");

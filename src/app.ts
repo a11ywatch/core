@@ -188,8 +188,6 @@ async function initServer(): Promise<HttpServer[]> {
    * Uses Event based handling to extract pages.
    */
   app.post("/api/crawl", scanLimiter, crawlStream);
-  app.post("/api/crawl-stream", scanLimiter, crawlStream);
-
   /*
    * Site wide scan handles via stream slim data sized.
    * Uses Event based handling to extract pages.
