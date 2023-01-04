@@ -16,17 +16,14 @@ export const crawlStream = async (
 ) => {
   const body = req.body as any;
   const baseUrl = body?.websiteUrl || body?.url;
-
   const url = baseUrl && decodeURIComponent(baseUrl);
+  const removeTrailing = body.removeTrailing;
 
   if (!url) {
     res.status(StatusCode.BadRequest);
     res.send([]);
     return;
   }
-
-  const client = (req.headers["X-Request-Client"] ||
-    req.headers["x-request-client"]) as string;
 
   const userNext = await getUserFromApiScan(
     req?.headers?.authorization || req?.cookies?.jwt,
@@ -62,9 +59,9 @@ export const crawlStream = async (
     res.raw.write("[");
 
     if (slim) {
-      await crawlHttpStreamSlim(crawlProps, res, client);
+      await crawlHttpStreamSlim(crawlProps, res, removeTrailing);
     } else {
-      await crawlHttpStream(crawlProps, res, client);
+      await crawlHttpStream(crawlProps, res, removeTrailing);
     }
 
     res.raw.write("]");

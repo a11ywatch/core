@@ -3,7 +3,7 @@ import {
   watcherCrawl,
   CrawlParams,
 } from "../actions/accessibility/watcher_crawl";
-import { getKey } from "../../event/crawl-tracking";
+import { crawlingSet, getKey } from "../../event/crawl-tracking";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
 
 import { domainName } from "./domain-name";
@@ -13,7 +13,7 @@ import { getHostName } from "./get-host";
 export const crawlHttpStreamSlim = (
   props: CrawlParams,
   res: FastifyContext["reply"],
-  client?: string
+  removeTrailing: boolean = true
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld, robots, agent } = props;
 
@@ -32,19 +32,27 @@ export const crawlHttpStreamSlim = (
   return new Promise((resolve) => {
     const domain = getHostName(url);
     const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
+    const key = getKey(domain, undefined, userId); // crawl event key
 
-    const crawlListener = (source) => {
-      setImmediate(() => {
-        const data = source?.data;
+    const crawlListener = removeTrailing
+      ? (source) => {
+          setImmediate(() => {
+            const data = source?.data;
 
-        // only send when true
-        if (data) {
-          if (!res.raw.writableEnded) {
-            res.raw.write(`${JSON.stringify(data)},`);
-          }
+            if (data && !res.raw.writableEnded) {
+              res.raw.write(`${JSON.stringify(data)}${crawlingSet.has(key) && crawlingSet.get(key).crawling ? "," : ""}`);
+            }
+          });
         }
-      });
-    };
+      : (source) => {
+          setImmediate(() => {
+            const data = source?.data;
+
+            if (data && !res.raw.writableEnded) {
+              res.raw.write(`${JSON.stringify(data)},`);
+            }
+          });
+        };
 
     crawlEmitter.on(crawlEvent, crawlListener);
 
@@ -52,24 +60,12 @@ export const crawlHttpStreamSlim = (
       setImmediate(() => {
         crawlTrackingEmitter.off(crawlEvent, crawlListener);
 
-        // back compat support old cli
-        if (
-          client &&
-          client.includes("a11ywatch_cli/") &&
-          !res.raw.writableEnded
-        ) {
-          // send extra item for trailing comma handler
-          res.raw.write(`${JSON.stringify({ url: "", domain: "" })}`, () =>
-            resolve(true)
-          );
-        } else {
-          resolve(true);
-        }
+        resolve(true);
       });
     };
 
     crawlTrackingEmitter.once(
-      `crawl-complete-${getKey(domain, undefined, userId)}`,
+      `crawl-complete-${key}`,
       crawlComplete
     );
   });
