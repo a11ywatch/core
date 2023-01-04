@@ -16,6 +16,7 @@ export const updateWebsite = async ({
   robots = true,
   tld,
   subdomains,
+  ignore,
 }: Partial<Website> & { actions?: Record<string, unknown>[] }) => {
   const [website, collection] = await getWebsite({ userId, url });
 
@@ -36,6 +37,7 @@ export const updateWebsite = async ({
     robots,
     subdomains: !!website.subdomains,
     tld: !!website.tld,
+    ignore: website.ignore,
   };
 
   // if page headers are sent add them
@@ -66,14 +68,19 @@ export const updateWebsite = async ({
     pageParams.ua = ua;
   }
 
-  // if user agent is defined
+  // if user tld is defined
   if (typeof tld !== "undefined") {
     pageParams.tld = tld;
   }
 
-  // if user agent is defined
+  // if user subdomains is defined
   if (typeof subdomains !== "undefined") {
     pageParams.subdomains = subdomains;
+  }
+
+  // if user agent is defined
+  if (typeof ignore !== "undefined" && Array.isArray(ignore)) {
+    pageParams.ignore = ignore;
   }
 
   await collection.updateOne({ url, userId }, { $set: pageParams });

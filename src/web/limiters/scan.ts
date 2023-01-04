@@ -56,4 +56,10 @@ const getGqlRateLimitDirective = () => {
   }
 };
 
-export { gqlRateLimiter, limiter, registerLimiter, scanLimiter, getGqlRateLimitDirective };
+export {
+  gqlRateLimiter,
+  limiter,
+  registerLimiter,
+  scanLimiter,
+  getGqlRateLimitDirective,
+};

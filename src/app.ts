@@ -223,6 +223,7 @@ async function initServer(): Promise<HttpServer[]> {
     const actions = paramParser(req, "actions");
     const subdomains = paramParser(req, "subdomains");
     const tld = paramParser(req, "tld");
+    const ignore = paramParser(req, "ignore");
 
     const { website } = await updateWebsite({
       userId,
@@ -235,6 +236,7 @@ async function initServer(): Promise<HttpServer[]> {
       actions,
       subdomains,
       tld,
+      ignore,
     });
 
     return res.send({

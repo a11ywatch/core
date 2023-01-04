@@ -77,6 +77,7 @@ export const scanAuthenticated = async (
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
   const html = paramParser(req, "html");
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
+  const ignore = paramParser(req, "ignore");
 
   if (!url && !html) {
     res.status(400);
@@ -113,6 +114,7 @@ export const scanAuthenticated = async (
         sendSub: false,
         standard,
         html,
+        ignore,
       },
       false,
       true

@@ -47,7 +47,7 @@ export const crawlStream = async (
     res.raw.writeHead(StatusCode.Ok, {
       "Content-Type": "application/json",
       "Transfer-Encoding": "chunked",
-      "Access-Control-Allow-Origin": "*"
+      "Access-Control-Allow-Origin": "*",
     });
 
     const crawlProps = await getCrawlConfig({

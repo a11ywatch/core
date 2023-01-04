@@ -1,5 +1,4 @@
 import { FastifyContext } from "apollo-server-fastify";
-
 import { paramParser } from "./extracter";
 
 // extract params for website configuration
@@ -14,6 +13,7 @@ export const getWebParams = (req: FastifyContext["request"]) => {
   const robots = paramParser(req, "robots");
   const subdomains = paramParser(req, "subdomains");
   const tld = paramParser(req, "tld");
+  const ignore = paramParser(req, "ignore");
 
   return {
     url,
@@ -26,5 +26,6 @@ export const getWebParams = (req: FastifyContext["request"]) => {
     robots,
     subdomains,
     tld,
+    ignore,
   };
 };

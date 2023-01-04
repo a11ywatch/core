@@ -35,6 +35,7 @@ export const addWebsite = async ({
   robots = true,
   subdomains = false,
   tld = false,
+  ignore = [],
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -93,6 +94,7 @@ export const addWebsite = async ({
     robots,
     subdomains: subdomainsEnabled,
     tld: tldEnabled,
+    ignore,
   });
 
   await collection.insertOne(website);
@@ -102,8 +104,8 @@ export const addWebsite = async ({
     if (actionsEnabled) {
       const [actionsCollection] = connect("PageActions");
 
-      // add actions to collection
-      actions.forEach(async (action) => {
+      for (let i = 0; i < actions.length; i++) {
+        const action = actions[i];
         const update = {
           $set: {
             ...action,
@@ -125,7 +127,7 @@ export const addWebsite = async ({
           update,
           { upsert: true }
         );
-      });
+      }
     }
 
     // perform extra scan on mutation. [TODO: add optional input field]

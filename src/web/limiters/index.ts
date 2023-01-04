@@ -1,1 +1,6 @@
-export { limiter, registerLimiter, scanLimiter, getGqlRateLimitDirective } from "./scan";
+export {
+  limiter,
+  registerLimiter,
+  scanLimiter,
+  getGqlRateLimitDirective,
+} from "./scan";

@@ -52,6 +52,7 @@ export const website = gql`
     shutdown: Boolean
     issue: [PageIssue]
     pageHeaders: [PageHeaders]
+    ignore: [String]
     analytics(limit: Int = 0, offset: Int = 0, all: Boolean = false): [Analytic]
     scripts(
       limit: Int = 0

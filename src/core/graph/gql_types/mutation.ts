@@ -39,6 +39,7 @@ export const mutation = gql`
       tld: Boolean
       subdomains: Boolean
       actions: [PageActionsInput]
+      ignore: [String]
     ): UpdateWebSiteMutationResponse
 
     updateScript(
@@ -94,6 +95,7 @@ export const mutation = gql`
       robots: Boolean
       subdomains: Boolean
       tld: Boolean
+      ignore: [String]
     ): UpdateWebSiteMutationResponse
 
     filterEmailDates(emailFilteredDates: [Int], morning: Boolean): User

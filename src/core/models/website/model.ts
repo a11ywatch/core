@@ -23,6 +23,7 @@ const WebsiteModel = {
   order: 0, // the sort order
   verified: false, // website verified
   verificationCode: "", // code to validate website record
+  ignore: [], // ignore list of standards
 };
 
 const makeWebsite = (

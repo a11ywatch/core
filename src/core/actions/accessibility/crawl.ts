@@ -39,6 +39,7 @@ export type CrawlConfig = {
   noStore?: boolean; // when enabled - do not store data to fs for js scripts etc
   html?: string; // raw html to validate
   standard?: string; // accessibility standard
+  ignore?: string[]; // ignore list of standards;
 };
 
 // track the crawl events between crawls
@@ -92,6 +93,7 @@ export const crawlPage = async (
     sendSub: sub,
     html,
     standard,
+    ignore,
   } = crawlConfig ?? {};
 
   // detect if redis is connected to send subs
@@ -135,6 +137,7 @@ export const crawlPage = async (
     pageInsights: websitePageInsights,
     mobile,
     ua,
+    ignore: websiteIgnore,
   } = website ?? {};
 
   const freeAccount = !urole; // free account
@@ -172,6 +175,7 @@ export const crawlPage = async (
     pageSpeedApiKey: pageSpeedApiKey,
     noStore: !website ? true : noStore, // prevent storing content if not target page
     html,
+    ignore: ignore ?? websiteIgnore,
   });
 
   let shutdown = false;
