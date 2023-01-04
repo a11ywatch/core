@@ -2,9 +2,15 @@ import type { FastifyInstance } from "fastify";
 import { config } from "../../config";
 import { stripe } from "../../core/external";
 import { UsersController, WebsitesController } from "../../core/controllers";
+import Stripe from "stripe";
+
+// Data to use from stripe web hook [todo: types may be available on newer versions]
+type StripeData = {
+  object: { customer_email: string; email?: string; billing_reason: string };
+};
 
 export const stripeHook = async (req, res) => {
-  let event;
+  let event: Stripe.Event;
 
   try {
     event = await stripe.webhooks.constructEventAsync(
@@ -18,12 +24,15 @@ export const stripeHook = async (req, res) => {
   }
 
   let statusCode = 200;
-  const { object: stripeCustomer } = event?.data ?? {};
+  // todo: bind to stripe api version
+  const { object: stripeCustomer } = (event?.data as StripeData) ?? {};
+
+  const userEmail = stripeCustomer?.customer_email ?? stripeCustomer?.email;
 
   switch (event.type) {
     case "customer.subscription.deleted": {
       const [user, collection] = await UsersController().getUser({
-        email: stripeCustomer.email,
+        email: userEmail,
       });
 
       await WebsitesController().removeWebsite({
@@ -44,6 +53,27 @@ export const stripeHook = async (req, res) => {
           stripeCustomer.billing_reason
         )
       ) {
+        const [user, collection] = await UsersController().getUser({
+          email: userEmail,
+        });
+
+        // todo: remove paymentSubscription storing
+        if (
+          user &&
+          user.paymentSubscription &&
+          user.paymentSubscription.status === "trialing"
+        ) {
+          user.paymentSubscription.status = "active";
+
+          await collection.updateOne(
+            { email: user.email },
+            {
+              $set: {
+                paymentSubscription: user.paymentSubscription,
+              },
+            }
+          );
+        }
       }
       break;
     }
