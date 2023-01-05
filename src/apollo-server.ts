@@ -19,9 +19,7 @@ const getServerConfig = (
       const req = ctx?.request;
       const authentication = (req?.headers as any)?.authorization || "";
       const body = req?.body as any;
-
       const user = getUserFromToken(authentication);
-
       const operation = body ? body?.operationName : "";
 
       // authentication error

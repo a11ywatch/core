@@ -40,7 +40,11 @@ export const crawlHttpStreamSlim = (
             const data = source?.data;
 
             if (data && !res.raw.writableEnded) {
-              res.raw.write(`${JSON.stringify(data)}${crawlingSet.has(key) && crawlingSet.get(key).crawling ? "," : ""}`);
+              const crawlSource = crawlingSet.has(key) && crawlingSet.get(key);
+
+              res.raw.write(
+                `${JSON.stringify(data)}${!crawlSource ? "" : ","}`
+              );
             }
           });
         }
@@ -64,9 +68,6 @@ export const crawlHttpStreamSlim = (
       });
     };
 
-    crawlTrackingEmitter.once(
-      `crawl-complete-${key}`,
-      crawlComplete
-    );
+    crawlTrackingEmitter.once(`crawl-complete-${key}`, crawlComplete);
   });
 };

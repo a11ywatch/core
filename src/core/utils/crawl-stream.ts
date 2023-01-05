@@ -37,8 +37,9 @@ export const crawlHttpStream = (
       ? (source) => {
           setImmediate(() => {
             const data = source?.data;
-            if (data) {
+            if (data && !res.raw.writableEnded) {
               const issuesFound = data?.issues?.length;
+              const crawlSource = crawlingSet.has(key) && crawlingSet.get(key);
 
               // raw json string building
               res.raw.write(
@@ -49,7 +50,7 @@ export const crawlHttpStream = (
                   }`,
                   success: true,
                   code: 200,
-                })}${crawlingSet.has(key) && crawlingSet.get(key).crawling ? "," : ""}`
+                })}${!crawlSource ? "" : ","}`
               );
             }
           });
@@ -57,7 +58,7 @@ export const crawlHttpStream = (
       : (source) => {
           setImmediate(() => {
             const data = source?.data;
-            if (data) {
+            if (data && !res.raw.writableEnded) {
               const issuesFound = data?.issues?.length;
 
               // raw json string building
@@ -85,9 +86,6 @@ export const crawlHttpStream = (
 
     crawlEmitter.on(crawlEvent, crawlListener);
 
-    crawlTrackingEmitter.once(
-      `crawl-complete-${key}`,
-      crawlCompleteListener
-    );
+    crawlTrackingEmitter.once(`crawl-complete-${key}`, crawlCompleteListener);
   });
 };
