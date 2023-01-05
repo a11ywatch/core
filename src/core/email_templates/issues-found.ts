@@ -130,7 +130,7 @@ export const issuesResultsTemplate: IssuesResultsFound = (
         <a href="https://a11ywatch.com/reports/${targetUrl}" style="font-weight: 800; font-size: 1.8em; display: block; padding: 8px; text-align: center; text-decoration: none">View Report</a>
       </div>
       <div style="padding-top: 12px; padding-bottom: 12px; border: 1px solid #ccc; margin-bottom: 6px; border-radius: 2px">
-        <a href="https://api.a11ywatch.com/api/get-website?q=${hostName}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; padding: 8px; text-align: center; text-decoration: none">Download Report</a>
+        <a href="https://api.a11ywatch.com/api/report?q=${hostName}&download=true" style="font-weight: 800; font-size: 1.8em; display: block; padding: 8px; text-align: center; text-decoration: none">Download Report</a>
       </div>
     </div>
     ${

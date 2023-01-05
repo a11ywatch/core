@@ -1,1 +1,1 @@
-export { getWebsiteAPI, getWebsiteReport } from "./website";
+export { getWebsiteReport } from "./website";

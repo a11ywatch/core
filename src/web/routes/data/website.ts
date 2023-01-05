@@ -2,7 +2,6 @@ import { FastifyContext } from "apollo-server-fastify";
 import { initUrl } from "@a11ywatch/website-source-builder";
 import { downloadToExcel, getUserFromToken } from "../../../core/utils";
 import { getReport } from "../../../core/controllers/reports";
-import { retreiveUserByToken } from "../../../core/utils/get-user-data";
 import { paramParser } from "../../params/extracter";
 import { StatusCode } from "../../messages/message";
 import { responseModel } from "../../../core/models";
@@ -10,7 +9,7 @@ import { URL_NOT_FOUND } from "../../../core/strings/errors";
 import type { Website } from "../../../types/types";
 
 // TODO: Refactor usage
-export const getWebsiteAPI = async (
+export const getWebsiteReport = async (
   req: FastifyContext["request"],
   res: FastifyContext["reply"]
 ) => {
@@ -55,40 +54,4 @@ export const getWebsiteAPI = async (
   }
 
   res.send(data);
-};
-
-// get a report and include the authenticated user
-export const getWebsiteReport = async (
-  req: FastifyContext["request"],
-  res: FastifyContext["reply"]
-) => {
-  const slug =
-    paramParser(req, "q") ||
-    paramParser(req, "url") ||
-    paramParser(req, "pageUrl");
-
-  if (!slug) {
-    res.status(404);
-    res.send(false);
-    return;
-  }
-
-  const [user] = await retreiveUserByToken(req.headers.authorization);
-
-  if (user) {
-    const query = initUrl(decodeURIComponent(slug + ""));
-
-    const report = await getReport(query, user.id);
-
-    let data: Website = null;
-
-    if (report?.website) {
-      data = report.website;
-    }
-
-    res.send(data);
-  } else {
-    res.status(401);
-    res.send(false);
-  }
 };
