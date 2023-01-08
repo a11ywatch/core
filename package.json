@@ -32,7 +32,7 @@
     "graphql": "^15.5.0",
     "graphql-middleware": "^6.1.33",
     "graphql-rate-limit": "^3.3.0",
-    "graphql-redis-subscriptions": "^2.5.0",
+    "graphql-redis-subscriptions": "^2.6.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-tag": "2.12.6",
     "graphql-ws": "^5.11.2",
