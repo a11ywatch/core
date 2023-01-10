@@ -77,7 +77,6 @@ export const scanAuthenticated = async (
   const baseUrl = paramParser(req, "websiteUrl") || paramParser(req, "url");
   const html = paramParser(req, "html");
   const url = baseUrl ? decodeURIComponent(baseUrl) : "";
-  const ignore = paramParser(req, "ignore");
 
   if (!url && !html) {
     res.status(400);
@@ -106,6 +105,67 @@ export const scanAuthenticated = async (
     const pageInsights = paramParser(req, "pageInsights");
     const standard = paramParser(req, "standard");
 
+    // todo: validation handling before sending to rpc services into util
+    const ignore = paramParser(req, "ignore");
+    const rules = paramParser(req, "rules");
+    const runners = paramParser(req, "runners");
+
+    const accessRules = [];
+
+    // rules limit
+    if (rules && Array.isArray(rules)) {
+      for (let i = 0; i < rules.length; i++) {
+        const rule = rules[i];
+
+        // validate rule storing
+        if (rule && typeof rule === "string" && rule.length < 200) {
+          accessRules.push(rule);
+        }
+        // limit 250 items
+        if (i > 250) {
+          break;
+        }
+      }
+    }
+
+    const ignoreRules = [];
+
+    // ignore limit
+    if (ignore && Array.isArray(ignore)) {
+      for (let i = 0; i < ignore.length; i++) {
+        const rule = ignore[i];
+        // validate rule storing
+        if (rule && typeof rule === "string" && rule.length < 200) {
+          ignoreRules.push(rule);
+        }
+        // limit 250 items
+        if (i > 250) {
+          break;
+        }
+      }
+    }
+
+    const testRunners = [];
+
+    // runners
+    if (runners && Array.isArray(runners)) {
+      for (let i = 0; i < runners.length; i++) {
+        const runner = runners[i];
+        // validate rule storing
+        if (
+          runner &&
+          typeof runner === "string" &&
+          ["htmlcs", "axe"].includes(runner)
+        ) {
+          testRunners.push(runner);
+        }
+        // limit 250 items
+        if (i > 3) {
+          break;
+        }
+      }
+    }
+
     resData = await crawlPage(
       {
         url,
@@ -114,7 +174,9 @@ export const scanAuthenticated = async (
         sendSub: false,
         standard,
         html,
-        ignore,
+        ignore: ignoreRules,
+        rules: accessRules,
+        runners: testRunners,
       },
       false,
       true

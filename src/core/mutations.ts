@@ -187,6 +187,9 @@ export const Mutation = {
       robots,
       subdomains,
       tld,
+      ignore,
+      rules,
+      runners,
     },
     context
   ) => {
@@ -203,6 +206,9 @@ export const Mutation = {
       robots,
       subdomains,
       tld,
+      ignore,
+      rules,
+      runners,
     });
   },
   forgotPassword: async (_, { email }, _context) => {

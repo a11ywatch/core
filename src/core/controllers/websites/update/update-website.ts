@@ -17,6 +17,8 @@ export const updateWebsite = async ({
   tld,
   subdomains,
   ignore,
+  rules,
+  runners,
 }: Partial<Website> & { actions?: Record<string, unknown>[] }) => {
   const [website, collection] = await getWebsite({ userId, url });
 
@@ -38,6 +40,8 @@ export const updateWebsite = async ({
     subdomains: !!website.subdomains,
     tld: !!website.tld,
     ignore: website.ignore,
+    rules: website.rules,
+    runners: website.runners,
   };
 
   // if page headers are sent add them
@@ -78,9 +82,64 @@ export const updateWebsite = async ({
     pageParams.subdomains = subdomains;
   }
 
-  // if user agent is defined
-  if (typeof ignore !== "undefined" && Array.isArray(ignore)) {
-    pageParams.ignore = ignore;
+  const accessRules = [];
+
+  // rules limit
+  if (rules && Array.isArray(rules)) {
+    for (let i = 0; i < rules.length; i++) {
+      const rule = rules[i];
+
+      // validate rule storing
+      if (rule && typeof rule === "string" && rule.length < 200) {
+        accessRules.push(rule);
+      }
+      // limit 250 items
+      if (i > 250) {
+        break;
+      }
+    }
+
+    pageParams.rules = accessRules;
+  }
+
+  const ignoreRules = [];
+
+  // ignore limit
+  if (ignore && Array.isArray(ignore)) {
+    for (let i = 0; i < ignore.length; i++) {
+      const rule = ignore[i];
+      // validate rule storing
+      if (rule && typeof rule === "string" && rule.length < 200) {
+        ignoreRules.push(rule);
+      }
+      // limit 250 items
+      if (i > 250) {
+        break;
+      }
+    }
+    pageParams.ignore = ignoreRules;
+  }
+
+  const testRunners = [];
+
+  // runners
+  if (runners && Array.isArray(runners)) {
+    for (let i = 0; i < runners.length; i++) {
+      const runner = runners[i];
+      // validate rule storing
+      if (
+        runner &&
+        typeof runner === "string" &&
+        ["htmlcs", "axe"].includes(runner)
+      ) {
+        testRunners.push(runner);
+      }
+      // limit 250 items
+      if (i > 3) {
+        break;
+      }
+    }
+    pageParams.runners = testRunners;
   }
 
   await collection.updateOne({ url, userId }, { $set: pageParams });

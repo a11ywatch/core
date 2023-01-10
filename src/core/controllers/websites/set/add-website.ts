@@ -36,6 +36,8 @@ export const addWebsite = async ({
   subdomains = false,
   tld = false,
   ignore = [],
+  rules = [],
+  runners = [],
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -76,6 +78,63 @@ export const addWebsite = async ({
     wcagStandard = standard;
   }
 
+  const accessRules = [];
+
+  // rules limit
+  if (rules && Array.isArray(rules)) {
+    for (let i = 0; i < rules.length; i++) {
+      const rule = rules[i];
+
+      // validate rule storing
+      if (rule && typeof rule === "string" && rule.length < 200) {
+        accessRules.push(rule);
+      }
+      // limit 250 items
+      if (i > 250) {
+        break;
+      }
+    }
+  }
+
+  const ignoreRules = [];
+
+  // ignore limit
+  if (ignore && Array.isArray(ignore)) {
+    for (let i = 0; i < ignore.length; i++) {
+      const rule = ignore[i];
+      // validate rule storing
+      if (rule && typeof rule === "string" && rule.length < 200) {
+        ignoreRules.push(rule);
+      }
+      // limit 250 items
+      if (i > 250) {
+        break;
+      }
+    }
+  }
+
+  const testRunners = [];
+
+  // runners
+  if (runners && Array.isArray(runners)) {
+    for (let i = 0; i < runners.length; i++) {
+      const runner = runners[i];
+      // validate rule storing
+      // todo: check for "a11y" runner
+      if (
+        runner &&
+        typeof runner === "string" &&
+        ["htmlcs", "axe"].includes(runner)
+      ) {
+        testRunners.push(runner);
+      }
+      // limit 3 items
+      if (i > 3) {
+        break;
+      }
+    }
+  }
+
   const actionsEnabled = actions && Array.isArray(actions) && actions.length;
 
   const subdomainsEnabled = subdomains && (SUPER_MODE || !!user.role);
@@ -94,7 +153,9 @@ export const addWebsite = async ({
     robots,
     subdomains: subdomainsEnabled,
     tld: tldEnabled,
-    ignore,
+    ignore: ignoreRules,
+    rules: accessRules,
+    runners: testRunners,
   });
 
   await collection.insertOne(website);

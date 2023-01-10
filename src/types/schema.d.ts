@@ -497,7 +497,9 @@ export type Website = {
   tld?: boolean;
   robots?: boolean;
   verified?: boolean; // dns verified by user
-  ignore?: string[]; // ignore list of standards
+  ignore?: string[]; // ignore list of rules
+  rules?: string[]; // list of rules to comply
+  runners?: string[]; // list of runners to use htmlcs,axe, and a11y
 };
 
 export type WebsiteIssuesArgs = {

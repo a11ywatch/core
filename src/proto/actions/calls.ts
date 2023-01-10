@@ -22,7 +22,9 @@ export interface ScanRpcParams {
   pageSpeedApiKey?: string; // the PageSpeed api key to use for request
   html?: string; // raw HTML to validate
   firefox?: boolean; // experimental todo: work outside local containers
-  ignore?: string[]; // ignore list of errors
+  ignore?: string[]; // ignore list of rules
+  rules?: string[]; // list of rules
+  runners?: string[]; // list of runners axe, htmlcs, a11y.
 }
 
 // perform scan to gRPC -> pagemind for website issues

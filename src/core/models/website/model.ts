@@ -23,7 +23,9 @@ const WebsiteModel = {
   order: 0, // the sort order
   verified: false, // website verified
   verificationCode: "", // code to validate website record
-  ignore: [], // ignore list of standards
+  ignore: [], // ignore list of rules
+  rules: [], // list of rules
+  runners: [], // runners htmlcs, axe, & a11y
 };
 
 const makeWebsite = (
