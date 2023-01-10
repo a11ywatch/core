@@ -33,11 +33,17 @@ const protoConfig = {
   oneofs: true,
 };
 
-export const loadProto = async (target: string = "website.proto", retry?: boolean) => {
+export const loadProto = async (
+  target: string = "website.proto",
+  retry?: boolean
+) => {
   try {
-    return await load(`${nodePath || "./node_modules"}/@a11ywatch/protos/${target}`,protoConfig);
+    return await load(
+      `${nodePath || "./node_modules"}/@a11ywatch/protos/${target}`,
+      protoConfig
+    );
   } catch (e) {
-    if(!nodePath) {
+    if (!nodePath) {
       nodePath = getNodeModulesPath();
     }
     if (!retry) {

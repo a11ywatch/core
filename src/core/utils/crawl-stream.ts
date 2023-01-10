@@ -39,7 +39,7 @@ export const crawlHttpStream = (
             const data = source?.data;
             if (data && !res.raw.writableEnded) {
               const issuesFound = data?.issues?.length;
-              const crawlSource = crawlingSet.has(key) && crawlingSet.get(key);
+              const crawlSource = crawlingSet.has(key);
 
               // raw json string building
               res.raw.write(

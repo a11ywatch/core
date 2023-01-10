@@ -40,7 +40,7 @@ export const crawlHttpStreamSlim = (
             const data = source?.data;
 
             if (data && !res.raw.writableEnded) {
-              const crawlSource = crawlingSet.has(key) && crawlingSet.get(key);
+              const crawlSource = crawlingSet.has(key);
 
               res.raw.write(
                 `${JSON.stringify(data)}${!crawlSource ? "" : ","}`
