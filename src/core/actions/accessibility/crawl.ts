@@ -181,11 +181,15 @@ export const crawlPage = async (
     pageSpeedApiKey: pageSpeedApiKey,
     noStore: !website ? true : noStore, // prevent storing content if not target page
     html,
-    ignore: ignore && Array.isArray(ignore) && ignore.length ? ignore : websiteIgnore,
+    ignore:
+      ignore && Array.isArray(ignore) && ignore.length ? ignore : websiteIgnore,
     rules: rules && Array.isArray(rules) && rules.length ? rules : websiteRules,
-    runners: runners && Array.isArray(runners) && runners.length ? runners : websiteRunners,
+    runners:
+      runners && Array.isArray(runners) && runners.length
+        ? runners
+        : websiteRunners,
   });
-  
+
   let shutdown = false;
 
   if (!sendEmail && !SUPER_MODE) {
@@ -411,7 +415,7 @@ async function* entriesFromWebsite(
 export async function* entriesFromWebsiteSync(
   pages: Website[]
 ): AsyncGenerator<[void, string]> {
-  for (const { url, userId, subdomains, tld, ua } of pages) {
+  for (const { url, userId, subdomains, tld, ua, proxy } of pages) {
     yield [
       !crawlingSet.has(getKey(url, [], userId)) &&
         (await watcherCrawl({
@@ -421,6 +425,7 @@ export async function* entriesFromWebsiteSync(
           userId,
           scan: true,
           agent: ua,
+          proxy,
         })),
       url,
     ];

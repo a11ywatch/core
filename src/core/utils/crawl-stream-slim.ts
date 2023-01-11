@@ -15,7 +15,7 @@ export const crawlHttpStreamSlim = (
   res: FastifyContext["reply"],
   removeTrailing: boolean = true
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld, robots, agent } = props;
+  const { url, userId, subdomains, tld, robots, agent, proxy } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -26,6 +26,7 @@ export const crawlHttpStreamSlim = (
       scan: true,
       robots,
       agent,
+      proxy,
     });
   });
 

@@ -17,6 +17,7 @@ export const addWebsite = async (
     ignore,
     rules,
     runners,
+    proxy,
     ...props
   },
   context
@@ -44,5 +45,6 @@ export const addWebsite = async (
     ignore,
     rules,
     runners,
+    proxy,
   });
 };

@@ -1,3 +1,4 @@
+// do not delete - part of utility events for sidecar.
 import {
   watcherCrawl,
   CrawlParams,
@@ -12,11 +13,11 @@ type CrawlMultiSite = {
   success?: boolean;
 };
 
-// crawl website and wait for finished emit event to continue @return Website[] use for testing and via sidecar.
+// crawl website and wait for finished emit event to continue @return Website[] used for testing and via sidecar.
 export const crawlMultiSiteWithEvent = (
   props: CrawlParams
 ): Promise<CrawlMultiSite> => {
-  const { url, userId, subdomains, tld, agent } = props;
+  const { url, userId, subdomains, tld, agent, proxy } = props;
 
   // start site-wide crawls
   setImmediate(async () => {
@@ -27,6 +28,7 @@ export const crawlMultiSiteWithEvent = (
       subdomains: !!subdomains,
       tld: !!tld,
       agent,
+      proxy,
     });
   });
 

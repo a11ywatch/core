@@ -89,4 +89,7 @@ if (DEV) {
 
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
+/// server secure hashing
+export const SERVER_SALT = process.env.SERVER_SALT || "12324325425";
+
 export { cookieConfigs, DEV, TEST_ENV, PRIVATE_KEY, PUBLIC_KEY };

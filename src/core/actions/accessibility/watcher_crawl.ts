@@ -1,14 +1,16 @@
 import { initUrl } from "@a11ywatch/website-source-builder";
+import { decipher } from "../../utils";
 import { controller } from "../../../proto/actions/calls";
 
 export interface CrawlParams {
   url?: string;
   scan?: boolean; // determine scan or crawl method
-  userId?: number;
+  userId?: number; // current user
   robots?: boolean; // respect robots txt file defaults to true
-  subdomains?: boolean;
-  tld?: boolean;
+  subdomains?: boolean; // with subdomains crawling
+  tld?: boolean; // with tld crawling
   agent?: string; // User-Agent to use during crawl
+  proxy?: string; // proxy for request
 }
 
 /**
@@ -20,15 +22,19 @@ export interface CrawlParams {
  *     await crawlPage({ url: "https://a11ywatch.com", scan: true. subdomains: true, tld: false }); // async real time stream
  *     await crawlPage({ url: "https://a11ywatch.com", userId: 122, robots: true, agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4619.141 Safari/537.36" }); // run request and respect robots
  */
-export const watcherCrawl = async ({
-  url,
-  userId,
-  scan = false,
-  robots = true,
-  subdomains = false,
-  tld = false,
-  agent,
-}: CrawlParams) => {
+export const watcherCrawl = async (
+  {
+    url,
+    userId,
+    scan = false,
+    robots = true,
+    subdomains = false,
+    tld = false,
+    agent,
+    proxy,
+  }: CrawlParams,
+  deciphered?: boolean
+) => {
   const crawlParams = {
     url: initUrl(url, true),
     id: userId,
@@ -36,6 +42,7 @@ export const watcherCrawl = async ({
     subdomains,
     tld,
     agent,
+    proxy: proxy && !deciphered ? decipher(proxy) : proxy,
   };
 
   try {

@@ -9,13 +9,14 @@ import {
   getHostName,
   blockWebsiteAdd,
   stripUrlEndingSlash,
+  cipher,
 } from "../../../utils";
 import { makeWebsite } from "../../../models/website";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
 import { watcherCrawl } from "../../../actions/accessibility/watcher_crawl";
 import { connect } from "../../../../database";
-import { SUPER_MODE } from "../../../../config/config";
+import { DEV, SUPER_MODE } from "../../../../config/config";
 
 // allowed standards
 const allowedStandards = ["WCAG2A", "WCAG2AA", "WCAG2AAA", "Section508"];
@@ -38,6 +39,7 @@ export const addWebsite = async ({
   ignore = [],
   rules = [],
   runners = [],
+  proxy = "",
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -140,6 +142,15 @@ export const addWebsite = async ({
   const subdomainsEnabled = subdomains && (SUPER_MODE || !!user.role);
   const tldEnabled = tld && (SUPER_MODE || !!user.role);
 
+  const proxyHost =
+    proxy &&
+    typeof proxy === "string" &&
+    (proxy.startsWith("http") ||
+      proxy.startsWith("https") ||
+      proxy.startsWith("socks5"))
+      ? cipher(proxy)
+      : "";
+
   const website = makeWebsite({
     userId,
     url,
@@ -156,6 +167,14 @@ export const addWebsite = async ({
     ignore: ignoreRules,
     rules: accessRules,
     runners: testRunners,
+    proxy:
+      DEV ||
+      (!DEV &&
+        user.role &&
+        (!proxyHost.startsWith("http://localhost") ||
+          !proxyHost.startsWith("https://localhost")))
+        ? proxyHost
+        : "",
   });
 
   await collection.insertOne(website);
@@ -193,15 +212,19 @@ export const addWebsite = async ({
 
     // perform extra scan on mutation. [TODO: add optional input field]
     if (canScan) {
-      await watcherCrawl({
-        url: url,
-        userId,
-        robots,
-        subdomains: subdomainsEnabled,
-        tld: tldEnabled,
-        scan: true,
-        agent: ua,
-      });
+      await watcherCrawl(
+        {
+          url: url,
+          userId,
+          robots,
+          subdomains: subdomainsEnabled,
+          tld: tldEnabled,
+          scan: true,
+          agent: ua,
+          proxy,
+        },
+        true
+      );
     }
   });
 

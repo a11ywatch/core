@@ -20,3 +20,4 @@ export { jsonParse } from "./json-parse";
 export { domainName, domainNameFind } from "./domain-name";
 export { asyncRandomGenerate } from "./generate";
 export { crawlMultiSiteWithEvent } from "./multi-site";
+export { cipher, decipher } from "./crypto";

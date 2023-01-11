@@ -3,20 +3,10 @@ import { getUser } from "../../controllers/users";
 import { watcherCrawl } from "../../actions/accessibility/watcher_crawl";
 import type { Website } from "../../../types/schema";
 
-type Page = {
-  userId?: number;
-  url: string;
-  subdomains?: boolean;
-  tld?: boolean;
-  ua?: string; // user agent
-};
-
 // run a set of websites and get issues [DAILY CRON]
-export async function websiteWatch(
-  pages: Page[] | Website[] = []
-): Promise<void> {
+export async function websiteWatch(pages: Website[] = []): Promise<void> {
   for (const website of pages) {
-    const { userId, url, subdomains, tld, ua } = website;
+    const { userId, url, subdomains, tld, ua, proxy } = website;
     const [user] = await getUser({ id: userId });
 
     // prevent unconfirmed emails from job
@@ -45,6 +35,7 @@ export async function websiteWatch(
           subdomains,
           tld,
           agent: ua,
+          proxy,
         });
       });
     }

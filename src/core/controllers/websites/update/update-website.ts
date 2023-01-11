@@ -2,8 +2,10 @@ import { Website } from "../../../../types/schema";
 import { WEBSITE_NOT_FOUND, SUCCESS } from "../../../../core/strings";
 import { connect } from "../../../../database";
 import { getWebsite } from "../find";
+import { cipher } from "../../../../core/utils";
+import { DEV } from "../../../../config";
 
-// update a website by properties from form input on adding/
+// update a website by properties from form input on adding
 export const updateWebsite = async ({
   userId,
   url,
@@ -19,6 +21,7 @@ export const updateWebsite = async ({
   ignore,
   rules,
   runners,
+  proxy,
 }: Partial<Website> & { actions?: Record<string, unknown>[] }) => {
   const [website, collection] = await getWebsite({ userId, url });
 
@@ -30,18 +33,19 @@ export const updateWebsite = async ({
 
   // params prior - we mutate this on update
   const pageParams = {
+    actionsEnabled, // todo: remove actionsEnabled or set property to toggle
+    robots,
     pageHeaders: website.pageHeaders,
     pageInsights: website.pageInsights,
     mobile: website.mobile,
     standard: website.standard,
     ua: website.ua ? website.ua : undefined,
-    actionsEnabled,
-    robots,
     subdomains: !!website.subdomains,
     tld: !!website.tld,
     ignore: website.ignore,
     rules: website.rules,
     runners: website.runners,
+    proxy: website.proxy,
   };
 
   // if page headers are sent add them
@@ -80,6 +84,26 @@ export const updateWebsite = async ({
   // if user subdomains is defined
   if (typeof subdomains !== "undefined") {
     pageParams.subdomains = subdomains;
+  }
+
+  // if proxy is defined
+  if (
+    (typeof proxy !== "undefined" && !proxy) ||
+    (proxy &&
+      typeof proxy === "string" &&
+      (proxy.startsWith("http") ||
+        proxy.startsWith("https") ||
+        proxy.startsWith("socks5")))
+  ) {
+    if (
+      DEV ||
+      !proxy ||
+      (!DEV &&
+        (!proxy.startsWith("http://localhost") ||
+          !proxy.startsWith("https://localhost")))
+    ) {
+      pageParams.proxy = !proxy ? "" : cipher(proxy);
+    }
   }
 
   const accessRules = [];

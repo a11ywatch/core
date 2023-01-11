@@ -42,6 +42,7 @@ export const mutation = gql`
       ignore: [String]
       rules: [String]
       runners: [String]
+      proxy: String
     ): UpdateWebSiteMutationResponse
 
     updateScript(
@@ -100,6 +101,7 @@ export const mutation = gql`
       ignore: [String]
       rules: [String]
       runners: [String]
+      proxy: String
     ): UpdateWebSiteMutationResponse
 
     filterEmailDates(emailFilteredDates: [Int], morning: Boolean): User

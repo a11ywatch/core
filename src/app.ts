@@ -6,7 +6,7 @@ import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import type { Server as HttpServer } from "http";
 
-import { config, logServerInit, fastifyConfig, corsOptions } from "./config";
+import { config, logServerInit, fastifyConfig, corsOptions, DEV } from "./config";
 import {
   crawlAllAuthedWebsitesCluster,
   WebsitesController,
@@ -226,6 +226,7 @@ async function initServer(): Promise<HttpServer[]> {
     const ignore = paramParser(req, "ignore");
     const rules = paramParser(req, "rules");
     const runners = paramParser(req, "runners");
+    const proxy = paramParser(req, "proxy");
 
     const { website } = await updateWebsite({
       userId,
@@ -241,6 +242,7 @@ async function initServer(): Promise<HttpServer[]> {
       ignore,
       rules,
       runners,
+      proxy: DEV || usr?.payload?.audience ? proxy : undefined,
     });
 
     return res.send({
@@ -276,7 +278,6 @@ async function initServer(): Promise<HttpServer[]> {
   app.delete("/api/website", async (req, res) => {
     const usr = getUserFromToken(req.headers.authorization || req.cookies.jwt);
     const userId = usr?.payload?.keyid;
-
     const url = paramParser(req, "url");
     const deleteMany = paramParser(req, "deleteMany");
     const domain = paramParser(req, "domain");

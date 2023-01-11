@@ -58,7 +58,7 @@ export const crawlStreaming = (
   },
   call: ServerCallStreaming
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld, norobo } = props;
+  const { url, userId, subdomains, tld, norobo, proxy } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -68,6 +68,7 @@ export const crawlStreaming = (
       tld: !!tld,
       scan: true,
       robots: !norobo,
+      proxy,
     });
   });
 

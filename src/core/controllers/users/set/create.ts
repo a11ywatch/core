@@ -34,7 +34,9 @@ export const createUser = async ({
   const googleAuthed = user && (user.googleId || googleId);
   const githubAuthed = user && (user.githubId || githubId);
 
-  const emailConfirmed = !!googleId || !!githubId;
+  if (!googleId && !githubId && !password) {
+    throw new Error("Password of atleast 6 chars required to register.");
+  }
 
   const salthash = password && (await saltHashPassword(password, user?.salt));
   const passwordMatch = user?.password === salthash?.passwordHash;
@@ -47,9 +49,8 @@ export const createUser = async ({
     );
   }
 
-  if (!googleId && !githubId && !password) {
-    throw new Error("Password of atleast 6 chars required to register.");
-  }
+  // auto confirm email from google and github auth
+  const emailConfirmed = !!googleId || !!githubId;
 
   // user account found! validate request
   if (user) {

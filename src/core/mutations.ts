@@ -15,7 +15,7 @@ import { gqlRateLimiter } from "../web/limiters/scan";
 import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
 import { ScriptsController, UsersController } from "./controllers";
-import { SUPER_MODE } from "../config/config";
+import { DEV, SUPER_MODE } from "../config/config";
 import { CRAWLER_COMMENCED } from "./strings/success";
 import { crawlingSet, getKey } from "../event/crawl-tracking";
 import { StatusCode } from "../web/messages/message";
@@ -73,8 +73,7 @@ export const Mutation = {
         };
       }
 
-      // todo: validate website exist for crawl?
-      const { subdomains, tld, ua } = website ?? {};
+      const { subdomains, tld, ua, proxy } = website ?? {};
 
       setImmediate(async () => {
         await watcherCrawl({
@@ -84,6 +83,7 @@ export const Mutation = {
           tld: tld,
           scan: true,
           agent: ua,
+          proxy: proxy,
         });
       });
       return {
@@ -190,10 +190,11 @@ export const Mutation = {
       ignore,
       rules,
       runners,
+      proxy,
     },
     context
   ) => {
-    const { keyid } = context.user?.payload || defaultPayload;
+    const { keyid, audience } = context.user?.payload || defaultPayload;
 
     return await WebsitesController().updateWebsite({
       userId: userId || keyid,
@@ -209,6 +210,7 @@ export const Mutation = {
       ignore,
       rules,
       runners,
+      proxy: DEV || audience ? proxy : undefined,
     });
   },
   forgotPassword: async (_, { email }, _context) => {

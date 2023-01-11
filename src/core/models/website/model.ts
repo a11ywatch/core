@@ -26,6 +26,7 @@ const WebsiteModel = {
   ignore: [], // ignore list of rules
   rules: [], // list of rules
   runners: [], // runners htmlcs, axe, & a11y
+  proxy: "", // proxy for request
 };
 
 const makeWebsite = (

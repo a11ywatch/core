@@ -55,6 +55,7 @@ export const website = gql`
     ignore: [String]
     rules: [String]
     runners: [String]
+    proxy: String
     analytics(limit: Int = 0, offset: Int = 0, all: Boolean = false): [Analytic]
     scripts(
       limit: Int = 0

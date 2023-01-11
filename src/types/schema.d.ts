@@ -496,10 +496,11 @@ export type Website = {
   subdomains?: boolean;
   tld?: boolean;
   robots?: boolean;
+  proxy?: string; // proxy for network request
   verified?: boolean; // dns verified by user
   ignore?: string[]; // ignore list of rules
   rules?: string[]; // list of rules to comply
-  runners?: string[]; // list of runners to use htmlcs,axe, and a11y
+  runners?: string[]; // list of runners to use htmlcs, and axe
 };
 
 export type WebsiteIssuesArgs = {
