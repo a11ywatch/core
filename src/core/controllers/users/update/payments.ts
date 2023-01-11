@@ -17,7 +17,7 @@ const trialPeriod = process.env.TRIAL_PERIOD
   ? parseInt(process.env.TRIAL_PERIOD, 10)
   : 14;
 
-// add payment subscription between basic and premium plans.
+// add payment subscription between plans.
 export const addPaymentSubscription = async ({
   keyid,
   email: emailP,
@@ -52,6 +52,8 @@ export const addPaymentSubscription = async ({
         };
       }
     }
+    // todo: remove plan from token
+    const plan = parsedToken?.plan ?? paymentPlan ?? "L1";
 
     // params used to create the user
     const createParams = parsedToken?.referral
@@ -97,8 +99,6 @@ export const addPaymentSubscription = async ({
         }
       }
 
-      // todo: remove plan from token
-      const plan = parsedToken?.plan ?? paymentPlan;
       const stripeProductPlan = stripeProductId(plan, yearly);
       const activeSub = user?.paymentSubscription;
       const upgradeAccount =

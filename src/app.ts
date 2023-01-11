@@ -6,7 +6,13 @@ import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import type { Server as HttpServer } from "http";
 
-import { config, logServerInit, fastifyConfig, corsOptions, DEV } from "./config";
+import {
+  config,
+  logServerInit,
+  fastifyConfig,
+  corsOptions,
+  DEV,
+} from "./config";
 import {
   crawlAllAuthedWebsitesCluster,
   WebsitesController,
