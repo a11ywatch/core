@@ -6,7 +6,7 @@ export const website = async (_, { url, ...props }, context) => {
 
   const [website] = await WebsitesController().getWebsite({
     userId,
-    url: decodeURIComponent(url),
+    url: url && decodeURIComponent(url),
   });
 
   return website;

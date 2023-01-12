@@ -82,7 +82,11 @@ export const addPaymentSubscription = async ({
       }
       // if customer not found on re-sub re-create user
       if (!customer) {
-        customer = await stripe.customers.create(createParams);
+        try {
+          customer = await stripe.customers.create(createParams);
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
 
@@ -199,7 +203,7 @@ export const cancelSubscription = async ({ keyid }) => {
 
     if (deletedSubscription) {
       const jwt = signJwt({
-        email: user?.email,
+        email: user.email,
         role: 0,
         keyid: user.id,
       });
