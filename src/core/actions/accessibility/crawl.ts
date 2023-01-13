@@ -29,6 +29,7 @@ import type { Issue } from "../../../types/schema";
 import { watcherCrawl } from "./watcher_crawl";
 import { shapeResponse } from "../../models/response/shape-response";
 import { crawlingSet, getKey } from "../../../event/crawl-tracking";
+import type { Collection, Document } from "mongodb";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -306,6 +307,8 @@ export const crawlPage = async (
               : Promise.resolve([null, null]),
           ]);
 
+          console.log(pagesCollection);
+
           await Promise.all([
             // analytics
             collectionUpsert(
@@ -332,7 +335,7 @@ export const crawlPage = async (
             // pages
             collectionUpsert(
               updateWebsiteProps,
-              [pagesCollection, newSite, !issueCount], // delete document if issues do not exist
+              [pagesCollection as Collection<Document>, newSite, !issueCount], // delete document if issues do not exist
               {
                 searchProps: { url: pageUrl, userId },
               }

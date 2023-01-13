@@ -1,10 +1,11 @@
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
 import { extractLighthouse } from "../../core/utils/shapes/extract-page-data";
 import { LIGHTHOUSE } from "../../core/static";
-import { pubsub } from "../../database";
+import { connect, pubsub } from "../../database";
 import { collectionUpsert } from "../../core/utils";
 import { PageSpeedController } from "../../core/controllers/page-speed/main";
 import { WebsitesController } from "../../core/controllers";
+import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 
 // lighthouse page updating
 export const pageUpdate = async (
@@ -28,6 +29,7 @@ export const pageUpdate = async (
     const [website] = await WebsitesController().getWebsite({ domain, userId });
 
     if (website) {
+      const [pagesCollection] = connect("Pages");
       const [pageSpeed, pageSpeedCollection] =
         await PageSpeedController().getWebsite(
           { pageUrl: lighthouseResults.pageUrl, userId },
@@ -39,6 +41,22 @@ export const pageUpdate = async (
         pageSpeedCollection,
         pageSpeed,
       ]);
+
+      // update collection after batch async operations
+      // add flag on pages for lighthouse
+      await collectionUpsert(
+        {
+          pageInsights: true,
+        },
+        [pagesCollection, true],
+        {
+          searchProps: {
+            domain,
+            userId,
+            url: removeTrailingSlash(pageUrl), // todo: add trailing slash removal from root instead of split
+          },
+        }
+      );
 
       try {
         await pubsub.publish(LIGHTHOUSE, {

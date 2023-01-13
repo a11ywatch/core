@@ -58,12 +58,12 @@ export const Website = {
       ...params,
     });
   },
-  pages: async ({ userId, url, domain }, params) => {
+  pages: async ({ userId, url, domain, insights = false }, params) => {
     return await PagesController().getPagesPaging({
       userId,
       url,
       domain,
-      insights: true,
+      insights, // todo: if enabled rate limit weighted
       ...params,
     });
   },

@@ -1,3 +1,5 @@
+import type { Collection, Document } from "mongodb";
+
 /*
  * Update or add item into collection - some values are autofilled if empty.
  * This method acts as a collection upsert with delete for any collection.
@@ -7,7 +9,7 @@
  */
 export const collectionUpsert = async (
   source: any,
-  [collection, shouldUpdate, shouldDelete]: [any, any, any?],
+  [collection, shouldUpdate, shouldDelete]: [Collection<Document>, any, any?],
   config?: any
 ) => {
   if (typeof source === "undefined") {
@@ -38,13 +40,17 @@ export const collectionUpsert = async (
 
   if (shouldUpdate && shouldDelete) {
     return await collection.deleteOne(queryParams); // delete the record when update & delete
-  } else if (!shouldUpdate) {
-    return await collection.insertOne(source);
-  } else if (shouldUpdate === "many") {
-    return await collection.updateMany(queryParams, { $set: source });
-  } else {
-    return await collection.updateOne(queryParams, { $set: source });
   }
+
+  if (!shouldUpdate) {
+    return await collection.insertOne(source);
+  }
+
+  if (shouldUpdate === "many") {
+    return await collection.updateMany(queryParams, { $set: source });
+  }
+
+  return await collection.updateOne(queryParams, { $set: source });
 };
 
 /*

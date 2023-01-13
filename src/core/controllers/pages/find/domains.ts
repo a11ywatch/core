@@ -32,7 +32,7 @@ export const getPages = async (
 };
 
 // Get the page from the collection
-// @example await getPage({userID: 2}) // returns Pages collection and not Website
+// @example await getPage({ userID: 2, url: "http://someurl.com" }) // returns Pages collection and not Website
 export const getPage = async ({
   userId,
   url,
@@ -42,10 +42,9 @@ export const getPage = async ({
 }) => {
   const [collection] = connect("Pages");
   const searchProps = websiteSearchParams({ url, userId });
+  const page = await collection.findOne(searchProps);
 
-  const website = await collection.findOne(searchProps);
-
-  return [website, collection];
+  return [page, collection];
 };
 
 // get all the pages in the database
@@ -96,12 +95,18 @@ export const getPagesPaging = async (
     for (let i = 0; i < pages.length; i++) {
       const cp = pages[i];
 
+      // if insights not found continue
+      if (!cp.pageInsights) {
+        continue;
+      }
+
       const { json } =
         (await PageSpeedController().getWebsite({
           userId,
           pageUrl: cp.url,
           domain,
         })) ?? {};
+
       if (json) {
         pages[i].insight = { json };
       }

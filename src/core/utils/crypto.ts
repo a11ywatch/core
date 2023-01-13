@@ -7,16 +7,16 @@ let key = null;
 try {
   // attempt sha256 salting
   key = createHash("sha256").update(SERVER_SALT, "ascii").digest();
-} catch(e) {
-  console.error(e)
+} catch (e) {
+  console.error(e);
 }
 
 const iv = "1234567890123456";
 
 // cipher string
 export const cipher = (secret) => {
-  if(!secret) {
-    return ""
+  if (!secret) {
+    return "";
   }
   try {
     const cipherer = createCipheriv("aes-256-cbc", key, iv);
@@ -30,8 +30,8 @@ export const cipher = (secret) => {
 
 // decipher string
 export const decipher = (encrypted) => {
-  if(!encrypted) {
-    return ""
+  if (!encrypted) {
+    return "";
   }
   try {
     const textParts = encrypted.split(":");
