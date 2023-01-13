@@ -7,6 +7,7 @@ import {
   scripts,
   issue,
   issues,
+  pageInsights,
 } from "./graph/queries";
 
 export const Query = {
@@ -18,4 +19,5 @@ export const Query = {
   website,
   websites,
   user,
+  pagespeed: pageInsights,
 };

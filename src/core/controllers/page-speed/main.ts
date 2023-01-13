@@ -72,17 +72,5 @@ export const PageSpeedController = () => ({
 
     return await collection.findOne(searchProps);
   },
-  getPageSpeed: async ({
-    userId,
-    pageUrl,
-  }: {
-    userId?: number;
-    pageUrl?: string;
-  }) => {
-    const [collection] = connect("PageSpeed");
-    const searchProps = websiteSearchParams({ pageUrl, userId });
-
-    return await collection.find(searchProps).limit(10).toArray();
-  },
   getPageSpeedPaging,
 });

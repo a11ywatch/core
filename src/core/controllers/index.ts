@@ -1,4 +1,5 @@
 export { WebsitesController } from "./websites";
+export { PageSpeedController } from "./page-speed/main";
 export { UsersController } from "./users";
 export { IssuesController } from "./issues";
 export { PagesController } from "./pages";

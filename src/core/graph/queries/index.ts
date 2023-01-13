@@ -4,3 +4,4 @@ export { pages } from "./pages";
 export { history } from "./history";
 export { scripts } from "./scripts";
 export { issue, issues } from "./issues";
+export { pageInsights } from "./pageInsights";
