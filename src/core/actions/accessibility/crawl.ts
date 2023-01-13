@@ -25,7 +25,6 @@ import { collectionIncrement } from "../../utils/collection-upsert";
 import { SCAN_TIMEOUT } from "../../strings/errors";
 import { StatusCode } from "../../../web/messages/message";
 import type { User, Website } from "../../../types/types";
-import type { Issue } from "../../../types/schema";
 import { watcherCrawl } from "./watcher_crawl";
 import { shapeResponse } from "../../models/response/shape-response";
 import { crawlingSet, getKey } from "../../../event/crawl-tracking";
@@ -241,24 +240,20 @@ export const crawlPage = async (
     script,
     issues: pageIssues,
     webPage,
-    adaScore,
     issuesInfo,
   } = extractPageData(dataSource);
 
-  const newIssue = Object.assign({}, pageIssues, {
-    domain,
+  // the new issue information with userId
+  const newIssue = {
+    issues: pageIssues.issues,
+    documentTitle: pageIssues.documentTitle,
+    pageUrl: pageIssues.pageUrl,
+    domain: pageIssues.domain,
     userId,
-    pageUrl,
-  });
+  };
 
   // issues array
-  const { issues: subIssues = [] }: { issues: Issue[] } = pageIssues ?? {};
-  const issueCount = subIssues.length;
-
-  const updateWebsiteProps: Website = Object.assign({}, webPage, {
-    online: true,
-    userId,
-  });
+  const issueCount = pageIssues.issues.length;
 
   // if HTML passed and from crawler or valid content enable storing
   if ((html && urlMap) || !html) {
@@ -267,11 +262,17 @@ export const crawlPage = async (
       setImmediate(async () => {
         // if ROOT domain for scan update Website Collection.
         if (rootPage) {
-          const { issuesInfo, issues, ...updateProps } = updateWebsiteProps;
-
           await collectionUpsert(
-            updateProps,
-            [websiteCollection, !!updateWebsiteProps],
+            {
+              domain: webPage.domain,
+              url: webPage.url,
+              cdnConnected: webPage.cdnConnected,
+              pageLoadTime: webPage.pageLoadTime,
+              lastScanDate: webPage.lastScanDate,
+              online: true,
+              userId,
+            },
+            [websiteCollection, !!webPage],
             {
               searchProps: { url: pageUrl, userId },
             }
@@ -287,8 +288,6 @@ export const crawlPage = async (
         // if issues exist prior or current update collection
         // Add to Issues collection if page contains issues or if record should update/delete.
         if (issueCount || issueExist) {
-          const { issueMeta, ...analyticsProps } = issuesInfo; // todo: remove pluck
-
           const [
             [analytics, analyticsCollection],
             [newSite, pagesCollection],
@@ -307,21 +306,21 @@ export const crawlPage = async (
               : Promise.resolve([null, null]),
           ]);
 
-          console.log(pagesCollection);
-
           await Promise.all([
             // analytics
             collectionUpsert(
-              Object.assign(
-                {},
-                {
-                  pageUrl,
-                  domain,
-                  userId,
-                  adaScore,
-                },
-                analyticsProps
-              ),
+              {
+                pageUrl,
+                domain,
+                userId,
+                possibleIssuesFixedByCdn: issuesInfo.possibleIssuesFixedByCdn,
+                totalIssues: issuesInfo.totalIssues,
+                issuesFixedByCdn: issuesInfo.issuesFixedByCdn,
+                errorCount: issuesInfo.errorCount,
+                warningCount: issuesInfo.warningCount,
+                noticeCount: issuesInfo.noticeCount,
+                adaScore: issuesInfo.adaScore,
+              },
               [analyticsCollection, analytics]
             ),
             // issues
@@ -334,7 +333,14 @@ export const crawlPage = async (
             ),
             // pages
             collectionUpsert(
-              updateWebsiteProps,
+              {
+                domain: webPage.domain,
+                url: webPage.url,
+                pageLoadTime: webPage.pageLoadTime,
+                lastScanDate: webPage.lastScanDate,
+                userId,
+                online: true,
+              },
               [pagesCollection as Collection<Document>, newSite, !issueCount], // delete document if issues do not exist
               {
                 searchProps: { url: pageUrl, userId },
@@ -364,7 +370,14 @@ export const crawlPage = async (
           if (sendEmail && issuesInfo?.errorCount && userData?.emailConfirmed) {
             await emailMessager.sendMail({
               userId,
-              data: Object.assign({}, pageIssues, { issuesInfo }), // todo: use response data
+              data: {
+                issues: pageIssues.issues,
+                documentTitle: pageIssues.documentTitle,
+                pageUrl: pageIssues.pageUrl,
+                domain: pageIssues.domain,
+                userId,
+                issuesInfo,
+              }, // todo: use response data
               confirmedOnly: true,
               sendEmail: true,
             });
@@ -384,10 +397,17 @@ export const crawlPage = async (
 
   // Flatten issues with the array set results without meta.
   const responseData = {
-    data: Object.assign({}, updateWebsiteProps, {
-      issues: subIssues,
+    data: {
+      domain: webPage.domain,
+      url: webPage.url,
+      cdnConnected: webPage.cdnConnected,
+      pageLoadTime: webPage.pageLoadTime,
+      lastScanDate: webPage.lastScanDate,
+      issues: pageIssues.issues,
       issuesInfo,
-    }),
+      userId,
+      online: true,
+    },
   };
 
   trackerProccess(

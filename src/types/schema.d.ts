@@ -28,7 +28,7 @@ export type Analytic = {
   noticeCount?: number;
   userId?: number;
   domain?: string;
-  adaScore?: Maybe<Scalars["Float"]>;
+  adaScore?: number;
 };
 
 export type BasicMutationResponse = MutationResponse & {
@@ -72,6 +72,16 @@ export type HistoryIssuesArgs = {
   filter?: string;
 };
 
+// data returned from runner pagemind
+export type PageIssue = {
+  documentTitle?: string;
+  issues?: Issue[];
+  url?: string;
+  domain?: string;
+  pageUrl?: string;
+};
+
+// todo: Refactor recursive gql type
 export type Issue = {
   __typename?: "Issue";
   documentTitle?: string;
@@ -93,6 +103,7 @@ export type IssueIssuesArgs = {
   filter?: string;
 };
 
+// meta data for web page issues
 export type IssueMeta = {
   __typename?: "IssueMeta";
   issuesFixedByCdn?: number;
@@ -102,6 +113,9 @@ export type IssueMeta = {
   skipContentIncluded?: boolean;
   errorCount?: number;
   warningCount?: number;
+  noticeCount?: number;
+  adaScore?: number; // todo: rename
+  issueMeta?: { skipContentIncluded: false };
 };
 
 export type Mutation = {
@@ -358,7 +372,6 @@ export type Pages = {
   user?: Maybe<User>;
   domain?: string;
   userId?: number;
-  cdnConnected?: boolean;
   pageLoadTime?: Maybe<PageLoadTimeMeta>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   issuesInfo?: Maybe<IssueMeta>;
@@ -510,7 +523,7 @@ export type WebsiteIssuesArgs = {
 // response from pagemind gRPC request to gather website insight
 export type PageMindScanResponse = {
   webPage?: Website;
-  issues?: Issue[];
+  issues?: PageIssue;
   script?: Script;
   userId?: number;
   usage?: number;
