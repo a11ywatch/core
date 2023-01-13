@@ -66,6 +66,7 @@ export const scanWebsite = async ({
   // limited scan endpoint
   const currentIssues = limitIssue(issues);
 
+  // todo: remove object clone
   return responseModel({
     data: Object.assign({}, website, webPage, {
       userId,

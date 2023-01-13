@@ -1,5 +1,6 @@
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import type { Struct } from "pb-util/build";
+import type { PageMindScanResponse } from "../../../types/schema";
 import { jsonParse } from "../../../core/utils";
 
 // handle lighthouse extracting
@@ -16,8 +17,14 @@ export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
   };
 };
 
+// type DataSource = {
+//   userId?: number;
+//   script?: Script;
+//   issues?: Issue;
+//   webPage?: Website
+// }
 // generic page format
-export const extractPageData = (dataSource) => {
+export const extractPageData = (dataSource: PageMindScanResponse) => {
   const { script, issues, webPage, userId } = dataSource ?? {
     script: null,
     // todo: rename top level collection
@@ -30,7 +37,6 @@ export const extractPageData = (dataSource) => {
   let errorCount;
   let warningCount;
   let noticeCount;
-  let adaScore;
   let lighthouseData;
 
   // pluck insight into its own collection
@@ -40,7 +46,6 @@ export const extractPageData = (dataSource) => {
   if (website && issuesInfo) {
     errorCount = issuesInfo.errorCount;
     warningCount = issuesInfo.warningCount;
-    adaScore = issuesInfo.adaScore;
     noticeCount = issuesInfo.noticeCount;
   }
 
@@ -56,6 +61,5 @@ export const extractPageData = (dataSource) => {
     errorCount,
     warningCount,
     noticeCount,
-    adaScore,
   };
 };
