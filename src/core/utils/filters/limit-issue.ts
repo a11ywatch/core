@@ -1,6 +1,6 @@
 import type { Issue } from "../../../types/types";
 
-// limit the issue records to 1/4th
+// limit the issue records to 1/4th todo: pre-allocate
 // @return Issue['issues'][]
 export const limitIssue = ({ issues }: Issue) => {
   if (!issues.length) {

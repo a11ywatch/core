@@ -1,5 +1,5 @@
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
-import { responseModel, makeWebsite } from "../../models";
+import { responseModel } from "../../models";
 import { ResponseModel } from "../../models/response/types";
 import { getHostName } from "../../utils";
 import { fetchPageIssues } from "./fetch-issues";
@@ -40,10 +40,7 @@ export const scanWebsite = async ({
     return responseModel({ message: WEBSITE_NOT_FOUND });
   }
 
-  const website = makeWebsite({ url: pageUrl, domain });
-
   const dataSource: PageMindScanResponse = await fetchPageIssues({
-    pageHeaders: website.pageHeaders,
     url: pageUrl,
     userId,
     pageInsights,
@@ -63,17 +60,17 @@ export const scanWebsite = async ({
 
   const { script, issues, webPage, issuesInfo } = extractPageData(dataSource);
 
-  // limited scan endpoint
-  const currentIssues = limitIssue(issues);
-
-  // todo: remove object clone
   return responseModel({
-    data: Object.assign({}, website, webPage, {
-      userId,
-      timestamp: new Date().getTime(),
+    data: {
+      domain: webPage.domain,
+      url: webPage.url,
+      cdnConnected: webPage.cdnConnected,
+      pageLoadTime: webPage.pageLoadTime,
+      timestamp: webPage.lastScanDate,
+      issues: limitIssue(issues), // limited scan endpoint
       script,
-      issues: currentIssues,
+      userId,
       issuesInfo,
-    }),
+    },
   });
 };

@@ -385,7 +385,6 @@ export const crawlPage = async (
         }
       });
     }
-
     if (issueCount && sendSub) {
       try {
         await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
@@ -395,7 +394,6 @@ export const crawlPage = async (
     }
   }
 
-  // Flatten issues with the array set results without meta.
   const responseData = {
     data: {
       domain: webPage.domain,

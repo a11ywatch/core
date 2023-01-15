@@ -9,6 +9,8 @@ let db: Db = null;
 
 const dbEmitter = new (class DBEmitter extends EventEmitter {})();
 
+// todo: enable dbless mode to disable persisting across stub 'client' and 'db' object methods.
+
 // create a mongodb client.
 const createClient = async (dbconnection?: string): Promise<MongoClient> => {
   let mclient: MongoClient;
@@ -73,8 +75,6 @@ const pollTillConnected = async (): Promise<boolean> => {
     resolve(connected);
   });
 };
-
-// todo: determine indexs on startup for application
 
 export {
   client,
