@@ -117,7 +117,7 @@ export const createUser = async ({
         };
       }
 
-      await collection.updateOne(
+      collection && await collection.updateOne(
         { email },
         {
           $set: updateCollectionProps,
@@ -146,7 +146,7 @@ export const createUser = async ({
       emailConfirmed,
     });
 
-    await collection.insertOne(userObject);
+    collection && await collection.insertOne(userObject);
 
     if (!emailConfirmed) {
       await confirmEmail({ keyid: id });

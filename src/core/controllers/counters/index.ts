@@ -6,7 +6,7 @@ const getCounter = async ({
   _id,
 }): Promise<[WithId<Document>, Collection<Document>]> => {
   const [collection] = connect("Counters");
-  const counter = await collection.findOne({ _id });
+  const counter = collection && await collection.findOne({ _id });
 
   return [counter, collection];
 };
@@ -18,11 +18,11 @@ const getNextSequenceValue = async (sequenceName) => {
 
   // insert first counter
   if (!hascounter) {
-    await collection.insertOne({ _id: sequenceName, sequence_value: 0 });
+    collection && await collection.insertOne({ _id: sequenceName, sequence_value: 0 });
     return 0;
   }
 
-  const sequenceDocument = await collection.findOneAndUpdate(
+  const sequenceDocument = collection && await collection.findOneAndUpdate(
     {
       _id: sequenceName,
     },
@@ -41,7 +41,7 @@ const getNextSequenceValue = async (sequenceName) => {
 const CountersController = ({ user } = { user: null }) => ({
   fixCounters: async (_, chain) => {
     const [collection] = connect("Counters");
-    const counters = await collection.find().limit(150).toArray();
+    const counters = collection ? await collection.find().limit(150).toArray() : [];
 
     return chain ? [counters, collection] : counters;
   },
@@ -49,10 +49,10 @@ const CountersController = ({ user } = { user: null }) => ({
   getNextSequenceValue,
   getCounters: async ({ userId, pageUrl, url }) => {
     const [collection] = connect("Counters");
-    return await collection
+    return collection ? await collection
       .find(websiteSearchParams({ pageUrl, userId }))
       .limit(20)
-      .toArray();
+      .toArray() : [];
   },
 });
 

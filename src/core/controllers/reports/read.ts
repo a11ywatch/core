@@ -57,7 +57,7 @@ export const getReport = async (url: string, userId?: number) => {
   const [domainCollection] = connect(pageCollection);
 
   try {
-    website = await domainCollection.findOne(websiteFindBy);
+    website = domainCollection && await domainCollection.findOne(websiteFindBy);
   } catch (e) {
     console.error(e);
   }
@@ -65,7 +65,7 @@ export const getReport = async (url: string, userId?: number) => {
   // find the issues for the website page
   if (website) {
     try {
-      const websiteIssues = await issueCollection.findOne({
+      const websiteIssues = issueCollection && await issueCollection.findOne({
         pageUrl: website.url,
       });
 

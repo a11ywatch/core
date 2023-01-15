@@ -6,7 +6,7 @@ export const findPageActionsByPath = async ({ path, userId }) => {
   let actions = [];
 
   try {
-    const action = await actionsCollection.findOne({
+    const action = actionsCollection &&  await actionsCollection.findOne({
       path,
       userId,
     });

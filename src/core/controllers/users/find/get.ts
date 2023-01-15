@@ -19,7 +19,7 @@ async function getUser({
   const block = !email && !emailConfirmCode && !validateUID(id);
 
   // prevent user find on empty queries
-  if (block) {
+  if (block || !collection) {
     return [null, collection];
   }
 

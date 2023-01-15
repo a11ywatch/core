@@ -21,7 +21,7 @@ const createClient = async (dbconnection?: string): Promise<MongoClient> => {
       connected = true;
     } catch (_) {
       console.error(
-        "MongoDB not established. Start mongo on port 27017 to persist data."
+        "MongoDB not established. Start mongo on port 27017 to persist data and restart or use the `initDbConnection` method."
       );
     }
 
@@ -46,13 +46,13 @@ const initDbConnection = async (dbconnection?: string) => {
 
 // @return [collection, client]  a MongoDb Collection to use and the top level client
 const connect = (collectionType = "Websites"): [Collection, MongoClient] => [
-  db.collection(collectionType),
+  db && db.collection(collectionType),
   client,
 ];
 
 const closeDbConnection = async () => {
   if (connected) {
-    await client.close();
+    client && await client.close();
     connected = false;
   }
 };
@@ -77,6 +77,7 @@ const pollTillConnected = async (): Promise<boolean> => {
 };
 
 export {
+  db,
   client,
   connected,
   connect,
