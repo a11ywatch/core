@@ -11,8 +11,8 @@ export const meta = gql`
     totalIssues: Int
     cdnConnected: Boolean
     issueMeta: IssueMeta
-    adaScoreAverage: Int
-    adaScore: Int
+    accessScoreAverage: Int
+    accessScore: Int
     errorCount: Int
     warningCount: Int
     noticeCount: Int

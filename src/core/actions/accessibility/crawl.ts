@@ -319,7 +319,7 @@ export const crawlPage = async (
                 errorCount: issuesInfo.errorCount,
                 warningCount: issuesInfo.warningCount,
                 noticeCount: issuesInfo.noticeCount,
-                adaScore: issuesInfo.adaScore,
+                accessScore: issuesInfo.accessScore,
               },
               [analyticsCollection, analytics]
             ),

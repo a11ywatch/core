@@ -21,7 +21,7 @@ const downloadToExcel = async (
 
     const worksheet = workbook.addWorksheet(`${source?.domain} WCAG Audit`, {
       headerFooter: {
-        firstHeader: `Accessibility score - ${source.issuesInfo?.adaScore}`,
+        firstHeader: `Accessibility score - ${source.issuesInfo?.accessScore}`,
         firstFooter: `Test ran ${source?.lastScanDate}`,
       },
     });

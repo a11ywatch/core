@@ -28,7 +28,7 @@ export type Analytic = {
   noticeCount?: number;
   userId?: number;
   domain?: string;
-  adaScore?: number;
+  accessScore?: number;
 };
 
 export type BasicMutationResponse = MutationResponse & {
@@ -114,7 +114,7 @@ export type IssueMeta = {
   errorCount?: number;
   warningCount?: number;
   noticeCount?: number;
-  adaScore?: number; // todo: rename
+  accessScore?: number; // todo: rename
   issueMeta?: { skipContentIncluded: false };
 };
 

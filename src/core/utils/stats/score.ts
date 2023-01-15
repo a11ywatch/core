@@ -55,7 +55,7 @@ export async function setWebsiteScore({
       crawlComplete: {
         userId,
         domain: website?.domain,
-        adaScoreAverage: issuesInfo?.adaScoreAverage,
+        accessScoreAverage: issuesInfo?.accessScoreAverage,
         shutdown,
       },
     });

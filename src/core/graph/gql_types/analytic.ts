@@ -12,7 +12,7 @@ export const analytic = gql`
     warningCount: Int
     noticeCount: Int
     userId: Int
-    adaScore: Float
+    accessScore: Float
     possibleIssuesFixedByCdn: Int
     totalIssues: Int
     issuesFixedByCdn: Int

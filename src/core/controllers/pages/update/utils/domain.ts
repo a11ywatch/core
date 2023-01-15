@@ -8,7 +8,7 @@ const defaultIssuesInfo = {
   warningCount: 0,
   errorCount: 0,
   noticeCount: 0,
-  adaScoreAverage: 0,
+  accessScoreAverage: 0,
   issuesFixedByCdn: 0,
   possibleIssuesFixedByCdn: 0,
 };
@@ -23,7 +23,7 @@ type ScoreProps = {
 
 // standard issue type [TODO centralize]
 type IssuesInfo = {
-  adaScoreAverage: number;
+  accessScoreAverage: number;
   possibleIssuesFixedByCdn: any;
   totalIssues: any;
   issuesFixedByCdn: any;
@@ -63,7 +63,7 @@ const getDataUntil = async (
   let websitePossibleIssuesFixedByCdn =
     prevIssuesInfo?.possibleIssuesFixedByCdn || 0;
 
-  const adaScores: number[] = [];
+  const accessScores: number[] = [];
 
   const pageCounter = pages?.length || 0;
 
@@ -75,12 +75,12 @@ const getDataUntil = async (
       warningCount,
       errorCount,
       noticeCount,
-      adaScore,
+      accessScore,
       issuesFixedByCdn,
       possibleIssuesFixedByCdn,
     } = page ?? Object.assign({}, defaultIssuesInfo);
 
-    adaScores.push(Number(adaScore));
+    accessScores.push(Number(accessScore));
 
     if (errorCount) {
       websiteErrors = websiteErrors + Number(errorCount);
@@ -105,14 +105,14 @@ const getDataUntil = async (
     }
   }
 
-  const averageItems = arrayAverage(adaScores);
+  const averageItems = arrayAverage(accessScores);
 
   const avgScore = Math.round(
     isNaN(averageItems) || perfectScore ? 100 : averageItems
   );
 
   const issuesInfo = {
-    adaScoreAverage: avgScore,
+    accessScoreAverage: avgScore,
     possibleIssuesFixedByCdn: websitePossibleIssuesFixedByCdn,
     totalIssues: websiteErrors + websiteWarnings + websiteNotices,
     issuesFixedByCdn: websiteIssuesFixedByCdn,

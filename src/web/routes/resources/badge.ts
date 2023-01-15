@@ -14,7 +14,7 @@ export const statusBadge = async (
     false
   );
 
-  const score = page?.adaScore ?? 0;
+  const score = page?.accessScore ?? 0;
   let statusColor = "#000";
 
   // validate score on page find

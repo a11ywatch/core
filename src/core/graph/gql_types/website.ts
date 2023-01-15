@@ -83,7 +83,7 @@ export const website = gql`
   """
   type CrawlStatus {
     domain: String
-    adaScoreAverage: Int
+    accessScoreAverage: Int
     shutdown: Boolean
   }
 `;
