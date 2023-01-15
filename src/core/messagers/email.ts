@@ -70,7 +70,7 @@ const sendMail = async ({
         text: mailOptions.text,
         subject: `[Report] ${totalIssues} ${pluralize(
           totalIssues,
-          "issue"
+          "error"
         )} found with ${pageUrl || domain}.`,
         html: `${issuesTable}<br />${footer.marketing({
           userId,
