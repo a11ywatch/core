@@ -10,7 +10,7 @@
     "build": "tsc",
     "fix": "prettier --write '**/*.{js,jsx,ts,tsx}'",
     "start": "NODE_ENV=production node dist/server.js",
-    "pub": "tsc && cp package.json dist && cp package-lock.json dist && cp README.md dist && cp LICENSE dist && cd dist && npm publish"
+    "pub": "tsc && cp package.json package-lock.json README.md LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
     "@a11ywatch/protos": "^0.3.16",
