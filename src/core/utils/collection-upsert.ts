@@ -12,7 +12,7 @@ export const collectionUpsert = async (
   [collection, shouldUpdate, shouldDelete]: [Collection<Document>, any, any?],
   config?: any
 ) => {
-  if (typeof source === "undefined") {
+  if (typeof source === "undefined" || !collection) {
     return Promise.resolve();
   }
   const userId = config?.searchProps?.userId ?? source?.userId;
@@ -64,7 +64,7 @@ export const collectionIncrement = async (
   collection: any,
   searchProps: Record<any, any>
 ) => {
-  if (typeof source === "undefined") {
+  if (typeof source === "undefined" || !collection) {
     return Promise.resolve();
   }
   return await collection.updateOne(

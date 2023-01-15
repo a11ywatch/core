@@ -19,14 +19,12 @@ export const getWebsite = async ({
     domain,
   });
   const [collection] = connect("Websites");
-
-  const website = (await collection.findOne(params)) as Website;
+  const website = collection && (await collection.findOne(params)) as Website;
 
   return [website, collection];
 };
 
 // wrapper for data
-
 export const getWebsiteWrapper = async (params) => {
   const [website] = await getWebsite(params);
 

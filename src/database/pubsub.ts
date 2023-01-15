@@ -11,6 +11,7 @@ async function createPubSub() {
       subscriber: createRedisClient(),
     });
   } else {
+    // todo: make optional
     const { PubSub } = await import("graphql-subscriptions");
     // use memory sub
     pubsub = new PubSub();
