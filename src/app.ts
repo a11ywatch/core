@@ -1,7 +1,6 @@
 import fastify, { FastifyInstance } from "fastify";
 import { ApolloServer } from "apollo-server-fastify";
 import { configureAgent } from "node-iframe";
-import { CronJob } from "cron";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import type { Server as HttpServer } from "http";
@@ -400,7 +399,12 @@ async function initServer(): Promise<HttpServer[]> {
     graphqlPath: server.graphqlPath,
   });
 
-  new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+  // optional lazy cron
+  if (process.env.A11Y_WATCH_CRON_ENABLED === "true") {
+    const { CronJob } = await import("cron");
+
+    new CronJob("0 11,23 * * *", crawlAllAuthedWebsitesCluster).start();
+  }
 
   return [app.server];
 }

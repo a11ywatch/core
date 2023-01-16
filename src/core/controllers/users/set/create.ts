@@ -117,15 +117,16 @@ export const createUser = async ({
         };
       }
 
-      collection && await collection.updateOne(
-        { email },
-        {
-          $set: updateCollectionProps,
-        },
-        {
-          upsert: true,
-        }
-      );
+      collection &&
+        (await collection.updateOne(
+          { email },
+          {
+            $set: updateCollectionProps,
+          },
+          {
+            upsert: true,
+          }
+        ));
 
       return user;
     } else {
@@ -146,7 +147,7 @@ export const createUser = async ({
       emailConfirmed,
     });
 
-    collection && await collection.insertOne(userObject);
+    collection && (await collection.insertOne(userObject));
 
     if (!emailConfirmed) {
       await confirmEmail({ keyid: id });

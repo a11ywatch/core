@@ -52,7 +52,7 @@ const connect = (collectionType = "Websites"): [Collection, MongoClient] => [
 
 const closeDbConnection = async () => {
   if (connected) {
-    client && await client.close();
+    client && (await client.close());
     connected = false;
   }
 };

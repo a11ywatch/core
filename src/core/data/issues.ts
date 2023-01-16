@@ -1,3 +1,1 @@
-
-export const Issue = {
-};
+export const Issue = {};

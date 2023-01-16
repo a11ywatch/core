@@ -19,7 +19,7 @@ export const getWebsite = async ({
     domain,
   });
   const [collection] = connect("Websites");
-  const website = collection && (await collection.findOne(params)) as Website;
+  const website = collection && ((await collection.findOne(params)) as Website);
 
   return [website, collection];
 };
@@ -69,13 +69,15 @@ export const getWebsitesPaginated = async (
   const [collection] = connect("Websites");
 
   // websites stored only contain users
-  const data = await collection
-    .find({ ...filter })
-    .sort({ order: 1 }) // todo: optional sorting
-    .project(project ?? { url: 1, userId: 1, subdomains: 1, tld: 1 })
-    .limit(limit)
-    .skip(offset ?? limit * page)
-    .toArray();
+  const data =
+    collection &&
+    (await collection
+      .find(filter)
+      .sort({ order: 1 }) // todo: optional sorting
+      .project(project ?? { url: 1, userId: 1, subdomains: 1, tld: 1 })
+      .limit(limit)
+      .skip(offset ?? limit * page)
+      .toArray());
 
   return [data, collection];
 };

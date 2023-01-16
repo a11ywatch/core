@@ -42,6 +42,13 @@ SCRIPTS_ENABLED=true
 A11YWATCH_NO_STORE=false
 ```
 
+## Cron
+
+Enable CRON morning and nightly jobs
+
+```
+A11Y_WATCH_CRON_ENABLED=true
+```
 ### Queue
 
 Set the limit to number of test in parallel per run to `CRAWL_QUEUE_LIMIT` env var - default is set to 8.
