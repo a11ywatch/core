@@ -10,6 +10,7 @@ import { AnalyticsController } from "../../controllers/analytics";
 import { getPage } from "../../controllers/pages/find";
 import { UsersController } from "../../controllers/users";
 import { extractPageData } from "../../utils/shapes/extract-page-data";
+import { filterRunnerDuplicates } from "../../utils/filters/runners";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "../../models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "../../../event";
@@ -184,10 +185,11 @@ export const crawlPage = async (
     ignore:
       ignore && Array.isArray(ignore) && ignore.length ? ignore : websiteIgnore,
     rules: rules && Array.isArray(rules) && rules.length ? rules : websiteRules,
-    runners:
+    runners: filterRunnerDuplicates(
       runners && Array.isArray(runners) && runners.length
         ? runners
-        : websiteRunners,
+        : websiteRunners || []
+    ),
   });
 
   let shutdown = false;

@@ -4,6 +4,7 @@ import { connect } from "../../../../database";
 import { getWebsite } from "../find";
 import { cipher } from "../../../../core/utils";
 import { DEV } from "../../../../config";
+import { filterRunnerDuplicates } from "../../../utils/filters/runners";
 
 // update a website by properties from form input on adding
 export const updateWebsite = async ({
@@ -148,17 +149,15 @@ export const updateWebsite = async ({
 
   // runners
   if (runners && Array.isArray(runners)) {
-    for (let i = 0; i < runners.length; i++) {
-      const runner = runners[i];
-      // validate rule storing
+    const runnerItems = filterRunnerDuplicates(runners);
+    for (let i = 0; i < runnerItems.length; i++) {
+      const runner = runnerItems[i];
       if (
-        runner &&
         typeof runner === "string" &&
-        ["htmlcs", "axe"].includes(runner)
+        (runner === "axe" || runner === "htmlcs")
       ) {
         testRunners.push(runner);
       }
-      // limit 250 items
       if (i > 3) {
         break;
       }

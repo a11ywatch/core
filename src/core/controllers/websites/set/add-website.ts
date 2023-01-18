@@ -17,6 +17,7 @@ import { getUser } from "../../users";
 import { watcherCrawl } from "../../../actions/accessibility/watcher_crawl";
 import { connect } from "../../../../database";
 import { DEV, SUPER_MODE } from "../../../../config/config";
+import { filterRunnerDuplicates } from "../../../utils/filters/runners";
 
 // allowed standards
 const allowedStandards = ["WCAG2A", "WCAG2AA", "WCAG2AAA", "Section508"];
@@ -119,8 +120,10 @@ export const addWebsite = async ({
 
   // runners
   if (runners && Array.isArray(runners)) {
-    for (let i = 0; i < runners.length; i++) {
-      const runner = runners[i];
+    const runnerItems = filterRunnerDuplicates(runners);
+
+    for (let i = 0; i < runnerItems.length; i++) {
+      const runner = runnerItems[i];
       // validate rule storing
       // todo: check for "a11y" runner
       if (
