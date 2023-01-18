@@ -351,18 +351,19 @@ export const crawlPage = async (
             // scripts
             scriptsEnabled && script
               ? collectionUpsert(
-                  Object.assign(
-                    {},
-                    script,
-                    { userId },
-                    {
-                      scriptMeta: !scripts?.scriptMeta
-                        ? {
-                            skipContentEnabled: true,
-                          }
-                        : scripts.scriptMeta,
-                    }
-                  ),
+                  {
+                    pageUrl: script.pageUrl,
+                    domain: script.domain,
+                    script: script.script,
+                    cdnUrl: script.cdnUrl,
+                    cdnConnected: script.cdnConnected,
+                    issueMeta: script.issueMeta,
+                    scriptMeta: !scripts?.scriptMeta
+                      ? {
+                          skipContentEnabled: true,
+                        }
+                      : scripts.scriptMeta,
+                  },
                   [scriptsCollection, scripts]
                 )
               : Promise.resolve(),
@@ -379,7 +380,7 @@ export const crawlPage = async (
                 domain: pageIssues.domain,
                 userId,
                 issuesInfo,
-              }, // todo: use response data
+              },
               confirmedOnly: true,
               sendEmail: true,
             });
