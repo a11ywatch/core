@@ -39,7 +39,7 @@ const downloadToExcel = async (
         outlineLevel: 1,
         checked: 0,
       },
-    ] as any;
+    ] as Partial<excel.Column & {checked: number}>[];
 
     const rowIssues = source?.issue?.length ? source.issue : source?.issues;
 
