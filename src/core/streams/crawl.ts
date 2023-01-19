@@ -54,6 +54,7 @@ export const crawlStream = async (
       subdomains: body.subdomains,
       tld: body.tld,
       robots: body.robots,
+      sitemap: body.sitemap,
     });
 
     res.raw.write("[");

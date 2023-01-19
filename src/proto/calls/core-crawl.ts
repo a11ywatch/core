@@ -14,13 +14,19 @@ import { validateScanEnabled } from "../../core/controllers/users/update/scan-at
 import { UsersController } from "../../core/controllers";
 
 type ServerCallStreaming = ServerWritableStream<
-  { url: string; authorization: string; subdomains: boolean; tld: boolean },
+  {
+    url: string;
+    authorization: string;
+    subdomains: boolean;
+    tld: boolean;
+    sitemap: boolean;
+  },
   {}
 >;
 
 // core multi page streaming gRPC
 export const coreCrawl = async (call: ServerCallStreaming) => {
-  const { authorization, url, subdomains, tld } = call.request;
+  const { authorization, url, subdomains, tld, sitemap } = call.request;
   const userNext = getUserFromToken(authorization); // get current user
   const userId = userNext?.payload?.keyid;
 
@@ -43,6 +49,7 @@ export const coreCrawl = async (call: ServerCallStreaming) => {
       role: userNext?.payload?.audience,
       subdomains,
       tld,
+      sitemap,
     });
 
     await crawlStreaming(crawlProps, call);
@@ -58,7 +65,7 @@ export const crawlStreaming = (
   },
   call: ServerCallStreaming
 ): Promise<boolean> => {
-  const { url, userId, subdomains, tld, norobo, proxy } = props;
+  const { url, userId, subdomains, tld, norobo, proxy, sitemap } = props;
 
   setImmediate(async () => {
     await watcherCrawl({
@@ -69,6 +76,7 @@ export const crawlStreaming = (
       scan: true,
       robots: !norobo,
       proxy,
+      sitemap
     });
   });
 

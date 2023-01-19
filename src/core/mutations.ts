@@ -191,6 +191,7 @@ export const Mutation = {
       rules,
       runners,
       proxy,
+      sitemap,
     },
     context
   ) => {
@@ -211,6 +212,7 @@ export const Mutation = {
       rules,
       runners,
       proxy: DEV || audience ? proxy : undefined,
+      sitemap,
     });
   },
   forgotPassword: async (_, { email }, _context) => {

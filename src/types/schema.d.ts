@@ -510,6 +510,7 @@ export type Website = {
   tld?: boolean;
   robots?: boolean;
   proxy?: string; // proxy for network request
+  sitemap?: boolean; // use a sitemap to crawl the page
   verified?: boolean; // dns verified by user
   ignore?: string[]; // ignore list of rules
   rules?: string[]; // list of rules to comply

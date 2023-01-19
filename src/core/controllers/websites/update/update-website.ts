@@ -23,6 +23,7 @@ export const updateWebsite = async ({
   rules,
   runners,
   proxy,
+  sitemap,
 }: Partial<Website> & { actions?: Record<string, unknown>[] }) => {
   const [website, collection] = await getWebsite({ userId, url });
 
@@ -47,6 +48,7 @@ export const updateWebsite = async ({
     rules: website.rules,
     runners: website.runners,
     proxy: website.proxy,
+    sitemap: !!website.sitemap,
   };
 
   // if page headers are sent add them
@@ -85,6 +87,10 @@ export const updateWebsite = async ({
   // if user subdomains is defined
   if (typeof subdomains !== "undefined") {
     pageParams.subdomains = subdomains;
+  }
+  // if user subdomains is defined
+  if (typeof sitemap !== "undefined") {
+    pageParams.sitemap = sitemap;
   }
 
   // if proxy is defined

@@ -41,6 +41,7 @@ export const addWebsite = async ({
   rules = [],
   runners = [],
   proxy = "",
+  sitemap = false,
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -178,6 +179,7 @@ export const addWebsite = async ({
           !proxyHost.startsWith("https://localhost")))
         ? proxyHost
         : "",
+    sitemap,
   });
 
   await collection.insertOne(website);

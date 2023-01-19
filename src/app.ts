@@ -232,6 +232,7 @@ async function initServer(): Promise<HttpServer[]> {
     const rules = paramParser(req, "rules");
     const runners = paramParser(req, "runners");
     const proxy = paramParser(req, "proxy");
+    const sitemap = paramParser(req, "sitemap");
 
     const { website } = await updateWebsite({
       userId,
@@ -248,6 +249,7 @@ async function initServer(): Promise<HttpServer[]> {
       rules,
       runners,
       proxy: DEV || usr?.payload?.audience ? proxy : undefined,
+      sitemap
     });
 
     return res.send({

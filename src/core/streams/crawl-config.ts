@@ -9,10 +9,12 @@ export const getCrawlConfig = async ({
   url,
   tld,
   subdomains,
+  sitemap,
   robots = true,
 }) => {
   let subdomainsEnabled = SUPER_MODE ? subdomains : role && subdomains;
   let tldEnabled = SUPER_MODE ? tld : role && tld;
+  let sitemapEnabled = SUPER_MODE ? sitemap : role && sitemap;
   let agent = "";
 
   // determine active configuration on role
@@ -29,6 +31,9 @@ export const getCrawlConfig = async ({
         if (website.ua) {
           agent = website.ua;
         }
+        if (typeof sitemap === "undefined" && website.sitemap) {
+          sitemapEnabled = true;
+        }
       }
     }
   }
@@ -40,5 +45,6 @@ export const getCrawlConfig = async ({
     tld: tldEnabled,
     robots,
     agent,
+    sitemap: sitemapEnabled,
   };
 };

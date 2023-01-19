@@ -11,6 +11,7 @@ export interface CrawlParams {
   tld?: boolean; // with tld crawling
   agent?: string; // User-Agent to use during crawl
   proxy?: string; // proxy for request
+  sitemap?: boolean; // sitemap enabled for request
 }
 
 /**
@@ -32,6 +33,7 @@ export const watcherCrawl = async (
     tld = false,
     agent,
     proxy,
+    sitemap = false,
   }: CrawlParams,
   deciphered?: boolean
 ) => {
@@ -43,6 +45,7 @@ export const watcherCrawl = async (
     tld,
     agent,
     proxy: proxy && !deciphered ? decipher(proxy) : proxy,
+    sitemap,
   };
 
   try {

@@ -155,7 +155,7 @@ export const scanAuthenticated = async (
         if (
           runner &&
           typeof runner === "string" &&
-          ["htmlcs", "axe"].includes(runner)
+          (runner === "axe" || runner === "htmlcs")
         ) {
           testRunners.push(runner);
         }
