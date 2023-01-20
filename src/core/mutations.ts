@@ -73,7 +73,7 @@ export const Mutation = {
         };
       }
 
-      const { subdomains, tld, ua, proxy } = website ?? {};
+      const { subdomains, tld, ua, proxy, sitemap } = website ?? {};
 
       setImmediate(async () => {
         await watcherCrawl({
@@ -84,6 +84,7 @@ export const Mutation = {
           scan: true,
           agent: ua,
           proxy: proxy,
+          sitemap: !!sitemap
         });
       });
       return {
