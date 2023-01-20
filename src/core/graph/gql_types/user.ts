@@ -33,8 +33,6 @@ export const user = gql`
     history: [History]
     scanInfo: ScanInformation
     analytics(filter: String): [Analytic]
-    scripts(filter: String): [Script]
-    script(filter: String, url: String): Script
     paymentSubscription: PaymentSubScription
     websiteLimit: Int
     downAlerts: [Website]

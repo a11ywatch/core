@@ -126,7 +126,6 @@ export type Mutation = {
   updateUser?: Maybe<UpdateUserMutationResponse>;
   toggleAlert?: Maybe<UpdateUserMutationResponse>;
   updateWebsite?: Maybe<UpdateWebSiteMutationResponse>;
-  updateScript?: Maybe<UpdateScriptMutationResponse>;
   crawlWebsite?: Maybe<UpdateWebSiteMutationResponse>;
   scanWebsite?: Maybe<UpdateWebSiteMutationResponse>;
   forgotPassword?: Maybe<User>;
@@ -291,8 +290,6 @@ export type Query = {
   issues?: Maybe<Array<Maybe<Issue>>>;
   history?: Maybe<Array<Maybe<History>>>;
   analytics?: Maybe<Array<Maybe<Analytic>>>;
-  scripts?: Maybe<Array<Maybe<Script>>>;
-  script?: Maybe<Script>;
   issue?: Maybe<Issue>;
   user?: Maybe<User>;
 };
@@ -339,19 +336,6 @@ export type ScanInformation = {
   lastScanDate?: Maybe<Scalars["Date"]>;
   totalUptime?: number;
   usageLimit?: number;
-};
-
-export type Script = {
-  __typename?: "Script";
-  id?: string;
-  pageUrl?: string;
-  domain?: string;
-  script?: string;
-  cdnUrl?: string;
-  cdnUrlMinified?: string;
-  cdnConnected?: boolean;
-  issueMeta?: Maybe<IssueMeta>;
-  scriptMeta?: Maybe<ScriptMeta>;
 };
 
 export type ScriptMeta = {
@@ -407,14 +391,6 @@ export type SubscriptionEmailVerifiedArgs = {
   userId?: number;
 };
 
-export type UpdateScriptMutationResponse = MutationResponse & {
-  __typename?: "UpdateScriptMutationResponse";
-  code: string;
-  success: boolean;
-  message: string;
-  script?: Maybe<Script>;
-};
-
 export type UpdateUserMutationResponse = MutationResponse & {
   __typename?: "UpdateUserMutationResponse";
   code: string;
@@ -456,8 +432,6 @@ export type User = {
   history?: Maybe<Array<Maybe<History>>>;
   scanInfo?: Maybe<ScanInformation>;
   analytics?: Maybe<Array<Maybe<Analytic>>>;
-  scripts?: Maybe<Array<Maybe<Script>>>;
-  script?: Maybe<Script>;
   paymentSubscription?: Maybe<Stripe.subscriptions.ISubscription>;
   websiteLimit?: number;
   lastLoginDate?: string;
@@ -490,11 +464,8 @@ export type Website = {
   domain?: string;
   cdnConnected?: boolean;
   pageLoadTime?: PageLoadTimeMeta;
-  issues?: Issue[]; // gql recursive query type
-  issue?: Issue[];
   issuesInfo?: IssueMeta;
   pages?: Pages[];
-  script?: Script;
   lastScanDate?: string;
   documentTitle?: string;
   cdn?: string;
@@ -525,7 +496,6 @@ export type WebsiteIssuesArgs = {
 export type PageMindScanResponse = {
   webPage?: Website;
   issues?: PageIssue;
-  script?: Script;
   userId?: number;
   usage?: number;
 };

@@ -48,10 +48,6 @@ const defaultWebURL = DEV
   ? `http://localhost:${defaultWebPort}`
   : "https://a11ywatch.com";
 
-// prevent storing content to CDN server
-export const DISABLE_STORE_SCRIPTS =
-  process.env.A11YWATCH_NO_STORE === "true" ? true : false;
-
 export const config = {
   DEV,
   DB_URL: process.env.DB_URL || process.env.MONGO_URL,

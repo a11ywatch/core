@@ -5,7 +5,6 @@ import { getHostName } from "../../utils";
 import { fetchPageIssues } from "./fetch-issues";
 import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { limitIssue } from "../../utils/filters/limit-issue";
-import { DISABLE_STORE_SCRIPTS, SUPER_MODE } from "../../../config/config";
 import { WEBSITE_NOT_FOUND } from "../../strings";
 import { StatusCode } from "../../../web/messages/message";
 import { SCAN_TIMEOUT } from "../../strings/errors";
@@ -30,7 +29,6 @@ type ScanParams = {
 export const scanWebsite = async ({
   userId,
   url,
-  noStore = DISABLE_STORE_SCRIPTS,
   pageInsights = false,
 }: ScanParams): Promise<ResponseModel> => {
   const pageUrl = removeTrailingSlash(url);
@@ -44,8 +42,6 @@ export const scanWebsite = async ({
     url: pageUrl,
     userId,
     pageInsights,
-    noStore: !SUPER_MODE ? true : noStore,
-    scriptsEnabled: false,
   });
 
   // handled successful but, page did not exist or rendered to slow.
@@ -58,7 +54,7 @@ export const scanWebsite = async ({
     });
   }
 
-  const { script, issues, webPage, issuesInfo } = extractPageData(dataSource);
+  const { issues, webPage, issuesInfo } = extractPageData(dataSource);
 
   return responseModel({
     data: {
@@ -68,7 +64,6 @@ export const scanWebsite = async ({
       pageLoadTime: webPage.pageLoadTime,
       timestamp: webPage.lastScanDate,
       issues: limitIssue(issues), // limited scan endpoint
-      script,
       userId,
       issuesInfo,
     },

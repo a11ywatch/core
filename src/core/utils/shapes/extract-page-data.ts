@@ -19,14 +19,12 @@ export const extractLighthouse = ({ domain, pageUrl, userId, insight }) => {
 
 // type DataSource = {
 //   userId?: number;
-//   script?: Script;
 //   issues?: Issue;
 //   webPage?: Website
 // }
 // generic page format
 export const extractPageData = (dataSource: PageMindScanResponse) => {
-  const { script, issues, webPage, userId } = dataSource ?? {
-    script: null,
+  const { issues, webPage, userId } = dataSource ?? {
     // todo: rename top level collection
     issues: {
       issues: [],
@@ -52,7 +50,6 @@ export const extractPageData = (dataSource: PageMindScanResponse) => {
   return {
     userId,
     // collections
-    script,
     issues,
     webPage: website,
     issuesInfo,

@@ -1,9 +1,4 @@
-import {
-  pageMindClient,
-  crawlerClient,
-  mavClient,
-  cdnClient,
-} from "../website-client";
+import { pageMindClient, crawlerClient, mavClient } from "../website-client";
 import type { PageMindScanResponse } from "../../types/schema";
 
 // params to perform website scans
@@ -12,8 +7,6 @@ export interface ScanRpcParams {
   userId?: number;
   pageHeaders?: any[];
   pageInsights?: boolean;
-  noStore?: boolean; // prevent storing values to CDN server
-  scriptsEnabled?: boolean; // scripts storing enabled for user
   mobile?: boolean; // is the testing done in mobile view port
   standard?: string; // is the testing done in mobile view port
   ua?: string; // is the testing done in mobile view port
@@ -68,19 +61,6 @@ export const crawlerCrawl = (website = {}) => {
   });
 };
 
-// store script into s3 | local
-export const setScript = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    pageMindClient.setScript(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
 // parse an image to base64 -> mav service
 const parseImg = (img = {}) => {
   return new Promise((resolve, reject) => {
@@ -94,23 +74,9 @@ const parseImg = (img = {}) => {
   });
 };
 
-const removeScript = (website = {}) => {
-  return new Promise((resolve, reject) => {
-    cdnClient.removeScript(website, (error, res) => {
-      if (!error) {
-        resolve(res);
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
 export const controller = {
   scan,
   crawlerScan,
   crawlerCrawl,
-  setScript,
   parseImg,
-  removeScript,
 };

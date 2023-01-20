@@ -76,7 +76,7 @@ export const crawlStreaming = (
       scan: true,
       robots: !norobo,
       proxy,
-      sitemap
+      sitemap,
     });
   });
 

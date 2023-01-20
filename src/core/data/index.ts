@@ -4,4 +4,3 @@ export { Issue } from "./issues";
 export { Pages } from "./pages";
 export { History } from "./history";
 export { Analytic } from "./analytics";
-export { Script } from "./script";

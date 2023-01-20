@@ -3,7 +3,6 @@ import { getWebsitesPaging } from "../../core/controllers/websites/find/get";
 import { getIssuesPaging } from "../../core/controllers/issues/find";
 import { getPagesPaging } from "../../core/controllers/pages/find/domains";
 import { getAnalyticsPaging } from "../../core/controllers/analytics";
-import { getScriptsPaging } from "../../core/controllers/scripts";
 import { getPageSpeedPaging } from "../../core/controllers/page-speed/main";
 import { responseWrap } from "../response";
 import type { FastifyInstance } from "fastify";
@@ -54,22 +53,6 @@ export const setListRoutes = (app: FastifyInstance) => {
           offset,
           domain,
           insights: true,
-        }),
-      userId,
-    });
-  });
-
-  // paginated retrieve scripts from the database. Limit default is set to 20.
-  app.get("/api/list/scripts", async (req, res) => {
-    const { userId, domain, limit, offset } = getBaseParamsList(req);
-
-    await responseWrap(res, {
-      callback: () =>
-        getScriptsPaging({
-          userId,
-          limit,
-          offset,
-          domain,
         }),
       userId,
     });

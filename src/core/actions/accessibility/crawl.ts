@@ -4,7 +4,6 @@ import { pubsub } from "../../../database/pubsub";
 import { ISSUE_ADDED } from "../../static";
 import { collectionUpsert, domainName } from "../../utils";
 import { IssuesController } from "../../controllers/issues";
-import { ScriptsController } from "../../controllers/scripts";
 import { getWebsite } from "../../controllers/websites";
 import { AnalyticsController } from "../../controllers/analytics";
 import { getPage } from "../../controllers/pages/find";
@@ -14,11 +13,7 @@ import { filterRunnerDuplicates } from "../../utils/filters/runners";
 import { fetchPageIssues } from "./fetch-issues";
 import { ResponseModel } from "../../models/response/types";
 import { crawlEmitter, crawlTrackingEmitter } from "../../../event";
-import {
-  SUPER_MODE,
-  SCRIPTS_ENABLED,
-  DISABLE_STORE_SCRIPTS,
-} from "../../../config/config";
+import { SUPER_MODE } from "../../../config/config";
 import { findPageActionsByPath } from "../../controllers/page-actions/find";
 import { validateScanEnabled } from "../../controllers/users/update/scan-attempt";
 import { RATE_EXCEEDED_ERROR } from "../../strings";
@@ -37,7 +32,6 @@ export type CrawlConfig = {
   pageInsights?: boolean; // use page insights to get info
   sendSub?: boolean; // use pub sub
   user?: User; // optional pass user
-  noStore?: boolean; // when enabled - do not store data to fs for js scripts etc
   html?: string; // raw html to validate
   standard?: string; // accessibility standard
   ignore?: string[]; // ignore list of rules
@@ -136,7 +130,6 @@ export const crawlPage = async (
 
   const { role: urole, pageSpeedApiKey, scanInfo } = userData ?? {};
   const {
-    verified,
     standard: websiteStandard,
     pageHeaders,
     pageInsights: websitePageInsights,
@@ -148,7 +141,6 @@ export const crawlPage = async (
   } = website ?? {};
 
   const freeAccount = !urole; // free account
-  const scriptsEnabled = website && SCRIPTS_ENABLED && !freeAccount; // scripts for and storing JS scripts
   const rootPage = pathname === "/"; // the url is the base domain index.
 
   const insightsEnabled = getInsightsEnabled({
@@ -158,13 +150,6 @@ export const crawlPage = async (
     rootPage,
   });
 
-  // prevent storage on free accounts js scripts
-  let noStore = freeAccount || crawlConfig.noStore || !verified;
-
-  if (SUPER_MODE && !DISABLE_STORE_SCRIPTS) {
-    noStore = false;
-  }
-
   const actions = await findPageActionsByPath({ userId, path: pathname });
 
   const dataSource = await fetchPageIssues({
@@ -172,15 +157,12 @@ export const crawlPage = async (
     url: urlMap,
     userId,
     pageInsights: insightsEnabled,
-    scriptsEnabled:
-      (verified && scriptsEnabled) || (SUPER_MODE && scriptsEnabled), // bypass verification on SUPER_MODE
     mobile,
     ua,
     standard: standard || websiteStandard,
     actions,
     cv: SUPER_MODE || !!urole,
     pageSpeedApiKey: pageSpeedApiKey,
-    noStore: !website ? true : noStore, // prevent storing content if not target page
     html,
     ignore:
       ignore && Array.isArray(ignore) && ignore.length ? ignore : websiteIgnore,
@@ -239,7 +221,6 @@ export const crawlPage = async (
   }
 
   const {
-    script,
     issues: pageIssues,
     webPage,
     issuesInfo,
@@ -290,23 +271,14 @@ export const crawlPage = async (
         // if issues exist prior or current update collection
         // Add to Issues collection if page contains issues or if record should update/delete.
         if (issueCount || issueExist) {
-          const [
-            [analytics, analyticsCollection],
-            [newSite, pagesCollection],
-            [scripts, scriptsCollection],
-          ] = await Promise.all([
-            AnalyticsController().getWebsite({ pageUrl, userId }, true),
-            getPage({
-              userId,
-              url: pageUrl,
-            }),
-            scriptsEnabled
-              ? ScriptsController().getScript(
-                  { pageUrl, userId, noRetries: true },
-                  true
-                )
-              : Promise.resolve([null, null]),
-          ]);
+          const [[analytics, analyticsCollection], [newSite, pagesCollection]] =
+            await Promise.all([
+              AnalyticsController().getWebsite({ pageUrl, userId }, true),
+              getPage({
+                userId,
+                url: pageUrl,
+              }),
+            ]);
 
           await Promise.all([
             // analytics
@@ -348,25 +320,6 @@ export const crawlPage = async (
                 searchProps: { url: pageUrl, userId },
               }
             ),
-            // scripts
-            scriptsEnabled && script
-              ? collectionUpsert(
-                  {
-                    pageUrl: script.pageUrl,
-                    domain: script.domain,
-                    script: script.script,
-                    cdnUrl: script.cdnUrl,
-                    cdnConnected: script.cdnConnected,
-                    issueMeta: script.issueMeta,
-                    scriptMeta: !scripts?.scriptMeta
-                      ? {
-                          skipContentEnabled: true,
-                        }
-                      : scripts.scriptMeta,
-                  },
-                  [scriptsCollection, scripts]
-                )
-              : Promise.resolve(),
           ]);
 
           // send email if issues of type error exist for the page. TODO: remove from layer.

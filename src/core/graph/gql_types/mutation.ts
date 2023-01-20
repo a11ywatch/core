@@ -45,13 +45,6 @@ export const mutation = gql`
       proxy: String
     ): UpdateWebSiteMutationResponse
 
-    updateScript(
-      url: String
-      scriptMeta: ScriptMetaInput
-      editScript: Boolean
-      newScript: String
-    ): UpdateScriptMutationResponse
-
     """
     Multi-page or site crawl for issues.
     """
@@ -140,13 +133,6 @@ export const mutation = gql`
     user: User
     alertEnabled: Boolean
     profileVisible: Boolean
-  }
-
-  type UpdateScriptMutationResponse implements MutationResponse {
-    code: String!
-    success: Boolean!
-    message: String!
-    script: Script
   }
 
   """

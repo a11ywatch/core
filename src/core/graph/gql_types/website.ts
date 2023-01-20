@@ -31,10 +31,8 @@ export const website = gql`
     cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issuesInfo: IssueInfo
-    script: Script
     lastScanDate: String
     documentTitle: String
-    cdn: String
     online: Boolean
     timestamp: String
     pageInsights: Boolean
@@ -57,12 +55,6 @@ export const website = gql`
     runners: [String]
     proxy: String
     analytics(limit: Int = 0, offset: Int = 0, all: Boolean = false): [Analytic]
-    scripts(
-      limit: Int = 0
-      offset: Int = 0
-      offset: Int = 0
-      all: Boolean = false
-    ): [Script]
     issues(
       filter: String
       limit: Int = 0

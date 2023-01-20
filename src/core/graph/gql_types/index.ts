@@ -5,7 +5,6 @@ export { issue } from "./issue";
 export { page } from "./page";
 export { history } from "./history";
 export { analytic } from "./analytic";
-export { script } from "./script";
 export { payments } from "./payments";
 export { meta } from "./meta";
 export { pageInsights } from "./page-insights";

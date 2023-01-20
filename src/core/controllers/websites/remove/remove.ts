@@ -8,9 +8,6 @@ import { getWebsite } from "../find";
 import { HistoryController } from "../../history";
 import { domainNameFind } from "../../../utils";
 import { validateUID } from "../../../../web/params/extracter";
-import { controller } from "../../../../proto/actions/calls";
-import { getWebsitesPaginated } from "../find/get";
-import { SUPER_MODE } from "../../../../config";
 
 // remove a website or all website and related data.
 export const removeWebsite = async ({
@@ -28,10 +25,6 @@ export const removeWebsite = async ({
 
   if (deleteMany) {
     const [webcollection] = connect("Websites");
-    const [websites] = await getWebsitesPaginated(50, { userId }, 0, 0, {
-      domain: 1,
-    });
-
     // todo: get all websites and send request to cdn server for assets removal
     await webcollection.deleteMany({ userId });
     await scriptsCollection.deleteMany({ userId });
@@ -40,20 +33,6 @@ export const removeWebsite = async ({
     await issuesCollection.deleteMany({ userId });
     await actionsCollection.deleteMany({ userId });
     await pageSpeedCollection.deleteMany({ userId });
-
-    for (const website of websites) {
-      if (SUPER_MODE || website.verified) {
-        try {
-          await controller.removeScript({
-            domain: website.domain,
-            scriptBuffer: "",
-            cdnSourceStripped: "",
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
 
     return { code: 200, success: true, message: SUCCESS_DELETED_ALL };
   }
@@ -65,18 +44,6 @@ export const removeWebsite = async ({
   }
 
   const domainName = siteExist.domain;
-
-  if (SUPER_MODE || siteExist.verified) {
-    try {
-      await controller.removeScript({
-        domain: domainName,
-        scriptBuffer: "",
-        cdnSourceStripped: "",
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }
 
   const removeRelative = siteExist.subdomains || siteExist.tld;
 

@@ -58,7 +58,6 @@ import { getWebsiteWrapper } from "./core/controllers/websites/find/get";
 import { responseModel } from "./core/models";
 import { limiter, scanLimiter } from "./web/limiters";
 import { appEmitter } from "./event/emitters/control";
-import { setAdsRoutes } from "./web/routes_groups/ads";
 import { setDnsVerifyRoutes } from "./web/routes_groups/dns-verify";
 import { backgroundSync } from "./web/routes/sync";
 import { priceConfig } from "@a11ywatch/website-source-builder";
@@ -249,7 +248,7 @@ async function initServer(): Promise<HttpServer[]> {
       rules,
       runners,
       proxy: DEV || usr?.payload?.audience ? proxy : undefined,
-      sitemap
+      sitemap,
     });
 
     return res.send({
@@ -325,7 +324,6 @@ async function initServer(): Promise<HttpServer[]> {
 
   // get the stripe client key
   setDnsVerifyRoutes(app);
-  setAdsRoutes(app);
   setListRoutes(app);
   setAuthRoutes(app);
   setGithubActionRoutes(app);

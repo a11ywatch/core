@@ -14,7 +14,7 @@ import { scanWebsite, crawlPage } from "../core/actions";
 import { gqlRateLimiter } from "../web/limiters/scan";
 import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
-import { ScriptsController, UsersController } from "./controllers";
+import { UsersController } from "./controllers";
 import { DEV, SUPER_MODE } from "../config/config";
 import { CRAWLER_COMMENCED } from "./strings/success";
 import { crawlingSet, getKey } from "../event/crawl-tracking";
@@ -240,21 +240,6 @@ export const Mutation = {
     return await UsersController().toggleAlert({
       keyid,
       alertEnabled,
-    });
-  },
-  updateScript: async (
-    _,
-    { url, scriptMeta, editScript, newScript },
-    context
-  ) => {
-    const { keyid } = context.user?.payload || defaultPayload;
-
-    return await ScriptsController().updateScript({
-      userId: keyid,
-      scriptMeta,
-      pageUrl: url,
-      editScript,
-      newScript,
     });
   },
   sortWebsites: async (_, { order }, context) => {

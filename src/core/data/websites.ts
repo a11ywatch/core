@@ -1,7 +1,6 @@
 import { UsersController } from "../controllers/users";
 import { IssuesController } from "../controllers/issues";
 import { PagesController } from "../controllers/pages";
-import { ScriptsController } from "../controllers/scripts";
 import { AnalyticsController } from "../controllers";
 import { getPageActionsPaging } from "../controllers/page-actions/page-actions";
 import { PageSpeedController } from "../controllers/page-speed/main";
@@ -36,20 +35,6 @@ export const Website = {
     }
 
     return issues;
-  },
-  // find one script for a page -- TODO: move to pages
-  script: async ({ userId, url, pageUrl }) => {
-    return await ScriptsController().getScript(
-      { userId: userId, pageUrl: url || pageUrl },
-      false
-    );
-  },
-  scripts: async ({ userId, domain }, params) => {
-    return await ScriptsController().getScriptsPaging({
-      userId: userId,
-      domain,
-      ...params,
-    });
   },
   analytics: async ({ userId, domain }, params) => {
     return await AnalyticsController().getAnalyticsPaging({

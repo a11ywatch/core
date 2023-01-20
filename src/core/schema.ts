@@ -14,7 +14,6 @@ import {
   subscription,
   history,
   analytic,
-  script,
   payments,
   meta,
   input,
@@ -40,7 +39,6 @@ const typeDefs = gql`
   ${website}
   ${page}
   ${issue}
-  ${script}
   ${analytic}
   ${history}
   ${query}

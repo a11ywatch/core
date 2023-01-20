@@ -1,8 +1,4 @@
-import {
-  AnalyticsController,
-  HistoryController,
-  ScriptsController,
-} from "../controllers";
+import { AnalyticsController, HistoryController } from "../controllers";
 import { viewUpcomingInvoice } from "../controllers/users/update/payments";
 import { getWebsitesPaging } from "../controllers/websites/find/get";
 
@@ -15,23 +11,6 @@ export const User = {
   analytics: async ({ id, keyid }) => {
     return await AnalyticsController().getAnalytics({
       userId: id || keyid,
-    });
-  },
-  script: async ({ id, filter, keyid }, { url, pageUrl }) => {
-    return await ScriptsController().getScript(
-      {
-        userId: id || keyid,
-        pageUrl: url || pageUrl,
-        filter,
-        noRetries: false,
-      },
-      false
-    );
-  },
-  scripts: async ({ id, keyid }, { url, pageUrl }) => {
-    return await ScriptsController().getScripts({
-      userId: id || keyid,
-      pageUrl: url || pageUrl,
     });
   },
   websites: async ({ id, keyid }, params) => {
