@@ -179,7 +179,7 @@ export const addWebsite = async ({
           !proxyHost.startsWith("https://localhost")))
         ? proxyHost
         : "",
-    sitemap,
+    sitemap: SUPER_MODE ? sitemap : user.role && sitemap,
   });
 
   await collection.insertOne(website);

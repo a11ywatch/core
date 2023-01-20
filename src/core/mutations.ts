@@ -15,7 +15,7 @@ import { gqlRateLimiter } from "../web/limiters/scan";
 import { getWebsite, WebsitesController } from "./controllers/websites";
 import { websiteFormatter } from "./utils/shapes/website-gql";
 import { UsersController } from "./controllers";
-import { DEV, SUPER_MODE } from "../config/config";
+import { SUPER_MODE } from "../config/config";
 import { CRAWLER_COMMENCED } from "./strings/success";
 import { crawlingSet, getKey } from "../event/crawl-tracking";
 import { StatusCode } from "../web/messages/message";
@@ -196,6 +196,7 @@ export const Mutation = {
     context
   ) => {
     const { keyid, audience } = context.user?.payload || defaultPayload;
+    const featsEnabled = SUPER_MODE || audience;
 
     return await WebsitesController().updateWebsite({
       userId: userId || keyid,
@@ -206,13 +207,13 @@ export const Mutation = {
       standard,
       ua,
       robots,
-      subdomains,
-      tld,
       ignore,
       rules,
       runners,
-      proxy: DEV || audience ? proxy : undefined,
-      sitemap,
+      tld: featsEnabled ? tld : false,
+      subdomains: featsEnabled ? subdomains : false,
+      proxy: featsEnabled ? proxy : undefined,
+      sitemap: featsEnabled ? sitemap : false,
     });
   },
   forgotPassword: async (_, { email }, _context) => {

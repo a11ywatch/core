@@ -10,7 +10,7 @@ import {
   logServerInit,
   fastifyConfig,
   corsOptions,
-  DEV,
+  SUPER_MODE,
 } from "./config";
 import {
   crawlAllAuthedWebsitesCluster,
@@ -247,8 +247,8 @@ async function initServer(): Promise<HttpServer[]> {
       ignore,
       rules,
       runners,
-      proxy: DEV || usr?.payload?.audience ? proxy : undefined,
-      sitemap,
+      proxy: SUPER_MODE || usr?.payload?.audience ? proxy : undefined,
+      sitemap: SUPER_MODE || usr?.payload?.audience ? sitemap : false,
     });
 
     return res.send({
