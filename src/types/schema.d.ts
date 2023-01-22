@@ -1,24 +1,5 @@
 import type Stripe from "stripe";
 
-export type Maybe<T> = T | null;
-export type Exact<T extends { [key: string]: unknown }> = {
-  [K in keyof T]: T[K];
-};
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]?: Maybe<T[SubKey]>;
-};
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]: Maybe<T[SubKey]>;
-};
-/** All built-in and custom scalars, mapped to their actual values */
-export type Scalars = {
-  ID: string;
-  String: string;
-  Boolean: boolean;
-  Int: number;
-  Float: number;
-};
-
 export type Analytic = {
   __typename?: "Analytic";
   id?: string;
@@ -56,16 +37,16 @@ export type History = {
   __typename?: "History";
   id?: string;
   url?: string;
-  user?: Maybe<User>;
-  issues?: Maybe<Array<Maybe<Issue>>>;
-  pages?: Maybe<Array<Maybe<Pages>>>;
+  user?: User;
+  issues?: Issue[];
+  pages?: Pages[];
   userId?: number;
   domain?: string;
   cdnConnected?: boolean;
-  pageLoadTime?: Maybe<PageLoadTimeMeta>;
-  issuesInfo?: Maybe<IssueMeta>;
+  pageLoadTime?: PageLoadTimeMeta;
+  issuesInfo?: IssueMeta;
   pageInsights?: boolean;
-  insight?: Maybe<PageInsights>;
+  insight?: PageInsights;
 };
 
 export type HistoryIssuesArgs = {
@@ -92,8 +73,8 @@ export type Issue = {
   context?: string;
   selector?: string;
   runner?: string;
-  issue?: Maybe<Issue>;
-  issues?: Maybe<Array<Maybe<Issue>>>;
+  issue?: Issue;
+  issues?: Issue[];
   url?: string;
   domain?: string;
   pageUrl?: string;
@@ -120,22 +101,22 @@ export type IssueMeta = {
 
 export type Mutation = {
   __typename?: "Mutation";
-  register?: Maybe<User>;
-  login?: Maybe<User>;
-  logout?: Maybe<BasicMutationResponse>;
-  updateUser?: Maybe<UpdateUserMutationResponse>;
-  toggleAlert?: Maybe<UpdateUserMutationResponse>;
-  updateWebsite?: Maybe<UpdateWebSiteMutationResponse>;
-  crawlWebsite?: Maybe<UpdateWebSiteMutationResponse>;
-  scanWebsite?: Maybe<UpdateWebSiteMutationResponse>;
-  forgotPassword?: Maybe<User>;
-  confirmEmail?: Maybe<UpdateUserMutationResponse>;
-  resetPassword?: Maybe<User>;
-  addWebsite?: Maybe<UpdateWebSiteMutationResponse>;
-  filterEmailDates?: Maybe<User>;
-  removeWebsite?: Maybe<UpdateWebSiteMutationResponse>;
-  addPaymentSubscription?: Maybe<UpdateUserMutationResponse>;
-  cancelSubscription?: Maybe<UpdateUserMutationResponse>;
+  register?: User;
+  login?: User;
+  logout?: BasicMutationResponse;
+  updateUser?: UpdateUserMutationResponse;
+  toggleAlert?: UpdateUserMutationResponse;
+  updateWebsite?: UpdateWebSiteMutationResponse;
+  crawlWebsite?: UpdateWebSiteMutationResponse;
+  scanWebsite?: UpdateWebSiteMutationResponse;
+  forgotPassword?: User;
+  confirmEmail?: UpdateUserMutationResponse;
+  resetPassword?: User;
+  addWebsite?: UpdateWebSiteMutationResponse;
+  filterEmailDates?: User;
+  removeWebsite?: UpdateWebSiteMutationResponse;
+  addPaymentSubscription?: UpdateUserMutationResponse;
+  cancelSubscription?: UpdateUserMutationResponse;
 };
 
 export type MutationRegisterArgs = {
@@ -167,13 +148,13 @@ export type MutationToggleProfileArgs = {
 
 export type MutationUpdateWebsiteArgs = {
   url?: string;
-  customHeaders?: Maybe<Array<Maybe<CreatePageHeaders>>>;
+  customHeaders?: CreatePageHeaders[];
   pageInsights?: boolean;
 };
 
 export type MutationUpdateScriptArgs = {
   url?: string;
-  scriptMeta?: Maybe<ScriptMetaInput>;
+  scriptMeta?: ScriptMetaInput;
   editScript?: boolean;
   newScript?: string;
 };
@@ -207,7 +188,7 @@ export type MutationAddWebsiteArgs = {
 };
 
 export type MutationFilterEmailDatesArgs = {
-  emailFilteredDates?: Maybe<Array<number>>;
+  emailFilteredDates?: number[];
 };
 
 export type MutationRemoveWebsiteArgs = {
@@ -284,14 +265,14 @@ export type PaymentSubScription = {
 
 export type Query = {
   __typename?: "Query";
-  websites?: Maybe<Array<Maybe<Website>>>;
-  website?: Maybe<Website>;
-  pages?: Maybe<Array<Maybe<Pages>>>;
-  issues?: Maybe<Array<Maybe<Issue>>>;
-  history?: Maybe<Array<Maybe<History>>>;
-  analytics?: Maybe<Array<Maybe<Analytic>>>;
-  issue?: Maybe<Issue>;
-  user?: Maybe<User>;
+  websites?: Website[];
+  website?: Website;
+  pages?: Pages[];
+  issues?: Issue[];
+  history?: History[];
+  analytics?: Analytic[];
+  issue?: Issue;
+  user?: User;
 };
 
 export type QueryWebsitesArgs = {
@@ -333,9 +314,10 @@ export type QueryIssueArgs = {
 
 export type ScanInformation = {
   __typename?: "ScanInformation";
-  lastScanDate?: Maybe<Scalars["Date"]>;
+  lastScanDate?: number | Date;
   totalUptime?: number;
   usageLimit?: number;
+  creditedUptime?: number;
 };
 
 export type ScriptMeta = {
@@ -353,14 +335,14 @@ export type Pages = {
   __typename?: "Pages";
   id?: string;
   url?: string;
-  user?: Maybe<User>;
+  user?: User;
   domain?: string;
   userId?: number;
-  pageLoadTime?: Maybe<PageLoadTimeMeta>;
-  issues?: Maybe<Array<Maybe<Issue>>>;
-  issuesInfo?: Maybe<IssueMeta>;
+  pageLoadTime?: PageLoadTimeMeta;
+  issues?: Issue[];
+  issuesInfo?: IssueMeta;
   pageInsights?: boolean;
-  insight?: Maybe<PageInsights>;
+  insight?: PageInsights;
 };
 
 export type SubDomainIssuesArgs = {
@@ -369,10 +351,10 @@ export type SubDomainIssuesArgs = {
 
 export type Subscription = {
   __typename?: "Subscription";
-  websiteAdded?: Maybe<Website>;
-  issueAdded?: Maybe<Issue>;
-  emailVerified?: Maybe<User>;
-  websiteRemoved?: Maybe<Website>;
+  websiteAdded?: Website;
+  issueAdded?: Issue;
+  emailVerified?: User;
+  websiteRemoved?: Website;
 };
 
 export type SubscriptionWebsiteAddedArgs = {
@@ -396,7 +378,7 @@ export type UpdateUserMutationResponse = MutationResponse & {
   code: string;
   success: boolean;
   message: string;
-  user?: Maybe<User>;
+  user?: User;
   alertEnabled?: boolean;
   profileVisible?: boolean;
 };
@@ -406,7 +388,7 @@ export type UpdateWebSiteMutationResponse = MutationResponse & {
   code: string;
   success: boolean;
   message: string;
-  website?: Maybe<Website>;
+  website?: Website;
 };
 
 export type User = {
@@ -426,13 +408,13 @@ export type User = {
   role?: number;
   activeSubscription?: boolean;
   emailConfirmed?: boolean;
-  emailFilteredDates?: Maybe<Array<number>>;
-  websites?: Maybe<Array<Maybe<Website>>>;
+  emailFilteredDates?: number[];
+  websites?: Website[];
   profileVisible?: boolean;
-  history?: Maybe<Array<Maybe<History>>>;
-  scanInfo?: Maybe<ScanInformation>;
-  analytics?: Maybe<Array<Maybe<Analytic>>>;
-  paymentSubscription?: Maybe<Stripe.subscriptions.ISubscription>;
+  history?: History[];
+  scanInfo?: ScanInformation;
+  analytics?: Analytic[];
+  paymentSubscription?: Stripe.subscriptions.ISubscription;
   websiteLimit?: number;
   lastLoginDate?: string;
   downAlerts?: Website[];
@@ -440,6 +422,7 @@ export type User = {
   resetCode?: string;
   stripeID?: string;
   pageSpeedApiKey?: string;
+  usageAnchorDate?: number | Date; // the date to track the monthly usage for a user
 };
 
 export type UserAnalyticsArgs = {
@@ -466,7 +449,7 @@ export type Website = {
   pageLoadTime?: PageLoadTimeMeta;
   issuesInfo?: IssueMeta;
   pages?: Pages[];
-  lastScanDate?: string;
+  lastScanDate?: number | Date;
   documentTitle?: string;
   cdn?: string;
   pageHeaders?: PageHeaders[];

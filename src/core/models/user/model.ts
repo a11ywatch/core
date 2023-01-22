@@ -11,11 +11,13 @@ const UserModel = {
   emailConfirmed: false,
   profileVisible: false,
   lastLoginDate: "",
+  usageAnchorDate: 0,
   passwordRequired: false,
   // api usage
   scanInfo: {
     lastScanDate: null,
-    totalUptime: 0, // total scan uptime
+    totalUptime: 0, // total scan uptime from plans
+    creditedUptime: 0, // uptime credits applied to account outside of plan usage negate against
   },
   websiteLimit: 1, // limit of websites a user can have
   googleId: "",
@@ -27,11 +29,14 @@ const UserModel = {
 
 // add defaults from user model and set the lastLoginDate to the current date
 const makeUser = (extra: any = {}): typeof UserModel => {
+  const currentDate = new Date();
+
   return Object.assign(
     {},
     UserModel,
     {
-      lastLoginDate: new Date(),
+      lastLoginDate: currentDate,
+      usageAnchorDate: currentDate,
     },
     extra
   );

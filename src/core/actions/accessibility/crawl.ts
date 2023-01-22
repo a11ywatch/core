@@ -104,7 +104,7 @@ export const crawlPage = async (
     id: userId,
   });
 
-  const { pageUrl, domain, pathname } = sourceBuild(urlMap, userId);
+  const { pageUrl, domain, pathname } = sourceBuild(urlMap);
 
   // block scans from running
   if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
@@ -193,6 +193,7 @@ export const crawlPage = async (
         },
       }) === false;
 
+    // todo: negate usage from uptime outside plan. One generic method to handle uptime.
     setImmediate(async () => {
       await collectionIncrement(
         {

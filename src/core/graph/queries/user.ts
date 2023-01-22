@@ -23,7 +23,6 @@ export const user = async (_, { id, password }, ctx) => {
       ...props,
       emailConfirmed: !!emailConfirmed, // temp fix
       keyid: userId,
-      // ?.status === "active"
       activeSubscription: !!user?.paymentSubscription,
       loggedIn: !!ctx.user,
       accountType: audience + "" || "",

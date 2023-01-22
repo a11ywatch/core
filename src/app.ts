@@ -34,6 +34,7 @@ import { confirmEmail, detectImage, unSubEmails } from "./web/routes";
 import { statusBadge } from "./web/routes/resources/badge";
 import { scanAuthenticated, scanSimple } from "./web/routes/scan";
 import { setGithubActionRoutes } from "./web/routes_groups/github-actions";
+import { setExternalRoutes } from "./web/routes_groups/external";
 import { setAuthRoutes } from "./web/routes_groups/auth";
 import { startGRPC } from "./proto/init";
 import { killServer as killGrpcServer } from "./proto/website-server";
@@ -327,6 +328,7 @@ async function initServer(): Promise<HttpServer[]> {
   setListRoutes(app);
   setAuthRoutes(app);
   setGithubActionRoutes(app);
+  setExternalRoutes(app);
 
   // EMAIL
   // unsubscribe to emails or Alerts.

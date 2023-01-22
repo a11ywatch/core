@@ -24,8 +24,6 @@ const validateUserRequest = (req: FastifyContext["request"]): number => {
   if (validateUID(userId) && isClient && (SUPER_MODE || softAuth)) {
     return userId;
   }
-  // check to see if dns if verified
-  return null;
 };
 
 const verifiedProps = {
@@ -33,13 +31,13 @@ const verifiedProps = {
   data: { verified: true },
 };
 
-// set all ad friends network routes
+// set all dns verifiycation routes
 export const setDnsVerifyRoutes = (app: FastifyInstance) => {
   app.get("/api/website/dns", async (req, res) => {
     const userId = validateUserRequest(req);
 
     // check to see if dns if verified
-    if (validateUID(userId)) {
+    if (typeof userId !== "undefined") {
       const domain = paramParser(req, "domain");
 
       if (!domain) {
@@ -72,7 +70,7 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
   app.post("/api/website/dns", async (req, res) => {
     const userId = validateUserRequest(req);
 
-    if (validateUID(userId)) {
+    if (typeof userId !== "undefined") {
       const domain = paramParser(req, "domain");
       const [collection] = connect("Websites");
 

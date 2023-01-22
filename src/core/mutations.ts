@@ -84,7 +84,7 @@ export const Mutation = {
           scan: true,
           agent: ua,
           proxy: proxy,
-          sitemap: !!sitemap
+          sitemap: !!sitemap,
         });
       });
       return {

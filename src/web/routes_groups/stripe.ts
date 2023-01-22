@@ -3,6 +3,7 @@ import { config } from "../../config";
 import { stripe } from "../../core/external";
 import { UsersController, WebsitesController } from "../../core/controllers";
 import Stripe from "stripe";
+import { addMonths } from "date-fns";
 
 // Data to use from stripe web hook [todo: types may be available on newer versions]
 type StripeData = {
@@ -47,7 +48,6 @@ export const stripeHook = async (req, res) => {
       break;
     }
     case "invoice.payment_succeeded": {
-      // determine next payment
       if (
         ["manual", "subscription_cycle", "subscription_update"].includes(
           stripeCustomer.billing_reason
@@ -57,7 +57,6 @@ export const stripeHook = async (req, res) => {
           email: userEmail,
         });
 
-        // todo: remove paymentSubscription storing
         if (
           user &&
           user.paymentSubscription &&
@@ -68,16 +67,38 @@ export const stripeHook = async (req, res) => {
           await collection.updateOne(
             { email: user.email },
             {
-              $set: {
-                paymentSubscription: user.paymentSubscription,
-              },
+              $set:
+                stripeCustomer.billing_reason === "subscription_cycle"
+                  ? {
+                      paymentSubscription: user.paymentSubscription,
+                      usageAnchorDate: user.usageAnchorDate
+                        ? addMonths(user.usageAnchorDate, 1)
+                        : new Date(),
+                    }
+                  : {
+                      paymentSubscription: user.paymentSubscription,
+                    },
             }
           );
         }
       }
       break;
     }
+
     case "customer.created": {
+      const [user, collection] = await UsersController().getUser({
+        email: userEmail,
+      });
+
+      await collection.updateOne(
+        { email: user.email },
+        {
+          $set: {
+            usageAnchorDate: new Date(),
+          },
+        }
+      );
+
       break;
     }
 

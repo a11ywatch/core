@@ -1,8 +1,12 @@
-import { isSameDay } from "date-fns";
+import { addMonths, differenceInMonths } from "date-fns";
 import { getUsageLimitsMs } from "@a11ywatch/website-source-builder";
 import { getUser } from "../find";
 import { SUPER_MODE } from "../../../../config/config";
 import { User } from "../../../../types/schema";
+import { validateUID } from "../../../../web/params/extracter";
+
+const validateResetDate = (date: number | Date) =>
+  differenceInMonths(date, new Date());
 
 // Determine if user can perform web accessibility scanning
 // @returns Promise<boolean>
@@ -23,40 +27,31 @@ export const updateScanAttempt = async ({
   }
 
   // get collection if does not exist
-  if (!collection && typeof userId !== "undefined") {
+  if (!collection && validateUID(userId)) {
     [user, collection] = await getUser({ id: userId });
   }
 
   if (user) {
     const currentDate = new Date();
-
     const scanInfo = user?.scanInfo ?? {
       lastScanDate: null,
       totalUptime: 0,
+      creditedUptime: 0,
       usageLimit: 0,
     };
 
-    if (
-      !scanInfo?.lastScanDate ||
-      !isSameDay(scanInfo?.lastScanDate, currentDate)
-    ) {
-      scanInfo.totalUptime = 0;
-    }
+    // ping simply update dates and usage
+    if (ping) {
+      if (!user.role && validateResetDate(user.usageAnchorDate)) {
+        user.usageAnchorDate = addMonths(user.usageAnchorDate, 1);
+        scanInfo.totalUptime = 0;
+      }
 
-    const canScan = validateScanEnabled({
-      user: {
-        role: user?.role,
+      const updateProps = {
+        usageAnchorDate: user.usageAnchorDate,
         scanInfo,
-      },
-    });
-
-    // update the scan attempt if next day
-    if (canScan) {
-      scanInfo.lastScanDate = currentDate;
-
-      const updateProps = ping
-        ? { scanInfo, lastLoginDate: new Date() }
-        : { scanInfo };
+        lastLoginDate: new Date(),
+      };
 
       try {
         await collection.findOneAndUpdate(
@@ -66,9 +61,34 @@ export const updateScanAttempt = async ({
       } catch (e) {
         console.error(e);
       }
-    }
+    } else {
+      if (!user.role && validateResetDate(user.usageAnchorDate)) {
+        user.usageAnchorDate = addMonths(user.usageAnchorDate, 1);
+        scanInfo.totalUptime = 0;
+      }
 
-    return canScan;
+      const canScan = validateScanEnabled({
+        user: {
+          role: user?.role,
+          scanInfo,
+        },
+      });
+
+      // update the scan attempt if next day
+      if (canScan) {
+        scanInfo.lastScanDate = currentDate;
+        try {
+          await collection.findOneAndUpdate(
+            { id: user.id },
+            { $set: { scanInfo } }
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      return canScan;
+    }
   }
 
   return false;
