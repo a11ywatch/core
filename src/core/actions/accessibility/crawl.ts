@@ -176,12 +176,11 @@ export const crawlPage = async (
 
   let shutdown = false;
 
-  if (!sendEmail && !SUPER_MODE) {
+  if (!SUPER_MODE) {
     const ttime = dataSource?.usage || 0;
     const pastUptime = scanInfo?.totalUptime || 0;
     const totalUptime = ttime + pastUptime;
 
-    // check if scan has shut down
     shutdown =
       validateScanEnabled({
         user: {
