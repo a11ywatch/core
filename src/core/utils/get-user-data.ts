@@ -1,7 +1,11 @@
 import type { FastifyContext } from "apollo-server-fastify";
 import type { User } from "../../types/schema";
 import { UsersController } from "../controllers";
-import { GENERAL_ERROR, RATE_EXCEEDED_ERROR } from "../strings";
+import {
+  EMAIL_NEEDS_CONFIRMATION,
+  GENERAL_ERROR,
+  RATE_EXCEEDED_ERROR,
+} from "../strings";
 import { getUserFromToken, extractTokenKey } from "./get-user";
 import { config } from "../../config/config";
 import { frontendClientOrigin } from "./is-client";
@@ -144,14 +148,27 @@ export const getUserFromApiScan = async (
     return user || {};
   }
 
-  const canScan = await UsersController({
+  // user needs to confirm email free plans and possibly dns verification
+  if (!user || (user && !user.emailConfirmed)) {
+    res.status(StatusCode.Unauthorized);
+    res.send({
+      data: null,
+      message: !user ? "User not found." : "Email confirmation required.",
+      success: false,
+    });
+    return;
+  }
+
+  const [canScan, u] = await UsersController({
     user,
   }).updateScanAttempt({ id: user.id, user: user, collection });
 
-  if (!config.SUPER_MODE && !canScan) {
+  if (!canScan) {
     res.send({
       data: null,
-      message: RATE_EXCEEDED_ERROR,
+      message: u.emailConfirmed
+        ? RATE_EXCEEDED_ERROR
+        : EMAIL_NEEDS_CONFIRMATION,
       success: false,
     });
     return;

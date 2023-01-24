@@ -11,6 +11,7 @@ export {
   PASSWORD_ERROR,
   WEBSITE_URL_ERROR,
   RATE_EXCEEDED_ERROR,
+  EMAIL_NEEDS_CONFIRMATION,
 } from "./errors";
 
 export {

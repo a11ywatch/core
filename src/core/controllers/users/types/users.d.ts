@@ -54,7 +54,8 @@ export interface UserControllerMethodsType {
   forgotPassword(params: Params, chain?: boolean): Promise<any>;
   toggleAlert(params: Params, chain?: boolean): Promise<Partial<User>>; // async background db updates
   resetPassword(params: Params, chain?: boolean): Promise<any>;
-  updateScanAttempt(params: Params): Promise<any>;
+  // update scan attempt and determine if user can perform a scan
+  updateScanAttempt(params: Params): Promise<[boolean, User?, any?]>;
   validateEmail(params: Params, chain?: boolean): Promise<any>;
   unsubscribeEmails(params: Params): Promise<any>;
   sendWebsiteOffline(params: Params): Promise<any>;

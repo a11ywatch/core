@@ -24,9 +24,7 @@ export const addWebsite = async (
   context
 ) => {
   const { userId } = getPayLoad(context, props);
-
-  // TODO: centralize scan attempt via events.
-  const canScan = await UsersController().updateScanAttempt({
+  const [canScan] = await UsersController().updateScanAttempt({
     userId: userId,
   });
 

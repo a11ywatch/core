@@ -9,7 +9,7 @@ const validateResetDate = (date: number | Date) =>
   differenceInMonths(date, new Date());
 
 // Determine if user can perform web accessibility scanning
-// @returns Promise<boolean>
+// @returns Promise<[boolean, User]>
 export const updateScanAttempt = async ({
   userId,
   user,
@@ -17,13 +17,13 @@ export const updateScanAttempt = async ({
   ping,
 }: {
   userId?: number;
-  collection: any;
-  user: User;
+  collection?: any;
+  user?: User;
   ping?: boolean;
-}) => {
+}): Promise<[boolean, User?, any?]> => {
   // if SUPER_MODE always return truthy
   if (SUPER_MODE) {
-    return true;
+    return [true, null, collection];
   }
 
   // get collection if does not exist
@@ -32,8 +32,8 @@ export const updateScanAttempt = async ({
   }
 
   // return false if email not confirmed
-  if(user && !user.emailConfirmed) {
-    return false;
+  if (user && !user.emailConfirmed) {
+    return [false, user, collection];
   }
 
   if (user) {
@@ -92,11 +92,11 @@ export const updateScanAttempt = async ({
         }
       }
 
-      return canScan;
+      return [canScan, user, collection];
     }
   }
 
-  return false;
+  return [false, user, collection];
 };
 
 /*

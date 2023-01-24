@@ -1,4 +1,4 @@
-import { RATE_EXCEEDED_ERROR } from "./strings";
+import { RATE_EXCEEDED_ERROR, EMAIL_NEEDS_CONFIRMATION } from "./strings";
 import {
   updateUser,
   addWebsite,
@@ -55,11 +55,11 @@ export const Mutation = {
 
     const { keyid } = context.user?.payload || defaultPayload;
 
-    const canScan = !SUPER_MODE
+    const [canScan, u] = !SUPER_MODE
       ? await UsersController().updateScanAttempt({
           userId: keyid,
         })
-      : true;
+      : [true];
 
     if (canScan) {
       const [website] = await getWebsite({ userId: keyid, url });
@@ -94,7 +94,9 @@ export const Mutation = {
         message: CRAWLER_COMMENCED,
       };
     } else {
-      throw new Error(RATE_EXCEEDED_ERROR);
+      throw new Error(
+        u?.emailConfirmed ? RATE_EXCEEDED_ERROR : EMAIL_NEEDS_CONFIRMATION
+      );
     }
   },
   // run scans to the pagemind -> browser -> mav -> api
@@ -108,13 +110,15 @@ export const Mutation = {
     let errorMessage;
 
     if (!SUPER_MODE) {
-      const canScan = await UsersController().updateScanAttempt({
+      const [canScan, u] = await UsersController().updateScanAttempt({
         userId: keyid,
       });
 
       // if the request did not come from the server update api usage
       if (!canScan) {
-        errorMessage = RATE_EXCEEDED_ERROR;
+        errorMessage = u.emailConfirmed
+          ? RATE_EXCEEDED_ERROR
+          : EMAIL_NEEDS_CONFIRMATION;
       }
 
       // check rate limits for request. TODO: adjust r

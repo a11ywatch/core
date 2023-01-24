@@ -18,5 +18,7 @@ export const WEBSITE_URL_ERROR =
   "Invalid url, please check your url and try again.";
 export const RATE_EXCEEDED_ERROR =
   "RATE EXCEEDED: Please try again tomorrow or upgrade your account.";
+export const EMAIL_NEEDS_CONFIRMATION =
+  "Email confirmation required to commence scans and crawls.";
 export const SCAN_TIMEOUT =
   "Scan timeout, rendered too slow over 25000 ms or not at all. Check your url and try again.";
