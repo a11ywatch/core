@@ -31,6 +31,11 @@ export const updateScanAttempt = async ({
     [user, collection] = await getUser({ id: userId });
   }
 
+  // return false if email not confirmed
+  if(user && !user.emailConfirmed) {
+    return false;
+  }
+
   if (user) {
     const currentDate = new Date();
     const scanInfo = user?.scanInfo ?? {

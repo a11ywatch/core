@@ -13,10 +13,6 @@ type AddPaymentProps = {
   paymentPlan?: string; // valid payment plan
 };
 
-const trialPeriod = process.env.TRIAL_PERIOD
-  ? parseInt(process.env.TRIAL_PERIOD, 10)
-  : 14;
-
 // add payment subscription between plans.
 export const addPaymentSubscription = async ({
   keyid,
@@ -56,17 +52,9 @@ export const addPaymentSubscription = async ({
     const plan = parsedToken?.plan ?? paymentPlan ?? "L1";
 
     // params used to create the user
-    const createParams = parsedToken?.referral
-      ? {
-          email,
-          metadata: {
-            referral: parsedToken.referral,
-          },
-        }
-      : {
-          email,
-          metadata: null,
-        };
+    const createParams = {
+      email,
+    };
 
     let customer = { id: user.stripeID };
 
@@ -105,38 +93,23 @@ export const addPaymentSubscription = async ({
 
       const stripeProductPlan = stripeProductId(plan, yearly);
       const activeSub = user?.paymentSubscription;
-      const upgradeAccount =
-        activeSub?.status === "trialing" || activeSub?.status === "active";
+      const upgradeAccount = activeSub?.status === "active";
 
       let charge = null;
 
       // remove prior subscriptions
       if (upgradeAccount) {
         try {
-          if (activeSub?.status === "trialing") {
-            charge = await stripe.subscriptions.update(activeSub.id, {
-              proration_behavior: "always_invoice",
-              cancel_at_period_end: false,
-              items: [
-                {
-                  id: activeSub.items.data[0].id,
-                  price: stripeProductPlan,
-                },
-              ],
-              trial_end: "now",
-            });
-          } else {
-            charge = await stripe.subscriptions.update(activeSub.id, {
-              proration_behavior: "create_prorations",
-              cancel_at_period_end: false,
-              items: [
-                {
-                  id: activeSub.items.data[0].id,
-                  price: stripeProductPlan,
-                },
-              ],
-            });
-          }
+          charge = await stripe.subscriptions.update(activeSub.id, {
+            proration_behavior: "create_prorations",
+            cancel_at_period_end: false,
+            items: [
+              {
+                id: activeSub.items.data[0].id,
+                price: stripeProductPlan,
+              },
+            ],
+          });
         } catch (e) {
           console.error(e);
         }
@@ -151,7 +124,6 @@ export const addPaymentSubscription = async ({
               plan: stripeProductPlan,
             },
           ],
-          trial_period_days: !activeSub ? trialPeriod : undefined,
         });
       }
 

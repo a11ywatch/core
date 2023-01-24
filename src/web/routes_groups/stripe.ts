@@ -57,30 +57,26 @@ export const stripeHook = async (req, res) => {
           email: userEmail,
         });
 
-        if (
-          user &&
-          user.paymentSubscription &&
-          user.paymentSubscription.status === "trialing"
-        ) {
+        if (user?.paymentSubscription?.status !== "active") {
           user.paymentSubscription.status = "active";
-
-          await collection.updateOne(
-            { email: user.email },
-            {
-              $set:
-                stripeCustomer.billing_reason === "subscription_cycle"
-                  ? {
-                      paymentSubscription: user.paymentSubscription,
-                      usageAnchorDate: user.usageAnchorDate
-                        ? addMonths(user.usageAnchorDate, 1)
-                        : new Date(),
-                    }
-                  : {
-                      paymentSubscription: user.paymentSubscription,
-                    },
-            }
-          );
         }
+
+        await collection.updateOne(
+          { email: user.email },
+          {
+            $set:
+              stripeCustomer.billing_reason === "subscription_cycle"
+                ? {
+                    paymentSubscription: user.paymentSubscription,
+                    usageAnchorDate: user.usageAnchorDate
+                      ? addMonths(user.usageAnchorDate, 1)
+                      : new Date(),
+                  }
+                : {
+                    paymentSubscription: user.paymentSubscription,
+                  },
+          }
+        );
       }
       break;
     }
