@@ -11,3 +11,4 @@ export {
   addPaymentSubscription,
   downgradeStripeUserValues,
 } from "./payments";
+export { runUserChecks } from "./reset";

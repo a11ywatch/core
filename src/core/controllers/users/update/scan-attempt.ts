@@ -14,12 +14,10 @@ export const updateScanAttempt = async ({
   userId,
   user,
   collection,
-  ping,
 }: {
   userId?: number;
   collection?: any;
   user?: User;
-  ping?: boolean;
 }): Promise<[boolean, User?, any?]> => {
   // if SUPER_MODE always return truthy
   if (SUPER_MODE) {
@@ -46,16 +44,23 @@ export const updateScanAttempt = async ({
     };
 
     // ping simply update dates and usage
-    if (ping) {
-      if (!user.role && validateResetDate(user.usageAnchorDate)) {
-        user.usageAnchorDate = addMonths(user.usageAnchorDate, 1);
-        scanInfo.totalUptime = 0;
-      }
+    if (!user.role && validateResetDate(user.usageAnchorDate)) {
+      user.usageAnchorDate = addMonths(user.usageAnchorDate, 1);
+      scanInfo.totalUptime = 0;
+    }
 
+    const canScan = validateScanEnabled({
+      user: {
+        role: user?.role,
+        scanInfo,
+      },
+    });
+
+    if (canScan) {
+      scanInfo.lastScanDate = currentDate;
       const updateProps = {
         usageAnchorDate: user.usageAnchorDate,
         scanInfo,
-        lastLoginDate: new Date(),
       };
 
       try {
@@ -66,34 +71,9 @@ export const updateScanAttempt = async ({
       } catch (e) {
         console.error(e);
       }
-    } else {
-      if (!user.role && validateResetDate(user.usageAnchorDate)) {
-        user.usageAnchorDate = addMonths(user.usageAnchorDate, 1);
-        scanInfo.totalUptime = 0;
-      }
-
-      const canScan = validateScanEnabled({
-        user: {
-          role: user?.role,
-          scanInfo,
-        },
-      });
-
-      // update the scan attempt if next day
-      if (canScan) {
-        scanInfo.lastScanDate = currentDate;
-        try {
-          await collection.findOneAndUpdate(
-            { id: user.id },
-            { $set: { scanInfo } }
-          );
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
-      return [canScan, user, collection];
     }
+
+    return [canScan, user, collection];
   }
 
   return [false, user, collection];
