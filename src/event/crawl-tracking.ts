@@ -144,7 +144,7 @@ const crawlProcessed = (target) => {
         item.crawling = false;
       }
 
-      if (item.current === item.total && !item.crawling) {
+      if (!item.crawling && item.current === item.total) {
         await deInit(key, target);
       }
     }
