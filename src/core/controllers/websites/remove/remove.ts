@@ -16,7 +16,6 @@ export const removeWebsite = async ({
   domain = "",
   deleteMany = false,
 }) => {
-  const [scriptsCollection] = connect("Scripts");
   const [analyticsCollection] = connect("Analytics");
   const [pagesCollection] = connect("Pages");
   const [issuesCollection] = connect("Issues");
@@ -27,7 +26,6 @@ export const removeWebsite = async ({
     const [webcollection] = connect("Websites");
     // todo: get all websites and send request to cdn server for assets removal
     await webcollection.deleteMany({ userId });
-    await scriptsCollection.deleteMany({ userId });
     await analyticsCollection.deleteMany({ userId });
     await pagesCollection.deleteMany({ userId });
     await issuesCollection.deleteMany({ userId });
@@ -61,7 +59,6 @@ export const removeWebsite = async ({
     deleteQuery = domainNameFind({ userId }, siteExist.domain);
   }
 
-  await scriptsCollection.deleteMany(deleteQuery);
   await analyticsCollection.deleteMany(deleteQuery);
   await pagesCollection.deleteMany(deleteQuery);
   await issuesCollection.deleteMany(deleteQuery);

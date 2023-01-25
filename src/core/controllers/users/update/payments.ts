@@ -163,7 +163,7 @@ export const addPaymentSubscription = async ({
 };
 
 // revert account to basic
-export const cancelSubscription = async ({ keyid }) => {
+export const cancelSubscription = async ({ keyid }, blockUpdate?: boolean) => {
   const [user, collection] = await getUser({ id: keyid });
 
   if (!user) {
@@ -173,7 +173,8 @@ export const cancelSubscription = async ({ keyid }) => {
   if (user?.stripeID) {
     const deletedSubscription = await removeUserSubscriptions(user.stripeID);
 
-    if (deletedSubscription) {
+    // blockUpdate to prevent waisting resources on account delete
+    if (deletedSubscription && !blockUpdate) {
       const jwt = signJwt({
         email: user.email,
         role: 0,

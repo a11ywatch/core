@@ -1,15 +1,21 @@
 import { request } from "https";
 import { createUser } from "../../core/controllers/users/set";
-import { runUserChecks, verifyUser } from "../../core/controllers/users/update";
+import {
+  cancelSubscription,
+  runUserChecks,
+  verifyUser,
+} from "../../core/controllers/users/update";
 import { getUserFromToken } from "../../core/utils";
 import { config, cookieConfigs } from "../../config";
 import { UsersController } from "../../core/controllers/users";
 import { StatusCode } from "../messages/message";
-import type { FastifyInstance } from "fastify";
 import { validateUID } from "../params/extracter";
 import { limiter, registerLimiter } from "../limiters";
 import { User } from "../../types/schema";
-import { SUCCESS } from "../../core/strings";
+import { GENERAL_ERROR, SUCCESS } from "../../core/strings";
+import { WebsitesController } from "../../core/controllers";
+import { connect } from "../../database";
+import type { FastifyInstance } from "fastify";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -133,22 +139,62 @@ export const setAuthRoutes = (app: FastifyInstance) => {
   });
 
   // A NEW INSTANCE OF THE APP BASIC PING (RUNS ONCE ON APP START)
-  app.post("/api/ping", async (req, res) => {
+  app.post("/api/ping", (req, res) => {
     if (req.cookies.jwt || req.headers.authorization) {
-      setImmediate(async () => {
-        const id = getUserFromToken(
-          req.cookies.jwt || req.headers.authorization
-        )?.payload?.keyid;
+      const id = getUserFromToken(req.cookies.jwt || req.headers.authorization)
+        ?.payload?.keyid;
 
-        if (validateUID(id)) {
+      if (validateUID(id)) {
+        setImmediate(async () => {
           await runUserChecks({
             userId: id,
           });
-        }
-      });
+        });
+      }
     }
 
     res.status(200).send();
+  });
+
+  // delete all account adata
+  app.delete("/api/user", async (req, res) => {
+    let message = GENERAL_ERROR;
+    if (req.cookies.jwt || req.headers.authorization) {
+      const user = getUserFromToken(
+        req.cookies.jwt || req.headers.authorization
+      );
+      // audience - role (rename)
+      const { keyid: id, audience } = user?.payload ?? {
+        keyid: undefined,
+        audience: 0,
+      };
+
+      if (validateUID(id)) {
+        if (audience) {
+          await cancelSubscription({ keyid: id });
+        }
+
+        const [collection] = connect("Users");
+        const [historyCollecion] = connect("History");
+
+        await Promise.all([
+          WebsitesController().removeWebsite({
+            userId: id,
+            deleteMany: true,
+          }),
+          collection.deleteOne({ id }),
+          historyCollecion.deleteMany({ userId: id }),
+        ]);
+        message = `${SUCCESS}: account deleted.`;
+        res.setCookie("jwt", "", cookieConfigs);
+        res.clearCookie("jwt");
+      }
+    }
+
+    res.status(200).send({
+      data: null,
+      message: message,
+    });
   });
 
   // only used for github redirects non external for a11ywatch.com
