@@ -41,5 +41,6 @@ export const user = gql`
     stripeID: String
     invoice: Invoice
     pageSpeedApiKey: String
+    usageAnchorDate: String
   }
 `;
