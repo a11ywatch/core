@@ -2,7 +2,6 @@ const WebsiteModel = {
   userId: undefined,
   url: "",
   domain: "",
-  cdnConnected: false,
   pageInsights: false,
   pageHeaders: [],
   // insight: null, insight from pageSpeed

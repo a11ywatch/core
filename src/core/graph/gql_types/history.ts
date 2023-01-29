@@ -12,7 +12,6 @@ export const history = gql`
     pages: [Pages]
     userId: Int
     domain: String
-    cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issuesInfo: IssueMeta
     pageInsights: Boolean

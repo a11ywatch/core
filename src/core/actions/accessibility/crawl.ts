@@ -249,7 +249,6 @@ export const crawlPage = async (
             {
               domain: webPage.domain,
               url: webPage.url,
-              cdnConnected: webPage.cdnConnected,
               pageLoadTime: webPage.pageLoadTime,
               lastScanDate: webPage.lastScanDate,
               online: true,
@@ -268,6 +267,7 @@ export const crawlPage = async (
             true
           );
 
+        // todo: track all page information
         // if issues exist prior or current update collection
         // Add to Issues collection if page contains issues or if record should update/delete.
         if (issueCount || issueExist) {
@@ -341,12 +341,15 @@ export const crawlPage = async (
         }
       });
     }
+
     if (issueCount && sendSub) {
-      try {
-        await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
-      } catch (_) {
-        // silent pub sub errors
-      }
+      setImmediate(async () => {
+        try {
+          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+        } catch (_) {
+          // silent pub sub errors
+        }
+      });
     }
   }
 
@@ -354,7 +357,6 @@ export const crawlPage = async (
     data: {
       domain: webPage.domain,
       url: webPage.url,
-      cdnConnected: webPage.cdnConnected,
       pageLoadTime: webPage.pageLoadTime,
       lastScanDate: webPage.lastScanDate,
       issues: pageIssues.issues,

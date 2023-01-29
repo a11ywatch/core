@@ -60,7 +60,6 @@ export const scanWebsite = async ({
     data: {
       domain: webPage.domain,
       url: webPage.url,
-      cdnConnected: webPage.cdnConnected,
       pageLoadTime: webPage.pageLoadTime,
       timestamp: webPage.lastScanDate,
       issues: limitIssue(issues), // limited scan endpoint

@@ -42,7 +42,6 @@ export type History = {
   pages?: Pages[];
   userId?: number;
   domain?: string;
-  cdnConnected?: boolean;
   pageLoadTime?: PageLoadTimeMeta;
   issuesInfo?: IssueMeta;
   pageInsights?: boolean;
@@ -90,7 +89,6 @@ export type IssueMeta = {
   issuesFixedByCdn?: number;
   possibleIssuesFixedByCdn?: number;
   totalIssues?: number;
-  cdnConnected?: boolean;
   skipContentIncluded?: boolean;
   errorCount?: number;
   warningCount?: number;
@@ -445,7 +443,6 @@ export type Website = {
   user?: User;
   userId?: number;
   domain?: string;
-  cdnConnected?: boolean;
   pageLoadTime?: PageLoadTimeMeta;
   issuesInfo?: IssueMeta;
   pages?: Pages[];

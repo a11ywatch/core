@@ -28,7 +28,6 @@ export const website = gql`
     user: User
     userId: Int
     domain: String
-    cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issuesInfo: IssueInfo
     lastScanDate: String

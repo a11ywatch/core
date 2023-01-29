@@ -12,7 +12,6 @@ export const page = gql`
     domain: String
     userId: Int
     online: Boolean
-    cdnConnected: Boolean
     pageLoadTime: PageLoadTimeMeta
     issues(filter: String): [PageIssue]
     issuesInfo: IssueInfo
