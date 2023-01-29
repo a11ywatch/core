@@ -7,7 +7,7 @@ export const scanEnd = async (
   call: ServerWritableStream<{ domain: string; user_id: number }, {}>,
   callback: sendUnaryData<any>
 ) => {
-  process.nextTick(() => {
+  setImmediate(() => {
     crawlTrackingEmitter.emit("crawl-complete", call.request);
   });
 

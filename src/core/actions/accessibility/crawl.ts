@@ -45,18 +45,16 @@ const trackerProccess = (
   { domain, urlMap, userId, shutdown = false }: any,
   blockEvent?: boolean
 ) => {
-  // determine crawl has been processed top level tracking
+  if (!blockEvent && data) {
+    // event for handling streamed data
+    crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
+  }
   crawlTrackingEmitter.emit("crawl-processed", {
     user_id: userId,
     domain,
     pages: [urlMap],
     shutdown,
   });
-
-  if (!blockEvent && data) {
-    // event for handling streamed data
-    crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
-  }
 };
 
 // determine insights
