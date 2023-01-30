@@ -12,8 +12,10 @@ export const getWebParams = (req: FastifyContext["request"]) => {
   const actions = paramParser(req, "actions");
   const robots = paramParser(req, "robots");
   const subdomains = paramParser(req, "subdomains");
+  const sitemap = paramParser(req, "sitemap");
   const tld = paramParser(req, "tld");
   const ignore = paramParser(req, "ignore");
+  const monitoringEnabled = paramParser(req, "monitoringEnabled");
 
   return {
     url,
@@ -27,5 +29,7 @@ export const getWebParams = (req: FastifyContext["request"]) => {
     subdomains,
     tld,
     ignore,
+    sitemap,
+    monitoringEnabled,
   };
 };

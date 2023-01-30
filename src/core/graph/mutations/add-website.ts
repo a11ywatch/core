@@ -19,6 +19,7 @@ export const addWebsite = async (
     runners,
     proxy,
     sitemap,
+    monitoringEnabled,
     ...props
   },
   context
@@ -46,5 +47,6 @@ export const addWebsite = async (
     runners,
     proxy,
     sitemap,
+    monitoringEnabled,
   });
 };

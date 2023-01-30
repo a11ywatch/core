@@ -22,7 +22,7 @@ import { filterRunnerDuplicates } from "../../../utils/filters/runners";
 // allowed standards
 const allowedStandards = ["WCAG2A", "WCAG2AA", "WCAG2AAA", "Section508"];
 
-// used on mutations performs a website created following a multi-site scan if enabled
+// used on mutations performs a website created following a multi-site scan if enabled todo: opt crawl on scan
 export const addWebsite = async ({
   userId,
   url: urlMap,
@@ -42,6 +42,7 @@ export const addWebsite = async ({
   runners = [],
   proxy = "",
   sitemap = false,
+  monitoringEnabled = true,
 }) => {
   const decodedUrl = decodeURIComponent(urlMap);
   // make a clean web url without trailing slashes [TODO: OPT IN to trailing slashes or not]
@@ -180,6 +181,7 @@ export const addWebsite = async ({
         ? proxyHost
         : "",
     sitemap: SUPER_MODE ? sitemap : user.role && sitemap,
+    monitoringEnabled,
   });
 
   await collection.insertOne(website);

@@ -24,6 +24,8 @@ export const updateWebsite = async ({
   runners,
   proxy,
   sitemap,
+  monitoringEnabled,
+  actionsEnabled,
 }: Partial<Website> & { actions?: Record<string, unknown>[] }) => {
   const [website, collection] = await getWebsite({ userId, url });
 
@@ -31,11 +33,9 @@ export const updateWebsite = async ({
     throw new Error(WEBSITE_NOT_FOUND);
   }
 
-  const actionsEnabled = actions && Array.isArray(actions) && actions.length;
-
   // params prior - we mutate this on update
   const pageParams = {
-    actionsEnabled, // todo: remove actionsEnabled or set property to toggle
+    actionsEnabled: website.actionsEnabled, // todo: remove actionsEnabled or set property to toggle
     robots,
     pageHeaders: website.pageHeaders,
     pageInsights: website.pageInsights,
@@ -49,6 +49,7 @@ export const updateWebsite = async ({
     runners: website.runners,
     proxy: website.proxy,
     sitemap: !!website.sitemap,
+    monitoringEnabled: website.monitoringEnabled,
   };
 
   // if page headers are sent add them
@@ -92,7 +93,13 @@ export const updateWebsite = async ({
   if (typeof sitemap !== "undefined") {
     pageParams.sitemap = sitemap;
   }
-
+  // if user subdomains is defined
+  if (typeof monitoringEnabled !== "undefined") {
+    pageParams.monitoringEnabled = monitoringEnabled;
+  }
+  if (typeof actionsEnabled !== "undefined") {
+    pageParams.actionsEnabled = actionsEnabled;
+  }
   // if proxy is defined
   if (
     (typeof proxy !== "undefined" && !proxy) ||
@@ -174,7 +181,7 @@ export const updateWebsite = async ({
   await collection.updateOne({ url, userId }, { $set: pageParams });
 
   // store into actions collection TODO: validate actions
-  if (actionsEnabled && actions) {
+  if (actions && Array.isArray(actions) && actions.length) {
     const [actionsCollection] = connect("PageActions");
     const domain = website.domain;
 

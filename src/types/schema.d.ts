@@ -457,8 +457,10 @@ export type Website = {
   mobile?: boolean;
   standard?: string;
   ua?: string;
+  actionsEnabled?: boolean;
   subdomains?: boolean;
   tld?: boolean;
+  monitoringEnabled?: boolean;
   robots?: boolean;
   proxy?: string; // proxy for network request
   sitemap?: boolean; // use a sitemap to crawl the page

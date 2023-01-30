@@ -197,6 +197,7 @@ export const Mutation = {
       runners,
       proxy,
       sitemap,
+      monitoringEnabled,
     },
     context
   ) => {
@@ -219,6 +220,7 @@ export const Mutation = {
       subdomains: featsEnabled ? subdomains : false,
       proxy: featsEnabled ? proxy : undefined,
       sitemap: featsEnabled ? sitemap : false,
+      monitoringEnabled,
     });
   },
   forgotPassword: async (_, { email }, _context) => {

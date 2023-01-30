@@ -54,6 +54,7 @@ export const website = gql`
     runners: [String]
     proxy: String
     sitemap: Boolean
+    monitoringEnabled: Boolean
     analytics(limit: Int = 0, offset: Int = 0, all: Boolean = false): [Analytic]
     issues(
       filter: String

@@ -44,6 +44,8 @@ export const mutation = gql`
       runners: [String]
       proxy: String
       sitemap: Boolean
+      monitoringEnabled: Boolean
+      actionsEnabled: Boolean
     ): UpdateWebSiteMutationResponse
 
     """
@@ -97,6 +99,8 @@ export const mutation = gql`
       runners: [String]
       proxy: String
       sitemap: Boolean
+      monitoringEnabled: Boolean
+      actionsEnabled: Boolean
     ): UpdateWebSiteMutationResponse
 
     filterEmailDates(emailFilteredDates: [Int], morning: Boolean): User

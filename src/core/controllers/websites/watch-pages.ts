@@ -7,11 +7,20 @@ import { validateScanEnabled } from "../users/update/scan-attempt";
 // run a set of websites and get issues [DAILY CRON]
 export async function websiteWatch(pages: Website[] = []): Promise<void> {
   for (const website of pages) {
-    const { userId, url, subdomains, tld, ua, proxy } = website;
+    const { userId, url, subdomains, tld, ua, proxy, monitoringEnabled } =
+      website;
+
+    if (
+      !url ||
+      (typeof monitoringEnabled !== "undefined" && !monitoringEnabled)
+    ) {
+      continue;
+    }
+
     const [user] = await getUser({ id: userId });
 
     // prevent unconfirmed emails from job
-    if (!user || (user && !user?.emailConfirmed) || !url) {
+    if (!user || (user && !user?.emailConfirmed)) {
       continue;
     }
 

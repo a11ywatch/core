@@ -232,6 +232,8 @@ async function initServer(): Promise<HttpServer[]> {
     const runners = paramParser(req, "runners");
     const proxy = paramParser(req, "proxy");
     const sitemap = paramParser(req, "sitemap");
+    const monitoringEnabled = paramParser(req, "monitoringEnabled");
+    const actionsEnabled = paramParser(req, "actionsEnabled");
 
     const { website } = await updateWebsite({
       userId,
@@ -249,6 +251,8 @@ async function initServer(): Promise<HttpServer[]> {
       runners,
       proxy: SUPER_MODE || usr?.payload?.audience ? proxy : undefined,
       sitemap: SUPER_MODE || usr?.payload?.audience ? sitemap : false,
+      monitoringEnabled,
+      actionsEnabled,
     });
 
     return res.send({

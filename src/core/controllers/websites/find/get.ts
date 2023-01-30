@@ -74,12 +74,20 @@ export const getWebsitesPaginated = async (
     (await collection
       .find(filter)
       .sort({ order: 1 }) // todo: optional sorting
-      .project(project ?? { url: 1, userId: 1, subdomains: 1, tld: 1 })
+      .project(
+        project ?? {
+          url: 1,
+          userId: 1,
+          subdomains: 1,
+          tld: 1,
+          monitoringEnabled: 1,
+        }
+      )
       .limit(limit)
       .skip(offset ?? limit * page)
       .toArray());
 
-  return [data, collection];
+  return [data ?? [], collection];
 };
 
 // get websites for a user with pagination offsets.
