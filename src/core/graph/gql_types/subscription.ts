@@ -6,7 +6,7 @@ export const subscription = gql`
   """
   type Subscription {
     websiteAdded: Website
-    issueAdded: Issue
+    issueAdded: Website
     emailVerified: User
     crawlComplete: CrawlStatus
     websiteRemoved: Website

@@ -223,15 +223,6 @@ export const crawlPage = async (
     issuesInfo,
   } = extractPageData(dataSource);
 
-  // the new issue information with userId
-  const newIssue = {
-    issues: pageIssues.issues,
-    documentTitle: pageIssues.documentTitle,
-    pageUrl: pageIssues.pageUrl,
-    domain: pageIssues.domain,
-    userId,
-  };
-
   // issues array
   const issueCount = pageIssues.issues.length;
 
@@ -296,7 +287,13 @@ export const crawlPage = async (
             ),
             // issues
             collectionUpsert(
-              newIssue,
+              {
+                issues: pageIssues.issues,
+                documentTitle: pageIssues.documentTitle,
+                pageUrl: pageIssues.pageUrl,
+                domain: pageIssues.domain,
+                userId,
+              },
               [issuesCollection, issueExist, !issueCount],
               {
                 searchProps: { pageUrl, userId },
@@ -342,7 +339,18 @@ export const crawlPage = async (
     if (issueCount && sendSub) {
       setImmediate(async () => {
         try {
-          await pubsub.publish(ISSUE_ADDED, { issueAdded: newIssue });
+          await pubsub.publish(ISSUE_ADDED, {
+            issueAdded: {
+              domain: webPage.domain,
+              url: webPage.url,
+              pageLoadTime: webPage.pageLoadTime,
+              lastScanDate: webPage.lastScanDate,
+              issue: pageIssues.issues,
+              issuesInfo,
+              userId,
+              online: true,
+            },
+          });
         } catch (_) {
           // silent pub sub errors
         }
