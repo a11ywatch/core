@@ -12,7 +12,7 @@ type ScanParams = {
 export type ScanRpcCall = ServerWritableStream<ScanParams, {}>;
 
 // perform scan via streams enqueueing scan
-export const scanStream = async (call: ScanRpcCall) => {
-  crawlTrackingEmitter.emit("crawl-processing", call); // pass in call to determine if crawl needs to stop
-  await crawlEnqueue(call.request); // queue to control output.
+export const scanStream = async (rpc: ScanRpcCall) => {
+  crawlTrackingEmitter.emit("crawl-processing", rpc); // pass in call to determine if crawl needs to stop
+  await crawlEnqueue(rpc.request); // queue to control output.
 };

@@ -7,7 +7,7 @@ import { PageSpeedController } from "../../core/controllers/page-speed/main";
 import { WebsitesController } from "../../core/controllers";
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 
-// lighthouse page updating
+// update Page collection with lighthouse results
 export const pageUpdate = async (
   call: ServerWritableStream<
     { domain: string; url: string; user_id: number; insight: any },

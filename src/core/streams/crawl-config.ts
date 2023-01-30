@@ -18,7 +18,7 @@ export const getCrawlConfig = async ({
   let agent = "";
 
   // determine active configuration on role
-  if (role && validateUID(id)) {
+  if ((role && validateUID(id)) || SUPER_MODE) {
     if (!subdomainsEnabled || !tldEnabled) {
       const [website] = await getWebsite({ userId: id, url });
       if (website) {

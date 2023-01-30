@@ -27,6 +27,9 @@ export const extractPageData = (dataSource: PageMindScanResponse) => {
   const { issues, webPage, userId } = dataSource ?? {
     // todo: rename top level collection
     issues: {
+      documentTitle: "",
+      domain: "",
+      pageUrl: "",
       issues: [],
     },
     webPage: null,
@@ -36,7 +39,6 @@ export const extractPageData = (dataSource: PageMindScanResponse) => {
   const { insight, ...w } = webPage ?? {};
   // pluck issues info outside
   const { issuesInfo, ...website } = w ?? {};
-
 
   return {
     userId,

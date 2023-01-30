@@ -66,24 +66,16 @@ export const crawlStreaming = async (
   call: ServerCallStreaming
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld, norobo, proxy, sitemap } = props;
+  const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
+  const crawlEvent = `crawl-${crawlKey}`;
 
-  await watcherCrawl({
-    url,
-    userId,
-    subdomains: !!subdomains,
-    tld: !!tld,
-    scan: true,
-    robots: !norobo,
-    proxy,
-    sitemap,
-  });
+  // audit data event
+  const crawlListener = ({ data }) => {
+    data && call.write({ data });
+  };
 
-  const crawlListener = (source) => source && call.write({ data: source.data });
-
-  return new Promise((resolve) => {
-    const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
-    const crawlEvent = `crawl-${crawlKey}`;
-
+  return new Promise(async (resolve) => {
+    // bind listeners
     const crawlCompleteListener = (data) => {
       crawlEmitter.off(crawlEvent, crawlListener);
       resolve(data);
@@ -95,5 +87,17 @@ export const crawlStreaming = async (
       `crawl-complete-${crawlKey}`,
       crawlCompleteListener
     );
+
+    // start crawl
+    await watcherCrawl({
+      url,
+      userId,
+      subdomains: !!subdomains,
+      tld: !!tld,
+      scan: true,
+      robots: !norobo,
+      proxy,
+      sitemap,
+    });
   });
 };

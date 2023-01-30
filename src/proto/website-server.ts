@@ -37,7 +37,6 @@ export const createServer = async () => {
     }
   );
 
-  // core service - todo bind on open PORT for external usage
   publicServer.addService(
     coreProto["apicore.CoreService"] as ServiceDefinition,
     {

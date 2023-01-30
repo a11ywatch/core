@@ -49,7 +49,7 @@ const rebindConcurrency = async () => {
 
 // init crawling
 const crawlStart = (target) => {
-  setImmediate(async () => {
+  setImmediate(() => {
     const key = getKey(target.domain, target.pages, target.user_id);
     // set the item for tracking
     if (!crawlingSet.has(key)) {
@@ -61,8 +61,6 @@ const crawlStart = (target) => {
         duration: performance.now(),
         event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
       });
-
-      await rebindConcurrency();
     }
   });
 };
@@ -98,7 +96,7 @@ const crawlComplete = (target) => {
       const item = crawlingSet.get(key);
       item.crawling = false;
 
-      if (item?.current === item?.total) {
+      if (item.current === item.total) {
         await deInit(key, target);
       }
     }
@@ -115,8 +113,9 @@ const crawlProcessing = (call: ScanRpcCall) => {
       const item = crawlingSet.get(key);
 
       if (item.crawling) {
-        item.total = item.total + 1;
+        item.total += 1;
       }
+
       if (item.shutdown) {
         call.write({ message: "shutdown" });
         call.end();
@@ -130,13 +129,12 @@ const crawlProcessing = (call: ScanRpcCall) => {
 const crawlProcessed = (target) => {
   setImmediate(async () => {
     // process a new item tracking count
-    const userId = target.user_id;
-    const key = getKey(target.domain, target.pages, userId);
+    const key = getKey(target.domain, target.pages, target.user_id);
 
     if (crawlingSet.has(key)) {
       const item = crawlingSet.get(key);
 
-      item.current = item.current + 1;
+      item.current += 1;
 
       // shutdown the events
       if (target.shutdown) {

@@ -202,7 +202,7 @@ export const crawlPage = async (
   }
 
   // TODO: SET PAGE OFFLINE DB
-  if (!dataSource || !dataSource?.webPage?.issuesInfo) {
+  if (!dataSource || !dataSource?.webPage?.issuesInfo || shutdown) {
     trackerProccess(
       undefined,
       { domain, urlMap, userId, shutdown },
@@ -339,7 +339,6 @@ export const crawlPage = async (
       });
     }
 
-    // send pub sub if issues exist
     if (issueCount && sendSub) {
       setImmediate(async () => {
         try {

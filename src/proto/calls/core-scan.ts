@@ -30,7 +30,6 @@ export const coreScan = async (
 
     callback(null, { data });
   } else {
-    // todo: add error messaging
     callback(null, { data: null });
   }
 };
