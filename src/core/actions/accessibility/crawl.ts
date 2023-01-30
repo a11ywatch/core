@@ -177,7 +177,6 @@ export const crawlPage = async (
   if (!SUPER_MODE) {
     const ttime = dataSource?.usage || 0;
     const pastUptime = scanInfo?.totalUptime || 0;
-    const totalUptime = ttime + pastUptime;
 
     shutdown =
       validateScanEnabled({
@@ -185,7 +184,7 @@ export const crawlPage = async (
           role: urole,
           scanInfo: {
             usageLimit: scanInfo?.usageLimit,
-            totalUptime,
+            totalUptime: ttime + pastUptime,
           },
         },
       }) === false;
@@ -340,6 +339,7 @@ export const crawlPage = async (
       });
     }
 
+    // send pub sub if issues exist
     if (issueCount && sendSub) {
       setImmediate(async () => {
         try {

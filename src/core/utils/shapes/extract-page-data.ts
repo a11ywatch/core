@@ -32,20 +32,11 @@ export const extractPageData = (dataSource: PageMindScanResponse) => {
     webPage: null,
   };
 
-  let errorCount;
-  let warningCount;
-  let noticeCount;
-  let lighthouseData;
-
   // pluck insight into its own collection
   const { insight, ...w } = webPage ?? {};
+  // pluck issues info outside
   const { issuesInfo, ...website } = w ?? {};
 
-  if (website && issuesInfo) {
-    errorCount = issuesInfo.errorCount;
-    warningCount = issuesInfo.warningCount;
-    noticeCount = issuesInfo.noticeCount;
-  }
 
   return {
     userId,
@@ -53,10 +44,5 @@ export const extractPageData = (dataSource: PageMindScanResponse) => {
     issues,
     webPage: website,
     issuesInfo,
-    lighthouseData,
-    // stats
-    errorCount,
-    warningCount,
-    noticeCount,
   };
 };
