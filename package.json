@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.7.41",
+  "version": "0.7.44",
   "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "apollo-server-core": "3.11.1",
     "apollo-server-fastify": "3.11.1",
     "cron": "2.1.0",
+    "csv-writer": "^1.6.0",
     "date-fns": "2.29.3",
     "exceljs": "4.3.0",
     "fastify": "^3.29.4",

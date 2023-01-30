@@ -32,6 +32,7 @@ const downloadToExcel = async (
       { header: "Message", key: "message", width: 30, checked: 0 },
       { header: "Context", key: "context", width: 40, checked: 0 },
       { header: "Selector", key: "selector", width: 30, checked: 0 },
+      { header: "Recurrence", key: "recurrence", width: 30, checked: 0 },
       {
         header: "Audit",
         key: "checked",
@@ -58,7 +59,7 @@ const downloadToExcel = async (
     );
     res.header(
       "Content-Disposition",
-      "attachment; filename=" + `${pageName}-audit.xlsx`
+      "attachment; filename=" + `${pageName}-${source?.lastScanDate}-audit.xlsx`
     );
 
     // convert to buffer instead of streaming
