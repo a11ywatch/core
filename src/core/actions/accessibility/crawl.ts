@@ -2,7 +2,7 @@ import { sourceBuild } from "@a11ywatch/website-source-builder";
 import { emailMessager } from "../../messagers";
 import { pubsub } from "../../../database/pubsub";
 import { ISSUE_ADDED } from "../../static";
-import { collectionUpsert, domainName } from "../../utils";
+import { collectionUpsert } from "../../utils";
 import { IssuesController } from "../../controllers/issues";
 import { getWebsite } from "../../controllers/websites";
 import { AnalyticsController } from "../../controllers/analytics";
@@ -25,6 +25,7 @@ import { watcherCrawl } from "./watcher_crawl";
 import { shapeResponse } from "../../models/response/shape-response";
 import { crawlingSet, getKey } from "../../../event/crawl-tracking";
 import type { Collection, Document } from "mongodb";
+import { getActiveCrawlKey } from "../../../event/names";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -45,10 +46,11 @@ const trackerProccess = (
   { domain, urlMap, userId, shutdown = false }: any,
   blockEvent?: boolean
 ) => {
+  // send data back to rpc or http stream emitter
   if (!blockEvent && data) {
-    // event for handling streamed data
-    crawlEmitter.emit(`crawl-${domainName(domain)}-${userId || 0}`, data);
+    crawlEmitter.emit(getActiveCrawlKey(domain, userId), data);
   }
+
   crawlTrackingEmitter.emit("crawl-processed", {
     user_id: userId,
     domain,
@@ -141,20 +143,18 @@ export const crawlPage = async (
   const freeAccount = !urole; // free account
   const rootPage = pathname === "/"; // the url is the base domain index.
 
-  const insightsEnabled = getInsightsEnabled({
-    pageInsights: pageInsights || websitePageInsights,
-    insightsLocked: !SUPER_MODE && freeAccount,
-    pageSpeedApiKey: !!pageSpeedApiKey,
-    rootPage,
-  });
-
   const actions = await findPageActionsByPath({ userId, path: pathname });
 
   const dataSource = await fetchPageIssues({
     pageHeaders,
     url: urlMap,
     userId,
-    pageInsights: insightsEnabled,
+    pageInsights: getInsightsEnabled({
+      pageInsights: pageInsights || websitePageInsights,
+      insightsLocked: !SUPER_MODE && freeAccount,
+      pageSpeedApiKey: !!pageSpeedApiKey,
+      rootPage,
+    }),
     mobile,
     ua,
     standard: standard || websiteStandard,

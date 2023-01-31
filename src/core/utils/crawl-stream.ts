@@ -5,8 +5,8 @@ import {
 } from "../actions/accessibility/watcher_crawl";
 import { crawlingSet, getKey } from "../../event/crawl-tracking";
 import { crawlEmitter, crawlTrackingEmitter } from "../../event";
-import { domainName } from "./domain-name";
 import { getHostName } from "./get-host";
+import { getActiveCrawlKey } from "../../event/names";
 
 // crawl website and wait for finished emit event to continue @return Website[] use for testing.
 export const crawlHttpStream = (
@@ -41,7 +41,7 @@ export const crawlHttpStream = (
 
   return new Promise((resolve) => {
     const domain = getHostName(url);
-    const crawlEvent = `crawl-${domainName(domain)}-${userId || 0}`;
+    const crawlEvent = getActiveCrawlKey(domain, userId);
     const key = getKey(domain, undefined, userId); // crawl event key
 
     const crawlListener = removeTrailing

@@ -24,7 +24,7 @@ export const cipher = (secret) => {
 
     return Buffer.concat([encrypted, cipherer.final()]).toString("hex");
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -41,6 +41,6 @@ export const decipher = (encrypted) => {
 
     return Buffer.concat([decrypted, decipherer.final()]).toString();
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };

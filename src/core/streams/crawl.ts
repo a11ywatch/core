@@ -21,8 +21,7 @@ export const crawlStream = async (
 
   if (!url) {
     res.status(StatusCode.BadRequest);
-    res.send([]);
-    return;
+    return res.send([]);
   }
 
   const userNext = await getUserFromApiScan(

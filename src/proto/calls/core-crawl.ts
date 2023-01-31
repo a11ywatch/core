@@ -43,16 +43,17 @@ export const coreCrawl = async (call: ServerCallStreaming) => {
       }
     }
 
-    const crawlProps = await getCrawlConfig({
-      id: userId,
-      url,
-      role: userNext?.payload?.audience,
-      subdomains,
-      tld,
-      sitemap,
-    });
-
-    await crawlStreaming(crawlProps, call);
+    await crawlStreaming(
+      await getCrawlConfig({
+        id: userId,
+        url,
+        role: userNext?.payload?.audience,
+        subdomains,
+        tld,
+        sitemap,
+      }),
+      call
+    );
   }
 
   call.end();
@@ -69,12 +70,11 @@ export const crawlStreaming = async (
   const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
   const crawlEvent = `crawl-${crawlKey}`;
 
-  // audit data event
-  const crawlListener = ({ data }) => {
-    data && call.write({ data });
-  };
-
   return new Promise(async (resolve) => {
+    // audit data event
+    const crawlListener = ({ data }) => {
+      data && call.write({ data });
+    };
     // bind listeners
     const crawlCompleteListener = (data) => {
       crawlEmitter.off(crawlEvent, crawlListener);

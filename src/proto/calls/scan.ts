@@ -1,8 +1,7 @@
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
 import { crawlMultiSite } from "../../core/actions";
 import { emailMessager } from "../../core/messagers";
-import { domainName } from "../../core/utils";
-import { crawlEmitter } from "../../event";
+import { crawlEmitter, getActiveCrawlKey } from "../../event";
 
 type ScanParams = {
   pages: string[];
@@ -28,7 +27,7 @@ export const scan = async (
   // a full site wide-scan performed. Send scan event including email.
   if (full) {
     const sendEmail = crawlEmitter.emit(
-      `crawl-${domainName(domain)}-${userId || 0}`,
+      getActiveCrawlKey(domain, userId),
       domain,
       data
     );
