@@ -17,6 +17,10 @@ export const getPages = async (
     domain: domain || (url && getHostName(url)),
   });
 
+  if (!collection) {
+    return chain ? [[], collection] : [];
+  }
+
   try {
     const pages = await collection
       .find(searchProps)
@@ -42,7 +46,7 @@ export const getPage = async ({
 }) => {
   const [collection] = connect("Pages");
   const searchProps = websiteSearchParams({ url, userId });
-  const page = await collection.findOne(searchProps);
+  const page = collection && (await collection.findOne(searchProps));
 
   return [page, collection];
 };
@@ -50,8 +54,7 @@ export const getPage = async ({
 // get all the pages in the database
 export const getAllPages = async () => {
   const [collection] = connect("Pages");
-
-  const websites = await collection.find({}).limit(0).toArray();
+  const websites = collection && (await collection.find({}).limit(0).toArray());
 
   return [websites, collection];
 };
@@ -84,14 +87,12 @@ export const getPagesPaging = async (
     params = domainNameFind(params, domain);
   }
 
-  const pages = await collection
-    .find(params)
-    .skip(offset)
-    .limit(limit)
-    .toArray();
+  const pages =
+    collection &&
+    (await collection.find(params).skip(offset).limit(limit).toArray());
 
   // run with insight relationship
-  if (insights) {
+  if (pages && insights) {
     for (let i = 0; i < pages.length; i++) {
       const cp = pages[i];
 

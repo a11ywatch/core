@@ -31,7 +31,9 @@ export const getAnalyticsPaging = async (params, chain?: boolean) => {
   let pages = [];
 
   try {
-    pages = await collection.find(filters).skip(offset).limit(limit).toArray();
+    pages =
+      collection &&
+      (await collection.find(filters).skip(offset).limit(limit).toArray());
 
     return chain ? [pages, collection] : pages;
   } catch (e) {
@@ -52,7 +54,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     let analytics = null;
 
     if (validateUID(userId) || bypass) {
-      analytics = await collection.findOne(searchProps);
+      analytics = collection && (await collection.findOne(searchProps));
     }
 
     return chain ? [analytics, collection] : analytics;
@@ -61,7 +63,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ domain, userId });
 
-    return validateUID(userId)
+    return validateUID(userId) && collection
       ? await collection.find(searchProps).limit(0).toArray()
       : [];
   },
@@ -69,7 +71,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId });
 
-    return validateUID(userId)
+    return validateUID(userId) && collection
       ? await collection.find(searchProps).limit(20).toArray()
       : [];
   },
