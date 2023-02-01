@@ -302,7 +302,7 @@ export const crawlPage = async (
             // pages
             collectionUpsert(
               {
-                domain: webPage.domain,
+                domain: website.domain, // set the webpage to the website
                 url: webPage.url,
                 pageLoadTime: webPage.pageLoadTime,
                 lastScanDate: webPage.lastScanDate,

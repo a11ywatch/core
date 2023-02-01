@@ -48,22 +48,6 @@ const rebindConcurrency = async () => {
   }
 };
 
-// init crawling
-const crawlStart = (target) => {
-  const key = getKey(target.domain, target.pages, target.user_id);
-  // set the item for tracking
-  if (!crawlingSet.has(key)) {
-    crawlingSet.set(key, {
-      total: 0,
-      current: 0,
-      crawling: true,
-      shutdown: false,
-      duration: performance.now(),
-      event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
-    });
-  }
-};
-
 // de-init crawling
 const deInit = async (key, target) => {
   crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
@@ -85,69 +69,88 @@ const deInit = async (key, target) => {
   await qWebsiteWorker.push(params);
 };
 
-// complete crawl
-const crawlComplete = (target) => {
-  const userId = target.user_id;
-  const key = getKey(target.domain, target.pages, userId);
-
-  if (crawlingSet.has(key)) {
-    const item = crawlingSet.get(key);
-    item.crawling = false;
-
-    if (item.current === item.total) {
-      setImmediate(async () => {
-        await deInit(key, target);
+// init crawling
+const crawlStart = (target) => {
+  setImmediate(() => {
+    const key = getKey(target.domain, target.pages, target.user_id);
+    // set the item for tracking
+    if (!crawlingSet.has(key)) {
+      crawlingSet.set(key, {
+        total: 0,
+        current: 0,
+        crawling: true,
+        shutdown: false,
+        duration: performance.now(),
+        event: bindTaskQ(crawlingSet.size + 1), // add 1 to include new item
       });
     }
-  }
+  });
+};
+
+// complete crawl
+const crawlComplete = (target) => {
+  setImmediate(async () => {
+    const key = getKey(target.domain, target.pages, target.user_id);
+
+    if (crawlingSet.has(key)) {
+      const item = crawlingSet.get(key);
+      item.crawling = false;
+
+      if (item.current === item.total) {
+        setImmediate(async () => {
+          await deInit(key, target);
+        });
+      }
+    }
+  });
 };
 
 // gRPC call
 const crawlProcessing = (call: ScanRpcCall) => {
-  const key = getKey(
-    call.request.domain,
-    call.request.pages,
-    call.request.user_id
-  ); // process a new item tracking count
+  setImmediate(async () => {
+    const key = getKey(
+      call.request.domain,
+      call.request.pages,
+      call.request.user_id
+    ); // process a new item tracking count
 
-  if (crawlingSet.has(key)) {
-    const item = crawlingSet.get(key);
+    if (crawlingSet.has(key)) {
+      const item = crawlingSet.get(key);
 
-    item.total += 1;
+      item.total += 1;
 
-    if (item.shutdown) {
-      call.write({ message: "shutdown" });
-      setImmediate(async () => {
+      if (item.shutdown) {
+        call.write({ message: "shutdown" });
         await deInit(key, call.request);
-      });
+      }
     }
-  }
 
-  call.end();
+    call.end();
+  });
 };
 
 // crawl finished processing the page
 const crawlProcessed = (target) => {
-  // process a new item tracking count
-  const key = getKey(target.domain, target.pages, target.user_id);
+  setImmediate(async () => {
+    // process a new item tracking count
+    const key = getKey(target.domain, target.pages, target.user_id);
 
-  if (crawlingSet.has(key)) {
-    const item = crawlingSet.get(key);
+    if (crawlingSet.has(key)) {
+      const item = crawlingSet.get(key);
 
-    item.current += 1;
+      item.current += 1;
 
-    // shutdown the events
-    if (target.shutdown) {
-      item.shutdown = true;
-      item.crawling = false;
-    }
+      // shutdown the events
+      if (target.shutdown) {
+        item.shutdown = true;
+        item.crawling = false;
+      }
 
-    if (!item.crawling && item.current === item.total) {
-      setImmediate(async () => {
+      if (!item.crawling && item.current === item.total) {
         await deInit(key, target);
-      });
+      }
     }
-  }
+  });
 };
 
 /*  Emit events to track crawling progress.

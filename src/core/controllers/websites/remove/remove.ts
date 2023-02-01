@@ -41,13 +41,11 @@ export const removeWebsite = async ({
     throw new Error(WEBSITE_NOT_FOUND);
   }
 
-  const domainName = siteExist.domain;
-
   const removeRelative = siteExist.subdomains || siteExist.tld;
 
   const baseRemoveQuery = validateUID(userId)
-    ? { domain: domainName, userId }
-    : { domain: domainName };
+    ? { domain: siteExist.domain, userId }
+    : { domain: siteExist.domain };
 
   const [history, historyCollection] = await HistoryController().getHistoryItem(
     baseRemoveQuery
