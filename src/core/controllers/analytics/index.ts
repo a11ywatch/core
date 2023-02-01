@@ -1,6 +1,8 @@
 import { validateUID } from "../../../web/params/extracter";
 import { connect } from "../../../database";
 import { domainNameFind, websiteSearchParams } from "../../utils";
+import type { Analytic } from "../../../types/schema";
+import { Collection, Document } from "mongodb";
 
 // analytics base params
 type BaseParams = {
@@ -10,7 +12,10 @@ type BaseParams = {
 };
 
 // get analytics by domain for a user with pagination offsets.
-export const getAnalyticsPaging = async (params, chain?: boolean) => {
+export const getAnalyticsPaging = async (
+  params,
+  chain?: boolean
+): Promise<[Analytic[], Collection<Document>] | Analytic[]> => {
   const { userId, domain, limit = 20, offset = 0, all = false } = params ?? {};
   const [collection] = connect("Analytics");
 
@@ -28,17 +33,17 @@ export const getAnalyticsPaging = async (params, chain?: boolean) => {
     }
   }
 
-  let pages = [];
-
   try {
-    pages =
-      collection &&
-      (await collection.find(filters).skip(offset).limit(limit).toArray());
+    const pages = (await collection
+      .find(filters)
+      .skip(offset)
+      .limit(limit)
+      .toArray()) as Analytic[];
 
     return chain ? [pages, collection] : pages;
   } catch (e) {
     console.error(e);
-    return chain ? [null, collection] : [];
+    return chain ? [[], collection] : [];
   }
 };
 
@@ -54,7 +59,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     let analytics = null;
 
     if (validateUID(userId) || bypass) {
-      analytics = collection && (await collection.findOne(searchProps));
+      analytics = await collection.findOne(searchProps);
     }
 
     return chain ? [analytics, collection] : analytics;
@@ -63,7 +68,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ domain, userId });
 
-    return validateUID(userId) && collection
+    return validateUID(userId)
       ? await collection.find(searchProps).limit(0).toArray()
       : [];
   },
@@ -71,7 +76,7 @@ export const AnalyticsController = ({ user } = { user: null }) => ({
     const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId });
 
-    return validateUID(userId) && collection
+    return validateUID(userId)
       ? await collection.find(searchProps).limit(20).toArray()
       : [];
   },

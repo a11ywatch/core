@@ -1,17 +1,9 @@
 import { getAnalyticsPaging } from "../../../analytics";
 import { arrayAverage } from "../../../../utils";
+import type { Analytic } from "../../../../../types/schema";
 
 // default hard page limit
 const PAGE_LIMIT = 10;
-
-const defaultIssuesInfo = {
-  warningCount: 0,
-  errorCount: 0,
-  noticeCount: 0,
-  accessScoreAverage: 0,
-  issuesFixedByCdn: 0,
-  possibleIssuesFixedByCdn: 0,
-};
 
 // the score generated
 type ScoreProps = {
@@ -45,7 +37,7 @@ const getDataUntil = async (
 ): Promise<void> => {
   const { domain, perfectScore, userId, all, resolve } = baseProps;
 
-  const pages = await getAnalyticsPaging(
+  const pages = (await getAnalyticsPaging(
     {
       domain,
       userId,
@@ -54,7 +46,7 @@ const getDataUntil = async (
       limit: PAGE_LIMIT,
     },
     false
-  );
+  )) as Analytic[];
 
   let websiteErrors = prevIssuesInfo?.errorCount || 0;
   let websiteWarnings = prevIssuesInfo?.warningCount || 0;
@@ -78,7 +70,14 @@ const getDataUntil = async (
       accessScore,
       issuesFixedByCdn,
       possibleIssuesFixedByCdn,
-    } = page ?? Object.assign({}, defaultIssuesInfo);
+    } = page ?? {
+      warningCount: 0,
+      errorCount: 0,
+      noticeCount: 0,
+      accessScoreAverage: 0,
+      issuesFixedByCdn: 0,
+      possibleIssuesFixedByCdn: 0,
+    };
 
     accessScores.push(Number(accessScore));
 

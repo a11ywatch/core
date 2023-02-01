@@ -7,6 +7,9 @@ export type Analytic = {
   errorCount?: number;
   warningCount?: number;
   noticeCount?: number;
+  // optional counters
+  issuesFixedByCdn?: number; // todo: remove across app
+  possibleIssuesFixedByCdn?: number; // rename to automatable
   userId?: number;
   domain?: string;
   accessScore?: number;

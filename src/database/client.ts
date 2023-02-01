@@ -1,6 +1,7 @@
 import { MongoClient, Collection, Db } from "mongodb";
 import { EventEmitter } from "events";
 import { config } from "../config/config";
+import { mdb } from "./mock-db";
 
 let client: MongoClient; // shared client across application
 let connected = false; // is client connected
@@ -46,7 +47,7 @@ const initDbConnection = async (dbconnection?: string) => {
 
 // @return [collection, client]  a MongoDb Collection to use and the top level client
 const connect = (collectionType = "Websites"): [Collection, MongoClient] => [
-  db && db.collection(collectionType),
+  db ? db.collection(collectionType) : mdb,
   client,
 ];
 
