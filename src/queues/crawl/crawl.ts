@@ -13,6 +13,7 @@ export const crawlEnqueue = async (data: {
   const { pages = [], user_id, html } = data;
   const key = getKey(null, pages, user_id);
 
+  // push into the queue of the crawling set
   const event = crawlingSet.has(key) && crawlingSet.get(key).event;
 
   // get users for crawl job matching the urls

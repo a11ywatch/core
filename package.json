@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.7.49",
+  "version": "0.7.51",
   "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "pub": "tsc && cp package.json package-lock.json README.md LICENSE dist && cd dist && npm publish"
   },
   "dependencies": {
-    "@a11ywatch/protos": "^0.4.4",
+    "@a11ywatch/protos": "^0.4.6",
     "@a11ywatch/website-source-builder": "^0.1.8",
     "@fastify/cookie": "^6.0.0",
     "@fastify/cors": "^7.0.0",

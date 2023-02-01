@@ -31,12 +31,15 @@ export const crawlStream = async (
   );
 
   if (userNext) {
+    const uid = userNext?.id;
     // block active crawl
-    if (
-      validateUID(userNext?.id) &&
-      crawlingSet.has(getKey(url, [], userNext.id))
-    ) {
+    if (validateUID(uid) && crawlingSet.has(getKey(url, [], uid))) {
       res.status(StatusCode.Accepted);
+      return res.send([]);
+    }
+
+    if (crawlingSet.has(getKey(url, [], uid))) {
+      res.status(StatusCode.ToManyRequest);
       return res.send([]);
     }
 

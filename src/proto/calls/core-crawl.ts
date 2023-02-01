@@ -12,6 +12,7 @@ import { validateUID } from "../../web/params/extracter";
 import { SUPER_MODE } from "../../config";
 import { validateScanEnabled } from "../../core/controllers/users/update/scan-attempt";
 import { UsersController } from "../../core/controllers";
+import { crawlingSet, getKey } from "../../event/crawl-tracking";
 
 type ServerCallStreaming = ServerWritableStream<
   {
@@ -41,6 +42,12 @@ export const coreCrawl = async (call: ServerCallStreaming) => {
       if (validateScanEnabled({ user }) === false) {
         return call.end();
       }
+    }
+
+    // prevent duplicate crawls
+    if (crawlingSet.has(getKey(url, [], userId))) {
+      SUPER_MODE && console.warn(`crawl in progress for ${url}`);
+      return call.end();
     }
 
     await crawlStreaming(
