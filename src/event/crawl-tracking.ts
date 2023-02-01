@@ -97,9 +97,7 @@ const crawlComplete = (target) => {
       item.crawling = false;
 
       if (item.current === item.total) {
-        setImmediate(async () => {
-          await deInit(key, target);
-        });
+        await deInit(key, target);
       }
     }
   });

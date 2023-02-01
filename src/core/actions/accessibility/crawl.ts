@@ -255,6 +255,9 @@ export const crawlPage = async (
             true
           );
 
+        const hostname =
+          website.tld || website.tld ? webPage.domain : undefined;
+
         // todo: track all page information
         // if issues exist prior or current update collection
         // Add to Issues collection if page contains issues or if record should update/delete.
@@ -273,7 +276,8 @@ export const crawlPage = async (
             collectionUpsert(
               {
                 pageUrl,
-                domain,
+                domain: website.domain,
+                hostname,
                 userId,
                 possibleIssuesFixedByCdn: issuesInfo.possibleIssuesFixedByCdn,
                 totalIssues: issuesInfo.totalIssues,
@@ -291,7 +295,9 @@ export const crawlPage = async (
                 issues: pageIssues.issues,
                 documentTitle: pageIssues.documentTitle,
                 pageUrl: pageIssues.pageUrl,
-                domain: pageIssues.domain,
+                domain: website.domain,
+                hostname,
+                webdomain: website.domain,
                 userId,
               },
               [issuesCollection, issueExist, !issueCount],
@@ -302,10 +308,11 @@ export const crawlPage = async (
             // pages
             collectionUpsert(
               {
-                domain: website.domain, // set the webpage to the website
                 url: webPage.url,
+                domain: website.domain,
                 pageLoadTime: webPage.pageLoadTime,
                 lastScanDate: webPage.lastScanDate,
+                hostname,
                 userId,
                 online: true,
               },

@@ -51,7 +51,6 @@ export const getIssues = async (
     userId,
   });
 
-  // todo: PAGINATION
   return await collection
     .find(searchProps)
     .sort({ pageUrl: 1 })
