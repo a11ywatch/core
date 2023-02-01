@@ -56,9 +56,7 @@ const getDataUntil = async (
     prevIssuesInfo?.possibleIssuesFixedByCdn || 0;
 
   const accessScores: number[] = [];
-
   const pageCounter = pages?.length || 0;
-
   const pageCount = (prevIssuesInfo?.pageCount || 0) + pageCounter;
 
   for (const page of pages) {
@@ -81,27 +79,11 @@ const getDataUntil = async (
 
     accessScores.push(Number(accessScore));
 
-    if (errorCount) {
-      websiteErrors = websiteErrors + Number(errorCount);
-    }
-
-    if (warningCount) {
-      websiteWarnings = websiteWarnings + Number(warningCount);
-    }
-
-    if (noticeCount) {
-      websiteNotices = websiteNotices + Number(noticeCount);
-    }
-
-    if (issuesFixedByCdn) {
-      websiteIssuesFixedByCdn =
-        websiteIssuesFixedByCdn + Number(issuesFixedByCdn);
-    }
-
-    if (possibleIssuesFixedByCdn) {
-      websiteIssuesFixedByCdn =
-        websitePossibleIssuesFixedByCdn + Number(possibleIssuesFixedByCdn);
-    }
+    websiteErrors += Number(errorCount || 0);
+    websiteWarnings += Number(warningCount || 0);
+    websiteNotices += Number(noticeCount || 0);
+    websiteIssuesFixedByCdn += Number(issuesFixedByCdn || 0);
+    websiteIssuesFixedByCdn += Number(possibleIssuesFixedByCdn || 0);
   }
 
   const averageItems = arrayAverage(accessScores);
