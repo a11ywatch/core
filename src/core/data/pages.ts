@@ -9,10 +9,9 @@ export const Pages = {
     });
     return issueItem?.issues;
   },
-  issuesInfo: async ({ userId, url }, _params) => {
-    return await AnalyticsController().getWebsite({
+  issuesInfo: async ({ userId, url }, _params) =>
+    await AnalyticsController().getWebsite({
       userId,
       pageUrl: url,
-    });
-  },
+    }),
 };

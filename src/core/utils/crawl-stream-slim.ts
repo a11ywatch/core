@@ -17,21 +17,7 @@ export const crawlHttpStreamSlim = (
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld, robots, agent, proxy, sitemap } = props;
 
-  setImmediate(async () => {
-    await watcherCrawl({
-      url,
-      userId,
-      subdomains: !!subdomains,
-      tld: !!tld,
-      scan: true,
-      robots,
-      agent,
-      proxy,
-      sitemap,
-    });
-  });
-
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const domain = getHostName(url);
     const crawlEvent = getActiveCrawlKey(domain, userId);
     const key = getKey(domain, undefined, userId); // crawl event key
@@ -39,7 +25,7 @@ export const crawlHttpStreamSlim = (
     const crawlListener = removeTrailing
       ? (source) => {
           setImmediate(() => {
-            const data = source?.data;
+            const { data } = source;
 
             if (data && !res.raw.writableEnded) {
               const crawlSource = crawlingSet.has(key);
@@ -71,5 +57,17 @@ export const crawlHttpStreamSlim = (
     };
 
     crawlTrackingEmitter.once(`crawl-complete-${key}`, crawlComplete);
+
+    await watcherCrawl({
+      url,
+      userId,
+      subdomains: !!subdomains,
+      tld: !!tld,
+      scan: true,
+      robots,
+      agent,
+      proxy,
+      sitemap,
+    });
   });
 };

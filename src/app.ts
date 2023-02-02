@@ -187,18 +187,12 @@ async function initServer(): Promise<HttpServer[]> {
    * All websites site wide scan background sync.
    */
   app.post("/api/websites-sync", scanLimiter, backgroundSync);
-  /*
-   * Site wide scan handles via stream.
-   * Uses Event based handling to extract pages.
-   */
+  // Site wide scan handles via stream.
   app.post("/api/crawl", scanLimiter, crawlStream);
-  /*
-   * Site wide scan handles via stream slim data sized.
-   * Uses Event based handling to extract pages.
-   */
+  // Site wide scan handles via stream slim data sized.
   app.post("/api/crawl-stream-slim", scanLimiter, crawlStreamSlim);
 
-  // get base64 to image name
+  // convert base64 to image name
   app.post(IMAGE_CHECK, limiter, detectImage);
 
   /*
@@ -304,11 +298,12 @@ async function initServer(): Promise<HttpServer[]> {
     });
   });
 
+  const planInfo = {
+    data: priceConfig,
+  };
   // get the list of plans available that can use the `title` property for upgrading
   app.get("/api/plans", (_, res) => {
-    res.send({
-      data: priceConfig,
-    });
+    res.send(planInfo);
   });
 
   const STRIPE_KEY = process.env.STRIPE_CLIENT_KEY;
@@ -340,11 +335,12 @@ async function initServer(): Promise<HttpServer[]> {
   app.get(CONFIRM_EMAIL, confirmEmail);
   app.post(CONFIRM_EMAIL, confirmEmail);
 
+  const hcStatus = {
+    status: "healthy",
+  };
   // INTERNAL [todo: whitelist]
   app.get("/_internal_/healthcheck", (_, res) => {
-    res.send({
-      status: "healthy",
-    });
+    res.send(hcStatus);
   });
 
   // An error handling middleware

@@ -42,21 +42,20 @@ export type CrawlConfig = {
 
 // track the crawl events between crawls
 const trackerProccess = (
-  data: any,
+  data: { data: Website },
   { domain, urlMap, userId, shutdown = false }: any,
   blockEvent?: boolean
 ) => {
-  // send data back to rpc or http stream emitter
-  if (!blockEvent && data) {
-    crawlEmitter.emit(getActiveCrawlKey(domain, userId), data);
-  }
-
   crawlTrackingEmitter.emit("crawl-processed", {
     user_id: userId,
     domain,
     pages: [urlMap],
     shutdown,
   });
+  // send data back to rpc or http stream emitter after emit `crawl processed`
+  if (!blockEvent && data) {
+    crawlEmitter.emit(getActiveCrawlKey(domain, userId), data);
+  }
 };
 
 // determine insights

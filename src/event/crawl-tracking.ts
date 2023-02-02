@@ -49,22 +49,21 @@ const rebindConcurrency = async () => {
 };
 
 // de-init crawling
-const deInit = async (key, target) => {
+const deInit = async (key, target, { duration, shutdown }: CrawlSet) => {
+  crawlingSet.delete(key);
   crawlTrackingEmitter.emit(`crawl-complete-${key}`, target);
-  const item = crawlingSet.get(key);
 
   const params = {
     userId: target.user_id,
     meta: {
       extra: {
         domain: extractHostname(target.domain),
-        duration: performance.now() - item.duration,
-        shutdown: item.shutdown,
+        duration: performance.now() - duration,
+        shutdown: shutdown,
       },
     },
   };
 
-  crawlingSet.delete(key);
   await rebindConcurrency(); // rebind event queue and increment limit
   await qWebsiteWorker.push(params);
 };
@@ -97,7 +96,7 @@ const crawlComplete = (target) => {
       item.crawling = false;
 
       if (item.current === item.total) {
-        await deInit(key, target);
+        await deInit(key, target, item);
       }
     }
   });
@@ -119,7 +118,7 @@ const crawlProcessing = (call: ScanRpcCall) => {
 
       if (item.shutdown) {
         call.write({ message: "shutdown" });
-        await deInit(key, call.request);
+        await deInit(key, call.request, item);
       }
     }
 
@@ -145,7 +144,7 @@ const crawlProcessed = (target) => {
       }
 
       if (!item.crawling && item.current === item.total) {
-        await deInit(key, target);
+        await deInit(key, target, item);
       }
     }
   });
