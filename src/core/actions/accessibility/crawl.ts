@@ -86,7 +86,7 @@ export const crawlPage = async (
     url: urlMap,
     pageInsights = false,
     user: usr,
-    sendSub: sub,
+    sendSub: sub = true,
     html,
     standard,
     ignore,
@@ -94,8 +94,6 @@ export const crawlPage = async (
     runners,
   } = crawlConfig ?? {};
 
-  // detect if redis is connected to send subs
-  const sendSub: boolean = sub ?? true;
   const userId = usr?.id ?? crawlConfig?.userId;
 
   // todo: use prior user params if found
@@ -173,9 +171,9 @@ export const crawlPage = async (
 
   let shutdown = false;
 
+  // determine usage used
   if (!SUPER_MODE) {
     const ttime = dataSource?.usage || 0;
-    const pastUptime = scanInfo?.totalUptime || 0;
 
     shutdown =
       validateScanEnabled({
@@ -183,7 +181,7 @@ export const crawlPage = async (
           role: urole,
           scanInfo: {
             usageLimit: scanInfo?.usageLimit,
-            totalUptime: ttime + pastUptime,
+            totalUptime: ttime + scanInfo?.totalUptime || 0,
           },
         },
       }) === false;
@@ -225,143 +223,134 @@ export const crawlPage = async (
   // issues array
   const issueCount = pageIssues.issues.length;
 
-  // if HTML passed and from crawler or valid content enable storing
-  if ((html && urlMap) || !html) {
-    // if website record exist update integrity of the data.
-    if (website) {
-      setImmediate(async () => {
-        // if ROOT domain for scan update Website Collection.
-        if (rootPage) {
-          await collectionUpsert(
-            {
-              domain: webPage.domain,
-              url: webPage.url,
-              pageLoadTime: webPage.pageLoadTime,
-              lastScanDate: webPage.lastScanDate,
-              online: true,
-              userId,
-            },
-            [websiteCollection, !!webPage],
-            {
-              searchProps: { url: pageUrl, userId },
-            }
-          );
-        }
-
-        const [issueExist, issuesCollection] =
-          await IssuesController().getIssue(
-            { pageUrl, userId, noRetries: true },
-            true
-          );
-
-        const hostname =
-          website.tld || website.tld ? webPage.domain : undefined;
-
-        // todo: track all page information
-        // if issues exist prior or current update collection
-        // Add to Issues collection if page contains issues or if record should update/delete.
-        if (issueCount || issueExist) {
-          const [[analytics, analyticsCollection], [newSite, pagesCollection]] =
-            await Promise.all([
-              AnalyticsController().getWebsite({ pageUrl, userId }, true),
-              getPage({
-                userId,
-                url: pageUrl,
-              }),
-            ]);
-
-          await Promise.all([
-            // analytics
-            collectionUpsert(
-              {
-                pageUrl,
-                domain: website.domain,
-                hostname,
-                userId,
-                possibleIssuesFixedByCdn: issuesInfo.possibleIssuesFixedByCdn,
-                totalIssues: issuesInfo.totalIssues,
-                issuesFixedByCdn: issuesInfo.issuesFixedByCdn,
-                errorCount: issuesInfo.errorCount,
-                warningCount: issuesInfo.warningCount,
-                noticeCount: issuesInfo.noticeCount,
-                accessScore: issuesInfo.accessScore,
-              },
-              [analyticsCollection, analytics]
-            ),
-            // issues
-            collectionUpsert(
-              {
-                issues: pageIssues.issues,
-                documentTitle: pageIssues.documentTitle,
-                pageUrl: pageIssues.pageUrl,
-                domain: website.domain,
-                hostname,
-                webdomain: website.domain,
-                userId,
-              },
-              [issuesCollection, issueExist, !issueCount],
-              {
-                searchProps: { pageUrl, userId },
-              }
-            ),
-            // pages
-            collectionUpsert(
-              {
-                url: webPage.url,
-                domain: website.domain,
-                pageLoadTime: webPage.pageLoadTime,
-                lastScanDate: webPage.lastScanDate,
-                hostname,
-                userId,
-                online: true,
-              },
-              [pagesCollection as Collection<Document>, newSite, !issueCount], // delete document if issues do not exist
-              {
-                searchProps: { url: pageUrl, userId },
-              }
-            ),
-          ]);
-
-          // send email if issues of type error exist for the page. TODO: remove from layer.
-          if (sendEmail && issuesInfo?.errorCount && userData?.emailConfirmed) {
-            await emailMessager.sendMail({
-              userId,
-              data: {
-                issues: pageIssues.issues,
-                documentTitle: pageIssues.documentTitle,
-                pageUrl: pageIssues.pageUrl,
-                domain: pageIssues.domain,
-                userId,
-                issuesInfo,
-              },
-              confirmedOnly: true,
-              sendEmail: true,
-            });
+  // if website record exist update integrity of the data.
+  if (website) {
+    setImmediate(async () => {
+      // if ROOT domain for scan update Website Collection.
+      if (rootPage) {
+        await collectionUpsert(
+          {
+            domain: webPage.domain,
+            url: webPage.url,
+            pageLoadTime: webPage.pageLoadTime,
+            lastScanDate: webPage.lastScanDate,
+            online: true,
+            userId,
+          },
+          [websiteCollection, !!webPage],
+          {
+            searchProps: { url: pageUrl, userId },
           }
-        }
-      });
-    }
+        );
+      }
 
-    if (issueCount && sendSub) {
-      setImmediate(async () => {
-        try {
-          await pubsub.publish(ISSUE_ADDED, {
-            issueAdded: {
-              domain: webPage.domain,
-              url: webPage.url,
-              pageLoadTime: webPage.pageLoadTime,
-              lastScanDate: webPage.lastScanDate,
-              issue: pageIssues.issues,
-              issuesInfo,
-              userId,
-              online: true,
-            },
-          });
-        } catch (_) {
-          // silent pub sub errors
-        }
-      });
-    }
+      const [issueExist, issuesCollection] = await IssuesController().getIssue(
+        { pageUrl, userId, noRetries: true },
+        true
+      );
+
+      // add hostname to track outside website targeting
+      const hostname = website.tld || website.tld ? webPage.domain : undefined;
+
+      const [[analytics, analyticsCollection], [newSite, pagesCollection]] =
+        await Promise.all([
+          AnalyticsController().getWebsite({ pageUrl, userId }, true),
+          getPage({
+            userId,
+            url: pageUrl,
+          }),
+        ]);
+
+      await Promise.all([
+        // analytics
+        collectionUpsert(
+          {
+            pageUrl,
+            domain: website.domain,
+            hostname,
+            userId,
+            possibleIssuesFixedByCdn: issuesInfo.possibleIssuesFixedByCdn,
+            totalIssues: issuesInfo.totalIssues,
+            issuesFixedByCdn: issuesInfo.issuesFixedByCdn,
+            errorCount: issuesInfo.errorCount,
+            warningCount: issuesInfo.warningCount,
+            noticeCount: issuesInfo.noticeCount,
+            accessScore: issuesInfo.accessScore,
+          },
+          [analyticsCollection, analytics]
+        ),
+        // issues
+        collectionUpsert(
+          {
+            issues: pageIssues.issues,
+            documentTitle: pageIssues.documentTitle,
+            pageUrl: pageIssues.pageUrl,
+            domain: website.domain,
+            hostname,
+            webdomain: website.domain,
+            userId,
+          },
+          [issuesCollection, issueExist, !issueCount],
+          {
+            searchProps: { pageUrl, userId },
+          }
+        ),
+        // pages
+        collectionUpsert(
+          {
+            url: webPage.url,
+            domain: website.domain,
+            pageLoadTime: webPage.pageLoadTime,
+            lastScanDate: webPage.lastScanDate,
+            hostname,
+            userId,
+            online: true,
+          },
+          [pagesCollection as Collection<Document>, newSite, !issueCount], // delete document if issues do not exist
+          {
+            searchProps: { url: pageUrl, userId },
+          }
+        ),
+      ]);
+
+      // send email if issues of type error exist for the page. TODO: remove from layer.
+      if (sendEmail && issuesInfo?.errorCount && userData?.emailConfirmed) {
+        await emailMessager.sendMail({
+          userId,
+          data: {
+            issues: pageIssues.issues,
+            documentTitle: pageIssues.documentTitle,
+            pageUrl: pageIssues.pageUrl,
+            domain: pageIssues.domain,
+            userId,
+            issuesInfo,
+          },
+          confirmedOnly: true,
+          sendEmail: true,
+        });
+      }
+    });
+  }
+
+  if (issueCount && sub) {
+    setImmediate(async () => {
+      try {
+        await pubsub.publish(ISSUE_ADDED, {
+          issueAdded: {
+            domain: webPage.domain,
+            url: webPage.url,
+            pageLoadTime: webPage.pageLoadTime,
+            lastScanDate: webPage.lastScanDate,
+            issue: pageIssues.issues,
+            issuesInfo,
+            userId,
+            online: true,
+          },
+        });
+      } catch (_) {
+        // silent pub sub errors
+      }
+    });
   }
 
   const responseData = {

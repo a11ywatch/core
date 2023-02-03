@@ -119,8 +119,8 @@ const sendMailMultiPage = async ({
       }
 
       if (issuesInfo?.totalIssues) {
-        totalIssues = totalIssues + issuesInfo.errorCount;
-        totalWarnings = totalWarnings + issuesInfo.warningCount;
+        totalIssues += issuesInfo.errorCount;
+        totalWarnings += issuesInfo.warningCount;
       }
     }
 
@@ -153,7 +153,7 @@ const sendMailMultiPage = async ({
             <div style="margin-bottom: 12px; margin-top: 8px;">Login to see the full report.</div>
             ${issuesTable}<br />${footer.marketing({
             userId,
-            email: user?.email,
+            email: user.email,
           })}`,
         },
         sendMailCallback
@@ -163,19 +163,16 @@ const sendMailMultiPage = async ({
 };
 
 export const emailMessager = {
-  sendFollowupEmail: async ({
-    email,
-    emailConfirmed,
-    subject = "",
-    html,
-  }: any) => {
+  sendFollowupEmail: ({ email, emailConfirmed, subject = "", html }: any) => {
     if (emailConfirmed && email && subject && html) {
       transporter.sendMail(
-        Object.assign({}, mailOptions, {
+        {
+          html,
+          from: mailOptions.from,
+          text: mailOptions.text,
           to: email,
           subject: subject,
-          html,
-        }),
+        },
         sendMailCallback
       );
     }
