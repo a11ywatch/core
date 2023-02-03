@@ -15,6 +15,7 @@ import { User } from "../../types/schema";
 import { GENERAL_ERROR, SUCCESS } from "../../core/strings";
 import { WebsitesController } from "../../core/controllers";
 import { connect } from "../../database";
+import { allowedNext } from "../../core/utils/get-user-data";
 import type { FastifyInstance } from "fastify";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
@@ -97,38 +98,54 @@ const cleanUserProps = ({
   };
 };
 
-// set all authentication routes
+// set all authentication routes [ auth required for api ]
 export const setAuthRoutes = (app: FastifyInstance) => {
   app.post("/api/register", registerLimiter, async (req, res) => {
-    try {
-      const auth = await createUser(req.body);
+    const allowed = await allowedNext(
+      req?.headers?.authorization || req.cookies.jwt,
+      req,
+      res
+    );
 
-      res.setCookie("jwt", auth.jwt, cookieConfigs).send({
-        data: cleanUserProps(auth),
-        message: SUCCESS,
-      });
-    } catch (e) {
-      res.status(StatusCode.BadRequest);
-      res.send({
-        data: null,
-        message: e?.message,
-      });
+    if (allowed) {
+      try {
+        const auth = await createUser(req.body);
+
+        res.setCookie("jwt", auth.jwt, cookieConfigs).send({
+          data: cleanUserProps(auth),
+          message: SUCCESS,
+        });
+      } catch (e) {
+        res.status(StatusCode.BadRequest);
+        res.send({
+          data: null,
+          message: e?.message,
+        });
+      }
     }
   });
   app.post("/api/login", limiter, async (req, res) => {
-    try {
-      const auth = await verifyUser(req.body);
+    const allowed = await allowedNext(
+      req?.headers?.authorization || req.cookies.jwt,
+      req,
+      res
+    );
 
-      res.setCookie("jwt", auth.jwt, cookieConfigs).send({
-        data: cleanUserProps(auth),
-        message: SUCCESS,
-      });
-    } catch (e) {
-      res.status(StatusCode.BadRequest);
-      res.send({
-        data: null,
-        message: e?.message,
-      });
+    if (allowed) {
+      try {
+        const auth = await verifyUser(req.body);
+
+        res.setCookie("jwt", auth.jwt, cookieConfigs).send({
+          data: cleanUserProps(auth),
+          message: SUCCESS,
+        });
+      } catch (e) {
+        res.status(StatusCode.BadRequest);
+        res.send({
+          data: null,
+          message: e?.message,
+        });
+      }
     }
   });
 

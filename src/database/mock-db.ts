@@ -1,8 +1,7 @@
 import { Collection, Document } from "mongodb";
 
-const resObject = () => {
-  return null;
-};
+const resObject = () => null;
+
 const resArray = () => {
   return [];
 };
@@ -20,6 +19,8 @@ const preFind = () => {
   };
 };
 
+const resPromise = () => Promise.resolve(0);
+
 // partial mock db imp todo: use collection object proxy
 export const mdb: Collection<Document> = {
   // @ts-ignore partial imp find
@@ -36,5 +37,9 @@ export const mdb: Collection<Document> = {
   },
   findOne: resObject,
   findOneAndUpdate: resObject,
-  countDocuments: () => Promise.resolve(0),
+  countDocuments: resPromise,
+  deleteOne: resObject,
+  insertOne: resObject,
+  updateMany: resObject,
+  updateOne: resObject,
 };
