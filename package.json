@@ -24,7 +24,7 @@
     "apollo-server": "3.11.1",
     "apollo-server-core": "3.11.1",
     "apollo-server-fastify": "3.11.1",
-    "cron": "2.1.0",
+    "cron": "2.2.0",
     "csv-writer": "^1.6.0",
     "date-fns": "2.29.3",
     "exceljs": "4.3.0",
