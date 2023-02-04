@@ -1,7 +1,6 @@
 import { removeTrailingSlash } from "@a11ywatch/website-source-builder";
 import { responseModel } from "../../models";
 import { ResponseModel } from "../../models/response/types";
-import { getHostName } from "../../utils";
 import { fetchPageIssues } from "./fetch-issues";
 import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { limitIssue } from "../../utils/filters/limit-issue";
@@ -9,8 +8,9 @@ import { WEBSITE_NOT_FOUND } from "../../strings";
 import { StatusCode } from "../../../web/messages/message";
 import { SCAN_TIMEOUT } from "../../strings/errors";
 import type { PageMindScanResponse } from "../../../types/schema";
+import type { ScanRpcParams } from "../../../proto/actions/calls";
 
-type ScanParams = {
+interface ScanParams extends Partial<ScanRpcParams> {
   userId?: number;
   url: string;
   noStore?: boolean; // prevent script storage
@@ -23,18 +23,22 @@ type ScanParams = {
  * Examples:
  *
  *     await scanWebsite({ url: "https://a11ywatch.com" });
- *     await scanWebsite({ url: "https://a11ywatch.com", noStore: true }); // prevent storing contents to CDN from pagemind
- *     await scanWebsite({ url: "https://a11ywatch.com", userId: 122, noStore: true });
+ *     await scanWebsite({ url: "https://a11ywatch.com", noStore: true, mobile: true }); // prevent storing contents to CDN from pagemind
+ *     await scanWebsite({ url: "https://a11ywatch.com", userId: 122, noStore: true, runners: ["axe", "htmlcs"] });
  */
 export const scanWebsite = async ({
   userId,
   url,
   pageInsights = false,
+  runners,
+  mobile,
+  standard,
+  html,
+  ua
 }: ScanParams): Promise<ResponseModel> => {
   const pageUrl = removeTrailingSlash(url);
-  const domain = getHostName(pageUrl);
 
-  if (!domain) {
+  if (!pageUrl) {
     return responseModel({ message: WEBSITE_NOT_FOUND });
   }
 
@@ -42,6 +46,11 @@ export const scanWebsite = async ({
     url: pageUrl,
     userId,
     pageInsights,
+    runners,
+    mobile,
+    standard,
+    html,
+    ua
   });
 
   // handled successful but, page did not exist or rendered to slow.
