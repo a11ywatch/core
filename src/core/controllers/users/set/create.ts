@@ -1,3 +1,4 @@
+import { SUPER_MODE } from "../../../../config";
 import { makeUser } from "../../../../core/models";
 import { EMAIL_ERROR } from "../../../strings";
 import { saltHashPassword, signJwt } from "../../../utils";
@@ -19,13 +20,15 @@ export const createUser = async ({
   password,
   googleId,
   githubId: ghID,
-  role = 0,
+  role: roleID = 0,
 }: Partial<UserInput>) => {
   if (!email) {
     throw new Error(EMAIL_ERROR);
   }
 
   const [user, collection] = await getUser({ email });
+  // default paid supermode
+  const role = SUPER_MODE && !roleID ? 1 : roleID;
 
   // force number type
   const githubId = typeof ghID !== "undefined" ? Number(ghID) : null;
@@ -117,16 +120,15 @@ export const createUser = async ({
         };
       }
 
-      collection &&
-        (await collection.updateOne(
-          { email },
-          {
-            $set: updateCollectionProps,
-          },
-          {
-            upsert: true,
-          }
-        ));
+      await collection.updateOne(
+        { email },
+        {
+          $set: updateCollectionProps,
+        },
+        {
+          upsert: true,
+        }
+      );
 
       return user;
     } else {
@@ -147,7 +149,7 @@ export const createUser = async ({
       emailConfirmed,
     });
 
-    collection && (await collection.insertOne(userObject));
+    await collection.insertOne(userObject);
 
     if (!emailConfirmed) {
       await confirmEmail({ keyid: id });

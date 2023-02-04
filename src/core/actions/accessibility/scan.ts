@@ -15,7 +15,7 @@ interface ScanParams extends Partial<ScanRpcParams> {
   url: string;
   noStore?: boolean; // prevent script storage
   pageInsights?: boolean; // lighthouse insights
-};
+}
 
 /**
  * Send to gRPC pagemind request. Does not store any values into the DB from request. Full req -> res.
@@ -34,7 +34,7 @@ export const scanWebsite = async ({
   mobile,
   standard,
   html,
-  ua
+  ua,
 }: ScanParams): Promise<ResponseModel> => {
   const pageUrl = removeTrailingSlash(url);
 
@@ -50,7 +50,7 @@ export const scanWebsite = async ({
     mobile,
     standard,
     html,
-    ua
+    ua,
   });
 
   // handled successful but, page did not exist or rendered to slow.
