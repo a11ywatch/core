@@ -9,7 +9,7 @@ RUN apk upgrade --update-cache --available && \
 COPY . .
 RUN npm ci
 
-FROM node:19.2-alpine AS builder
+FROM node:19.5-alpine AS builder
 
 WORKDIR /usr/src/app
 
