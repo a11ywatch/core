@@ -156,6 +156,8 @@ export const addWebsite = async ({
       ? cipher(proxy)
       : "";
 
+  const sitemapEnabled = SUPER_MODE ? sitemap : user.role && sitemap;
+
   const website = makeWebsite({
     userId,
     url,
@@ -180,7 +182,7 @@ export const addWebsite = async ({
           !proxyHost.startsWith("https://localhost")))
         ? proxyHost
         : "",
-    sitemap: SUPER_MODE ? sitemap : user.role && sitemap,
+    sitemap: sitemapEnabled,
     monitoringEnabled,
   });
 
@@ -229,6 +231,7 @@ export const addWebsite = async ({
           scan: true,
           agent: ua,
           proxy,
+          sitemap: sitemapEnabled
         },
         true
       );
