@@ -36,11 +36,11 @@ export const scanWebsite = async ({
   html,
   ua,
 }: ScanParams): Promise<ResponseModel> => {
-  const pageUrl = removeTrailingSlash(url);
-
-  if (!pageUrl) {
+  if (!url) {
     return responseModel({ message: WEBSITE_NOT_FOUND });
   }
+
+  const pageUrl = removeTrailingSlash(url);
 
   const dataSource: PageMindScanResponse = await fetchPageIssues({
     url: pageUrl,
@@ -54,7 +54,7 @@ export const scanWebsite = async ({
   });
 
   // handled successful but, page did not exist or rendered to slow.
-  if (!dataSource?.webPage) {
+  if (dataSource && !dataSource?.webPage || !dataSource) {
     return responseModel({
       data: null,
       code: StatusCode.BadRequest,
@@ -71,7 +71,7 @@ export const scanWebsite = async ({
       url: webPage.url,
       pageLoadTime: webPage.pageLoadTime,
       timestamp: webPage.lastScanDate,
-      issues: limitIssue(issues), // limited scan endpoint
+      issues: limitIssue(issues && issues.issues), // limited scan endpoint
       userId,
       issuesInfo,
     },
