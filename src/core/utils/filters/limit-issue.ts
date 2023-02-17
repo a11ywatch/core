@@ -1,7 +1,7 @@
 // limit the issue records to 1/4th todo: pre-allocate
 // @return Issue['issues'][]
 export const limitIssue = (issues: any[]) => {
-  if (!issues || issues && Array.isArray(issues) && !issues.length) {
+  if (!issues || (issues && Array.isArray(issues) && !issues.length)) {
     return [];
   }
 

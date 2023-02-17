@@ -231,7 +231,7 @@ export const addWebsite = async ({
           scan: true,
           agent: ua,
           proxy,
-          sitemap: sitemapEnabled
+          sitemap: sitemapEnabled,
         },
         true
       );

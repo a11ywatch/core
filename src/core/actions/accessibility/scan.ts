@@ -54,7 +54,7 @@ export const scanWebsite = async ({
   });
 
   // handled successful but, page did not exist or rendered to slow.
-  if (dataSource && !dataSource?.webPage || !dataSource) {
+  if ((dataSource && !dataSource?.webPage) || !dataSource) {
     return responseModel({
       data: null,
       code: StatusCode.BadRequest,

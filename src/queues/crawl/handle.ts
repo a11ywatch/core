@@ -28,11 +28,13 @@ async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
   const { userId, meta } = arg;
   const { domain, duration, shutdown } = meta?.extra ?? {};
 
-  await setWebsiteScore({
-    domain,
-    userId: Number(userId),
-    duration,
-    shutdown: !!shutdown,
+  setImmediate(async () => {
+    await setWebsiteScore({
+      domain,
+      userId: Number(userId),
+      duration,
+      shutdown: !!shutdown,
+    });
   });
 }
 

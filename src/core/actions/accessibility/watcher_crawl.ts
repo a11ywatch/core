@@ -35,7 +35,7 @@ export const watcherCrawl = async (
     agent,
     proxy,
     sitemap = false,
-    delay
+    delay,
   }: CrawlParams,
   deciphered?: boolean
 ) => {
@@ -48,7 +48,7 @@ export const watcherCrawl = async (
     agent,
     proxy: proxy && !deciphered ? decipher(proxy) : proxy,
     sitemap,
-    delay
+    delay,
   };
 
   try {
