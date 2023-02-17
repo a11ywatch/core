@@ -1,4 +1,4 @@
-FROM node:19.5-alpine AS installer
+FROM node:19.6-alpine AS installer
 
 WORKDIR /usr/src/app
 
@@ -9,7 +9,7 @@ RUN apk upgrade --update-cache --available && \
 COPY . .
 RUN npm ci
 
-FROM node:19.5-alpine AS builder
+FROM node:19.6-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -18,7 +18,7 @@ COPY --from=installer /usr/src/app/node_modules ./node_modules
 # remove all dev modules
 RUN npm run build && rm -R ./node_modules && npm install --production
 
-FROM node:19.5-alpine
+FROM node:19.6-alpine
 
 WORKDIR /usr/src/app
 

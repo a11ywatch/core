@@ -12,6 +12,7 @@ export interface CrawlParams {
   agent?: string; // User-Agent to use during crawl
   proxy?: string; // proxy for request
   sitemap?: boolean; // sitemap enabled for request
+  delay?: number; // crawl throttling stream delay
 }
 
 /**
@@ -34,6 +35,7 @@ export const watcherCrawl = async (
     agent,
     proxy,
     sitemap = false,
+    delay
   }: CrawlParams,
   deciphered?: boolean
 ) => {
@@ -46,6 +48,7 @@ export const watcherCrawl = async (
     agent,
     proxy: proxy && !deciphered ? decipher(proxy) : proxy,
     sitemap,
+    delay
   };
 
   try {
