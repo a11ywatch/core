@@ -1,1 +1,1 @@
-export { q, qWebsiteWorker } from "./handle";
+export { q, qWebsiteWorker, asyncWorkerCrawlComplete } from "./handle";

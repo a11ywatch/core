@@ -24,7 +24,7 @@ async function asyncWorker(arg: Task): Promise<ResponseModel | boolean> {
 }
 
 // the async worker to use for completed crawl actions. TODO: remove for collection appending raw value to score.
-async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
+export async function asyncWorkerCrawlComplete(arg: Task): Promise<void> {
   const { userId, meta } = arg;
   const { domain, duration, shutdown } = meta?.extra ?? {};
 

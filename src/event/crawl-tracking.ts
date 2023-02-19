@@ -1,7 +1,7 @@
 import { getHostName } from "@a11ywatch/website-source-builder";
 import { performance } from "perf_hooks";
 import { bindTaskQ, getCWLimit } from "../queues/crawl/handle";
-import { qWebsiteWorker } from "../queues/crawl";
+import { asyncWorkerCrawlComplete } from "../queues/crawl";
 import { crawlTrackingEmitter } from "./emitters/crawl";
 import { domainName } from "../core/utils";
 import type { ScanRpcCall } from "../proto/calls/scan-stream";
@@ -65,7 +65,7 @@ const deInit = async (key, target, { duration, shutdown }: CrawlSet) => {
   };
 
   await rebindConcurrency(); // rebind event queue and increment limit
-  await qWebsiteWorker.push(params);
+  await asyncWorkerCrawlComplete(params);
 };
 
 // init crawling
@@ -94,10 +94,6 @@ const crawlComplete = (target) => {
     if (crawlingSet.has(key)) {
       const item = crawlingSet.get(key);
       item.crawling = false;
-
-      if (item.current === item.total) {
-        await deInit(key, target, item);
-      }
     }
   });
 };
