@@ -61,9 +61,9 @@ export const coreCrawl = async (call: ServerCallStreaming) => {
       }),
       call
     );
+  } else {
+    call.end();
   }
-
-  call.end();
 };
 
 // crawl website slim and wait for finished emit event to continue @return Website[].
@@ -72,39 +72,35 @@ export const crawlStreaming = async (
     norobo?: boolean;
   },
   call: ServerCallStreaming
-): Promise<boolean> => {
+) => {
   const { url, userId, subdomains, tld, norobo, proxy, sitemap } = props;
   const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
   const crawlEvent = `crawl-${crawlKey}`;
 
-  return new Promise(async (resolve) => {
-    // audit data event
-    const crawlListener = ({ data }) => {
-      data && call.write({ data });
-    };
-    // bind listeners
-    const crawlCompleteListener = (data) => {
-      crawlEmitter.off(crawlEvent, crawlListener);
-      resolve(data);
-    };
+  // audit data event
+  const crawlListener = ({ data }) => call.write({ data });
+  // bind listeners
+  const crawlCompleteListener = () => {
+    crawlEmitter.off(crawlEvent, crawlListener);
+    call.end();
+  };
 
-    crawlEmitter.on(crawlEvent, crawlListener);
+  crawlEmitter.on(crawlEvent, crawlListener);
 
-    crawlTrackingEmitter.once(
-      `crawl-complete-${crawlKey}`,
-      crawlCompleteListener
-    );
+  crawlTrackingEmitter.once(
+    `crawl-complete-${crawlKey}`,
+    crawlCompleteListener
+  );
 
-    // start crawl
-    await watcherCrawl({
-      url,
-      userId,
-      subdomains: !!subdomains,
-      tld: !!tld,
-      scan: true,
-      robots: !norobo,
-      proxy,
-      sitemap,
-    });
+  // start crawl
+  await watcherCrawl({
+    url,
+    userId,
+    subdomains: !!subdomains,
+    tld: !!tld,
+    scan: true,
+    robots: !norobo,
+    proxy,
+    sitemap,
   });
 };
