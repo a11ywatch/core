@@ -42,7 +42,7 @@ export const watcherCrawl = async (
   const crawlParams = {
     url: initUrl(url, true),
     id: userId,
-    robots,
+    norobots: !robots,
     subdomains,
     tld,
     agent,

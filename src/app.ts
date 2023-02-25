@@ -107,7 +107,7 @@ async function initServer(): Promise<HttpServer[]> {
   app.get("/status/:domain", limiter, statusBadge);
   // domain renderer [todo?: handle at edge]
   app.get("/api/iframe", limiter, createIframeEvent);
-  // get a previus run report
+  // get a previous run report
   app.get("/api/report", limiter, getWebsiteReport);
   // retrieve a user from the database
   app.get("/api/user", async (req, res) => {
