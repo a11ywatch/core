@@ -14,8 +14,7 @@ export const forgotPassword = async ({ email }) => {
     throw new Error(EMAIL_ERROR);
   }
 
-  const [user, collection] = await getUser({ email }).catch((e) => {
-    console.error(e);
+  const [user, collection] = await getUser({ email }).catch((_) => {
     return [];
   });
 

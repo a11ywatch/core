@@ -6,15 +6,21 @@ const resArray = () => {
   return [];
 };
 
+const resEnd = () => {
+  return {
+    toArray: resArray,
+  }
+};
+
 // find recursive builder mock
 const preFind = () => {
   return {
-    skip: resArray,
-    limit: resArray,
+    skip: resEnd,
+    limit: resEnd,
     toArray: resArray,
-    clone: resArray,
-    map: resArray,
-    filter: resArray,
+    clone: resEnd,
+    map: resEnd,
+    filter: resEnd,
     count: 0,
   };
 };
