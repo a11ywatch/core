@@ -74,7 +74,6 @@ let serverReady = false; // server is ready to go
 // all the connections for external request
 const connectClients = async () => {
   await initDbConnection(); // database connections
-  await initRedisConnection(); // redis connections
   await createPubSub(); // redis gql pub/sub
 };
 
@@ -420,6 +419,9 @@ const startServer = async (disableHttp?: boolean) => {
     }
     // tracking event emitter
     establishCrawlTracking(); // quick setup all event emitters binding
+
+    // start redis immediately for gql rate-limits and subs
+    await initRedisConnection();
 
     // gRPC startup
     const [_, __, [hcore]] = await Promise.all([
