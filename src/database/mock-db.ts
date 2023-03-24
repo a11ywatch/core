@@ -9,7 +9,7 @@ const resArray = () => {
 const resEnd = () => {
   return {
     toArray: resArray,
-  }
+  };
 };
 
 // find recursive builder mock

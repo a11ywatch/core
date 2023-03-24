@@ -101,7 +101,7 @@ export const crawlPage = async (
     id: userId,
   });
 
-  const { pageUrl, domain, pathname } = sourceBuild(urlMap);
+  const { domain, pathname } = sourceBuild(urlMap);
 
   // block scans from running
   if (!sendEmail && validateScanEnabled({ user: userData }) === false) {
@@ -220,6 +220,8 @@ export const crawlPage = async (
     issuesInfo,
   } = extractPageData(dataSource);
 
+  const pageUrl = webPage.url;
+
   // issues array
   const issueCount = pageIssues.issues.length;
 
@@ -306,7 +308,7 @@ export const crawlPage = async (
             userId,
             online: true,
           },
-          [pagesCollection as Collection<Document>, newSite, !issueCount], // delete document if issues do not exist
+          [pagesCollection as Collection<Document>, newSite],
           {
             searchProps: { url: pageUrl, userId },
           }

@@ -73,7 +73,8 @@ export const crawlStreaming = async (
   },
   call: ServerCallStreaming
 ) => {
-  const { url, userId, subdomains, tld, norobo, robots, proxy, sitemap } = props;
+  const { url, userId, subdomains, tld, norobo, robots, proxy, sitemap } =
+    props;
   const crawlKey = `${domainName(getHostName(url))}-${userId || 0}`;
   const crawlEvent = `crawl-${crawlKey}`;
 
