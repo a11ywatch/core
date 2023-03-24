@@ -1,7 +1,7 @@
 import { connect } from "../../../database";
 
 // find page actions by path
-export const findPageActionsByPath = async ({ path, userId }) => {
+export const findPageActionsByPath = async ({ path, userId, domain }) => {
   const [actionsCollection] = connect("PageActions");
   let actions = [];
 
@@ -9,6 +9,7 @@ export const findPageActionsByPath = async ({ path, userId }) => {
     const action = await actionsCollection.findOne({
       path,
       userId,
+      domain,
     });
 
     if (action && action.events) {

@@ -135,12 +135,19 @@ export const crawlPage = async (
     ignore: websiteIgnore,
     rules: websiteRules,
     runners: websiteRunners,
+    actionsEnabled,
   } = website ?? {};
 
   const freeAccount = !urole; // free account
   const rootPage = pathname === "/"; // the url is the base domain index.
 
-  const actions = await findPageActionsByPath({ userId, path: pathname });
+  const actions =
+    actionsEnabled &&
+    (await findPageActionsByPath({
+      userId,
+      path: pathname,
+      domain: website.domain,
+    }));
 
   const dataSource = await fetchPageIssues({
     pageHeaders,
