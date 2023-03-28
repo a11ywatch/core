@@ -3,10 +3,10 @@ import { emailMessager } from "../../messagers";
 import { pubsub } from "../../../database/pubsub";
 import { ISSUE_ADDED } from "../../static";
 import { collectionUpsert } from "../../utils";
-import { IssuesController } from "../../controllers/issues";
 import { getWebsite } from "../../controllers/websites";
+import { IssuesController } from "../../controllers/issues";
 import { AnalyticsController } from "../../controllers/analytics";
-import { getPage } from "../../controllers/pages/find";
+import { PagesController } from "../../../core/controllers/pages";
 import { UsersController } from "../../controllers/users";
 import { extractPageData } from "../../utils/shapes/extract-page-data";
 import { filterRunnerDuplicates } from "../../utils/filters/runners";
@@ -20,12 +20,11 @@ import { RATE_EXCEEDED_ERROR } from "../../strings";
 import { collectionIncrement } from "../../utils/collection-upsert";
 import { SCAN_TIMEOUT } from "../../strings/errors";
 import { StatusCode } from "../../../web/messages/message";
-import type { User, Website } from "../../../types/types";
 import { watcherCrawl } from "./watcher_crawl";
 import { shapeResponse } from "../../models/response/shape-response";
 import { crawlingSet, getKey } from "../../../event/crawl-tracking";
-import type { Collection, Document } from "mongodb";
 import { getActiveCrawlKey } from "../../../event/names";
+import type { User, Website } from "../../../types/types";
 
 export type CrawlConfig = {
   userId: number; // user id
@@ -228,12 +227,14 @@ export const crawlPage = async (
   } = extractPageData(dataSource);
 
   const pageUrl = webPage.url;
-
   // issues array
   const issueCount = pageIssues.issues.length;
 
   // if website record exist update integrity of the data.
   if (website) {
+    const analyticsCollection = AnalyticsController().getCollection();
+    const pagesCollection = PagesController().getCollection();
+
     setImmediate(async () => {
       // if ROOT domain for scan update Website Collection.
       if (rootPage) {
@@ -261,15 +262,6 @@ export const crawlPage = async (
       // add hostname to track outside website targeting
       const hostname = website.tld || website.tld ? webPage.domain : undefined;
 
-      const [[analytics, analyticsCollection], [newSite, pagesCollection]] =
-        await Promise.all([
-          AnalyticsController().getWebsite({ pageUrl, userId }, true),
-          getPage({
-            userId,
-            url: pageUrl,
-          }),
-        ]);
-
       await Promise.all([
         // analytics
         collectionUpsert(
@@ -286,7 +278,7 @@ export const crawlPage = async (
             noticeCount: issuesInfo.noticeCount,
             accessScore: issuesInfo.accessScore,
           },
-          [analyticsCollection, analytics]
+          [analyticsCollection, "upsert"]
         ),
         // issues
         collectionUpsert(
@@ -315,7 +307,7 @@ export const crawlPage = async (
             userId,
             online: true,
           },
-          [pagesCollection as Collection<Document>, newSite],
+          [pagesCollection, "upsert"],
           {
             searchProps: { url: pageUrl, userId },
           }

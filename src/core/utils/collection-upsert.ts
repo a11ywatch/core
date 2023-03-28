@@ -1,4 +1,5 @@
 import type { Collection, Document } from "mongodb";
+import { buildQueryParams } from "./q";
 
 /*
  * Update or add item into collection - some values are autofilled if empty.
@@ -9,34 +10,18 @@ import type { Collection, Document } from "mongodb";
  */
 export const collectionUpsert = async (
   source: any,
-  [collection, shouldUpdate, shouldDelete]: [Collection<Document>, any, any?],
+  [collection, shouldUpdate, shouldDelete]: [
+    Collection<Document>,
+    boolean | "upsert" | "many",
+    any?
+  ],
   config?: any
 ) => {
   if (typeof source === "undefined" || !collection) {
     return Promise.resolve();
   }
-  const userId = config?.searchProps?.userId ?? source?.userId;
-  const pageUrl = config?.searchProps?.pageUrl || source?.pageUrl;
-  const url = config?.searchProps?.url || source?.url;
-  const domain = config?.searchProps?.domain || source?.domain;
 
-  let queryParams = {};
-
-  if (typeof userId !== "undefined") {
-    queryParams = { userId };
-  }
-
-  if (pageUrl) {
-    queryParams = { ...queryParams, pageUrl };
-  }
-
-  if (url && !pageUrl) {
-    queryParams = { ...queryParams, url };
-  }
-
-  if (domain) {
-    queryParams = { ...queryParams, domain };
-  }
+  const queryParams = buildQueryParams(config?.searchProps ?? source);
 
   if (shouldUpdate && shouldDelete) {
     return await collection.deleteOne(queryParams); // delete the record when update & delete
@@ -50,7 +35,13 @@ export const collectionUpsert = async (
     return await collection.updateMany(queryParams, { $set: source });
   }
 
-  return await collection.updateOne(queryParams, { $set: source });
+  return await collection.updateOne(
+    queryParams,
+    { $set: source },
+    {
+      upsert: shouldUpdate === "upsert",
+    }
+  );
 };
 
 /*

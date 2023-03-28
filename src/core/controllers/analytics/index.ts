@@ -49,6 +49,11 @@ export const getAnalyticsPaging = async (
 
 // Page analytics for simple error stats
 export const AnalyticsController = ({ user } = { user: null }) => ({
+  getCollection: () => {
+    const [collection] = connect("Analytics");
+
+    return collection;
+  },
   getWebsite: async (
     { pageUrl, userId, domain, bypass }: BaseParams & { bypass?: boolean },
     chain?: boolean
