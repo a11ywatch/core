@@ -18,7 +18,7 @@
     "@fastify/cookie": "^6.0.0",
     "@fastify/cors": "^7.0.0",
     "@fastify/rate-limit": "^6.0.1",
-    "@graphql-tools/schema": "^9.0.12",
+    "@graphql-tools/schema": "^9.0.17",
     "@grpc/grpc-js": "1.8.7",
     "@grpc/proto-loader": "0.7.4",
     "apollo-server": "3.11.1",
