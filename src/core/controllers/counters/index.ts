@@ -1,14 +1,13 @@
 import type { Collection, Document, WithId } from "mongodb";
-import { connect } from "../../../database";
+import { countersCollection } from "../../../database";
 import { websiteSearchParams } from "../../utils";
 
 const getCounter = async ({
   _id,
 }): Promise<[WithId<Document>, Collection<Document>]> => {
-  const [collection] = connect("Counters");
-  const counter = await collection.findOne({ _id });
+  const counter = await countersCollection.findOne({ _id });
 
-  return [counter, collection];
+  return [counter, countersCollection];
 };
 
 const getNextSequenceValue = async (sequenceName) => {
@@ -40,20 +39,17 @@ const getNextSequenceValue = async (sequenceName) => {
 
 const CountersController = ({ user } = { user: null }) => ({
   fixCounters: async (_, chain) => {
-    const [collection] = connect("Counters");
-    const counters = await collection.find().limit(150).toArray();
+    const counters = await countersCollection.find().limit(150).toArray();
 
-    return chain ? [counters, collection] : counters;
+    return chain ? [counters, countersCollection] : counters;
   },
   getCounter,
   getNextSequenceValue,
-  getCounters: async ({ userId, pageUrl, url }) => {
-    const [collection] = connect("Counters");
-    return await collection
+  getCounters: async ({ userId, pageUrl }) =>
+    await countersCollection
       .find(websiteSearchParams({ pageUrl, userId }))
       .limit(20)
-      .toArray();
-  },
+      .toArray(),
 });
 
 export { getCounter, getNextSequenceValue, CountersController };

@@ -1,4 +1,18 @@
-export { connect, client, initDbConnection, closeDbConnection } from "./client";
+export {
+  connect,
+  client,
+  initDbConnection,
+  closeDbConnection,
+  analyticsCollection,
+  issuesCollection,
+  pagesCollection,
+  usersCollection,
+  websitesCollection,
+  actionsCollection,
+  historyCollection,
+  countersCollection,
+  pageSpeedCollection,
+} from "./client";
 export {
   initRedisConnection,
   redisClient,

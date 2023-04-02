@@ -1,6 +1,6 @@
 import { Website } from "../../../../types/schema";
 import { WEBSITE_NOT_FOUND, SUCCESS } from "../../../../core/strings";
-import { connect } from "../../../../database";
+import { actionsCollection } from "../../../../database";
 import { getWebsite } from "../find";
 import { cipher } from "../../../../core/utils";
 import { DEV } from "../../../../config";
@@ -182,7 +182,6 @@ export const updateWebsite = async ({
 
   // store into actions collection TODO: validate actions
   if (actions && Array.isArray(actions) && actions.length) {
-    const [actionsCollection] = connect("PageActions");
     const domain = website.domain;
 
     for (let i = 0; i < actions.length; i++) {

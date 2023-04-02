@@ -1,4 +1,4 @@
-import { connect } from "../../../database";
+import { pagesCollection, websitesCollection } from "../../../database";
 
 // [Internal] method to cleanup invalid domain adds & params fields to remove { html : "" }
 export const cleanUpDeprecatedFields = async (fields) => {
@@ -7,10 +7,6 @@ export const cleanUpDeprecatedFields = async (fields) => {
       "Fields requires a object with properties to remove."
     );
   }
-  const [collection] = connect("Pages");
-  const [websiteCollection] = connect("Websites");
-
-  await collection.updateMany({}, { $unset: fields });
-
-  await websiteCollection.updateMany({}, { $unset: fields });
+  await pagesCollection.updateMany({}, { $unset: fields });
+  await websitesCollection.updateMany({}, { $unset: fields });
 };

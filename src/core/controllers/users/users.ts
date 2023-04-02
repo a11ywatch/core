@@ -26,10 +26,12 @@ import {
 import { createUser } from "./set";
 import type { UserControllerType } from "./types";
 import { sendEmailConfirmation } from "./update/confirm-email";
+import { usersCollection } from "../../../database";
 
 export const UsersController: UserControllerType = (
   { user: _user } = { user: null }
 ) => ({
+  getCollection: usersCollection,
   getUser,
   verifyUser,
   createUser,

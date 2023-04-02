@@ -232,8 +232,8 @@ export const crawlPage = async (
 
   // if website record exist update integrity of the data.
   if (website) {
-    const analyticsCollection = AnalyticsController().getCollection();
-    const pagesCollection = PagesController().getCollection();
+    const analyticsCollection = AnalyticsController().getCollection;
+    const pagesCollection = PagesController().getCollection;
 
     setImmediate(async () => {
       // if ROOT domain for scan update Website Collection.

@@ -1,4 +1,11 @@
-import { connect } from "../../../../database";
+import {
+  pageSpeedCollection,
+  analyticsCollection,
+  pagesCollection,
+  issuesCollection,
+  actionsCollection,
+  websitesCollection,
+} from "../../../../database";
 import {
   WEBSITE_NOT_FOUND,
   SUCCESS,
@@ -16,16 +23,9 @@ export const removeWebsite = async ({
   domain = "",
   deleteMany = false,
 }) => {
-  const [analyticsCollection] = connect("Analytics");
-  const [pagesCollection] = connect("Pages");
-  const [issuesCollection] = connect("Issues");
-  const [actionsCollection] = connect("PageActions");
-  const [pageSpeedCollection] = connect("PageSpeed");
-
   if (deleteMany) {
-    const [webcollection] = connect("Websites");
     // todo: get all websites and send request to cdn server for assets removal
-    await webcollection.deleteMany({ userId });
+    await websitesCollection.deleteMany({ userId });
     await analyticsCollection.deleteMany({ userId });
     await pagesCollection.deleteMany({ userId });
     await issuesCollection.deleteMany({ userId });
@@ -60,9 +60,9 @@ export const removeWebsite = async ({
   await analyticsCollection.deleteMany(deleteQuery);
   await pagesCollection.deleteMany(deleteQuery);
   await issuesCollection.deleteMany(deleteQuery);
-  await collection.findOneAndDelete(deleteQuery);
   await actionsCollection.deleteMany(deleteQuery);
   await pageSpeedCollection.deleteMany(deleteQuery);
+  await collection.findOneAndDelete(deleteQuery);
 
   // PREVENT DUPLICATE ITEMS IN HISTORY
   if (!history) {

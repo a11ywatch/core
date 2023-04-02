@@ -1,4 +1,4 @@
-import { MongoClient, Collection, Db } from "mongodb";
+import { MongoClient, Collection, Db, Document } from "mongodb";
 import { EventEmitter } from "events";
 import { config } from "../config/config";
 import { mdb } from "./mock-db";
@@ -29,6 +29,15 @@ const createClient = async (dbconnection?: string): Promise<MongoClient> => {
     resolve(mclient);
   });
 };
+let pagesCollection: Collection<Document> = null;
+let analyticsCollection: Collection<Document> = null;
+let issuesCollection: Collection<Document> = null;
+let usersCollection: Collection<Document> = null;
+let websitesCollection: Collection<Document> = null;
+let actionsCollection: Collection<Document> = null;
+let historyCollection: Collection<Document> = null;
+let countersCollection: Collection<Document> = null;
+let pageSpeedCollection: Collection<Document> = null;
 
 // establish top level db connection
 const initDbConnection = async (dbconnection?: string) => {
@@ -37,6 +46,17 @@ const initDbConnection = async (dbconnection?: string) => {
   if (client) {
     client = await client.connect();
     db = client.db(config.DB_NAME);
+
+    // establish app collections
+    analyticsCollection = db.collection("Analytics");
+    pagesCollection = db.collection("Pages");
+    issuesCollection = db.collection("Issues");
+    usersCollection = db.collection("Users");
+    websitesCollection = db.collection("Websites");
+    actionsCollection = db.collection("PageActions");
+    historyCollection = db.collection("History");
+    countersCollection = db.collection("Counters");
+    pageSpeedCollection = db.collection("PageSpeed");
   }
 
   if (connectionState !== "determined") {
@@ -85,4 +105,14 @@ export {
   pollTillConnected,
   initDbConnection,
   closeDbConnection,
+  // collections
+  analyticsCollection,
+  issuesCollection,
+  pagesCollection,
+  usersCollection,
+  websitesCollection,
+  actionsCollection,
+  historyCollection,
+  countersCollection,
+  pageSpeedCollection,
 };

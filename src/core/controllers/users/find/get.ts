@@ -1,5 +1,5 @@
 import { userParams } from "../../../utils/controller-filter";
-import { connect } from "../../../../database";
+import { usersCollection } from "../../../../database";
 import type { User } from "../../../../types/types";
 import { validateUID } from "../../../../web/params/extracter";
 
@@ -15,19 +15,18 @@ async function getUser({
   emailConfirmCode,
   id,
 }: GetUserParams): Promise<[User | null, any]> {
-  const [collection] = connect("Users");
   const block = !email && !emailConfirmCode && !validateUID(id);
 
   // prevent user find on empty queries
-  if (block || !collection) {
-    return [null, collection];
+  if (block || !usersCollection) {
+    return [null, usersCollection];
   }
 
   const params = userParams({ email, id, emailConfirmCode });
 
-  const user = (await collection.findOne(params)) as User;
+  const user = (await usersCollection.findOne(params)) as User;
 
-  return [user, collection];
+  return [user, usersCollection];
 }
 
 export { getUser };

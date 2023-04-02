@@ -1,4 +1,4 @@
-import { connect } from "../../../../database";
+import { issuesCollection } from "../../../../database";
 import { getHostName, websiteSearchParams } from "../../../utils";
 import type { Issue } from "../../../../types/schema";
 
@@ -6,8 +6,6 @@ export const getIssue = async (
   { url, pageUrl, userId, noRetries }: any,
   chain?: boolean
 ) => {
-  const [collection] = connect("Issues");
-
   const queryUrl = decodeURIComponent(String(url || pageUrl));
 
   const searchProps = websiteSearchParams({
@@ -20,20 +18,20 @@ export const getIssue = async (
 
   // TODO: remove props and allow all
   if (Object.keys(searchProps).length) {
-    issue = await collection.findOne(searchProps);
+    issue = await issuesCollection.findOne(searchProps);
 
     // get issues from general bucket [marketing]
     if (!issue && !noRetries) {
-      issue = await collection.findOne({ pageUrl: queryUrl });
+      issue = await issuesCollection.findOne({ pageUrl: queryUrl });
       if (!issue) {
-        issue = await collection.findOne({
+        issue = await issuesCollection.findOne({
           domain: getHostName(queryUrl),
         });
       }
     }
   }
 
-  return chain ? [issue, collection] : issue;
+  return chain ? [issue, issuesCollection] : issue;
 };
 
 // query issue collection by limit
@@ -45,13 +43,12 @@ export const getIssues = async (
   }: { userId: number; domain?: string; pageUrl?: string },
   limit: number = 2000
 ) => {
-  const [collection] = connect("Issues");
   const searchProps = websiteSearchParams({
     domain: domain || getHostName(pageUrl),
     userId,
   });
 
-  return await collection
+  return await issuesCollection
     .find(searchProps)
     .sort({ pageUrl: 1 })
     .limit(limit)
@@ -60,7 +57,6 @@ export const getIssues = async (
 
 // get issues for a user with pagination offsets.
 export const getIssuesPaging = async (params) => {
-  const [collection] = connect("Issues");
   const { userId, domain, pageUrl, limit = 10, offset = 0, all } = params ?? {};
 
   const searchParams = websiteSearchParams({
@@ -69,7 +65,7 @@ export const getIssuesPaging = async (params) => {
     all,
   });
 
-  return (await collection
+  return (await issuesCollection
     .find(searchParams)
     .skip(offset)
     .limit(limit)

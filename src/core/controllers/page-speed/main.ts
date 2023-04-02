@@ -1,10 +1,9 @@
-import { connect } from "../../../database";
+import { pageSpeedCollection } from "../../../database";
 import { domainNameFind, websiteSearchParams } from "../../utils";
 
 // get analytics by domain for a user with pagination offsets.
 export const getPageSpeedPaging = async (p, chain?: boolean) => {
   const { userId, domain, limit = 20, offset = 0, all = false } = p ?? {};
-  const [collection] = connect("PageSpeed");
 
   let params = {};
 
@@ -20,13 +19,13 @@ export const getPageSpeedPaging = async (p, chain?: boolean) => {
     }
   }
 
-  const pages = await collection
+  const pages = await pageSpeedCollection
     .find(params)
     .skip(offset)
     .limit(limit)
     .toArray();
 
-  return chain ? [pages, collection] : pages;
+  return chain ? [pages, pageSpeedCollection] : pages;
 };
 
 // PageSpeed insights by lighthouse
@@ -41,7 +40,6 @@ export const PageSpeedController = () => ({
     }: { pageUrl?: string; userId?: number; domain?: string; all?: boolean },
     chain?: boolean
   ) => {
-    const [collection] = connect("PageSpeed");
     const searchProps = websiteSearchParams({
       pageUrl,
       userId,
@@ -52,10 +50,10 @@ export const PageSpeedController = () => ({
     let insights = null;
 
     if (Object.keys(searchProps).length) {
-      insights = await collection.findOne(searchProps);
+      insights = await pageSpeedCollection.findOne(searchProps);
     }
 
-    return chain ? [insights, collection] : insights;
+    return chain ? [insights, pageSpeedCollection] : insights;
   },
   // get page speed by domain relating to a website.
   getWebsitePageSpeed: async ({
@@ -67,10 +65,9 @@ export const PageSpeedController = () => ({
     domain?: string;
     pageUrl?: string;
   }) => {
-    const [collection] = connect("PageSpeed");
     const searchProps = websiteSearchParams({ pageUrl, domain, userId });
 
-    return await collection.findOne(searchProps);
+    return await pageSpeedCollection.findOne(searchProps);
   },
   getPageSpeedPaging,
 });

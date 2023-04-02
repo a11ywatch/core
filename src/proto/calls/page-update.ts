@@ -1,7 +1,7 @@
 import type { sendUnaryData, ServerWritableStream } from "@grpc/grpc-js";
 import { extractLighthouse } from "../../core/utils/shapes/extract-page-data";
 import { LIGHTHOUSE } from "../../core/static";
-import { connect, pubsub } from "../../database";
+import { pagesCollection, pubsub } from "../../database";
 import { collectionUpsert } from "../../core/utils";
 import { PageSpeedController } from "../../core/controllers/page-speed/main";
 import { WebsitesController } from "../../core/controllers";
@@ -29,7 +29,6 @@ export const pageUpdate = async (
     const [website] = await WebsitesController().getWebsite({ domain, userId });
 
     if (website) {
-      const [pagesCollection] = connect("Pages");
       const [pageSpeed, pageSpeedCollection] =
         await PageSpeedController().getWebsite(
           { pageUrl: lighthouseResults.pageUrl, userId },

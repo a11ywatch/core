@@ -1,5 +1,5 @@
 import { validateUID } from "../../../web/params/extracter";
-import { connect } from "../../../database";
+import { analyticsCollection } from "../../../database";
 import { domainNameFind, websiteSearchParams } from "../../utils";
 import type { Analytic } from "../../../types/schema";
 import { Collection, Document } from "mongodb";
@@ -17,7 +17,6 @@ export const getAnalyticsPaging = async (
   chain?: boolean
 ): Promise<[Analytic[], Collection<Document>] | Analytic[]> => {
   const { userId, domain, limit = 20, offset = 0, all = false } = params ?? {};
-  const [collection] = connect("Analytics");
 
   let filters = {};
 
@@ -34,55 +33,48 @@ export const getAnalyticsPaging = async (
   }
 
   try {
-    const pages = (await collection
+    const pages = (await analyticsCollection
       .find(filters)
       .skip(offset)
       .limit(limit)
       .toArray()) as Analytic[];
 
-    return chain ? [pages, collection] : pages;
+    return chain ? [pages, analyticsCollection] : pages;
   } catch (e) {
     console.error(e);
-    return chain ? [[], collection] : [];
+    return chain ? [[], analyticsCollection] : [];
   }
 };
 
 // Page analytics for simple error stats
 export const AnalyticsController = ({ user } = { user: null }) => ({
-  getCollection: () => {
-    const [collection] = connect("Analytics");
-
-    return collection;
-  },
+  getCollection: analyticsCollection,
   getWebsite: async (
     { pageUrl, userId, domain, bypass }: BaseParams & { bypass?: boolean },
     chain?: boolean
   ) => {
-    const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId, domain });
 
     let analytics = null;
 
     if (validateUID(userId) || bypass) {
-      analytics = await collection.findOne(searchProps);
+      analytics = await analyticsCollection.findOne(searchProps);
     }
 
-    return chain ? [analytics, collection] : analytics;
+    return chain ? [analytics, analyticsCollection] : analytics;
   },
   getWebsiteAnalytics: async ({ userId, domain }: BaseParams) => {
-    const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ domain, userId });
 
     return validateUID(userId)
-      ? await collection.find(searchProps).limit(0).toArray()
+      ? await analyticsCollection.find(searchProps).limit(0).toArray()
       : [];
   },
   getAnalytics: async ({ userId, pageUrl }: BaseParams) => {
-    const [collection] = connect("Analytics");
     const searchProps = websiteSearchParams({ pageUrl, userId });
 
     return validateUID(userId)
-      ? await collection.find(searchProps).limit(20).toArray()
+      ? await analyticsCollection.find(searchProps).limit(20).toArray()
       : [];
   },
   getAnalyticsPaging,

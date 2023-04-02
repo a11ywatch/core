@@ -1,7 +1,7 @@
 import dns from "dns";
 import { paramParser, validateUID } from "../params/extracter";
 import { frontendClientOrigin } from "../../core/utils/is-client";
-import { connect } from "../../database/index";
+import { websitesCollection } from "../../database/index";
 import { SUPER_MODE } from "../../config";
 import { getUserFromToken, asyncRandomGenerate } from "../../core/utils";
 import { AUTH_ERROR } from "../../core/strings";
@@ -47,8 +47,7 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
         });
       }
 
-      const [collection] = connect("Websites");
-      const website = await collection.findOne({ domain, userId });
+      const website = await websitesCollection.findOne({ domain, userId });
 
       if (!website) {
         return res.status(404).send({
@@ -72,7 +71,6 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
 
     if (typeof userId !== "undefined") {
       const domain = paramParser(req, "domain");
-      const [collection] = connect("Websites");
 
       if (!domain) {
         return res.status(422).send({
@@ -82,7 +80,7 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
       }
 
       const params = { domain, userId };
-      const website = await collection.findOne(params);
+      const website = await websitesCollection.findOne(params);
 
       if (!website) {
         return res.status(404).send({
@@ -96,11 +94,11 @@ export const setDnsVerifyRoutes = (app: FastifyInstance) => {
 
       if (!website.verified) {
         if (!website.verificationCode) {
-          await collection.updateOne(params, {
+          await websitesCollection.updateOne(params, {
             $set: { verificationCode },
           });
         } else if (await resolveDnsRecord(domain, website.verificationCode)) {
-          await collection.updateOne(params, {
+          await websitesCollection.updateOne(params, {
             $set: { verified: true },
             // verificationCode: "" todo unset property
           });

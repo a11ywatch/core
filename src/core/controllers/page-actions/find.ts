@@ -1,8 +1,7 @@
-import { connect } from "../../../database";
+import { actionsCollection } from "../../../database";
 
 // find page actions by path
 export const findPageActionsByPath = async ({ path, userId, domain }) => {
-  const [actionsCollection] = connect("PageActions");
   let actions = [];
 
   try {

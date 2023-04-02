@@ -1,4 +1,4 @@
-import { connect } from "../../../../database";
+import { websitesCollection } from "../../../../database";
 import { websiteSearchParams } from "../../../utils";
 import { PageSpeedController } from "../../page-speed/main";
 import type { Website } from "../../../../types/types";
@@ -18,10 +18,11 @@ export const getWebsite = async ({
     url,
     domain,
   });
-  const [collection] = connect("Websites");
-  const website = collection && ((await collection.findOne(params)) as Website);
+  const website =
+    websitesCollection &&
+    ((await websitesCollection.findOne(params)) as Website);
 
-  return [website, collection];
+  return [website, websitesCollection];
 };
 
 // wrapper for data
@@ -40,14 +41,13 @@ export const getWebsitesWithUsers = async (
   userLimit = 20,
   filter = {}
 ): Promise<[Website[], any]> => {
-  const [collection] = connect("Websites");
   return [
-    await collection
+    await websitesCollection
       .find({ userId: { $gte: 0, $ne: -1 }, ...filter })
       .project({ url: 1, userId: 1 })
       .limit(userLimit)
       .toArray(),
-    collection,
+    websitesCollection,
   ];
 };
 
@@ -66,12 +66,10 @@ export const getWebsitesPaginated = async (
   offset?: number, // use offset to skip
   project?: Record<string, 0 | 1>
 ): Promise<[Website[], any]> => {
-  const [collection] = connect("Websites");
-
   // websites stored only contain users
   const data =
-    collection &&
-    (await collection
+    websitesCollection &&
+    (await websitesCollection
       .find(filter)
       .sort({ order: 1 }) // todo: optional sorting
       .project(
@@ -87,7 +85,7 @@ export const getWebsitesPaginated = async (
       .skip(offset ?? limit * page)
       .toArray());
 
-  return [data ?? [], collection];
+  return [data ?? [], websitesCollection];
 };
 
 // get websites for a user with pagination offsets.
@@ -95,8 +93,7 @@ export const getWebsitesPaging = async (
   { userId, limit = 3, offset = 0, insights = false },
   chain?: boolean
 ): Promise<Website[] | [Website[], any]> => {
-  const [collection] = connect("Websites");
-  const webPages = (await collection
+  const webPages = (await websitesCollection
     .find({ userId })
     .sort({ order: 1 })
     .skip(offset)
@@ -122,14 +119,15 @@ export const getWebsitesPaging = async (
     }
   }
 
-  return chain ? [webPages, collection] : webPages;
+  return chain ? [webPages, websitesCollection] : webPages;
 };
 
 // return a list of websites for the user by 20
 export const getWebsites = async ({ userId }, chain?: boolean) => {
-  const [collection] = connect("Websites");
+  const websites = await websitesCollection
+    .find({ userId })
+    .limit(10)
+    .toArray();
 
-  const websites = await collection.find({ userId }).limit(10).toArray();
-
-  return chain ? [websites, collection] : websites;
+  return chain ? [websites, websitesCollection] : websites;
 };

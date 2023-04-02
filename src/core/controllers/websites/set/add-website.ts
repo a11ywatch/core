@@ -15,7 +15,7 @@ import { makeWebsite } from "../../../models/website";
 import { getWebsite } from "../find";
 import { getUser } from "../../users";
 import { watcherCrawl } from "../../../actions/accessibility/watcher_crawl";
-import { connect } from "../../../../database";
+import { actionsCollection } from "../../../../database";
 import { DEV, SUPER_MODE } from "../../../../config/config";
 import { filterRunnerDuplicates } from "../../../utils/filters/runners";
 
@@ -191,8 +191,6 @@ export const addWebsite = async ({
   setImmediate(async () => {
     // store into actions collection
     if (actionsEnabled) {
-      const [actionsCollection] = connect("PageActions");
-
       for (let i = 0; i < actions.length; i++) {
         const action = actions[i];
         const update = {

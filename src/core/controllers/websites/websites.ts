@@ -7,8 +7,10 @@ import {
 import { updateWebsite, sortWebsites } from "./update";
 import { addWebsite } from "./set";
 import { removeWebsite } from "./remove";
+import { websitesCollection } from "../../../database";
 
 export const WebsitesController = ({ user } = { user: null }) => ({
+  getCollection: websitesCollection,
   getWebsite,
   getWebsites,
   getWebsitesPaginated,

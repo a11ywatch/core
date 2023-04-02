@@ -1,4 +1,4 @@
-import { connect } from "../../../../database";
+import { pagesCollection } from "../../../../database";
 import {
   domainNameFind,
   getHostName,
@@ -11,27 +11,26 @@ export const getPages = async (
   { domain, userId, url }: { domain?: string; userId?: number; url?: string },
   chain?: boolean
 ) => {
-  const [collection] = connect("Pages");
+  if (!pagesCollection) {
+    return chain ? [[], pagesCollection] : [];
+  }
+
   const searchProps = websiteSearchParams({
     userId,
     domain: domain || (url && getHostName(url)),
   });
 
-  if (!collection) {
-    return chain ? [[], collection] : [];
-  }
-
   try {
-    const pages = await collection
+    const pages = await pagesCollection
       .find(searchProps)
       .sort({ url: 1 })
       .limit(0)
       .toArray();
 
-    return chain ? [pages, collection] : pages;
+    return chain ? [pages, pagesCollection] : pages;
   } catch (e) {
     // console.error(e);
-    return chain ? [[], collection] : [];
+    return chain ? [[], pagesCollection] : [];
   }
 };
 
@@ -44,19 +43,18 @@ export const getPage = async ({
   userId?: number;
   url?: string;
 }) => {
-  const [collection] = connect("Pages");
   const searchProps = websiteSearchParams({ url, userId });
-  const page = collection && (await collection.findOne(searchProps));
+  const page = pagesCollection && (await pagesCollection.findOne(searchProps));
 
-  return [page, collection];
+  return [page, pagesCollection];
 };
 
 // get all the pages in the database
 export const getAllPages = async () => {
-  const [collection] = connect("Pages");
-  const websites = collection && (await collection.find({}).limit(0).toArray());
+  const websites =
+    pagesCollection && (await pagesCollection.find({}).limit(0).toArray());
 
-  return [websites, collection];
+  return [websites, pagesCollection];
 };
 
 // get websites for a user with pagination offsets.
@@ -76,8 +74,6 @@ export const getPagesPaging = async (
   },
   chain?: boolean
 ) => {
-  const [collection] = connect("Pages");
-
   let params = {};
 
   if (typeof userId !== "undefined") {
@@ -88,8 +84,8 @@ export const getPagesPaging = async (
   }
 
   const pages =
-    collection &&
-    (await collection.find(params).skip(offset).limit(limit).toArray());
+    pagesCollection &&
+    (await pagesCollection.find(params).skip(offset).limit(limit).toArray());
 
   // run with insight relationship
   if (pages && insights) {
@@ -114,5 +110,5 @@ export const getPagesPaging = async (
     }
   }
 
-  return chain ? [pages, collection] : pages;
+  return chain ? [pages, pagesCollection] : pages;
 };

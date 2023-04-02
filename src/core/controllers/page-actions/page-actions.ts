@@ -1,6 +1,6 @@
 import { URL } from "url";
 import { domainNameFind } from "../../utils";
-import { connect } from "../../../database";
+import { actionsCollection } from "../../../database";
 
 // get page actions by domain for a user with pagination offsets.
 export const getPageActionsPaging = async (
@@ -19,7 +19,6 @@ export const getPageActionsPaging = async (
   },
   chain?: boolean
 ) => {
-  const [collection] = connect("PageActions");
   let params = {};
 
   if (typeof userId !== "undefined") {
@@ -42,10 +41,14 @@ export const getPageActionsPaging = async (
   let items = [];
 
   if (Object.keys(params).length) {
-    items = await collection.find(params).skip(offset).limit(limit).toArray();
+    items = await actionsCollection
+      .find(params)
+      .skip(offset)
+      .limit(limit)
+      .toArray();
   }
 
   const pages = items ?? [];
 
-  return chain ? [pages, collection] : pages;
+  return chain ? [pages, actionsCollection] : pages;
 };

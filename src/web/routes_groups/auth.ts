@@ -14,7 +14,7 @@ import { limiter, registerLimiter } from "../limiters";
 import { User } from "../../types/schema";
 import { GENERAL_ERROR, SUCCESS } from "../../core/strings";
 import { WebsitesController } from "../../core/controllers";
-import { connect } from "../../database";
+import { historyCollection, usersCollection } from "../../database";
 import { allowedNext } from "../../core/utils/get-user-data";
 import type { FastifyInstance } from "fastify";
 
@@ -191,16 +191,13 @@ export const setAuthRoutes = (app: FastifyInstance) => {
           await cancelSubscription({ keyid: id });
         }
 
-        const [collection] = connect("Users");
-        const [historyCollecion] = connect("History");
-
         await Promise.all([
           WebsitesController().removeWebsite({
             userId: id,
             deleteMany: true,
           }),
-          collection.deleteOne({ id }),
-          historyCollecion.deleteMany({ userId: id }),
+          usersCollection.deleteOne({ id }),
+          historyCollection.deleteMany({ userId: id }),
         ]);
         message = `${SUCCESS}: account deleted.`;
         res.setCookie("jwt", "", cookieConfigs);

@@ -1,6 +1,10 @@
 import { URL } from "url";
 import { SUPER_MODE } from "../../../config/config";
-import { connect } from "../../../database";
+import {
+  issuesCollection,
+  websitesCollection,
+  pagesCollection,
+} from "../../../database";
 
 // get the page report for a website. TODO: REFACTOR..
 export const getReport = async (url: string, userId?: number) => {
@@ -25,14 +29,14 @@ export const getReport = async (url: string, userId?: number) => {
 
   let findBy = {};
   let websiteFindBy = {};
-  let pageCollection = "";
+  let domainCollection = null;
 
   if (targetPages) {
     findBy = { url };
-    pageCollection = "Pages";
+    domainCollection = pagesCollection;
   } else {
     findBy = { domain };
-    pageCollection = "Websites";
+    domainCollection = websitesCollection;
   }
 
   if (authenticated) {
@@ -53,9 +57,6 @@ export const getReport = async (url: string, userId?: number) => {
     };
   }
 
-  const [issueCollection] = connect("Issues");
-  const [domainCollection] = connect(pageCollection);
-
   try {
     website =
       domainCollection && (await domainCollection.findOne(websiteFindBy));
@@ -67,8 +68,8 @@ export const getReport = async (url: string, userId?: number) => {
   if (website) {
     try {
       const websiteIssues =
-        issueCollection &&
-        (await issueCollection.findOne({
+        issuesCollection &&
+        (await issuesCollection.findOne({
           pageUrl: website.url,
         }));
 
