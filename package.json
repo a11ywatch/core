@@ -36,7 +36,7 @@
     "graphql-redis-subscriptions": "2.6.0",
     "graphql-subscriptions": "2.0.0",
     "graphql-tag": "2.12.6",
-    "graphql-ws": "5.11.2",
+    "graphql-ws": "5.12.1",
     "ioredis": "5.2.4",
     "jsonwebtoken": "8.5.1",
     "mongodb": "4.13.0",
