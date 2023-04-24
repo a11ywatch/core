@@ -65,7 +65,6 @@ export const website = gql`
     pages(
       limit: Int = 0
       offset: Int = 0
-      offset: Int = 0
       insights: Boolean = false
     ): [Pages]
     actions(limit: Int = 0, offset: Int = 0): [PageActions]

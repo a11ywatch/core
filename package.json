@@ -1,6 +1,6 @@
 {
   "name": "@a11ywatch/core",
-  "version": "0.7.83",
+  "version": "0.7.84",
   "description": "a11ywatch central API",
   "main": "./server.js",
   "scripts": {
@@ -19,11 +19,11 @@
     "@fastify/cors": "^7.0.0",
     "@fastify/rate-limit": "^6.0.1",
     "@graphql-tools/schema": "^9.0.12",
-    "@grpc/grpc-js": "1.8.13",
+    "@grpc/grpc-js": "1.8.14",
     "@grpc/proto-loader": "0.7.6",
-    "apollo-server": "3.11.1",
-    "apollo-server-core": "3.11.1",
-    "apollo-server-fastify": "3.11.1",
+    "apollo-server": "3.12.0",
+    "apollo-server-core": "3.12.0",
+    "apollo-server-fastify": "3.12.0",
     "cron": "2.1.0",
     "csv-writer": "^1.6.0",
     "date-fns": "2.29.3",
@@ -36,15 +36,15 @@
     "graphql-redis-subscriptions": "2.6.0",
     "graphql-subscriptions": "2.0.0",
     "graphql-tag": "2.12.6",
-    "graphql-ws": "5.11.2",
-    "ioredis": "5.2.4",
+    "graphql-ws": "5.12.1",
+    "ioredis": "5.3.2",
     "jsonwebtoken": "8.5.1",
     "mongodb": "4.13.0",
     "node-iframe": "1.9.1",
     "nodemailer": "6.8.0",
     "pb-util": "1.0.3",
     "stripe": "11.1.0",
-    "ws": "8.12.0"
+    "ws": "8.13.0"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "2.2.2",
