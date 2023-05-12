@@ -17,11 +17,11 @@ export const crawlHttpStreamSlim = (
 ): Promise<boolean> => {
   const { url, userId, subdomains, tld, robots, agent, proxy, sitemap } = props;
 
-  return new Promise(async (resolve) => {
-    const domain = getHostName(url);
-    const crawlEvent = getActiveCrawlKey(domain, userId);
-    const key = getKey(domain, undefined, userId); // crawl event key
+  const domain = getHostName(url);
+  const crawlEvent = getActiveCrawlKey(domain, userId);
+  const key = getKey(domain, undefined, userId); // crawl event key
 
+  return new Promise((resolve) => {
     const crawlListener = removeTrailing
       ? (source) => {
           setImmediate(() => {
@@ -58,16 +58,19 @@ export const crawlHttpStreamSlim = (
 
     crawlTrackingEmitter.once(`crawl-complete-${key}`, crawlComplete);
 
-    await watcherCrawl({
-      url,
-      userId,
-      subdomains: !!subdomains,
-      tld: !!tld,
-      scan: true,
-      robots,
-      agent,
-      proxy,
-      sitemap,
-    });
+    setImmediate(
+      async () =>
+        await watcherCrawl({
+          url,
+          userId,
+          subdomains: !!subdomains,
+          tld: !!tld,
+          scan: true,
+          robots,
+          agent,
+          proxy,
+          sitemap,
+        })
+    );
   });
 };

@@ -3,7 +3,12 @@ import { ResponseParamsModel, ResponseModel } from "./types";
 
 // response model based on exact params
 export const shapeResponse = (params?: ResponseParamsModel): ResponseModel => {
-  let { success = true, message = "", code = StatusCode.Ok, data } = params ?? {};
+  let {
+    success = true,
+    message = "",
+    code = StatusCode.Ok,
+    data,
+  } = params ?? {};
 
   // determine success on code
   if (code >= StatusCode.BadRequest) {
