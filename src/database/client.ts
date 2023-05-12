@@ -29,6 +29,7 @@ const createClient = async (dbconnection?: string): Promise<MongoClient> => {
     resolve(mclient);
   });
 };
+
 let pagesCollection: Collection<Document> = null;
 let analyticsCollection: Collection<Document> = null;
 let issuesCollection: Collection<Document> = null;
@@ -44,21 +45,26 @@ const initDbConnection = async (dbconnection?: string) => {
   client = await createClient(dbconnection);
 
   if (client) {
-    client = await client.connect();
-    db = client.db(config.DB_NAME);
-
-    // establish app collections
-    analyticsCollection = db.collection("Analytics");
-    pagesCollection = db.collection("Pages");
-    issuesCollection = db.collection("Issues");
-    usersCollection = db.collection("Users");
-    websitesCollection = db.collection("Websites");
-    actionsCollection = db.collection("PageActions");
-    historyCollection = db.collection("History");
-    countersCollection = db.collection("Counters");
-    pageSpeedCollection = db.collection("PageSpeed");
+    try {
+      client = await client.connect();
+    } catch (e) {
+      console.error(e);
+    }
+    if(client) {
+      db = client.db(config.DB_NAME);
+  
+      // establish app collections
+      analyticsCollection = db.collection("Analytics");
+      pagesCollection = db.collection("Pages");
+      issuesCollection = db.collection("Issues");
+      usersCollection = db.collection("Users");
+      websitesCollection = db.collection("Websites");
+      actionsCollection = db.collection("PageActions");
+      historyCollection = db.collection("History");
+      countersCollection = db.collection("Counters");
+      pageSpeedCollection = db.collection("PageSpeed");
+    }
   }
-
   if (connectionState !== "determined") {
     dbEmitter.emit("event:init");
     connectionState = "determined";
@@ -86,7 +92,7 @@ const pollTillConnected = async (): Promise<boolean> => {
       connectionState = "establishing"; // mid state to determine extra reqs
       const maxTimeout = setTimeout(() => {
         resolve(connected);
-      }, 100);
+      }, 55);
       dbEmitter.once("event:init", () => {
         maxTimeout && clearTimeout(maxTimeout);
         resolve(connected);

@@ -19,8 +19,7 @@ const options = {
     return null;
   },
   reconnectOnError(err) {
-    const targetError = "READONLY";
-    if (err.message.includes(targetError)) {
+    if (err.message.includes("READONLY")) {
       return true;
     }
     return null;
@@ -29,7 +28,7 @@ const options = {
 
 // redis top level client
 const initRedisConnection = async (): Promise<boolean> => {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     try {
       redisClient = new Redis(options);
       redisClient?.on("error", (error) => {
@@ -43,11 +42,9 @@ const initRedisConnection = async (): Promise<boolean> => {
       console.error(e);
     }
 
-    try {
-      await redisClient.connect();
-    } catch (_) {}
-
-    resolve(redisConnected);
+    redisClient.connect().finally(() => {
+      resolve(redisConnected);
+    });
   });
 };
 
