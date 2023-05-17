@@ -30,15 +30,16 @@ const createClient = async (dbconnection?: string): Promise<MongoClient> => {
   });
 };
 
-let pagesCollection: Collection<Document> = null;
-let analyticsCollection: Collection<Document> = null;
-let issuesCollection: Collection<Document> = null;
-let usersCollection: Collection<Document> = null;
-let websitesCollection: Collection<Document> = null;
-let actionsCollection: Collection<Document> = null;
-let historyCollection: Collection<Document> = null;
-let countersCollection: Collection<Document> = null;
-let pageSpeedCollection: Collection<Document> = null;
+// set all collections as mock until connected to prevent logic or
+let pagesCollection: Collection<Document> = mdb;
+let analyticsCollection: Collection<Document> = mdb;
+let issuesCollection: Collection<Document> = mdb;
+let usersCollection: Collection<Document> = mdb;
+let websitesCollection: Collection<Document> = mdb;
+let actionsCollection: Collection<Document> = mdb;
+let historyCollection: Collection<Document> = mdb;
+let countersCollection: Collection<Document> = mdb;
+let pageSpeedCollection: Collection<Document> = mdb;
 
 // establish top level db connection
 const initDbConnection = async (dbconnection?: string) => {
@@ -52,7 +53,6 @@ const initDbConnection = async (dbconnection?: string) => {
     }
     if (client) {
       db = client.db(config.DB_NAME);
-
       // establish app collections
       analyticsCollection = db.collection("Analytics");
       pagesCollection = db.collection("Pages");
