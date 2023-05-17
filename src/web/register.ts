@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import ratelimit from "@fastify/rate-limit";
-import { createRedisClient } from "../database/memory-client";
+import { redisClient } from "../database/memory-client";
 import { cookieConfigs, SUPER_MODE } from "../config/config";
 import { stripeHook } from "./routes_groups/stripe";
 
@@ -49,7 +49,7 @@ export const registerApp = async (app: FastifyInstance) => {
     await app.register(ratelimit, {
       max: 50,
       timeWindow: "1 minute",
-      redis: createRedisClient(),
+      redis: redisClient,
     });
   }
 

@@ -50,9 +50,9 @@ const initDbConnection = async (dbconnection?: string) => {
     } catch (e) {
       console.error(e);
     }
-    if(client) {
+    if (client) {
       db = client.db(config.DB_NAME);
-  
+
       // establish app collections
       analyticsCollection = db.collection("Analytics");
       pagesCollection = db.collection("Pages");

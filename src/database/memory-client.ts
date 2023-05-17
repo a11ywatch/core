@@ -41,10 +41,14 @@ const initRedisConnection = async (): Promise<boolean> => {
     } catch (e) {
       console.error(e);
     }
-
-    redisClient.connect().finally(() => {
-      resolve(redisConnected);
-    });
+    if (redisClient) {
+      redisClient.connect().finally(() => {
+        resolve(redisConnected);
+      });
+    } else {
+      redisConnected = false;
+      resolve(false);
+    }
   });
 };
 
@@ -71,6 +75,7 @@ const createRedisClient = () => {
 
   return newClient;
 };
+
 
 export {
   createRedisClient,
