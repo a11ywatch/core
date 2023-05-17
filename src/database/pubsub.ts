@@ -1,5 +1,5 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
-import { createRedisClient, redisConnected } from "./memory-client";
+import { createRedisClient, redisClient, redisConnected } from "./memory-client";
 
 let pubsub: Partial<RedisPubSub>;
 
@@ -7,7 +7,7 @@ let pubsub: Partial<RedisPubSub>;
 async function createPubSub() {
   if (redisConnected) {
     pubsub = new RedisPubSub({
-      publisher: createRedisClient(),
+      publisher: redisClient,
       subscriber: createRedisClient(),
     });
   } else {
