@@ -1,11 +1,11 @@
-import Redis from "ioredis";
+import Redis, { RedisOptions } from "ioredis";
 
 const redisLogEnabled = process.env.REDIS_LOG_ENABLED === "true";
 
 let redisConnected = false; // determine all redis connectivity
 let redisClient: Redis;
 
-const options = {
+const options: RedisOptions = {
   host: process.env.REDIS_HOST || "127.0.0.1",
   port: 6379,
   autoResubscribe: false,
@@ -26,25 +26,45 @@ const options = {
   },
 };
 
+const createRedisClient = () => {
+  let newClient = null;
+
+  try {
+    newClient = new Redis(options);
+  } catch (e) {
+    // silent
+  }
+
+  if (newClient) {
+    newClient?.on("error", (error) => {
+      redisLogEnabled && console.error("redis error", error);
+      redisConnected = false;
+    });
+
+    newClient?.on("connect", () => {
+      redisConnected = true;
+    });
+  }
+
+  return newClient;
+};
+
 // redis top level client
 const initRedisConnection = async (): Promise<boolean> => {
   return new Promise((resolve) => {
-    try {
-      redisClient = new Redis(options);
-      redisClient?.on("error", (error) => {
-        redisLogEnabled && console.error("redis error", error);
-        redisConnected = false;
-      });
-      redisClient?.on("connect", () => {
-        redisConnected = true;
-      });
-    } catch (e) {
-      console.error(e);
+    const client = createRedisClient();
+
+    if (client) {
+      redisClient = client;
     }
+
     if (redisClient) {
-      redisClient.connect().finally(() => {
-        resolve(redisConnected);
-      });
+      redisClient
+        .connect()
+        .catch((_) => {})
+        .finally(() => {
+          resolve(redisConnected);
+        });
     } else {
       redisConnected = false;
       resolve(false);
@@ -54,28 +74,14 @@ const initRedisConnection = async (): Promise<boolean> => {
 
 // close redis client
 const closeRedisConnection = () => {
-  try {
-    redisClient?.disconnect();
-  } catch (e) {
-    console.error(e);
+  if (redisClient) {
+    try {
+      redisClient?.disconnect();
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
-
-const createRedisClient = () => {
-  const newClient = new Redis(options);
-
-  newClient?.on("error", (error) => {
-    redisLogEnabled && console.error("redis error", error);
-    redisConnected = false;
-  });
-
-  newClient?.on("connect", () => {
-    redisConnected = true;
-  });
-
-  return newClient;
-};
-
 
 export {
   createRedisClient,

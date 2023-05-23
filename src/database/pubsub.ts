@@ -1,5 +1,9 @@
 import { RedisPubSub } from "graphql-redis-subscriptions";
-import { createRedisClient, redisClient, redisConnected } from "./memory-client";
+import {
+  createRedisClient,
+  redisClient,
+  redisConnected,
+} from "./memory-client";
 
 let pubsub: Partial<RedisPubSub>;
 
