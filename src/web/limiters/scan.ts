@@ -28,7 +28,7 @@ const registerLimiter = {
 const scanLimiter = {
   config: {
     rateLimit: {
-      max: 3,
+      max: 10000,
       timeWindow: "1 minute",
     },
   },

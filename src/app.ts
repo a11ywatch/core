@@ -165,23 +165,12 @@ async function initServer(): Promise<HttpServer[]> {
   /*
    * Single page scan nostore - example with limited response for domain
    */
-  app.post("/api/scan-simple", limiter, scanSimple);
+  app.post("/api/scan-simple", scanLimiter, scanSimple);
 
   /*
    * Single page scan
    */
-  app.post(
-    "/api/scan",
-    {
-      config: {
-        rateLimit: {
-          max: 8,
-          timeWindow: "1 minute",
-        },
-      },
-    },
-    scanAuthenticated
-  );
+  app.post("/api/scan", scanLimiter, scanAuthenticated);
   /*
    * All websites site wide scan background sync.
    */

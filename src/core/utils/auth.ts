@@ -3,25 +3,14 @@ import { PRIVATE_KEY, PUBLIC_KEY } from "../../config/config";
 
 const issuer = "AUTH/RESOURCE";
 const expiresIn = "365 days";
-let algorithm = "RS256";
+const algorithm = "RS256";
 
 const subject = "user@.com";
 const audience = "http://adahelpalerts.com"; // fix this with valid domain
 const keyid = "";
 
 let defaultKey;
-
-interface SignOnOptions {
-  issuer: string;
-  subject: string;
-  // role
-  audience: string;
-  expiresIn: string;
-  algorithm?: string;
-  keyid?: string;
-}
-
-let signOptions: SignOnOptions = {
+let jwtOptions: jwt.SignOptions = {
   issuer,
   subject,
   audience,
@@ -30,21 +19,15 @@ let signOptions: SignOnOptions = {
   keyid,
 };
 
+// auto add the tokens if none found
 if (!PRIVATE_KEY && !PUBLIC_KEY) {
   defaultKey = Buffer.from("secret", "base64");
-  signOptions = {
-    issuer,
-    subject,
-    audience,
-    expiresIn,
-    keyid,
-  };
 }
 
 const privateKey = String(PRIVATE_KEY || defaultKey).trim();
 const publicKey = String(PUBLIC_KEY || defaultKey).trim();
 
-export function signJwt({ email, role, keyid }, options = {}) {
+export const signJwt = ({ email, role, keyid }) => {
   return jwt.sign(
     {
       subject: email,
@@ -53,21 +36,22 @@ export function signJwt({ email, role, keyid }, options = {}) {
       keyid,
     },
     privateKey,
-    Object.assign({}, signOptions, options) as any
+    jwtOptions
   );
-}
+};
 
-export function verifyJwt(token, options = {}) {
-  return (
-    token &&
-    jwt.verify(
-      token,
-      publicKey,
-      Object.assign({}, signOptions, options, { algorithm: [algorithm] })
-    )
-  );
-}
+// verify the jwt token
+export const verifyJwt = (token) => {
+  if (token) {
+    try {
+      return jwt.verify(token, publicKey, jwtOptions);
+    } catch (e) {}
+  }
+};
 
-export function decodeJwt(token) {
-  return token && jwt.decode(token, { complete: true });
-}
+// decode the token without verifying
+export const decodeJwt = (token) => {
+  if (token) {
+    return jwt.decode(token, { complete: true });
+  }
+};
