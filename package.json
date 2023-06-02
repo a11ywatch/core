@@ -20,7 +20,7 @@
     "@fastify/rate-limit": "^6.0.1",
     "@graphql-tools/schema": "^9.0.12",
     "@grpc/grpc-js": "1.8.14",
-    "@grpc/proto-loader": "0.7.6",
+    "@grpc/proto-loader": "0.7.7",
     "apollo-server": "3.12.0",
     "apollo-server-core": "3.12.0",
     "apollo-server-fastify": "3.12.0",
