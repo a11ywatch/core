@@ -21,7 +21,7 @@ const createClient = async (dbconnection?: string): Promise<MongoClient> => {
       mclient = new MongoClient(dbconnection || config.DB_URL);
       connected = true;
     } catch (_) {
-      console.error(
+      console.warn(
         "MongoDB not established. Start mongo on port 27017 to persist data and restart or use the `initDbConnection` method."
       );
     }
