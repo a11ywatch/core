@@ -167,7 +167,7 @@ export const updateWebsite = async ({
       const runner = runnerItems[i];
       if (
         typeof runner === "string" &&
-        (runner === "axe" || runner === "htmlcs")
+        (runner === "axe" || runner === "htmlcs" || runner === "ace")
       ) {
         testRunners.push(runner);
       }
