@@ -15,6 +15,9 @@ export interface CrawlParams {
   delay?: number; // crawl throttling stream delay
 }
 
+// allow defaulting the agent for every request
+const UA = process.env.A11YWATCH_UA ? process.env.A11YWATCH_UA : undefined;
+
 /**
  * Send to gRPC crawler request. Gathers all website pages.
  *
@@ -45,7 +48,7 @@ export const watcherCrawl = async (
     norobots: !robots,
     subdomains,
     tld,
-    agent,
+    agent: agent ?? UA,
     proxy: proxy && !deciphered ? decipher(proxy) : proxy,
     sitemap,
     delay,
