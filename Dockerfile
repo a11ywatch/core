@@ -20,6 +20,9 @@ RUN npm run build && rm -R ./node_modules && npm install --production
 
 FROM node:21.6-alpine3.19
 
+ARG NODE_ENV=production
+ENV NODE_ENV $NODE_ENV
+
 WORKDIR /usr/src/app
 
 RUN apk upgrade --update-cache --available && \
