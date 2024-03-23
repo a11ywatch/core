@@ -71,7 +71,7 @@ export const getWebsitesPaginated = async (
     websitesCollection &&
     (await websitesCollection
       .find(filter)
-      .sort({ order: 1 }) // todo: optional sorting
+      .sort({ order: 1, _id: 1 }) // todo: optional sorting
       .project(
         project ?? {
           url: 1,
@@ -95,7 +95,7 @@ export const getWebsitesPaging = async (
 ): Promise<Website[] | [Website[], any]> => {
   const webPages = (await websitesCollection
     .find({ userId })
-    .sort({ order: 1 })
+    .sort({ order: 1, _id: 1 })
     .skip(offset)
     .limit(limit)
     .toArray()) as Website[];
